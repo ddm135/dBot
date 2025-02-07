@@ -3,24 +3,24 @@ from itertools import islice
 import discord
 from discord import app_commands
 
-from static.dConsts import BONUSES, sheetService
+from static.dConsts import GAMES, sheetService
 
 
 async def artist_autocomplete(
     itr: discord.Interaction, current: str
 ) -> list[app_commands.Choice[str]]:
-    game = BONUSES[itr.namespace.game]
+    gameD = GAMES[itr.namespace.game]
     result = (
         sheetService.values()
         .get(
-            spreadsheetId=game["pingId"],
-            range=game["pingRange"],
+            spreadsheetId=gameD["pingId"],
+            range=gameD["pingRange"],
         )
         .execute()
     )
     values = result.get("values", [])
     artists = list(
-        dict.fromkeys(list(zip(*values))[game["pingColumns"].index("artist_name")])
+        dict.fromkeys(list(zip(*values))[gameD["pingColumns"].index("artist_name")])
     )
 
     return list(

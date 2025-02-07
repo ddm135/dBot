@@ -3,7 +3,7 @@ from discord import app_commands
 from discord.ext import commands
 
 from app_commands.autocomplete.bonus import artist_autocomplete
-from static.dConsts import BONUSES, sheetService
+from static.dConsts import GAMES, sheetService
 
 
 class Bonus(commands.Cog):
@@ -22,7 +22,7 @@ class Bonus(commands.Cog):
         self, itr: discord.Interaction, game: app_commands.Choice[str], artist_name: str
     ):
         await itr.response.defer(ephemeral=True)
-        gameD = BONUSES[game.value]
+        gameD = GAMES[game.value]
         result = (
             sheetService.values()
             .get(
@@ -76,16 +76,13 @@ class Bonus(commands.Cog):
     @app_commands.command()
     @app_commands.autocomplete(artist_name=artist_autocomplete)
     @app_commands.choices(
-        game=[
-            app_commands.Choice(name="SUPERSTAR JYPNATION (JP)", value="JYP_JP"),
-            app_commands.Choice(name="SUPERSTAR LAPONE", value="LP"),
-        ]
+        game=[app_commands.Choice(name=v["name"], value=k) for k, v in GAMES.items()]
     )
     async def bonus_remove(
         self, itr: discord.Interaction, game: app_commands.Choice[str], artist_name: str
     ):
         await itr.response.defer(ephemeral=True)
-        gameD = BONUSES[game.value]
+        gameD = GAMES[game.value]
         result = (
             sheetService.values()
             .get(

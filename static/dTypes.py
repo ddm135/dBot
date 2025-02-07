@@ -1,17 +1,11 @@
 from typing import TypedDict
 
 
-class SSLD(TypedDict):
-    spreadsheetId: str
-    spreadsheetRange: str
-    spreadsheetColumns: list[str]
-    pinChannelId: int
-    timezone: str
-    api: str
-
-
-class BonusD(TypedDict):
+class GameD(TypedDict):
     name: str
+    sslId: str
+    sslRange: str
+    sslColumns: list[str]
     pingId: str
     pingRange: str
     pingWrite: str
@@ -19,4 +13,7 @@ class BonusD(TypedDict):
     bonusId: str
     bonusRange: str
     bonusColumns: list[str]
+    color: int
+    pinChannelId: int
+    api: str
     timezone: str

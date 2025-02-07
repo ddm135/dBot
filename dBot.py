@@ -48,4 +48,4 @@ async def restart_clock(ctx: commands.Context):
     await ctx.send("Clock restarted!")
 
 
-bot.run(DISCORD_TOKEN)
+bot.run(DISCORD_TOKEN)  # type: ignore

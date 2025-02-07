@@ -5,7 +5,7 @@ from zoneinfo import ZoneInfo
 import discord
 from discord.ext import commands, tasks
 
-from static.dConsts import BONUSES, sheetService
+from static.dConsts import GAMES, sheetService
 
 
 class NotifyP9(commands.Cog):
@@ -28,7 +28,7 @@ class NotifyP9(commands.Cog):
         ]
     )
     async def notify_p9(self):
-        for game in BONUSES.values():
+        for gameD in GAMES.values():
             current = datetime.now().replace(
                 hour=0,
                 minute=0,
@@ -39,14 +39,14 @@ class NotifyP9(commands.Cog):
             one_day = timedelta(days=1)
             current = current + one_day
             initial_msg = (
-                f"# Bonus Reminder for {game['name']} on "
+                f"# Bonus Reminder for {gameD['name']} on "
                 f"<t:{int(current.timestamp())}:f>"
             )
             ping_result = (
                 sheetService.values()
                 .get(
-                    spreadsheetId=game["pingId"],
-                    range=game["pingRange"],
+                    spreadsheetId=gameD["pingId"],
+                    range=gameD["pingRange"],
                 )
                 .execute()
             )
@@ -54,36 +54,36 @@ class NotifyP9(commands.Cog):
             pings_unpack = list(
                 tuple(p for p in pair if p is not None) for pair in zip_longest(*pings)
             )
-            if len(pings_unpack) != len(game["pingColumns"]):
+            if len(pings_unpack) != len(gameD["pingColumns"]):
                 continue
             game_pinged_list = dict.fromkeys(
-                pings_unpack[game["pingColumns"].index("users")], False
+                pings_unpack[gameD["pingColumns"].index("users")], False
             )
 
             bonus_result = (
                 sheetService.values()
                 .get(
-                    spreadsheetId=game["bonusId"],
-                    range=game["bonusRange"],
+                    spreadsheetId=gameD["bonusId"],
+                    range=gameD["bonusRange"],
                 )
                 .execute()
             )
             bonuses = bonus_result.get("values")
             artists = list(
                 dict.fromkeys(
-                    list(zip(*bonuses))[game["bonusColumns"].index("artist_name")]
+                    list(zip(*bonuses))[gameD["bonusColumns"].index("artist_name")]
                 )
             )
             for artist in artists:
                 artist_pings = next(
                     ping
                     for ping in pings
-                    if ping[game["pingColumns"].index("artist_name")] == artist
+                    if ping[gameD["pingColumns"].index("artist_name")] == artist
                 )
-                if len(artist_pings) != len(game["pingColumns"]):
+                if len(artist_pings) != len(gameD["pingColumns"]):
                     continue
                 artist_ping_list = artist_pings[
-                    game["pingColumns"].index("users")
+                    gameD["pingColumns"].index("users")
                 ].split(",")
 
                 birthday_bonuses = []
@@ -97,14 +97,14 @@ class NotifyP9(commands.Cog):
                 next_birthday_end = None
                 for bonus in bonuses:
                     start = datetime.strptime(
-                        bonus[game["bonusColumns"].index("bonus_start")].replace(
+                        bonus[gameD["bonusColumns"].index("bonus_start")].replace(
                             "\r", ""
                         ),
                         "%Y-%m-%d",
                     )
                     start = start.replace(tzinfo=ZoneInfo("Asia/Seoul"))
                     end = datetime.strptime(
-                        bonus[game["bonusColumns"].index("bonus_end")].replace(
+                        bonus[gameD["bonusColumns"].index("bonus_end")].replace(
                             "\r", ""
                         ),
                         "%Y-%m-%d",
@@ -112,39 +112,39 @@ class NotifyP9(commands.Cog):
                     end = end.replace(tzinfo=ZoneInfo("Asia/Seoul"))
                     if (
                         start < current
-                        and artist == bonus[game["bonusColumns"].index("artist_name")]
-                        and bonus[game["bonusColumns"].index("member_name")]
+                        and artist == bonus[gameD["bonusColumns"].index("artist_name")]
+                        and bonus[gameD["bonusColumns"].index("member_name")]
                     ):
                         last_birthday_start = start
 
                     if (
                         end < current
-                        and artist == bonus[game["bonusColumns"].index("artist_name")]
-                        and bonus[game["bonusColumns"].index("member_name")]
+                        and artist == bonus[gameD["bonusColumns"].index("artist_name")]
+                        and bonus[gameD["bonusColumns"].index("member_name")]
                     ):
                         last_birthday_end = end
 
                     if (
                         current < start
-                        and artist == bonus[game["bonusColumns"].index("artist_name")]
-                        and bonus[game["bonusColumns"].index("member_name")]
+                        and artist == bonus[gameD["bonusColumns"].index("artist_name")]
+                        and bonus[gameD["bonusColumns"].index("member_name")]
                         and not next_birthday_start
                     ):
                         next_birthday_start = start
 
                     if (
                         current < end
-                        and artist == bonus[game["bonusColumns"].index("artist_name")]
-                        and bonus[game["bonusColumns"].index("member_name")]
+                        and artist == bonus[gameD["bonusColumns"].index("artist_name")]
+                        and bonus[gameD["bonusColumns"].index("member_name")]
                         and not next_birthday_end
                     ):
                         next_birthday_end = end
 
                     if (
                         start <= current <= end
-                        and artist == bonus[game["bonusColumns"].index("artist_name")]
+                        and artist == bonus[gameD["bonusColumns"].index("artist_name")]
                     ):
-                        if bonus[game["bonusColumns"].index("member_name")]:
+                        if bonus[gameD["bonusColumns"].index("member_name")]:
                             birthday_bonuses.append(bonus)
                             if current + one_day <= end:
                                 ne_birthday_bonuses.append(bonus)
@@ -155,7 +155,7 @@ class NotifyP9(commands.Cog):
                 ne_birthday_total = 0
                 if ne_birthday_bonuses:
                     ne_birthday_amounts = list(zip(*ne_birthday_bonuses))[
-                        game["bonusColumns"].index("bonus_amount")
+                        gameD["bonusColumns"].index("bonus_amount")
                     ]
                     for amt in ne_birthday_amounts:
                         ne_birthday_total += int(amt.replace("%", "").replace("\r", ""))
@@ -163,19 +163,19 @@ class NotifyP9(commands.Cog):
                 birthday_total = 0
                 if birthday_bonuses:
                     birthday_amounts = list(zip(*birthday_bonuses))[
-                        game["bonusColumns"].index("bonus_amount")
+                        gameD["bonusColumns"].index("bonus_amount")
                     ]
                     for amt in birthday_amounts:
                         birthday_total += int(amt.replace("%", "").replace("\r", ""))
                     birthday_members = " + ".join(
                         list(zip(*birthday_bonuses))[
-                            game["bonusColumns"].index("member_name")
+                            gameD["bonusColumns"].index("member_name")
                         ]
                     ).replace("\r", "")
 
                     birthday_ends = []
                     for dt in list(zip(*birthday_bonuses))[
-                        game["bonusColumns"].index("bonus_end")
+                        gameD["bonusColumns"].index("bonus_end")
                     ]:
                         be = datetime.strptime(dt.replace("\r", ""), "%Y-%m-%d")
                         be = be.replace(tzinfo=ZoneInfo("Asia/Seoul"))
@@ -194,7 +194,7 @@ class NotifyP9(commands.Cog):
 
                     birthday_starts = []
                     for dt in list(zip(*birthday_bonuses))[
-                        game["bonusColumns"].index("bonus_start")
+                        gameD["bonusColumns"].index("bonus_start")
                     ]:
                         bs = datetime.strptime(dt.replace("\r", ""), "%Y-%m-%d")
                         bs = bs.replace(tzinfo=ZoneInfo("Asia/Seoul"))
@@ -213,7 +213,8 @@ class NotifyP9(commands.Cog):
 
                     for bonus in birthday_bonuses:
                         start = datetime.strptime(
-                            bonus[game["bonusColumns"].index("bonus_start")], "%Y-%m-%d"
+                            bonus[gameD["bonusColumns"].index("bonus_start")],
+                            "%Y-%m-%d",
                         )
                         start = start.replace(tzinfo=ZoneInfo("Asia/Seoul"))
                         if start == current:
@@ -228,7 +229,7 @@ class NotifyP9(commands.Cog):
                             for bonus in album_bonuses:
                                 end = datetime.strptime(
                                     bonus[
-                                        game["bonusColumns"].index("bonus_end")
+                                        gameD["bonusColumns"].index("bonus_end")
                                     ].replace("\r", ""),
                                     "%Y-%m-%d",
                                 )
@@ -246,18 +247,18 @@ class NotifyP9(commands.Cog):
                                 )
 
                                 song_total = birthday_total + int(
-                                    bonus[game["bonusColumns"].index("bonus_amount")]
+                                    bonus[gameD["bonusColumns"].index("bonus_amount")]
                                     .replace("%", "")
                                     .replace("\r", "")
                                 )
                                 album_name = bonus[
-                                    game["bonusColumns"].index("album_name")
+                                    gameD["bonusColumns"].index("album_name")
                                 ].replace("\r", "")
                                 song_name = bonus[
-                                    game["bonusColumns"].index("song_name")
+                                    gameD["bonusColumns"].index("song_name")
                                 ].replace("\r", "")
                                 song_duration = bonus[
-                                    game["bonusColumns"].index("duration")
+                                    gameD["bonusColumns"].index("duration")
                                 ].replace("\r", "")
 
                                 msg = (
@@ -274,7 +275,7 @@ class NotifyP9(commands.Cog):
 
                     for bonus in birthday_bonuses:
                         end = datetime.strptime(
-                            bonus[game["bonusColumns"].index("bonus_end")].replace(
+                            bonus[gameD["bonusColumns"].index("bonus_end")].replace(
                                 "\r", ""
                             ),
                             "%Y-%m-%d",
@@ -291,7 +292,7 @@ class NotifyP9(commands.Cog):
 
                             for bonus in rebum_bonuses:
                                 start = datetime.strptime(
-                                    bonus[game["bonusColumns"].index("bonus_start")],
+                                    bonus[gameD["bonusColumns"].index("bonus_start")],
                                     "%Y-%m-%d",
                                 )
                                 start = datetime.now(ZoneInfo("Asia/Seoul")).replace(
@@ -316,18 +317,18 @@ class NotifyP9(commands.Cog):
                                 )
 
                                 song_total = birthday_total + int(
-                                    bonus[game["bonusColumns"].index("bonus_amount")]
+                                    bonus[gameD["bonusColumns"].index("bonus_amount")]
                                     .replace("%", "")
                                     .replace("\r", "")
                                 )
                                 album_name = bonus[
-                                    game["bonusColumns"].index("album_name")
+                                    gameD["bonusColumns"].index("album_name")
                                 ].replace("\r", "")
                                 song_name = bonus[
-                                    game["bonusColumns"].index("song_name")
+                                    gameD["bonusColumns"].index("song_name")
                                 ].replace("\r", "")
                                 song_duration = bonus[
-                                    game["bonusColumns"].index("duration")
+                                    gameD["bonusColumns"].index("duration")
                                 ].replace("\r", "")
 
                                 msg = (
@@ -344,7 +345,7 @@ class NotifyP9(commands.Cog):
 
                 for bonus in album_bonuses:
                     start = datetime.strptime(
-                        bonus[game["bonusColumns"].index("bonus_start")].replace(
+                        bonus[gameD["bonusColumns"].index("bonus_start")].replace(
                             "\r", ""
                         ),
                         "%Y-%m-%d",
@@ -353,7 +354,7 @@ class NotifyP9(commands.Cog):
 
                     if start == current:
                         end = datetime.strptime(
-                            bonus[game["bonusColumns"].index("bonus_end")].replace(
+                            bonus[gameD["bonusColumns"].index("bonus_end")].replace(
                                 "\r", ""
                             ),
                             "%Y-%m-%d",
@@ -375,18 +376,18 @@ class NotifyP9(commands.Cog):
                         )
 
                         song_total = birthday_total + int(
-                            bonus[game["bonusColumns"].index("bonus_amount")]
+                            bonus[gameD["bonusColumns"].index("bonus_amount")]
                             .replace("%", "")
                             .replace("\r", "")
                         )
                         album_name = bonus[
-                            game["bonusColumns"].index("album_name")
+                            gameD["bonusColumns"].index("album_name")
                         ].replace("\r", "")
                         song_name = bonus[
-                            game["bonusColumns"].index("song_name")
+                            gameD["bonusColumns"].index("song_name")
                         ].replace("\r", "")
                         song_duration = bonus[
-                            game["bonusColumns"].index("duration")
+                            gameD["bonusColumns"].index("duration")
                         ].replace("\r", "")
 
                         msg = (
@@ -400,7 +401,7 @@ class NotifyP9(commands.Cog):
 
                 for bonus in rebum_bonuses:
                     end = datetime.strptime(
-                        bonus[game["bonusColumns"].index("bonus_end")].replace(
+                        bonus[gameD["bonusColumns"].index("bonus_end")].replace(
                             "\r", ""
                         ),
                         "%Y-%m-%d",
@@ -409,7 +410,7 @@ class NotifyP9(commands.Cog):
 
                     if end == current + one_day:
                         start = datetime.strptime(
-                            bonus[game["bonusColumns"].index("bonus_start")].replace(
+                            bonus[gameD["bonusColumns"].index("bonus_start")].replace(
                                 "\r", ""
                             ),
                             "%Y-%m-%d",
@@ -431,18 +432,18 @@ class NotifyP9(commands.Cog):
                         )
 
                         song_total = ne_birthday_total + int(
-                            bonus[game["bonusColumns"].index("bonus_amount")]
+                            bonus[gameD["bonusColumns"].index("bonus_amount")]
                             .replace("%", "")
                             .replace("\r", "")
                         )
                         album_name = bonus[
-                            game["bonusColumns"].index("album_name")
+                            gameD["bonusColumns"].index("album_name")
                         ].replace("\r", "")
                         song_name = bonus[
-                            game["bonusColumns"].index("song_name")
+                            gameD["bonusColumns"].index("song_name")
                         ].replace("\r", "")
                         song_duration = bonus[
-                            game["bonusColumns"].index("duration")
+                            gameD["bonusColumns"].index("duration")
                         ].replace("\r", "")
 
                         msg = (
@@ -465,9 +466,7 @@ class NotifyP9(commands.Cog):
                         if not game_pinged_list[user_id]:
                             await user.send(f"{initial_msg}")
                             game_pinged_list[user_id] = True
-                        embed = discord.Embed(
-                            title=artist, color=discord.Color.random()
-                        )
+                        embed = discord.Embed(title=artist, color=gameD["color"])
                         if notify_start:
                             embed.add_field(
                                 name="Upcoming :green_circle:",

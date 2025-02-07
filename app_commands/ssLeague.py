@@ -17,8 +17,16 @@ from app_commands.autocomplete.ssLeague import (
     song_autocomplete,
     song_id_autocomplete,
 )
-from static.dConsts import A_JSON_BODY, A_JSON_HEADERS, SSLS, sheetService, ssCrypt, OK_ROLE_OWNER, SSRG_ROLE_MOD, \
-    SSRG_ROLE_SS
+from static.dConsts import (
+    A_JSON_BODY,
+    A_JSON_HEADERS,
+    GAMES,
+    OK_ROLE_OWNER,
+    SSRG_ROLE_MOD,
+    SSRG_ROLE_SS,
+    sheetService,
+    ssCrypt,
+)
 
 
 class ssLeague(commands.Cog):
@@ -27,10 +35,7 @@ class ssLeague(commands.Cog):
 
     @app_commands.command()
     @app_commands.choices(
-        game=[
-            app_commands.Choice(name="SUPERSTAR JYPNATION (JP)", value="JYP_JP"),
-            app_commands.Choice(name="SUPERSTAR LAPONE", value="LP"),
-        ]
+        game=[app_commands.Choice(name=v["name"], value=k) for k, v in GAMES.items()]
     )
     @app_commands.autocomplete(artist_name=artist_autocomplete)
     @app_commands.autocomplete(song_name=song_autocomplete)
@@ -53,12 +58,12 @@ class ssLeague(commands.Cog):
                 ephemeral=True,
             )
         else:
-            gameD = SSLS[game.value]
+            gameD = GAMES[game.value]
             result = (
                 sheetService.values()
                 .get(
-                    spreadsheetId=gameD["spreadsheetId"],
-                    range=gameD["spreadsheetRange"],
+                    spreadsheetId=gameD["sslId"],
+                    range=gameD["sslRange"],
                 )
                 .execute()
             )
@@ -68,12 +73,10 @@ class ssLeague(commands.Cog):
                 song = next(
                     s
                     for s in songs
-                    if s[gameD["spreadsheetColumns"].index("song_id")] == str(song_id)
+                    if s[gameD["sslColumns"].index("song_id")] == str(song_id)
                     or (
-                        s[gameD["spreadsheetColumns"].index("artist_name")]
-                        == artist_name
-                        and s[gameD["spreadsheetColumns"].index("song_name")]
-                        == song_name
+                        s[gameD["sslColumns"].index("artist_name")] == artist_name
+                        and s[gameD["sslColumns"].index("song_name")] == song_name
                     )
                 )
 
@@ -110,10 +113,7 @@ class ssLeague(commands.Cog):
 
                 color = None
                 for s in msd_data:
-                    if (
-                        str(s["code"])
-                        == song[gameD["spreadsheetColumns"].index("song_id")]
-                    ):
+                    if str(s["code"]) == song[gameD["sslColumns"].index("song_id")]:
                         color = s["albumBgColor"][:-2]
                         color = int(color, 16)
                         break
@@ -124,23 +124,21 @@ class ssLeague(commands.Cog):
                     color=color or discord.Color.random(seed=current_time.timestamp()),
                     title=embed_title,
                     description=(
-                        f"**{song[gameD["spreadsheetColumns"].index("artist_name")]} - "
-                        f"{song[gameD["spreadsheetColumns"].index("song_name")]}**"
+                        f"**{song[gameD["sslColumns"].index("artist_name")]} - "
+                        f"{song[gameD["sslColumns"].index("song_name")]}**"
                     ),
                 )
 
                 embed.add_field(
                     name="Duration",
-                    value=song[gameD["spreadsheetColumns"].index("duration")],
+                    value=song[gameD["sslColumns"].index("duration")],
                 )
-                if "skills" in gameD["spreadsheetColumns"]:
+                if "skills" in gameD["sslColumns"]:
                     embed.add_field(
                         name="Skill Order",
-                        value=song[gameD["spreadsheetColumns"].index("skills")],
+                        value=song[gameD["sslColumns"].index("skills")],
                     )
-                embed.set_thumbnail(
-                    url=song[gameD["spreadsheetColumns"].index("image")]
-                )
+                embed.set_thumbnail(url=song[gameD["sslColumns"].index("image")])
                 embed.set_footer(
                     text=current_time.strftime("%A, %B %d, %Y").replace(" 0", " ")
                 )
@@ -165,7 +163,20 @@ class ssLeague(commands.Cog):
 
     async def cog_app_command_error(self, itr: discord.Interaction, err):
         if isinstance(err, app_commands.errors.NoPrivateMessage):
-            await itr.response.send_message("This command cannot be used in direct messages", ephemeral=True, silent=True)
+            await itr.response.send_message(
+                "This command cannot be used in direct messages",
+                ephemeral=True,
+                silent=True,
+            )
+            return
+
+        if isinstance(err, app_commands.errors.MissingAnyRole):
+            await itr.response.send_message(
+                "You do not have permission to use this command",
+                ephemeral=True,
+                silent=True,
+            )
+            return
 
 
 async def setup(bot: commands.Bot):

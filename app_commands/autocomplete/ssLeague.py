@@ -3,26 +3,24 @@ from itertools import islice
 import discord
 from discord import app_commands
 
-from static.dConsts import SSLS, sheetService
+from static.dConsts import GAMES, sheetService
 
 
 async def artist_autocomplete(
     itr: discord.Interaction, current: str
 ) -> list[app_commands.Choice[str]]:
-    game = SSLS[itr.namespace.game]
+    gameD = GAMES[itr.namespace.game]
     result = (
         sheetService.values()
         .get(
-            spreadsheetId=game["spreadsheetId"],
-            range=game["spreadsheetRange"],
+            spreadsheetId=gameD["sslId"],
+            range=gameD["sslRange"],
         )
         .execute()
     )
     values = result.get("values", [])
     artists = list(
-        dict.fromkeys(
-            list(zip(*values))[game["spreadsheetColumns"].index("artist_name")]
-        )
+        dict.fromkeys(list(zip(*values))[gameD["sslColumns"].index("artist_name")])
     )
 
     return list(
@@ -43,13 +41,13 @@ async def artist_autocomplete(
 async def song_autocomplete(
     itr: discord.Interaction, current: str
 ) -> list[app_commands.Choice[str]]:
-    game = SSLS[itr.namespace.game]
+    gameD = GAMES[itr.namespace.game]
     artist_name = itr.namespace.artist_name
     result = (
         sheetService.values()
         .get(
-            spreadsheetId=game["spreadsheetId"],
-            range=game["spreadsheetRange"],
+            spreadsheetId=gameD["sslId"],
+            range=gameD["sslRange"],
         )
         .execute()
     )
@@ -59,13 +57,13 @@ async def song_autocomplete(
         islice(
             [
                 app_commands.Choice(
-                    name=song[game["spreadsheetColumns"].index("song_name")],
-                    value=song[game["spreadsheetColumns"].index("song_name")],
+                    name=song[gameD["sslColumns"].index("song_name")],
+                    value=song[gameD["sslColumns"].index("song_name")],
                 )
                 for song in songs
-                if artist_name == song[game["spreadsheetColumns"].index("artist_name")]
+                if artist_name == song[gameD["sslColumns"].index("artist_name")]
                 and current.lower()
-                in song[game["spreadsheetColumns"].index("song_name")].lower()
+                in song[gameD["sslColumns"].index("song_name")].lower()
             ],
             25,
         )
@@ -75,12 +73,12 @@ async def song_autocomplete(
 async def song_id_autocomplete(
     itr: discord.Interaction, current: str
 ) -> list[app_commands.Choice[str]]:
-    game = SSLS[itr.namespace.game]
+    gameD = GAMES[itr.namespace.game]
     result = (
         sheetService.values()
         .get(
-            spreadsheetId=game["spreadsheetId"],
-            range=game["spreadsheetRange"],
+            spreadsheetId=gameD["sslId"],
+            range=gameD["sslRange"],
         )
         .execute()
     )
@@ -91,13 +89,13 @@ async def song_id_autocomplete(
             [
                 app_commands.Choice(
                     name=(
-                        f"{song[game["spreadsheetColumns"].index("artist_name")]} - "
-                        f"{song[game["spreadsheetColumns"].index("song_name")]}"
+                        f"{song[gameD["sslColumns"].index("artist_name")]} - "
+                        f"{song[gameD["sslColumns"].index("song_name")]}"
                     ),
-                    value=song[game["spreadsheetColumns"].index("song_id")],
+                    value=song[gameD["sslColumns"].index("song_id")],
                 )
                 for song in songs
-                if current == song[game["spreadsheetColumns"].index("song_id")]
+                if current == song[gameD["sslColumns"].index("song_id")]
             ],
             25,
         )

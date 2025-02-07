@@ -1,12 +1,15 @@
+import os
+
 from apiclient import discovery
 from Cryptodome.Cipher import AES
+from dotenv import load_dotenv
 from google.oauth2 import service_account
 
-from static.dTypes import SSLD, BonusD
+from static.dTypes import GameD
 
-DISCORD_TOKEN = (
-    "MTMzNTMwNzU4ODU5NzcxMDg2OA.GZsv8G.201CKGpn6AuCsHyiQfXfcpr2qQKzMnYomsC3z8"
-)
+load_dotenv()
+
+DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 TEST_GUILD = 540849436868214784
 STATUS_CHANNEL = 1335315390732963952
 
@@ -40,42 +43,19 @@ TIMEZONES = {
     "ICT": "Asia/Bangkok",
 }
 
-SSLS: dict[str, SSLD] = {
-    "JYP_JP": {
-        "spreadsheetId": "1eVjwi0GudyMixnZtam8TeupRd3DQ6mheyRKp2lDA6qw",
-        "spreadsheetRange": "Songs!A2:F",
-        "spreadsheetColumns": [
-            "song_id",
-            "artist_name",
-            "song_name",
-            "duration",
-            "image",
-            "skills",
-        ],
-        "pinChannelId": 1335936325685084242,
-        "timezone": TIMEZONES["JST"],
-        "api": "https://ss-jyp-api-real.superstarjyp.jp",
-    },
-    "LP": {
-        "spreadsheetId": "1Ng57BGCDj025bxwCBbQulYFhRjS5runy5HnbStY_xSw",
-        "spreadsheetRange": "Songs!A2:F",
-        "spreadsheetColumns": [
-            "song_id",
-            "artist_name",
-            "song_name",
-            "duration",
-            "image",
-            "skills",
-        ],
-        "pinChannelId": 1336210286289616917,
-        "timezone": TIMEZONES["JST"],
-        "api": "https://ss-lapone-api-real.superstarlapone.jp",
-    },
-}
-
-BONUSES: dict[str, BonusD] = {
+GAMES: dict[str, GameD] = {
     "JYP_JP": {
         "name": "SUPERSTAR JYPNATION (JP)",
+        "sslId": "1eVjwi0GudyMixnZtam8TeupRd3DQ6mheyRKp2lDA6qw",
+        "sslRange": "Songs!A2:F",
+        "sslColumns": [
+            "song_id",
+            "artist_name",
+            "song_name",
+            "duration",
+            "image",
+            "skills",
+        ],
         "pingId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
         "pingRange": "JYPNATION!A1:B",
         "pingWrite": "JYPNATION!B",
@@ -83,13 +63,34 @@ BONUSES: dict[str, BonusD] = {
         "bonusId": "1eVjwi0GudyMixnZtam8TeupRd3DQ6mheyRKp2lDA6qw",
         "bonusRange": "Bonuses!A2:J",
         "bonusColumns": [
-            "song_id", "bonus_amount", "artist_name", "member_name", "album_name",
-            "song_name", "duration", "bonus_date", "bonus_start", "bonus_end"
+            "song_id",
+            "bonus_amount",
+            "artist_name",
+            "member_name",
+            "album_name",
+            "song_name",
+            "duration",
+            "bonus_date",
+            "bonus_start",
+            "bonus_end",
         ],
+        "color": 0x042699,
+        "pinChannelId": 951350075190313010,
+        "api": "https://ss-jyp-api-real.superstarjyp.jp",
         "timezone": TIMEZONES["JST"],
     },
     "LP": {
         "name": "SUPERSTAR LAPONE",
+        "sslId": "1Ng57BGCDj025bxwCBbQulYFhRjS5runy5HnbStY_xSw",
+        "sslRange": "Songs!A2:F",
+        "sslColumns": [
+            "song_id",
+            "artist_name",
+            "song_name",
+            "duration",
+            "image",
+            "skills",
+        ],
         "pingId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
         "pingRange": "LAPONE!A1:B",
         "pingWrite": "LAPONE!B",
@@ -97,9 +98,20 @@ BONUSES: dict[str, BonusD] = {
         "bonusId": "1Ng57BGCDj025bxwCBbQulYFhRjS5runy5HnbStY_xSw",
         "bonusRange": "Bonuses!A2:J",
         "bonusColumns": [
-            "song_id", "bonus_amount", "artist_name", "member_name", "album_name",
-            "song_name", "duration", "bonus_date", "bonus_start", "bonus_end"
+            "song_id",
+            "bonus_amount",
+            "artist_name",
+            "member_name",
+            "album_name",
+            "song_name",
+            "duration",
+            "bonus_date",
+            "bonus_start",
+            "bonus_end",
         ],
+        "color": 0xFF9D00,
+        "pinChannelId": 1039132737979813908,
+        "api": "https://ss-lapone-api-real.superstarlapone.jp",
         "timezone": TIMEZONES["JST"],
     },
 }
