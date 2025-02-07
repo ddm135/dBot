@@ -29,13 +29,17 @@ from static.dConsts import (
 )
 
 
-class ssLeague(commands.Cog):
+class SSLeague(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     @app_commands.command()
     @app_commands.choices(
-        game=[app_commands.Choice(name=v["name"], value=k) for k, v in GAMES.items()]
+        game=[
+            app_commands.Choice(name=v["name"], value=k)
+            for k, v in GAMES.items()
+            if v["pinChannelId"]
+        ]
     )
     @app_commands.autocomplete(artist_name=artist_autocomplete)
     @app_commands.autocomplete(song_name=song_autocomplete)
@@ -75,8 +79,11 @@ class ssLeague(commands.Cog):
                     for s in songs
                     if s[gameD["sslColumns"].index("song_id")] == str(song_id)
                     or (
-                        s[gameD["sslColumns"].index("artist_name")] == artist_name
-                        and s[gameD["sslColumns"].index("song_name")] == song_name
+                        not song_id
+                        and s[gameD["sslColumns"].index("artist_name")].lower()
+                        == artist_name.lower()
+                        and s[gameD["sslColumns"].index("song_name")].lower()
+                        == song_name.lower()
                     )
                 )
 
@@ -151,33 +158,31 @@ class ssLeague(commands.Cog):
                         await pin.unpin()
                         break
 
-                msg = await self.bot.get_channel(gameD["pinChannelId"]).send(
-                    embed=embed
-                )
+                msg = await pin_channel.send(embed=embed)
                 await asyncio.sleep(1)
                 await msg.pin()
-
                 await itr.followup.send("Pinned!")
             except StopIteration:
                 await itr.followup.send("Song not found")
+            except AttributeError:
+                await itr.followup.send("Bot is not in server")
 
-    async def cog_app_command_error(self, itr: discord.Interaction, err):
-        if isinstance(err, app_commands.errors.NoPrivateMessage):
-            await itr.response.send_message(
+    async def cog_app_command_error(self, interaction: discord.Interaction, error):
+        if isinstance(error, app_commands.errors.NoPrivateMessage):
+            await interaction.response.send_message(
                 "This command cannot be used in direct messages",
                 ephemeral=True,
                 silent=True,
             )
             return
 
-        if isinstance(err, app_commands.errors.MissingAnyRole):
-            await itr.response.send_message(
+        if isinstance(error, app_commands.errors.MissingAnyRole):
+            await interaction.response.send_message(
                 "You do not have permission to use this command",
                 ephemeral=True,
                 silent=True,
             )
-            return
 
 
 async def setup(bot: commands.Bot):
-    await bot.add_cog(ssLeague(bot))
+    await bot.add_cog(SSLeague(bot))

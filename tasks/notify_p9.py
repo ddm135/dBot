@@ -87,7 +87,6 @@ class NotifyP9(commands.Cog):
                 ].split(",")
 
                 birthday_bonuses = []
-                ne_birthday_bonuses = []
                 album_bonuses = []
                 notify_start = []
                 notify_end = []
@@ -122,7 +121,7 @@ class NotifyP9(commands.Cog):
                         and artist == bonus[gameD["bonusColumns"].index("artist_name")]
                         and bonus[gameD["bonusColumns"].index("member_name")]
                     ):
-                        last_birthday_end = end
+                        last_birthday_end = end + one_day
 
                     if (
                         current < start
@@ -130,7 +129,7 @@ class NotifyP9(commands.Cog):
                         and bonus[gameD["bonusColumns"].index("member_name")]
                         and not next_birthday_start
                     ):
-                        next_birthday_start = start
+                        next_birthday_start = start - one_day
 
                     if (
                         current < end
@@ -146,19 +145,10 @@ class NotifyP9(commands.Cog):
                     ):
                         if bonus[gameD["bonusColumns"].index("member_name")]:
                             birthday_bonuses.append(bonus)
-                            if current + one_day <= end:
-                                ne_birthday_bonuses.append(bonus)
                         else:
                             album_bonuses.append(bonus)
 
                 rebum_bonuses = album_bonuses.copy()
-                ne_birthday_total = 0
-                if ne_birthday_bonuses:
-                    ne_birthday_amounts = list(zip(*ne_birthday_bonuses))[
-                        gameD["bonusColumns"].index("bonus_amount")
-                    ]
-                    for amt in ne_birthday_amounts:
-                        ne_birthday_total += int(amt.replace("%", "").replace("\r", ""))
 
                 birthday_total = 0
                 if birthday_bonuses:
@@ -181,15 +171,13 @@ class NotifyP9(commands.Cog):
                         be = be.replace(tzinfo=ZoneInfo("Asia/Seoul"))
                         birthday_ends.append(be)
                     birthday_bonus_end = min(
-                        [
-                            x
-                            for x in (
-                                *birthday_ends,
-                                next_birthday_end,
-                                next_birthday_start,
-                            )
-                            if x is not None
-                        ]
+                        x
+                        for x in (
+                            *birthday_ends,
+                            next_birthday_end,
+                            next_birthday_start,
+                        )
+                        if x is not None
                     )
 
                     birthday_starts = []
@@ -200,15 +188,13 @@ class NotifyP9(commands.Cog):
                         bs = bs.replace(tzinfo=ZoneInfo("Asia/Seoul"))
                         birthday_starts.append(bs)
                     birthday_bonus_start = max(
-                        [
-                            x
-                            for x in (
-                                *birthday_starts,
-                                last_birthday_end,
-                                last_birthday_start,
-                            )
-                            if x is not None
-                        ]
+                        x
+                        for x in (
+                            *birthday_starts,
+                            last_birthday_end,
+                            last_birthday_start,
+                        )
+                        if x is not None
                     )
 
                     for bonus in birthday_bonuses:
@@ -235,15 +221,13 @@ class NotifyP9(commands.Cog):
                                 )
                                 end = end.replace(tzinfo=ZoneInfo("Asia/Seoul"))
                                 song_bonus_end = min(
-                                    [
-                                        x
-                                        for x in (
-                                            end,
-                                            next_birthday_end,
-                                            next_birthday_start,
-                                        )
-                                        if x is not None
-                                    ]
+                                    x
+                                    for x in (
+                                        end,
+                                        next_birthday_end,
+                                        next_birthday_start,
+                                    )
+                                    if x is not None
                                 )
 
                                 song_total = birthday_total + int(
@@ -281,12 +265,13 @@ class NotifyP9(commands.Cog):
                             "%Y-%m-%d",
                         )
                         end = end.replace(tzinfo=ZoneInfo("Asia/Seoul"))
-                        if end == current + one_day:
+                        if end == current:
                             msg = (
-                                f"> {birthday_members} - All Songs\n> {birthday_total}% | "
+                                f"> {birthday_members} - All Songs\n"
+                                f"> {birthday_total}% | "
                                 f"{birthday_bonus_start.strftime('%B %d').replace(' 0', ' ')}"
                                 f" - {end.strftime('%B %d').replace(' 0', ' ')}"
-                                f" | Ends <t:{int(current.timestamp())}:R>\n"
+                                f" | Ends <t:{int((current + one_day).timestamp())}:R>\n"
                             )
                             notify_end.append(msg)
 
@@ -305,15 +290,13 @@ class NotifyP9(commands.Cog):
                                     microsecond=0,
                                 )
                                 song_bonus_start = max(
-                                    [
-                                        x
-                                        for x in (
-                                            start,
-                                            last_birthday_end,
-                                            last_birthday_start,
-                                        )
-                                        if x is not None
-                                    ]
+                                    x
+                                    for x in (
+                                        start,
+                                        last_birthday_end,
+                                        last_birthday_start,
+                                    )
+                                    if x is not None
                                 )
 
                                 song_total = birthday_total + int(
@@ -332,11 +315,11 @@ class NotifyP9(commands.Cog):
                                 ].replace("\r", "")
 
                                 msg = (
-                                    f"> {album_name} - {song_name} ({song_duration})\n"
-                                    f"> {song_total}% | "
+                                    f"> {album_name} - {song_name}"
+                                    f" ({song_duration})\n> {song_total}% | "
                                     f"{song_bonus_start.strftime('%B %d').replace(' 0', ' ')}"
                                     f" - {end.strftime('%B %d').replace(' 0', ' ')}"
-                                    f" | Ends <t:{int(current.timestamp())}:R>\n"
+                                    f" | Ends <t:{int((current + one_day).timestamp())}:R>\n"
                                 )
                                 notify_end.append(msg)
 
@@ -361,18 +344,14 @@ class NotifyP9(commands.Cog):
                         )
                         end = end.replace(tzinfo=ZoneInfo("Asia/Seoul"))
                         song_bonus_start = max(
-                            [
-                                x
-                                for x in (start, last_birthday_start, last_birthday_end)
-                                if x is not None
-                            ]
+                            x
+                            for x in (start, last_birthday_start, last_birthday_end)
+                            if x is not None
                         )
                         song_bonus_end = min(
-                            [
-                                x
-                                for x in (end, next_birthday_end, next_birthday_start)
-                                if x is not None
-                            ]
+                            x
+                            for x in (end, next_birthday_end, next_birthday_start)
+                            if x is not None
                         )
 
                         song_total = birthday_total + int(
@@ -408,7 +387,7 @@ class NotifyP9(commands.Cog):
                     )
                     end = end.replace(tzinfo=ZoneInfo("Asia/Seoul"))
 
-                    if end == current + one_day:
+                    if end == current:
                         start = datetime.strptime(
                             bonus[gameD["bonusColumns"].index("bonus_start")].replace(
                                 "\r", ""
@@ -417,21 +396,17 @@ class NotifyP9(commands.Cog):
                         )
                         start = start.replace(tzinfo=ZoneInfo("Asia/Seoul"))
                         song_bonus_start = max(
-                            [
-                                x
-                                for x in (start, last_birthday_start, last_birthday_end)
-                                if x is not None
-                            ]
+                            x
+                            for x in (start, last_birthday_start, last_birthday_end)
+                            if x is not None
                         )
                         song_bonus_end = min(
-                            [
-                                x
-                                for x in (end, next_birthday_end, next_birthday_start)
-                                if x is not None
-                            ]
+                            x
+                            for x in (end, next_birthday_end, next_birthday_start)
+                            if x is not None
                         )
 
-                        song_total = ne_birthday_total + int(
+                        song_total = birthday_total + int(
                             bonus[gameD["bonusColumns"].index("bonus_amount")]
                             .replace("%", "")
                             .replace("\r", "")
@@ -451,7 +426,7 @@ class NotifyP9(commands.Cog):
                             f"> {song_total}% | "
                             f"{song_bonus_start.strftime('%B %d').replace(' 0', ' ')}"
                             f" - {song_bonus_end.strftime('%B %d').replace(' 0', ' ')}"
-                            f" | Ends <t:{int(current.timestamp())}:R>\n"
+                            f" | Ends <t:{int((current + one_day).timestamp())}:R>\n"
                         )
                         notify_end.append(msg)
 
@@ -477,6 +452,9 @@ class NotifyP9(commands.Cog):
                                 name="Expiring :orange_circle:",
                                 value="".join(notify_end),
                             )
+                        embed.set_thumbnail(
+                            url=artist_pings[gameD["pingColumns"].index("emblem")]
+                        )
                         await user.send(embed=embed, silent=True)
 
     @notify_p9.before_loop
