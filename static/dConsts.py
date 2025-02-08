@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 
 from apiclient import discovery
 from Cryptodome.Cipher import AES
@@ -56,6 +57,7 @@ GAMES: dict[str, GameD] = {
             "image",
             "skills",
         ],
+        "sslOffset": timedelta(hours=2),
         "pingId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
         "pingRange": "JYPNATION!A1:C",
         "pingWrite": "JYPNATION!C",
@@ -91,6 +93,7 @@ GAMES: dict[str, GameD] = {
             "image",
             "skills",
         ],
+        "sslOffset": timedelta(hours=2),
         "pingId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
         "pingRange": "LAPONE!A1:C",
         "pingWrite": "LAPONE!C",
@@ -119,6 +122,7 @@ GAMES: dict[str, GameD] = {
         "sslId": None,
         "sslRange": None,
         "sslColumns": None,
+        "sslOffset": None,
         "pingId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
         "pingRange": "EBiDAN!A1:C",
         "pingWrite": "EBiDAN!C",
@@ -147,6 +151,7 @@ GAMES: dict[str, GameD] = {
         "sslId": None,
         "sslRange": None,
         "sslColumns": None,
+        "sslOffset": None,
         "pingId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
         "pingRange": "Philippines!A1:C",
         "pingWrite": "Philippines!C",

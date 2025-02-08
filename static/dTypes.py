@@ -1,3 +1,4 @@
+from datetime import timedelta
 from typing import Optional, TypedDict
 
 
@@ -6,6 +7,7 @@ class GameD(TypedDict):
     sslId: Optional[str]
     sslRange: Optional[str]
     sslColumns: Optional[list[str]]
+    sslOffset: Optional[timedelta]
     pingId: str
     pingRange: str
     pingWrite: str
