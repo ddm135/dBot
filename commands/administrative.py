@@ -5,7 +5,7 @@ from static.dConsts import STATUS_CHANNEL
 
 
 class Administrative(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @commands.command()
@@ -32,6 +32,7 @@ class Administrative(commands.Cog):
             await self.bot.reload_extension("app_commands.bonus")
             await self.bot.reload_extension("app_commands.ssLeague")
             await self.bot.reload_extension("tasks.clock")
+            await self.bot.reload_extension("tasks.notify_p8")
             await self.bot.reload_extension("tasks.notify_p9")
             await msg.edit(content="Reloaded!")
 

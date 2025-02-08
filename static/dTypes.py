@@ -1,11 +1,11 @@
-from typing import TypedDict
+from typing import Optional, TypedDict
 
 
 class GameD(TypedDict):
     name: str
-    sslId: str
-    sslRange: str
-    sslColumns: list[str]
+    sslId: Optional[str]
+    sslRange: Optional[str]
+    sslColumns: Optional[list[str]]
     pingId: str
     pingRange: str
     pingWrite: str
@@ -14,6 +14,6 @@ class GameD(TypedDict):
     bonusRange: str
     bonusColumns: list[str]
     color: int
-    pinChannelId: int
+    pinChannelId: Optional[int]
     api: str
     timezone: str

@@ -7,16 +7,13 @@ from static.dConsts import GAMES, sheetService
 
 
 class Bonus(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @app_commands.command()
     @app_commands.autocomplete(artist_name=artist_autocomplete)
     @app_commands.choices(
-        game=[
-            app_commands.Choice(name="SUPERSTAR JYPNATION (JP)", value="JYP_JP"),
-            app_commands.Choice(name="SUPERSTAR LAPONE", value="LP"),
-        ]
+        game=[app_commands.Choice(name=v["name"], value=k) for k, v in GAMES.items()]
     )
     async def bonus_add(
         self, itr: discord.Interaction, game: app_commands.Choice[str], artist_name: str

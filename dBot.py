@@ -14,6 +14,7 @@ class dBot(commands.Bot):
         await self.load_extension("app_commands.bonus")
         await self.load_extension("app_commands.ssLeague")
         await self.load_extension("tasks.clock")
+        await self.load_extension("tasks.notify_p8")
         await self.load_extension("tasks.notify_p9")
         await super().setup_hook()
 

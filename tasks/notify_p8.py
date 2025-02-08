@@ -8,13 +8,13 @@ from discord.ext import commands, tasks
 from static.dConsts import GAMES, TIMEZONES, sheetService
 
 
-class NotifyP9(commands.Cog):
+class NotifyP8(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.notify_p9.start()
+        self.notify_p8.start()
 
     async def cog_unload(self):
-        self.notify_p9.cancel()
+        self.notify_p8.cancel()
 
     @tasks.loop(
         time=[
@@ -23,20 +23,20 @@ class NotifyP9(commands.Cog):
                 minute=0,
                 second=0,
                 microsecond=0,
-                tzinfo=ZoneInfo("Asia/Seoul"),
+                tzinfo=ZoneInfo("Asia/Manila"),
             )
         ]
     )
-    async def notify_p9(self):
+    async def notify_p8(self):
         for gameD in GAMES.values():
-            if gameD["timezone"] not in (TIMEZONES["KST"], TIMEZONES["JST"]):
+            if gameD["timezone"] not in (TIMEZONES["PHT"]):
                 continue
             current = datetime.now().replace(
                 hour=0,
                 minute=0,
                 second=0,
                 microsecond=0,
-                tzinfo=ZoneInfo("Asia/Seoul"),
+                tzinfo=ZoneInfo("Asia/Manila"),
             )
             one_day = timedelta(days=1)
             current = current + one_day
@@ -103,14 +103,14 @@ class NotifyP9(commands.Cog):
                         ),
                         "%Y-%m-%d",
                     )
-                    start = start.replace(tzinfo=ZoneInfo("Asia/Seoul"))
+                    start = start.replace(tzinfo=ZoneInfo("Asia/Manila"))
                     end = datetime.strptime(
                         bonus[gameD["bonusColumns"].index("bonus_end")].replace(
                             "\r", ""
                         ),
                         "%Y-%m-%d",
                     )
-                    end = end.replace(tzinfo=ZoneInfo("Asia/Seoul"))
+                    end = end.replace(tzinfo=ZoneInfo("Asia/Manila"))
                     if (
                         start < current
                         and artist == bonus[gameD["bonusColumns"].index("artist_name")]
@@ -170,7 +170,7 @@ class NotifyP9(commands.Cog):
                         gameD["bonusColumns"].index("bonus_end")
                     ]:
                         be = datetime.strptime(dt.replace("\r", ""), "%Y-%m-%d")
-                        be = be.replace(tzinfo=ZoneInfo("Asia/Seoul"))
+                        be = be.replace(tzinfo=ZoneInfo("Asia/Manila"))
                         birthday_ends.append(be)
                     birthday_bonus_end = min(
                         x
@@ -187,7 +187,7 @@ class NotifyP9(commands.Cog):
                         gameD["bonusColumns"].index("bonus_start")
                     ]:
                         bs = datetime.strptime(dt.replace("\r", ""), "%Y-%m-%d")
-                        bs = bs.replace(tzinfo=ZoneInfo("Asia/Seoul"))
+                        bs = bs.replace(tzinfo=ZoneInfo("Asia/Manila"))
                         birthday_starts.append(bs)
                     birthday_bonus_start = max(
                         x
@@ -204,7 +204,7 @@ class NotifyP9(commands.Cog):
                             bonus[gameD["bonusColumns"].index("bonus_start")],
                             "%Y-%m-%d",
                         )
-                        start = start.replace(tzinfo=ZoneInfo("Asia/Seoul"))
+                        start = start.replace(tzinfo=ZoneInfo("Asia/Manila"))
                         if start == current:
                             msg = (
                                 f"> {birthday_members} - All Songs\n> {birthday_total}"
@@ -221,7 +221,7 @@ class NotifyP9(commands.Cog):
                                     ].replace("\r", ""),
                                     "%Y-%m-%d",
                                 )
-                                end = end.replace(tzinfo=ZoneInfo("Asia/Seoul"))
+                                end = end.replace(tzinfo=ZoneInfo("Asia/Manila"))
                                 song_bonus_end = min(
                                     x
                                     for x in (
@@ -266,7 +266,7 @@ class NotifyP9(commands.Cog):
                             ),
                             "%Y-%m-%d",
                         )
-                        end = end.replace(tzinfo=ZoneInfo("Asia/Seoul"))
+                        end = end.replace(tzinfo=ZoneInfo("Asia/Manila"))
                         if end == current:
                             msg = (
                                 f"> {birthday_members} - All Songs\n"
@@ -282,7 +282,7 @@ class NotifyP9(commands.Cog):
                                     bonus[gameD["bonusColumns"].index("bonus_start")],
                                     "%Y-%m-%d",
                                 )
-                                start = datetime.now(ZoneInfo("Asia/Seoul")).replace(
+                                start = datetime.now(ZoneInfo("Asia/Manila")).replace(
                                     year=start.year,
                                     month=start.month,
                                     day=start.day,
@@ -335,7 +335,7 @@ class NotifyP9(commands.Cog):
                         ),
                         "%Y-%m-%d",
                     )
-                    start = start.replace(tzinfo=ZoneInfo("Asia/Seoul"))
+                    start = start.replace(tzinfo=ZoneInfo("Asia/Manila"))
 
                     if start == current:
                         end = datetime.strptime(
@@ -344,7 +344,7 @@ class NotifyP9(commands.Cog):
                             ),
                             "%Y-%m-%d",
                         )
-                        end = end.replace(tzinfo=ZoneInfo("Asia/Seoul"))
+                        end = end.replace(tzinfo=ZoneInfo("Asia/Manila"))
                         song_bonus_start = max(
                             x
                             for x in (start, last_birthday_start, last_birthday_end)
@@ -387,7 +387,7 @@ class NotifyP9(commands.Cog):
                         ),
                         "%Y-%m-%d",
                     )
-                    end = end.replace(tzinfo=ZoneInfo("Asia/Seoul"))
+                    end = end.replace(tzinfo=ZoneInfo("Asia/Manila"))
 
                     if end == current:
                         start = datetime.strptime(
@@ -396,7 +396,7 @@ class NotifyP9(commands.Cog):
                             ),
                             "%Y-%m-%d",
                         )
-                        start = start.replace(tzinfo=ZoneInfo("Asia/Seoul"))
+                        start = start.replace(tzinfo=ZoneInfo("Asia/Manila"))
                         song_bonus_start = max(
                             x
                             for x in (start, last_birthday_start, last_birthday_end)
@@ -459,10 +459,10 @@ class NotifyP9(commands.Cog):
                         )
                         await user.send(embed=embed, silent=True)
 
-    @notify_p9.before_loop
-    async def before_notify_p9(self):
+    @notify_p8.before_loop
+    async def before_notify_p8(self):
         await self.bot.wait_until_ready()
 
 
 async def setup(bot: commands.Bot):
-    await bot.add_cog(NotifyP9(bot))
+    await bot.add_cog(NotifyP8(bot))
