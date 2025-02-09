@@ -12,7 +12,7 @@ class Bonus(commands.Cog):
 
     @app_commands.command(
         description=(
-            "Add an artist to the bonus ping list (currently will only ping 1 hour "
+            "Add an artist to the bonus ping list (1 hour "
             "before bonus starts, 1 day 1 hour before bonus ends)"
         )
     )
