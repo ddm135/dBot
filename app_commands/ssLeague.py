@@ -33,7 +33,9 @@ class SSLeague(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @app_commands.command(description="Pin SSL song of the day (Song ID has higher priority)")
+    @app_commands.command(
+        description="Pin SSL song of the day (Song ID has higher priority)"
+    )
     @app_commands.choices(
         game=[
             app_commands.Choice(name=v["name"], value=k)
@@ -124,7 +126,9 @@ class SSLeague(commands.Cog):
                         color = s["albumBgColor"][:-2]
                         color = int(color, 16)
                         break
-                current_time = datetime.now(ZoneInfo(gameD["timezone"])) - gameD["sslOffset"]
+                current_time = (
+                    datetime.now(ZoneInfo(gameD["timezone"])) - gameD["sslOffset"]
+                )
                 embed_title = f"SSL #{current_time.strftime("%w").replace("0", "7")}"
 
                 embed = discord.Embed(
