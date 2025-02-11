@@ -432,11 +432,6 @@ class NotifyP8(commands.Cog):
                         )
                         notify_end.append(msg)
 
-                # print(artist)
-                # print("Start: ", end="")
-                # pprint(notify_start)
-                # print("End: ", end="")
-                # pprint(notify_end)
                 if notify_start or notify_end:
                     for user_id in artist_ping_list:
                         user = await self.bot.fetch_user(int(user_id))
@@ -448,11 +443,13 @@ class NotifyP8(commands.Cog):
                             embed.add_field(
                                 name="Upcoming :green_circle:",
                                 value="".join(notify_start),
+                                inline=False,
                             )
                         if notify_end:
                             embed.add_field(
                                 name="Expiring :orange_circle:",
                                 value="".join(notify_end),
+                                inline=False,
                             )
                         embed.set_thumbnail(
                             url=artist_pings[gameD["pingColumns"].index("emblem")]

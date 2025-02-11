@@ -6,11 +6,11 @@ from app_commands.autocomplete.bonus import artist_autocomplete
 from static.dConsts import GAMES, sheetService
 
 
-class Bonus(commands.Cog):
+class Bonus(commands.GroupCog, name="bonus"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @app_commands.command(
+    @app_commands.command(name="add",
         description=(
             "Add an artist to the bonus ping list (1 hour "
             "before bonus starts, 1 day 1 hour before bonus ends)"
@@ -75,7 +75,7 @@ class Bonus(commands.Cog):
                 f"{artist_name} is not a valid artist for {game.name}"
             )
 
-    @app_commands.command(description="Remove an artist from the bonus ping list")
+    @app_commands.command(name="remove", description="Remove an artist from the bonus ping list")
     @app_commands.autocomplete(artist_name=artist_autocomplete)
     @app_commands.choices(
         game=[app_commands.Choice(name=v["name"], value=k) for k, v in GAMES.items()]

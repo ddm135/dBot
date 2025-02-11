@@ -33,7 +33,7 @@ class SSLeague(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @app_commands.command(description="Pin SSL song of the day")
+    @app_commands.command(description="Pin SSL song of the day (Song ID has higher priority)")
     @app_commands.choices(
         game=[
             app_commands.Choice(name=v["name"], value=k)
