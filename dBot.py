@@ -1,21 +1,20 @@
+import os
 from datetime import datetime, time
 from zoneinfo import ZoneInfo
 
 import discord
 from discord.ext import commands, tasks
+from dotenv import load_dotenv
 
-from static.dConsts import DISCORD_TOKEN, STATUS_CHANNEL
+from static.dConsts import EXTENSIONS, STATUS_CHANNEL
+
+load_dotenv()
 
 
 class dBot(commands.Bot):
     async def setup_hook(self):
-        await self.load_extension("commands.administrative")
-        await self.load_extension("commands.memes")
-        await self.load_extension("app_commands.bonus")
-        await self.load_extension("app_commands.ssLeague")
-        await self.load_extension("tasks.clock")
-        await self.load_extension("tasks.notify_p8")
-        await self.load_extension("tasks.notify_p9")
+        for ext in EXTENSIONS:
+            await self.load_extension(ext)
         await super().setup_hook()
 
     async def on_ready(self):
@@ -49,4 +48,4 @@ async def restart_clock(ctx: commands.Context):
     await ctx.send("Clock restarted!")
 
 
-bot.run(DISCORD_TOKEN)  # type: ignore
+bot.run(os.getenv("DISCORD_TOKEN"))  # type: ignore

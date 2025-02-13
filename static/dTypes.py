@@ -2,7 +2,7 @@ from datetime import timedelta
 from typing import Optional, TypedDict
 
 
-class GameD(TypedDict):
+class GameDetails(TypedDict):
     name: str
     sslId: Optional[str]
     sslRange: Optional[str]
