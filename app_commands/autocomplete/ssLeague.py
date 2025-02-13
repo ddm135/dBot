@@ -3,7 +3,8 @@ from itertools import islice
 import discord
 from discord import app_commands
 
-from static.dConsts import GAMES, sheetService
+from static.dConsts import GAMES
+from static.dServices import sheetService
 
 
 async def artist_autocomplete(

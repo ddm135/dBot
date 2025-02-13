@@ -5,7 +5,8 @@ from zoneinfo import ZoneInfo
 import discord
 from discord.ext import commands, tasks
 
-from static.dConsts import GAMES, TIMEZONES, sheetService
+from static.dConsts import GAMES, TIMEZONES
+from static.dServices import sheetService
 
 
 class NotifyP9(commands.Cog):

@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-from static.dConsts import STATUS_CHANNEL
+from static.dConsts import EXTENSIONS, STATUS_CHANNEL
 
 
 class Administrative(commands.Cog):
@@ -11,7 +11,7 @@ class Administrative(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def sync(self, ctx: commands.Context):
-        if ctx.message.channel.id == STATUS_CHANNEL:
+        if ctx.channel.id == STATUS_CHANNEL:
             msg = await ctx.send("Syncing app commands...")
             await self.bot.tree.sync()
             self.bot.tree.clear_commands(guild=ctx.guild)
@@ -21,19 +21,14 @@ class Administrative(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def reload(self, ctx: commands.Context):
-        if ctx.message.channel.id == STATUS_CHANNEL:
+        if ctx.channel.id == STATUS_CHANNEL:
             msg = await ctx.send("Reloading extensions...")
             await self.bot.change_presence(
                 status=discord.Status.dnd,
                 activity=discord.Game(name="Reloading extensions..."),
             )
-            await self.bot.reload_extension("commands.administrative")
-            await self.bot.reload_extension("commands.memes")
-            await self.bot.reload_extension("app_commands.bonus")
-            await self.bot.reload_extension("app_commands.ssLeague")
-            await self.bot.reload_extension("tasks.clock")
-            await self.bot.reload_extension("tasks.notify_p8")
-            await self.bot.reload_extension("tasks.notify_p9")
+            for ext in EXTENSIONS:
+                await self.bot.reload_extension(ext)
             await msg.edit(content="Reloaded!")
 
 

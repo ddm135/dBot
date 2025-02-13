@@ -24,25 +24,24 @@ from static.dConsts import (
     OK_ROLE_OWNER,
     SSRG_ROLE_MOD,
     SSRG_ROLE_SS,
-    sheetService,
-    ssCrypt,
 )
+from static.dServices import cryptService, sheetService
 
 
 class SSLeague(commands.Cog):
+    GAME_CHOICES = [
+        app_commands.Choice(name=game["name"], value=key)
+        for key, game in GAMES.items()
+        if game["pinChannelId"]
+    ]
+
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @app_commands.command(
         description="Pin SSL song of the day (Song ID has higher priority)"
     )
-    @app_commands.choices(
-        game=[
-            app_commands.Choice(name=v["name"], value=k)
-            for k, v in GAMES.items()
-            if v["pinChannelId"]
-        ]
-    )
+    @app_commands.choices(game=GAME_CHOICES)
     @app_commands.autocomplete(artist_name=artist_autocomplete)
     @app_commands.autocomplete(song_name=song_autocomplete)
     @app_commands.autocomplete(song_id=song_id_autocomplete)
@@ -64,12 +63,12 @@ class SSLeague(commands.Cog):
                 ephemeral=True,
             )
         else:
-            gameD = GAMES[game.value]
+            game_details = GAMES[game.value]
             result = (
                 sheetService.values()
                 .get(
-                    spreadsheetId=gameD["sslId"],
-                    range=gameD["sslRange"],
+                    spreadsheetId=game_details["sslId"],
+                    range=game_details["sslRange"],
                 )
                 .execute()
             )
@@ -79,19 +78,19 @@ class SSLeague(commands.Cog):
                 song = next(
                     s
                     for s in songs
-                    if s[gameD["sslColumns"].index("song_id")] == str(song_id)
+                    if s[game_details["sslColumns"].index("song_id")] == str(song_id)
                     or (
                         not song_id
-                        and s[gameD["sslColumns"].index("artist_name")].lower()
+                        and s[game_details["sslColumns"].index("artist_name")].lower()
                         == artist_name.lower()
-                        and s[gameD["sslColumns"].index("song_name")].lower()
+                        and s[game_details["sslColumns"].index("song_name")].lower()
                         == song_name.lower()
                     )
                 )
 
                 async with aiohttp.ClientSession() as session:
                     async with session.post(
-                        url=gameD["api"],
+                        url=game_details["api"],
                         headers=A_JSON_HEADERS,
                         data=A_JSON_BODY,
                     ) as r:
@@ -108,7 +107,7 @@ class SSLeague(commands.Cog):
 
                 msd_enc = gzip.decompress(msd_enc)
                 msd_dec = (
-                    unpad(ssCrypt.decrypt(b64decode(msd_enc)), 16)
+                    unpad(cryptService.decrypt(b64decode(msd_enc)), 16)
                     .replace(rb"\/", rb"/")
                     .replace(rb"\u", rb"ddm135-u")
                 )
@@ -122,12 +121,16 @@ class SSLeague(commands.Cog):
 
                 color = None
                 for s in msd_data:
-                    if str(s["code"]) == song[gameD["sslColumns"].index("song_id")]:
+                    if (
+                        str(s["code"])
+                        == song[game_details["sslColumns"].index("song_id")]
+                    ):
                         color = s["albumBgColor"][:-2]
                         color = int(color, 16)
                         break
                 current_time = (
-                    datetime.now(ZoneInfo(gameD["timezone"])) - gameD["sslOffset"]
+                    datetime.now(ZoneInfo(game_details["timezone"]))
+                    - game_details["sslOffset"]
                 )
                 embed_title = f"SSL #{current_time.strftime("%w").replace("0", "7")}"
 
@@ -135,26 +138,26 @@ class SSLeague(commands.Cog):
                     color=color or discord.Color.random(seed=current_time.timestamp()),
                     title=embed_title,
                     description=(
-                        f"**{song[gameD["sslColumns"].index("artist_name")]} - "
-                        f"{song[gameD["sslColumns"].index("song_name")]}**"
+                        f"**{song[game_details["sslColumns"].index("artist_name")]} - "
+                        f"{song[game_details["sslColumns"].index("song_name")]}**"
                     ),
                 )
 
                 embed.add_field(
                     name="Duration",
-                    value=song[gameD["sslColumns"].index("duration")],
+                    value=song[game_details["sslColumns"].index("duration")],
                 )
-                if "skills" in gameD["sslColumns"]:
+                if "skills" in game_details["sslColumns"]:
                     embed.add_field(
                         name="Skill Order",
-                        value=song[gameD["sslColumns"].index("skills")],
+                        value=song[game_details["sslColumns"].index("skills")],
                     )
-                embed.set_thumbnail(url=song[gameD["sslColumns"].index("image")])
+                embed.set_thumbnail(url=song[game_details["sslColumns"].index("image")])
                 embed.set_footer(
                     text=current_time.strftime("%A, %B %d, %Y").replace(" 0", " ")
                 )
 
-                pin_channel = self.bot.get_channel(gameD["pinChannelId"])
+                pin_channel = self.bot.get_channel(game_details["pinChannelId"])
                 pins = await pin_channel.pins()
                 for pin in pins:
                     embeds = pin.embeds
@@ -171,7 +174,9 @@ class SSLeague(commands.Cog):
             except AttributeError:
                 await itr.followup.send("Bot is not in server")
 
-    async def cog_app_command_error(self, interaction: discord.Interaction, error):
+    async def cog_app_command_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
         if isinstance(error, app_commands.errors.NoPrivateMessage):
             await interaction.response.send_message(
                 "This command cannot be used in direct messages",
