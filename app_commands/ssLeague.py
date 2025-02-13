@@ -29,19 +29,19 @@ from static.dServices import cryptService, sheetService
 
 
 class SSLeague(commands.Cog):
+    GAME_CHOICES = [
+        app_commands.Choice(name=game["name"], value=key)
+        for key, game in GAMES.items()
+        if game["pinChannelId"]
+    ]
+
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @app_commands.command(
         description="Pin SSL song of the day (Song ID has higher priority)"
     )
-    @app_commands.choices(
-        game=[
-            app_commands.Choice(name=v["name"], value=k)
-            for k, v in GAMES.items()
-            if v["pinChannelId"]
-        ]
-    )
+    @app_commands.choices(game=GAME_CHOICES)
     @app_commands.autocomplete(artist_name=artist_autocomplete)
     @app_commands.autocomplete(song_name=song_autocomplete)
     @app_commands.autocomplete(song_id=song_id_autocomplete)
@@ -121,12 +121,16 @@ class SSLeague(commands.Cog):
 
                 color = None
                 for s in msd_data:
-                    if str(s["code"]) == song[game_details["sslColumns"].index("song_id")]:
+                    if (
+                        str(s["code"])
+                        == song[game_details["sslColumns"].index("song_id")]
+                    ):
                         color = s["albumBgColor"][:-2]
                         color = int(color, 16)
                         break
                 current_time = (
-                    datetime.now(ZoneInfo(game_details["timezone"])) - game_details["sslOffset"]
+                    datetime.now(ZoneInfo(game_details["timezone"]))
+                    - game_details["sslOffset"]
                 )
                 embed_title = f"SSL #{current_time.strftime("%w").replace("0", "7")}"
 
@@ -170,7 +174,9 @@ class SSLeague(commands.Cog):
             except AttributeError:
                 await itr.followup.send("Bot is not in server")
 
-    async def cog_app_command_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    async def cog_app_command_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
         if isinstance(error, app_commands.errors.NoPrivateMessage):
             await interaction.response.send_message(
                 "This command cannot be used in direct messages",

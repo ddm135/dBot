@@ -30,9 +30,7 @@ class Bonus(commands.GroupCog, name="bonus"):
     async def bonus_add(
         self, itr: discord.Interaction, game: app_commands.Choice[str], artist_name: str
     ):
-        await self._handle_ping_operation(
-            itr, game.value, artist_name, itr.command.name
-        )
+        await self._handle_bonus_command(itr, game.value, artist_name, itr.command.name)
 
     @app_commands.command(
         name="remove", description="Remove an artist from the bonus ping list"
@@ -42,12 +40,10 @@ class Bonus(commands.GroupCog, name="bonus"):
     async def bonus_remove(
         self, itr: discord.Interaction, game: app_commands.Choice[str], artist_name: str
     ):
-        await self._handle_ping_operation(
-            itr, game.value, artist_name, itr.command.name
-        )
+        await self._handle_bonus_command(itr, game.value, artist_name, itr.command.name)
 
     @staticmethod
-    async def _handle_ping_operation(
+    async def _handle_bonus_command(
         itr: discord.Interaction, game_key: str, artist_name: str, operation: str
     ):
         await itr.response.defer(ephemeral=True)
@@ -72,6 +68,7 @@ class Bonus(commands.GroupCog, name="bonus"):
 
                 if not message_prefix.startswith("Already"):
                     Bonus._update_ping_data(game_details, users, i)
+
                 await itr.followup.send(f"{message_prefix} {_artist_name} ping list!")
                 return
 
