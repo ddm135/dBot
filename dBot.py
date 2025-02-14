@@ -8,6 +8,10 @@ from dotenv import load_dotenv
 
 from static.dConsts import EXTENSIONS, STATUS_CHANNEL
 
+# pyright: reportAttributeAccessIssue=false
+# pyright: reportOptionalMemberAccess=false
+
+
 load_dotenv()
 
 
@@ -48,4 +52,4 @@ async def restart_clock(ctx: commands.Context):
     await ctx.send("Clock restarted!")
 
 
-bot.run(os.getenv("DISCORD_TOKEN"))  # type: ignore
+bot.run(os.getenv("DISCORD_TOKEN"))  # type: ignore[arg-type]

@@ -13,6 +13,7 @@ from discord import app_commands
 from discord.ext import commands
 
 from app_commands.autocomplete.ssLeague import (
+    _get_ssl_data,
     artist_autocomplete,
     song_autocomplete,
     song_id_autocomplete,
@@ -25,7 +26,7 @@ from static.dConsts import (
     SSRG_ROLE_MOD,
     SSRG_ROLE_SS,
 )
-from static.dServices import cryptService, sheetService
+from static.dServices import cryptService
 
 
 class SSLeague(commands.Cog):
@@ -64,15 +65,7 @@ class SSLeague(commands.Cog):
             )
         else:
             game_details = GAMES[game.value]
-            result = (
-                sheetService.values()
-                .get(
-                    spreadsheetId=game_details["sslId"],
-                    range=game_details["sslRange"],
-                )
-                .execute()
-            )
-            songs = result.get("values", [])
+            songs = _get_ssl_data(game_details)
 
             try:
                 song = next(

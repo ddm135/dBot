@@ -4,9 +4,9 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from app_commands.autocomplete.bonus import artist_autocomplete
+from app_commands.autocomplete.bonus import _get_ping_data, artist_autocomplete
 from static.dConsts import GAMES
-from static.dServices import sheetService
+from static.dHelpers import update_sheet_data
 from static.dTypes import GameDetails
 
 
@@ -30,6 +30,7 @@ class Bonus(commands.GroupCog, name="bonus"):
     async def bonus_add(
         self, itr: discord.Interaction, game: app_commands.Choice[str], artist_name: str
     ):
+        assert itr.command
         await self._handle_bonus_command(itr, game.value, artist_name, itr.command.name)
 
     @app_commands.command(
@@ -40,6 +41,7 @@ class Bonus(commands.GroupCog, name="bonus"):
     async def bonus_remove(
         self, itr: discord.Interaction, game: app_commands.Choice[str], artist_name: str
     ):
+        assert itr.command
         await self._handle_bonus_command(itr, game.value, artist_name, itr.command.name)
 
     @staticmethod
@@ -48,7 +50,7 @@ class Bonus(commands.GroupCog, name="bonus"):
     ):
         await itr.response.defer(ephemeral=True)
         game_details = GAMES[game_key]
-        ping_data = Bonus._get_ping_data(game_details)
+        ping_data = _get_ping_data(game_details)
         user_id = str(itr.user.id)
         artist_column_index = game_details["pingColumns"].index("artist_name")
         users_column_index = game_details["pingColumns"].index("users")
@@ -77,15 +79,6 @@ class Bonus(commands.GroupCog, name="bonus"):
         )
 
     @staticmethod
-    def _get_ping_data(game_details: GameDetails) -> list[list[str]]:
-        result = (
-            sheetService.values()
-            .get(spreadsheetId=game_details["pingId"], range=game_details["pingRange"])
-            .execute()
-        )
-        return result.get("values", [])
-
-    @staticmethod
     def _update_artist_ping_list(
         operation: str, user_id: str, users: list[str]
     ) -> Optional[str]:
@@ -110,12 +103,12 @@ class Bonus(commands.GroupCog, name="bonus"):
     def _update_ping_data(
         game_details: GameDetails, users: list[str], artist_index: int
     ):
-        sheetService.values().update(
-            spreadsheetId=game_details["pingId"],
-            range=f"{game_details["pingWrite"]}{artist_index}",
-            valueInputOption="RAW",
-            body={"values": [[",".join(users)]]},
-        ).execute()
+        update_sheet_data(
+            game_details["pingId"],
+            f"{game_details["pingWrite"]}{artist_index}",
+            parse_input=False,
+            data=[[",".join(users)]],
+        )
 
 
 async def setup(bot: commands.Bot):
