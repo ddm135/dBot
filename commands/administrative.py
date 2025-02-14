@@ -5,12 +5,12 @@ from static.dConsts import EXTENSIONS, STATUS_CHANNEL
 
 
 class Administrative(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
     @commands.command()
     @commands.is_owner()
-    async def sync(self, ctx: commands.Context):
+    async def sync(self, ctx: commands.Context) -> None:
         if ctx.channel.id == STATUS_CHANNEL:
             msg = await ctx.send("Syncing app commands...")
             await self.bot.tree.sync()
@@ -20,7 +20,7 @@ class Administrative(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
-    async def reload(self, ctx: commands.Context):
+    async def reload(self, ctx: commands.Context) -> None:
         if ctx.channel.id == STATUS_CHANNEL:
             msg = await ctx.send("Reloading extensions...")
             await self.bot.change_presence(
@@ -32,5 +32,5 @@ class Administrative(commands.Cog):
             await msg.edit(content="Reloaded!")
 
 
-async def setup(bot: commands.Bot):
+async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(Administrative(bot))

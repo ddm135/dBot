@@ -4,7 +4,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from app_commands.autocomplete.bonus import _get_ping_data, artist_autocomplete
+from app_commands.autocomplete.bonus import _ping_preprocess, artist_autocomplete
 from static.dConsts import GAMES
 from static.dHelpers import update_sheet_data
 from static.dTypes import GameDetails
@@ -15,7 +15,7 @@ class Bonus(commands.GroupCog, name="bonus"):
         app_commands.Choice(name=game["name"], value=key) for key, game in GAMES.items()
     ]
 
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
     @app_commands.command(
@@ -28,8 +28,11 @@ class Bonus(commands.GroupCog, name="bonus"):
     @app_commands.autocomplete(artist_name=artist_autocomplete)
     @app_commands.choices(game=GAME_CHOICES)
     async def bonus_add(
-        self, itr: discord.Interaction, game: app_commands.Choice[str], artist_name: str
-    ):
+        self,
+        itr: discord.Interaction,
+        game: app_commands.Choice[str],
+        artist_name: str,
+    ) -> None:
         assert itr.command
         await self._handle_bonus_command(itr, game.value, artist_name, itr.command.name)
 
@@ -39,29 +42,37 @@ class Bonus(commands.GroupCog, name="bonus"):
     @app_commands.autocomplete(artist_name=artist_autocomplete)
     @app_commands.choices(game=GAME_CHOICES)
     async def bonus_remove(
-        self, itr: discord.Interaction, game: app_commands.Choice[str], artist_name: str
-    ):
+        self,
+        itr: discord.Interaction,
+        game: app_commands.Choice[str],
+        artist_name: str,
+    ) -> None:
         assert itr.command
         await self._handle_bonus_command(itr, game.value, artist_name, itr.command.name)
 
-    @staticmethod
     async def _handle_bonus_command(
-        itr: discord.Interaction, game_key: str, artist_name: str, operation: str
-    ):
+        self,
+        itr: discord.Interaction,
+        game_key: str,
+        artist_name: str,
+        operation: str,
+    ) -> None:
         await itr.response.defer(ephemeral=True)
-        game_details = GAMES[game_key]
-        ping_data = _get_ping_data(game_details)
         user_id = str(itr.user.id)
-        artist_column_index = game_details["pingColumns"].index("artist_name")
-        users_column_index = game_details["pingColumns"].index("users")
+        (
+            game_details,
+            ping_data,
+            artist_name_index,
+            users_index,
+        ) = _ping_preprocess(game_key)
 
         for i, row in enumerate(ping_data, start=1):
-            _artist_name = row[artist_column_index]
+            _artist_name = row[artist_name_index]
             if _artist_name.lower() == artist_name.lower():
-                users = row[users_column_index].split(",")
+                users = row[users_index].split(",")
 
                 if not (
-                    message_prefix := Bonus._update_artist_ping_list(
+                    message_prefix := self._update_artist_ping_list(
                         operation, user_id, users
                     )
                 ):
@@ -69,7 +80,7 @@ class Bonus(commands.GroupCog, name="bonus"):
                     return
 
                 if not message_prefix.startswith("Already"):
-                    Bonus._update_ping_data(game_details, users, i)
+                    self._update_ping_data(game_details, users, i)
 
                 await itr.followup.send(f"{message_prefix} {_artist_name} ping list!")
                 return
@@ -78,9 +89,11 @@ class Bonus(commands.GroupCog, name="bonus"):
             f"{artist_name} is not a valid artist for {game_details["name"]}"
         )
 
-    @staticmethod
     def _update_artist_ping_list(
-        operation: str, user_id: str, users: list[str]
+        self,
+        operation: str,
+        user_id: str,
+        users: list[str],
     ) -> Optional[str]:
         if operation == "add":
             if user_id not in users:
@@ -99,10 +112,12 @@ class Bonus(commands.GroupCog, name="bonus"):
 
         return message_prefix
 
-    @staticmethod
     def _update_ping_data(
-        game_details: GameDetails, users: list[str], artist_index: int
-    ):
+        self,
+        game_details: GameDetails,
+        users: list[str],
+        artist_index: int,
+    ) -> None:
         update_sheet_data(
             game_details["pingId"],
             f"{game_details["pingWrite"]}{artist_index}",
@@ -111,5 +126,5 @@ class Bonus(commands.GroupCog, name="bonus"):
         )
 
 
-async def setup(bot: commands.Bot):
+async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(Bonus(bot))

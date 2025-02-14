@@ -1,5 +1,6 @@
 from datetime import timedelta
 from typing import Optional, TypedDict
+from zoneinfo import ZoneInfo
 
 
 class GameDetails(TypedDict):
@@ -18,4 +19,4 @@ class GameDetails(TypedDict):
     color: int
     pinChannelId: Optional[int]
     api: str
-    timezone: str
+    timezone: ZoneInfo

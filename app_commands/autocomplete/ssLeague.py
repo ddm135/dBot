@@ -1,3 +1,5 @@
+from typing import Optional
+
 import discord
 from discord import app_commands
 
@@ -9,11 +11,8 @@ from static.dTypes import GameDetails
 async def artist_autocomplete(
     itr: discord.Interaction, current: str
 ) -> list[app_commands.Choice[str]]:
-    game_details = GAMES[itr.namespace.game]
-    ssl_data = _get_ssl_data(game_details)
+    _, ssl_data, artist_name_index, _, _, _, _, _ = _ssl_preprocess(itr.namespace.game)
 
-    assert game_details["sslColumns"]
-    artist_name_index = game_details["sslColumns"].index("artist_name")
     artists = [
         app_commands.Choice(name=artist, value=artist)
         for artist in dict.fromkeys(tuple(zip(*ssl_data))[artist_name_index])
@@ -26,13 +25,11 @@ async def artist_autocomplete(
 async def song_autocomplete(
     itr: discord.Interaction, current: str
 ) -> list[app_commands.Choice[str]]:
-    game_details = GAMES[itr.namespace.game]
     artist_name = itr.namespace.artist_name
-    ssl_data = _get_ssl_data(game_details)
+    _, ssl_data, artist_name_index, song_name_index, _, _, _, _ = _ssl_preprocess(
+        itr.namespace.game
+    )
 
-    assert game_details["sslColumns"]
-    artist_name_index = game_details["sslColumns"].index("artist_name")
-    song_name_index = game_details["sslColumns"].index("song_name")
     songs = [
         app_commands.Choice(name=s[song_name_index], value=s[song_name_index])
         for s in ssl_data
@@ -46,13 +43,9 @@ async def song_autocomplete(
 async def song_id_autocomplete(
     itr: discord.Interaction, current: str
 ) -> list[app_commands.Choice[str]]:
-    game_details = GAMES[itr.namespace.game]
-    ssl_data = _get_ssl_data(game_details)
-
-    assert game_details["sslColumns"]
-    artist_name_index = game_details["sslColumns"].index("artist_name")
-    song_name_index = game_details["sslColumns"].index("song_name")
-    song_id_index = game_details["sslColumns"].index("song_id")
+    _, ssl_data, artist_name_index, song_name_index, song_id_index, _, _, _ = (
+        _ssl_preprocess(itr.namespace.game)
+    )
 
     if song := next((s for s in ssl_data if current == s[song_id_index]), None):
         return [
@@ -64,7 +57,39 @@ async def song_id_autocomplete(
     return []
 
 
+def get_ssl_data(spreadsheet_id: str, range_str: str) -> list[list[str]]:
+    return get_sheet_data(spreadsheet_id, range_str)
+
+
+def _ssl_preprocess(
+    game: str,
+) -> tuple[GameDetails, list[list[str]], int, int, int, int, int, Optional[int]]:
+    game_details = GAMES[game]
+    ssl_data = _get_ssl_data(game_details)
+    assert (ssl_columns := game_details["sslColumns"])
+    return game_details, ssl_data, *_get_ssl_indexes(ssl_columns)
+
+
 def _get_ssl_data(game_details: GameDetails) -> list[list[str]]:
-    assert game_details["sslId"]
-    assert game_details["sslRange"]
-    return get_sheet_data(game_details["sslId"], game_details["sslRange"])
+    assert (ssl_id := game_details["sslId"])
+    assert (ssl_range := game_details["sslRange"])
+    return get_ssl_data(ssl_id, ssl_range)
+
+
+def _get_ssl_indexes(
+    ssl_columns: list[str],
+) -> tuple[int, int, int, int, int, Optional[int]]:
+    song_id_index = ssl_columns.index("song_id")
+    artist_name_index = ssl_columns.index("artist_name")
+    song_name_index = ssl_columns.index("song_name")
+    duration_index = ssl_columns.index("duration")
+    image_url_index = ssl_columns.index("image")
+    skills_index = ssl_columns.index("skills") if "skills" in ssl_columns else None
+    return (
+        artist_name_index,
+        song_name_index,
+        song_id_index,
+        duration_index,
+        image_url_index,
+        skills_index,
+    )

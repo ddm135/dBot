@@ -1,19 +1,17 @@
 import asyncio
 import gzip
 import json
-from base64 import b64decode
-from datetime import datetime
-from typing import Optional
+from datetime import datetime, timedelta
+from typing import Optional, Union
 from zoneinfo import ZoneInfo
 
 import aiohttp
 import discord
-from Cryptodome.Util.Padding import unpad
 from discord import app_commands
 from discord.ext import commands
 
 from app_commands.autocomplete.ssLeague import (
-    _get_ssl_data,
+    _ssl_preprocess,
     artist_autocomplete,
     song_autocomplete,
     song_id_autocomplete,
@@ -26,10 +24,11 @@ from static.dConsts import (
     SSRG_ROLE_MOD,
     SSRG_ROLE_SS,
 )
-from static.dServices import cryptService
+from static.dHelpers import decrypt_cbc, decrypt_ecb
+from static.dTypes import GameDetails
 
 
-class SSLeague(commands.Cog):
+class SSLeague(commands.GroupCog, name="ssl"):
     GAME_CHOICES = [
         app_commands.Choice(name=game["name"], value=key)
         for key, game in GAMES.items()
@@ -40,132 +39,215 @@ class SSLeague(commands.Cog):
         self.bot = bot
 
     @app_commands.command(
-        description="Pin SSL song of the day (Song ID has higher priority)"
+        description="Pin SSL song of the day using Artist Name and Song Name"
     )
     @app_commands.choices(game=GAME_CHOICES)
     @app_commands.autocomplete(artist_name=artist_autocomplete)
     @app_commands.autocomplete(song_name=song_autocomplete)
-    @app_commands.autocomplete(song_id=song_id_autocomplete)
     @app_commands.checks.has_any_role(OK_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
-    async def ssl(
+    async def pin_by_name(
         self,
         itr: discord.Interaction,
         game: app_commands.Choice[str],
-        artist_name: Optional[str],
-        song_name: Optional[str],
-        song_id: Optional[str],
+        artist_name: str,
+        song_name: str,
     ):
         await itr.response.defer(ephemeral=True)
-        if not song_id and not (artist_name and song_name):
-            await itr.followup.send(
-                "Pinning SSL requires one of the following:"
-                "\n- Artist Name and Song Name"
-                "\n- Song ID",
-                ephemeral=True,
+        (
+            game_details,
+            ssl_data,
+            artist_name_index,
+            song_name_index,
+            song_id_index,
+            duration_index,
+            image_url_index,
+            skills_index,
+        ) = _ssl_preprocess(game.value)
+
+        try:
+            song = next(
+                s
+                for s in ssl_data
+                if s[artist_name_index].lower() == artist_name.lower()
+                and s[song_name_index].lower() == song_name.lower()
             )
-        else:
-            game_details = GAMES[game.value]
-            songs = _get_ssl_data(game_details)
 
-            try:
-                song = next(
-                    s
-                    for s in songs
-                    if s[game_details["sslColumns"].index("song_id")] == str(song_id)
-                    or (
-                        not song_id
-                        and s[game_details["sslColumns"].index("artist_name")].lower()
-                        == artist_name.lower()
-                        and s[game_details["sslColumns"].index("song_name")].lower()
-                        == song_name.lower()
-                    )
-                )
+            await self._handle_ssl_command(
+                itr,
+                game_details,
+                song[artist_name_index],
+                song[song_name_index],
+                int(song[song_id_index]),
+                song[duration_index],
+                song[image_url_index],
+                song[skills_index] if skills_index else None,
+            )
+        except StopIteration:
+            await itr.followup.send("Song not found")
+        except AttributeError:
+            await itr.followup.send("Bot is not in server")
 
-                async with aiohttp.ClientSession() as session:
-                    async with session.post(
-                        url=game_details["api"],
-                        headers=A_JSON_HEADERS,
-                        data=A_JSON_BODY,
-                    ) as r:
-                        js = await r.json(content_type=None)
-                        msd_url = js["result"]["context"]["MusicData"]["file"]
+    @app_commands.command(description="Pin SSL song of the day using Song ID")
+    @app_commands.choices(game=GAME_CHOICES)
+    @app_commands.autocomplete(song_id=song_id_autocomplete)
+    @app_commands.checks.has_any_role(OK_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
+    async def pin_by_id(
+        self,
+        itr: discord.Interaction,
+        game: app_commands.Choice[str],
+        song_id: str,
+    ):
+        await itr.response.defer(ephemeral=True)
+        (
+            game_details,
+            ssl_data,
+            artist_name_index,
+            song_name_index,
+            song_id_index,
+            duration_index,
+            image_url_index,
+            skills_index,
+        ) = _ssl_preprocess(game.value)
 
-                    async with session.get(url=msd_url) as r:
-                        msd_enc = b""
-                        while True:
-                            chunk = await r.content.read(1024)
-                            if not chunk:
-                                break
-                            msd_enc += chunk
+        try:
+            song = next(s for s in ssl_data if s[song_id_index] == song_id)
 
-                msd_enc = gzip.decompress(msd_enc)
-                msd_dec = (
-                    unpad(cryptService.decrypt(b64decode(msd_enc)), 16)
-                    .replace(rb"\/", rb"/")
-                    .replace(rb"\u", rb"ddm135-u")
-                )
-                js = json.loads(msd_dec)
-                msd_dec = (
-                    json.dumps(js, indent="\t", ensure_ascii=False)
-                    .replace(r"ddm135-u", r"\u")
-                    .encode("utf8")
-                )
-                msd_data = json.loads(msd_dec)
+            await self._handle_ssl_command(
+                itr,
+                game_details,
+                song[artist_name_index],
+                song[song_name_index],
+                int(song[song_id_index]),
+                song[duration_index],
+                song[image_url_index],
+                song[skills_index] if skills_index else None,
+            )
+        except StopIteration:
+            await itr.followup.send("Song not found")
+        except AttributeError:
+            await itr.followup.send("Bot is not in server")
 
-                color = None
-                for s in msd_data:
-                    if (
-                        str(s["code"])
-                        == song[game_details["sslColumns"].index("song_id")]
-                    ):
-                        color = s["albumBgColor"][:-2]
-                        color = int(color, 16)
+    async def _handle_ssl_command(
+        self,
+        itr: discord.Interaction,
+        game_details: GameDetails,
+        artist_name: str,
+        song_name: str,
+        song_id: int,
+        duration: str,
+        image_url: str,
+        skills: Optional[str],
+    ) -> None:
+        color = await self._get_song_color(song_id, game_details["api"])
+
+        assert (offset := game_details["sslOffset"])
+        timezone = game_details["timezone"]
+        embed, embed_title = self._generate_embed(
+            artist_name, song_name, duration, image_url, timezone, offset, color, skills
+        )
+
+        assert (pin_channel_id := game_details["pinChannelId"])
+        pin_channel = self.bot.get_channel(pin_channel_id)
+        assert isinstance(pin_channel, discord.TextChannel)
+        await self._unpin_old_ssl(embed_title, pin_channel)
+        await self._pin_new_ssl(itr, embed, pin_channel)
+
+    async def _get_song_color(self, song_id: int, api_url: str) -> Optional[int]:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                url=api_url,
+                headers=A_JSON_HEADERS,
+                data=A_JSON_BODY,
+            ) as r:
+                try:
+                    ajs = await r.json(content_type=None)
+                except json.JSONDecodeError:
+                    ajs = json.loads(decrypt_cbc(await r.text()))
+
+            msd_url = ajs["result"]["context"]["MusicData"]["file"]
+
+            async with session.get(url=msd_url) as r:
+                msd_enc = b""
+                while True:
+                    chunk = await r.content.read(1024)
+                    if not chunk:
                         break
-                current_time = (
-                    datetime.now(ZoneInfo(game_details["timezone"]))
-                    - game_details["sslOffset"]
-                )
-                embed_title = f"SSL #{current_time.strftime("%w").replace("0", "7")}"
+                    msd_enc += chunk
 
-                embed = discord.Embed(
-                    color=color or discord.Color.random(seed=current_time.timestamp()),
-                    title=embed_title,
-                    description=(
-                        f"**{song[game_details["sslColumns"].index("artist_name")]} - "
-                        f"{song[game_details["sslColumns"].index("song_name")]}**"
-                    ),
-                )
+        msd_js = json.loads(
+            decrypt_ecb(gzip.decompress(msd_enc))
+            .replace(rb"\/", rb"/")
+            .replace(rb"\u", rb"ddm135-u")
+        )
+        msd_data = json.loads(
+            json.dumps(msd_js, indent="\t", ensure_ascii=False)
+            .replace(r"ddm135-u", r"\u")
+            .encode()
+        )
 
-                embed.add_field(
-                    name="Duration",
-                    value=song[game_details["sslColumns"].index("duration")],
-                )
-                if "skills" in game_details["sslColumns"]:
-                    embed.add_field(
-                        name="Skill Order",
-                        value=song[game_details["sslColumns"].index("skills")],
-                    )
-                embed.set_thumbnail(url=song[game_details["sslColumns"].index("image")])
-                embed.set_footer(
-                    text=current_time.strftime("%A, %B %d, %Y").replace(" 0", " ")
-                )
+        for s in msd_data:
+            if s["code"] == song_id:
+                color = s["albumBgColor"][:-2]
+                return int(color, 16)
+        return None
 
-                pin_channel = self.bot.get_channel(game_details["pinChannelId"])
-                pins = await pin_channel.pins()
-                for pin in pins:
-                    embeds = pin.embeds
-                    if embeds and embed_title in embeds[0].title:
-                        await pin.unpin()
-                        break
+    def _generate_embed(
+        self,
+        artist_name: str,
+        song_name: str,
+        duration: str,
+        image_url: str,
+        timezone: ZoneInfo,
+        offset: timedelta,
+        color: Optional[Union[int, discord.Color]],
+        skills: Optional[str],
+    ) -> tuple[discord.Embed, str]:
+        current_time = datetime.now(timezone) - offset
+        embed_title = f"SSL #{current_time.strftime("%w").replace("0", "7")}"
 
-                msg = await pin_channel.send(embed=embed)
-                await asyncio.sleep(1)
-                await msg.pin()
-                await itr.followup.send("Pinned!")
-            except StopIteration:
-                await itr.followup.send("Song not found")
-            except AttributeError:
-                await itr.followup.send("Bot is not in server")
+        embed = discord.Embed(
+            color=color or discord.Color.random(seed=current_time.timestamp()),
+            title=embed_title,
+            description=(f"**{artist_name} - {song_name}**"),
+        )
+
+        embed.add_field(
+            name="Duration",
+            value=duration,
+        )
+        if skills:
+            embed.add_field(
+                name="Skill Order",
+                value=skills,
+            )
+
+        embed.set_thumbnail(url=image_url)
+        embed.set_footer(text=current_time.strftime("%A, %B %d, %Y").replace(" 0", " "))
+
+        return embed, embed_title
+
+    async def _unpin_old_ssl(
+        self,
+        embed_title: str,
+        pin_channel: discord.TextChannel,
+    ) -> None:
+        pins = await pin_channel.pins()
+        for pin in pins:
+            embeds = pin.embeds
+            if embeds and embeds[0].title and embed_title in embeds[0].title:
+                await pin.unpin()
+                break
+
+    async def _pin_new_ssl(
+        self,
+        itr: discord.Interaction,
+        embed: discord.Embed,
+        pin_channel: discord.TextChannel,
+    ) -> None:
+        msg = await pin_channel.send(embed=embed)
+        await asyncio.sleep(1)
+        await msg.pin()
+        await itr.followup.send("Pinned!")
 
     async def cog_app_command_error(
         self, interaction: discord.Interaction, error: app_commands.AppCommandError

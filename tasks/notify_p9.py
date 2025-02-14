@@ -42,11 +42,11 @@ class NotifyP9(commands.Cog):
             one_day = timedelta(days=1)
             current = current + one_day
             initial_msg = (
-                f"# Bonus Reminder for {gameD['name']} on "
+                f"# Bonus Reminder for {gameD["name"]} on "
                 f"<t:{int(current.timestamp())}:f>"
             )
             ping_result = (
-                sheetService.values()
+                sheetService
                 .get(
                     spreadsheetId=gameD["pingId"],
                     range=gameD["pingRange"],
@@ -64,7 +64,7 @@ class NotifyP9(commands.Cog):
             )
 
             bonus_result = (
-                sheetService.values()
+                sheetService
                 .get(
                     spreadsheetId=gameD["bonusId"],
                     range=gameD["bonusRange"],
@@ -209,8 +209,8 @@ class NotifyP9(commands.Cog):
                         if start == current:
                             msg = (
                                 f"> {birthday_members} - All Songs\n> {birthday_total}"
-                                f"% | {start.strftime('%B %d').replace(' 0', ' ')} - "
-                                f"{birthday_bonus_end.strftime('%B %d').replace(' 0', ' ')}"
+                                f"% | {start.strftime("%B %d").replace(" 0", " ")} - "
+                                f"{birthday_bonus_end.strftime("%B %d").replace(" 0", " ")}"
                                 f" | Available <t:{int(current.timestamp())}:R>\n"
                             )
                             notify_start.append(msg)
@@ -251,8 +251,8 @@ class NotifyP9(commands.Cog):
                                 msg = (
                                     f"> {album_name} - {song_name} ({song_duration})\n"
                                     f"> {song_total}% | "
-                                    f"{start.strftime('%B %d').replace(' 0', ' ')} - "
-                                    f"{song_bonus_end.strftime('%B %d').replace(' 0', ' ')}"
+                                    f"{start.strftime("%B %d").replace(" 0", " ")} - "
+                                    f"{song_bonus_end.strftime("%B %d").replace(" 0", " ")}"
                                     f" | Available <t:{int(current.timestamp())}:R>\n"
                                 )
                                 notify_start.append(msg)
@@ -272,8 +272,8 @@ class NotifyP9(commands.Cog):
                             msg = (
                                 f"> {birthday_members} - All Songs\n"
                                 f"> {birthday_total}% | "
-                                f"{birthday_bonus_start.strftime('%B %d').replace(' 0', ' ')}"
-                                f" - {end.strftime('%B %d').replace(' 0', ' ')}"
+                                f"{birthday_bonus_start.strftime("%B %d").replace(" 0", " ")}"
+                                f" - {end.strftime("%B %d").replace(" 0", " ")}"
                                 f" | Ends <t:{int((current + one_day).timestamp())}:R>\n"
                             )
                             notify_end.append(msg)
@@ -320,8 +320,8 @@ class NotifyP9(commands.Cog):
                                 msg = (
                                     f"> {album_name} - {song_name}"
                                     f" ({song_duration})\n> {song_total}% | "
-                                    f"{song_bonus_start.strftime('%B %d').replace(' 0', ' ')}"
-                                    f" - {end.strftime('%B %d').replace(' 0', ' ')}"
+                                    f"{song_bonus_start.strftime("%B %d").replace(" 0", " ")}"
+                                    f" - {end.strftime("%B %d").replace(" 0", " ")}"
                                     f" | Ends <t:{int((current + one_day).timestamp())}:R>\n"
                                 )
                                 notify_end.append(msg)
@@ -375,8 +375,8 @@ class NotifyP9(commands.Cog):
                         msg = (
                             f"> {album_name} - {song_name} ({song_duration})\n"
                             f"> {song_total}% | "
-                            f"{song_bonus_start.strftime('%B %d').replace(' 0', ' ')}"
-                            f" - {song_bonus_end.strftime('%B %d').replace(' 0', ' ')}"
+                            f"{song_bonus_start.strftime("%B %d").replace(" 0", " ")}"
+                            f" - {song_bonus_end.strftime("%B %d").replace(" 0", " ")}"
                             f" | Available <t:{int(current.timestamp())}:R>\n"
                         )
                         notify_start.append(msg)
@@ -427,8 +427,8 @@ class NotifyP9(commands.Cog):
                         msg = (
                             f"> {album_name} - {song_name} ({song_duration})\n"
                             f"> {song_total}% | "
-                            f"{song_bonus_start.strftime('%B %d').replace(' 0', ' ')}"
-                            f" - {song_bonus_end.strftime('%B %d').replace(' 0', ' ')}"
+                            f"{song_bonus_start.strftime("%B %d").replace(" 0", " ")}"
+                            f" - {song_bonus_end.strftime("%B %d").replace(" 0", " ")}"
                             f" | Ends <t:{int((current + one_day).timestamp())}:R>\n"
                         )
                         notify_end.append(msg)

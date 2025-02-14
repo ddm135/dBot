@@ -12,16 +12,16 @@ class Clock(commands.Cog):
     TIMEZONE_ITEMS = list(TIMEZONES.items())
     TIMEZONE_COUNT = len(TIMEZONES)
 
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
         self.counter = 0
         self.clock.start()
 
-    async def cog_unload(self):
+    async def cog_unload(self) -> None:
         self.clock.cancel()
 
     @tasks.loop(seconds=10)
-    async def clock(self):
+    async def clock(self) -> None:
         short_name1, timezone1 = self.TIMEZONE_ITEMS[self.counter]
         short_name2, timezone2 = self.TIMEZONE_ITEMS[self.counter + 1]
         current_time1 = self._format_current_time(timezone1, short_name1)
@@ -33,13 +33,12 @@ class Clock(commands.Cog):
         self.counter = (self.counter + self.STEP) % self.TIMEZONE_COUNT
 
     @clock.before_loop
-    async def before_loop(self):
+    async def before_loop(self) -> None:
         await self.bot.wait_until_ready()
 
-    @staticmethod
-    def _format_current_time(timezone: str, short_name: str) -> str:
-        return datetime.now(ZoneInfo(timezone)).strftime(f"%H:%M {short_name}")
+    def _format_current_time(self, timezone: ZoneInfo, short_name: str) -> str:
+        return datetime.now(timezone).strftime(f"%H:%M {short_name}")
 
 
-async def setup(bot: commands.Bot):
+async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(Clock(bot))

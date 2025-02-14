@@ -1,4 +1,5 @@
 from datetime import timedelta
+from zoneinfo import ZoneInfo
 
 from static.dTypes import GameDetails
 
@@ -10,6 +11,7 @@ OK_ROLE_OWNER = 973231666711634001
 SSRG_ROLE_MOD = 1039013749597683742
 SSRG_ROLE_SS = 439095346061377536
 
+AESKey = "WnFKN1v_gUcgmUVZnjjjGXGwk557zBSO"
 A_JSON_HEADERS = {
     "X-SuperStar-AES-IV": "PUIEOQYGNEFFFUAX",
     "X-SuperStar-Asset-Ignore": "true",
@@ -21,10 +23,10 @@ A_JSON_BODY = (
 )
 
 TIMEZONES = {
-    "KST": "Asia/Seoul",
-    "JST": "Asia/Tokyo",
-    "PHT": "Asia/Manila",
-    "ICT": "Asia/Bangkok",
+    "KST": ZoneInfo("Asia/Seoul"),
+    "JST": ZoneInfo("Asia/Tokyo"),
+    "PHT": ZoneInfo("Asia/Manila"),
+    "ICT": ZoneInfo("Asia/Bangkok"),
 }
 
 EXTENSIONS = [
