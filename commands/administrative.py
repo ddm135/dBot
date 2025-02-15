@@ -13,10 +13,14 @@ class Administrative(commands.Cog):
     async def sync(self, ctx: commands.Context) -> None:
         if ctx.channel.id == STATUS_CHANNEL:
             msg = await ctx.send("Syncing app commands...")
-            await self.bot.tree.sync()
-            self.bot.tree.clear_commands(guild=ctx.guild)
-            await self.bot.tree.sync(guild=ctx.guild)
-            await msg.edit(content="Synced!")
+            try:
+                await self.bot.tree.sync()
+                self.bot.tree.clear_commands(guild=ctx.guild)
+                await self.bot.tree.sync(guild=ctx.guild)
+                await msg.edit(content="Synced!")
+            except discord.RateLimited as e:
+                await msg.edit(content="Rate limited.")
+                print(e)
 
     @commands.command()
     @commands.is_owner()
