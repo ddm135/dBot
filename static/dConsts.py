@@ -40,6 +40,35 @@ EXTENSIONS = [
 ]
 
 GAMES: dict[str, GameDetails] = {
+    "G": {
+        "name": "SUPERSTAR GFRIEND",
+        "sslId": None,
+        "sslRange": None,
+        "sslColumns": None,
+        "sslOffset": None,
+        "pingId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
+        "pingRange": "GFRIEND!A1:D",
+        "pingWrite": "GFRIEND!C",
+        "pingColumns": ("artist_name", "emblem", "users"),
+        "bonusId": "1V1f3xp24R5AA7yDP0OAZLu5ZVPiMZKE31EkDkoIfhJY",
+        "bonusRange": "Bonuses!A2:J",
+        "bonusColumns": (
+            "song_id",
+            "bonus_amount",
+            "artist_name",
+            "member_name",
+            "album_name",
+            "song_name",
+            "duration",
+            "bonus_date",
+            "bonus_start",
+            "bonus_end",
+        ),
+        "color": 0x00ABC0,
+        "pinChannelIds": None,
+        "api": "https://ssg-api-https.dalcomsoft.net/api",
+        "timezone": TIMEZONES["KST"],
+    },
     "JYP_JP": {
         "name": "SUPERSTAR JYPNATION (JP)",
         "sslId": "1eVjwi0GudyMixnZtam8TeupRd3DQ6mheyRKp2lDA6qw",
