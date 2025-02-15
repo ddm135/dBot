@@ -31,7 +31,7 @@ class SSLeague(commands.GroupCog, name="ssl"):
     GAME_CHOICES = [
         app_commands.Choice(name=game["name"], value=key)
         for key, game in GAMES.items()
-        if game["pinChannelId"]
+        if game["pinChannelIds"]
     ]
 
     def __init__(self, bot: commands.Bot):
@@ -73,7 +73,8 @@ class SSLeague(commands.GroupCog, name="ssl"):
 
             timezone = game_details["timezone"]
             assert (offset := game_details["sslOffset"])
-            assert (pin_channel_id := game_details["pinChannelId"])
+            assert (pin_channel_ids := game_details["pinChannelIds"])
+            assert itr.guild_id
             api_url = game_details["api"]
 
             await self._handle_ssl_command(
@@ -86,7 +87,7 @@ class SSLeague(commands.GroupCog, name="ssl"):
                 song[skills_index] if skills_index else None,
                 timezone,
                 offset,
-                pin_channel_id,
+                pin_channel_ids[itr.guild_id],
                 api_url,
             )
         except StopIteration:
@@ -119,7 +120,8 @@ class SSLeague(commands.GroupCog, name="ssl"):
 
             timezone = game_details["timezone"]
             assert (offset := game_details["sslOffset"])
-            assert (pin_channel_id := game_details["pinChannelId"])
+            assert (pin_channel_ids := game_details["pinChannelIds"])
+            assert itr.guild_id
             api_url = game_details["api"]
 
             await self._handle_ssl_command(
@@ -132,7 +134,7 @@ class SSLeague(commands.GroupCog, name="ssl"):
                 song[skills_index] if skills_index else None,
                 timezone,
                 offset,
-                pin_channel_id,
+                pin_channel_ids[itr.guild_id],
                 api_url,
             )
         except StopIteration:
@@ -286,6 +288,9 @@ class SSLeague(commands.GroupCog, name="ssl"):
                 ephemeral=True,
                 silent=True,
             )
+            return
+
+        raise error
 
 
 async def setup(bot: commands.Bot):

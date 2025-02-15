@@ -136,66 +136,69 @@ class NotifyP8(commands.Cog):
                             album_bonuses.append(bonus)
 
                 birthday_total = 0
-                birthday_zip: tuple[tuple[str, ...], ...] = tuple(
-                    zip(*birthday_bonuses)
-                )
-                birthday_amounts = birthday_zip[
-                    gameD["bonusColumns"].index("bonus_amount")
-                ]
-                for amt in birthday_amounts:
-                    birthday_total += int(amt.replace("%", "").replace("\r", ""))
-                birthday_members = " + ".join(
-                    birthday_zip[gameD["bonusColumns"].index("member_name")]
-                ).replace("\r", "")
-
-                birthday_starts = []
-                for dt in birthday_zip[gameD["bonusColumns"].index("bonus_start")]:
-                    bs = datetime.strptime(dt.replace("\r", ""), "%Y-%m-%d")
-                    bs = bs.replace(tzinfo=ZoneInfo("Asia/Manila"))
-                    birthday_starts.append(bs)
-                birthday_start = max(
-                    x
-                    for x in (
-                        *birthday_starts,
-                        last_birthday_end,
-                        last_birthday_start,
+                birthday_start = None
+                birthday_end = None
+                if birthday_bonuses:
+                    birthday_zip: tuple[tuple[str, ...], ...] = tuple(
+                        zip(*birthday_bonuses)
                     )
-                    if x is not None
-                )
+                    birthday_amounts = birthday_zip[
+                        gameD["bonusColumns"].index("bonus_amount")
+                    ]
+                    for amt in birthday_amounts:
+                        birthday_total += int(amt.replace("%", "").replace("\r", ""))
+                    birthday_members = " + ".join(
+                        birthday_zip[gameD["bonusColumns"].index("member_name")]
+                    ).replace("\r", "")
 
-                birthday_ends = []
-                for dt in birthday_zip[gameD["bonusColumns"].index("bonus_end")]:
-                    be = datetime.strptime(dt.replace("\r", ""), "%Y-%m-%d")
-                    be = be.replace(tzinfo=ZoneInfo("Asia/Manila"))
-                    birthday_ends.append(be)
-                birthday_end = min(
-                    x
-                    for x in (
-                        *birthday_ends,
-                        next_birthday_end,
-                        next_birthday_start,
+                    birthday_starts = []
+                    for dt in birthday_zip[gameD["bonusColumns"].index("bonus_start")]:
+                        bs = datetime.strptime(dt.replace("\r", ""), "%Y-%m-%d")
+                        bs = bs.replace(tzinfo=ZoneInfo("Asia/Manila"))
+                        birthday_starts.append(bs)
+                    birthday_start = max(
+                        x
+                        for x in (
+                            *birthday_starts,
+                            last_birthday_end,
+                            last_birthday_start,
+                        )
+                        if x is not None
                     )
-                    if x is not None
-                )
 
-                if birthday_start == current:
-                    msg = (
-                        f"> {birthday_members} - All Songs\n> {birthday_total}"
-                        f"% | {birthday_start.strftime("%B %d").replace(" 0", " ")} - "
-                        f"{birthday_end.strftime("%B %d").replace(" 0", " ")}"
-                        f" | Available <t:{int(current.timestamp())}:R>\n"
+                    birthday_ends = []
+                    for dt in birthday_zip[gameD["bonusColumns"].index("bonus_end")]:
+                        be = datetime.strptime(dt.replace("\r", ""), "%Y-%m-%d")
+                        be = be.replace(tzinfo=ZoneInfo("Asia/Manila"))
+                        birthday_ends.append(be)
+                    birthday_end = min(
+                        x
+                        for x in (
+                            *birthday_ends,
+                            next_birthday_end,
+                            next_birthday_start,
+                        )
+                        if x is not None
                     )
-                    notify_start.append(msg)
 
-                if birthday_end == current:
-                    msg = (
-                        f"> {birthday_members} - All Songs\n"
-                        f"> {birthday_total}% | "
-                        f"{birthday_start.strftime("%B %d").replace(" 0", " ")}"
-                        f" - {birthday_end.strftime("%B %d").replace(" 0", " ")}"
-                        f" | Ends <t:{int((current + one_day).timestamp())}:R>\n"
-                    )
-                    notify_end.append(msg)
+                    if birthday_start == current:
+                        msg = (
+                            f"> {birthday_members} - All Songs\n> {birthday_total}"
+                            f"% | {birthday_start.strftime("%B %d").replace(" 0", " ")} - "
+                            f"{birthday_end.strftime("%B %d").replace(" 0", " ")}"
+                            f" | Available <t:{int(current.timestamp())}:R>\n"
+                        )
+                        notify_start.append(msg)
+
+                    if birthday_end == current:
+                        msg = (
+                            f"> {birthday_members} - All Songs\n"
+                            f"> {birthday_total}% | "
+                            f"{birthday_start.strftime("%B %d").replace(" 0", " ")}"
+                            f" - {birthday_end.strftime("%B %d").replace(" 0", " ")}"
+                            f" | Ends <t:{int((current + one_day).timestamp())}:R>\n"
+                        )
+                        notify_end.append(msg)
 
                 for bonus in album_bonuses:
                     start = datetime.strptime(

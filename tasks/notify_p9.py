@@ -57,8 +57,6 @@ class NotifyP9(commands.Cog):
             pings_unpack = list(
                 tuple(p for p in pair if p is not None) for pair in zip_longest(*pings)
             )
-            if len(pings_unpack) != len(gameD["pingColumns"]):
-                continue
             game_pinged_list = dict.fromkeys(
                 pings_unpack[gameD["pingColumns"].index("users")], False
             )
@@ -83,8 +81,6 @@ class NotifyP9(commands.Cog):
                     for ping in pings
                     if ping[gameD["pingColumns"].index("artist_name")] == artist
                 )
-                if len(artist_pings) != len(gameD["pingColumns"]):
-                    continue
                 artist_ping_list = artist_pings[
                     gameD["pingColumns"].index("users")
                 ].split(",")
