@@ -70,6 +70,7 @@ class Bonus(commands.GroupCog, name="bonus"):
             _artist_name = row[artist_name_index]
             if _artist_name.lower() == artist_name.lower():
                 users = row[users_index].split(",")
+                users.remove("") if "" in users else None
 
                 if not (
                     message_prefix := self._update_artist_ping_list(

@@ -25,7 +25,6 @@ from static.dConsts import (
     SSRG_ROLE_SS,
 )
 from static.dHelpers import decrypt_cbc, decrypt_ecb
-from static.dTypes import GameDetails
 
 
 class SSLeague(commands.GroupCog, name="ssl"):
@@ -72,20 +71,26 @@ class SSLeague(commands.GroupCog, name="ssl"):
                 and s[song_name_index].lower() == song_name.lower()
             )
 
+            timezone = game_details["timezone"]
+            assert (offset := game_details["sslOffset"])
+            assert (pin_channel_id := game_details["pinChannelId"])
+            api_url = game_details["api"]
+
             await self._handle_ssl_command(
                 itr,
-                game_details,
                 song[artist_name_index],
                 song[song_name_index],
                 int(song[song_id_index]),
                 song[duration_index],
                 song[image_url_index],
                 song[skills_index] if skills_index else None,
+                timezone,
+                offset,
+                pin_channel_id,
+                api_url,
             )
         except StopIteration:
             await itr.followup.send("Song not found")
-        except AttributeError:
-            await itr.followup.send("Bot is not in server")
 
     @app_commands.command(description="Pin SSL song of the day using Song ID")
     @app_commands.choices(game=GAME_CHOICES)
@@ -112,47 +117,57 @@ class SSLeague(commands.GroupCog, name="ssl"):
         try:
             song = next(s for s in ssl_data if s[song_id_index] == song_id)
 
+            timezone = game_details["timezone"]
+            assert (offset := game_details["sslOffset"])
+            assert (pin_channel_id := game_details["pinChannelId"])
+            api_url = game_details["api"]
+
             await self._handle_ssl_command(
                 itr,
-                game_details,
                 song[artist_name_index],
                 song[song_name_index],
                 int(song[song_id_index]),
                 song[duration_index],
                 song[image_url_index],
                 song[skills_index] if skills_index else None,
+                timezone,
+                offset,
+                pin_channel_id,
+                api_url,
             )
         except StopIteration:
             await itr.followup.send("Song not found")
-        except AttributeError:
-            await itr.followup.send("Bot is not in server")
 
     async def _handle_ssl_command(
         self,
         itr: discord.Interaction,
-        game_details: GameDetails,
         artist_name: str,
         song_name: str,
         song_id: int,
         duration: str,
         image_url: str,
         skills: Optional[str],
+        timezone: ZoneInfo,
+        offset: timedelta,
+        pin_channel_id: int,
+        api_url: str,
     ) -> None:
-        color = await self._get_song_color(song_id, game_details["api"])
+        color = await self._get_song_color(song_id, api_url)
 
-        assert (offset := game_details["sslOffset"])
-        timezone = game_details["timezone"]
         embed, embed_title = self._generate_embed(
             artist_name, song_name, duration, image_url, timezone, offset, color, skills
         )
 
-        assert (pin_channel_id := game_details["pinChannelId"])
         pin_channel = self.bot.get_channel(pin_channel_id)
-        assert isinstance(pin_channel, discord.TextChannel)
-        await self._unpin_old_ssl(embed_title, pin_channel)
-        await self._pin_new_ssl(itr, embed, pin_channel)
 
-    async def _get_song_color(self, song_id: int, api_url: str) -> Optional[int]:
+        try:
+            assert isinstance(pin_channel, discord.TextChannel)
+            await self._unpin_old_ssl(embed_title, pin_channel)
+            await self._pin_new_ssl(itr, embed, pin_channel)
+        except AssertionError:
+            await itr.followup.send("Bot is not in server")
+
+    async def _get_a_json(self, api_url: str) -> dict:
         async with aiohttp.ClientSession() as session:
             async with session.post(
                 url=api_url,
@@ -163,9 +178,12 @@ class SSLeague(commands.GroupCog, name="ssl"):
                     ajs = await r.json(content_type=None)
                 except json.JSONDecodeError:
                     ajs = json.loads(decrypt_cbc(await r.text()))
+        return ajs
 
-            msd_url = ajs["result"]["context"]["MusicData"]["file"]
-
+    async def _get_music_data(self, api_url: str) -> dict:
+        ajs = await self._get_a_json(api_url)
+        msd_url = ajs["result"]["context"]["MusicData"]["file"]
+        async with aiohttp.ClientSession() as session:
             async with session.get(url=msd_url) as r:
                 msd_enc = b""
                 while True:
@@ -179,12 +197,14 @@ class SSLeague(commands.GroupCog, name="ssl"):
             .replace(rb"\/", rb"/")
             .replace(rb"\u", rb"ddm135-u")
         )
-        msd_data = json.loads(
+        return json.loads(
             json.dumps(msd_js, indent="\t", ensure_ascii=False)
             .replace(r"ddm135-u", r"\u")
             .encode()
         )
 
+    async def _get_song_color(self, song_id: int, api_url: str) -> Optional[int]:
+        msd_data = await self._get_music_data(api_url)
         for s in msd_data:
             if s["code"] == song_id:
                 color = s["albumBgColor"][:-2]
@@ -208,7 +228,7 @@ class SSLeague(commands.GroupCog, name="ssl"):
         embed = discord.Embed(
             color=color or discord.Color.random(seed=current_time.timestamp()),
             title=embed_title,
-            description=(f"**{artist_name} - {song_name}**"),
+            description=f"**{artist_name} - {song_name}**",
         )
 
         embed.add_field(

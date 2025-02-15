@@ -1,8 +1,10 @@
+aiohttp~=3.11.11
 discord.py~=2.4.0
 google-api-python-client~=2.160.0
 google-api-python-client-stubs~=1.29.0
 google-auth-httplib2~=0.2.0
 google-auth-oauthlib~=1.2.1
+protobuf~=5.29.3
 pycryptodomex~=3.21.0
 python-dotenv~=1.0.1
 tzdata~=2025.1
