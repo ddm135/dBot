@@ -1,3 +1,4 @@
+from typing import Union
 import discord
 from discord import app_commands
 
@@ -35,7 +36,9 @@ def _get_ping_data(game_details: GameDetails) -> list[list[str]]:
     return get_ping_data(game_details["pingId"], game_details["pingRange"])
 
 
-def _get_ping_indexes(ping_columns: list[str]) -> tuple[int, int]:
+def _get_ping_indexes(
+    ping_columns: Union[list[str], tuple[str, ...]]
+) -> tuple[int, int]:
     artist_name_index = ping_columns.index("artist_name")
     users_index = ping_columns.index("users")
     return artist_name_index, users_index

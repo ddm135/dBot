@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 
 import discord
 from discord import app_commands
@@ -25,7 +25,7 @@ async def artist_autocomplete(
 async def song_autocomplete(
     itr: discord.Interaction, current: str
 ) -> list[app_commands.Choice[str]]:
-    artist_name = itr.namespace.artist_name
+    artist_name: str = itr.namespace.artist_name
     _, ssl_data, artist_name_index, song_name_index, _, _, _, _ = _ssl_preprocess(
         itr.namespace.game
     )
@@ -33,7 +33,7 @@ async def song_autocomplete(
     songs = [
         app_commands.Choice(name=s[song_name_index], value=s[song_name_index])
         for s in ssl_data
-        if artist_name == s[artist_name_index]
+        if artist_name.lower() == s[artist_name_index].lower()
         and current.lower() in s[song_name_index].lower()
     ]
 
@@ -77,7 +77,7 @@ def _get_ssl_data(game_details: GameDetails) -> list[list[str]]:
 
 
 def _get_ssl_indexes(
-    ssl_columns: list[str],
+    ssl_columns: Union[list[str], tuple[str, ...]],
 ) -> tuple[int, int, int, int, int, Optional[int]]:
     song_id_index = ssl_columns.index("song_id")
     artist_name_index = ssl_columns.index("artist_name")
