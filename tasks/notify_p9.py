@@ -206,8 +206,7 @@ class NotifyP9(commands.Cog):
                             msg = (
                                 f"> {birthday_members} - All Songs\n> {birthday_total}"
                                 f"% | {start.strftime("%B %d").replace(" 0", " ")} - "
-                                f"{birthday_bonus_end.strftime("%B %d").replace(" 0", " ")}"
-                                f" | Available <t:{int(current.timestamp())}:R>\n"
+                                f"{birthday_bonus_end.strftime("%B %d").replace(" 0", " ")}\n"
                             )
                             notify_start.append(msg)
 
@@ -248,8 +247,7 @@ class NotifyP9(commands.Cog):
                                     f"> {album_name} - {song_name} ({song_duration})\n"
                                     f"> {song_total}% | "
                                     f"{start.strftime("%B %d").replace(" 0", " ")} - "
-                                    f"{song_bonus_end.strftime("%B %d").replace(" 0", " ")}"
-                                    f" | Available <t:{int(current.timestamp())}:R>\n"
+                                    f"{song_bonus_end.strftime("%B %d").replace(" 0", " ")}\n"
                                 )
                                 notify_start.append(msg)
 
@@ -269,8 +267,7 @@ class NotifyP9(commands.Cog):
                                 f"> {birthday_members} - All Songs\n"
                                 f"> {birthday_total}% | "
                                 f"{birthday_bonus_start.strftime("%B %d").replace(" 0", " ")}"
-                                f" - {end.strftime("%B %d").replace(" 0", " ")}"
-                                f" | Ends <t:{int((current + one_day).timestamp())}:R>\n"
+                                f" - {end.strftime("%B %d").replace(" 0", " ")}\n"
                             )
                             notify_end.append(msg)
 
@@ -317,8 +314,7 @@ class NotifyP9(commands.Cog):
                                     f"> {album_name} - {song_name}"
                                     f" ({song_duration})\n> {song_total}% | "
                                     f"{song_bonus_start.strftime("%B %d").replace(" 0", " ")}"
-                                    f" - {end.strftime("%B %d").replace(" 0", " ")}"
-                                    f" | Ends <t:{int((current + one_day).timestamp())}:R>\n"
+                                    f" - {end.strftime("%B %d").replace(" 0", " ")}\n"
                                 )
                                 notify_end.append(msg)
 
@@ -371,9 +367,8 @@ class NotifyP9(commands.Cog):
                         msg = (
                             f"> {album_name} - {song_name} ({song_duration})\n"
                             f"> {song_total}% | "
-                            f"{song_bonus_start.strftime("%B %d").replace(" 0", " ")}"
-                            f" - {song_bonus_end.strftime("%B %d").replace(" 0", " ")}"
-                            f" | Available <t:{int(current.timestamp())}:R>\n"
+                            f"{song_bonus_start.strftime("%B %d").replace(" 0", " ")} -"
+                            f" {song_bonus_end.strftime("%B %d").replace(" 0", " ")}\n"
                         )
                         notify_start.append(msg)
 
@@ -423,9 +418,8 @@ class NotifyP9(commands.Cog):
                         msg = (
                             f"> {album_name} - {song_name} ({song_duration})\n"
                             f"> {song_total}% | "
-                            f"{song_bonus_start.strftime("%B %d").replace(" 0", " ")}"
-                            f" - {song_bonus_end.strftime("%B %d").replace(" 0", " ")}"
-                            f" | Ends <t:{int((current + one_day).timestamp())}:R>\n"
+                            f"{song_bonus_start.strftime("%B %d").replace(" 0", " ")} -"
+                            f" {song_bonus_end.strftime("%B %d").replace(" 0", " ")}\n"
                         )
                         notify_end.append(msg)
 
@@ -438,13 +432,20 @@ class NotifyP9(commands.Cog):
                         embed = discord.Embed(title=artist, color=gameD["color"])
                         if notify_start:
                             embed.add_field(
-                                name="Upcoming :green_circle:",
+                                name=(
+                                    f"Available <t:{int(current.timestamp())}:R> "
+                                    f":green_circle:"
+                                ),
                                 value="".join(notify_start),
                                 inline=False,
                             )
                         if notify_end:
                             embed.add_field(
-                                name="Expiring :orange_circle:",
+                                name=(
+                                    f"Ends "
+                                    f"<t:{int((current + one_day).timestamp())}:R> "
+                                    f":orange_circle:"
+                                ),
                                 value="".join(notify_end),
                                 inline=False,
                             )
