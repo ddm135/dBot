@@ -4,7 +4,7 @@ from apiclient.discovery import build  # type: ignore
 from Cryptodome.Cipher import AES
 from google.oauth2.service_account import Credentials
 
-from static.dConsts import A_JSON_HEADERS, AESKey
+from static.dConsts import A_JSON_HEADERS, AES_KEY
 
 if typing.TYPE_CHECKING:
     from googleapiclient._apis.sheets.v4 import SheetsResource  # type: ignore
@@ -19,9 +19,9 @@ sheetService: "SheetsResource.SpreadsheetsResource.ValuesResource" = (
     .values()
 )
 
-cryptServiceECB = AES.new(AESKey.encode(), AES.MODE_ECB)
+cryptServiceECB = AES.new(AES_KEY.encode(), AES.MODE_ECB)
 cryptServiceCBC = AES.new(
-    AESKey.encode(),
+    AES_KEY.encode(),
     AES.MODE_CBC,
     A_JSON_HEADERS["X-SuperStar-AES-IV"].encode(),
 )
