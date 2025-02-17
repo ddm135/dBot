@@ -3,7 +3,7 @@ from typing import Optional, Union
 import discord
 from discord import app_commands
 
-from static.dConsts import GAMES, MAX_AUTOCOMPLETE_RESULTS
+from static.dConsts import GAMES, MAX_AUTOCOMPLETE_RESULTS, TIMEZONES
 from static.dHelpers import get_sheet_data
 from static.dTypes import GameDetails
 
@@ -57,8 +57,10 @@ async def song_id_autocomplete(
     return []
 
 
-def get_ssl_data(spreadsheet_id: str, range_str: str) -> list[list[str]]:
-    return get_sheet_data(spreadsheet_id, range_str)
+def get_ssl_data(
+    spreadsheet_id: str, range_str: str, instance: Optional[str] = None
+) -> list[list[str]]:
+    return get_sheet_data(spreadsheet_id, range_str, instance)
 
 
 def _ssl_preprocess(
@@ -73,7 +75,11 @@ def _ssl_preprocess(
 def _get_ssl_data(game_details: GameDetails) -> list[list[str]]:
     assert (ssl_id := game_details["sslId"])
     assert (ssl_range := game_details["sslRange"])
-    return get_ssl_data(ssl_id, ssl_range)
+    return get_ssl_data(
+        ssl_id,
+        ssl_range,
+        "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
+    )
 
 
 def _get_ssl_indexes(

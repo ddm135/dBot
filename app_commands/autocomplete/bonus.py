@@ -1,8 +1,9 @@
-from typing import Union
+from typing import Optional, Union
+
 import discord
 from discord import app_commands
 
-from static.dConsts import GAMES, MAX_AUTOCOMPLETE_RESULTS
+from static.dConsts import GAMES, MAX_AUTOCOMPLETE_RESULTS, TIMEZONES
 from static.dHelpers import get_sheet_data
 from static.dTypes import GameDetails
 
@@ -21,8 +22,10 @@ async def artist_autocomplete(
     return artists[:MAX_AUTOCOMPLETE_RESULTS]
 
 
-def get_ping_data(spreadsheet_id: str, range_str: str) -> list[list[str]]:
-    return get_sheet_data(spreadsheet_id, range_str)
+def get_ping_data(
+    spreadsheet_id: str, range_str: str, instance: Optional[str] = None
+) -> list[list[str]]:
+    return get_sheet_data(spreadsheet_id, range_str, instance)
 
 
 def _ping_preprocess(game: str) -> tuple[GameDetails, list[list[str]], int, int]:
@@ -33,7 +36,11 @@ def _ping_preprocess(game: str) -> tuple[GameDetails, list[list[str]], int, int]
 
 
 def _get_ping_data(game_details: GameDetails) -> list[list[str]]:
-    return get_ping_data(game_details["pingId"], game_details["pingRange"])
+    return get_ping_data(
+        game_details["pingId"],
+        game_details["pingRange"],
+        "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
+    )
 
 
 def _get_ping_indexes(

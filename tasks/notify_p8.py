@@ -54,7 +54,11 @@ class NotifyP8(commands.Cog):
             if not game_pinged_list:
                 continue
 
-            bonuses = get_sheet_data(gameD["bonusId"], gameD["bonusRange"])
+            bonuses = get_sheet_data(
+                gameD["bonusId"],
+                gameD["bonusRange"],
+                "KR" if gameD["timezone"] == TIMEZONES["KST"] else None,
+            )
             artists = tuple(
                 dict.fromkeys(
                     tuple(zip(*bonuses))[gameD["bonusColumns"].index("artist_name")]
