@@ -1,5 +1,4 @@
 from datetime import datetime, time, timedelta
-from zoneinfo import ZoneInfo
 
 import discord
 from discord.ext import commands, tasks
@@ -9,11 +8,11 @@ from static.dHelpers import get_sheet_data
 
 
 class NotifyP8(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
         self.notify_p8.start()
 
-    async def cog_unload(self):
+    async def cog_unload(self) -> None:
         self.notify_p8.cancel()
 
     @tasks.loop(
@@ -23,25 +22,25 @@ class NotifyP8(commands.Cog):
                 minute=0,
                 second=0,
                 microsecond=0,
-                tzinfo=ZoneInfo("Asia/Manila"),
+                tzinfo=TIMEZONES["PHT"],
             )
         ]
     )
     async def notify_p8(self) -> None:
         one_day = timedelta(days=1)
-        current = (
-            datetime.now().replace(
-                hour=0,
-                minute=0,
-                second=0,
-                microsecond=0,
-                tzinfo=ZoneInfo("Asia/Manila"),
-            )
-            + one_day
-        )
         for gameD in GAMES.values():
-            if gameD["timezone"] not in (TIMEZONES["PHT"],):
+            if (timezone := gameD["timezone"]) not in (TIMEZONES["PHT"],):
                 continue
+            current = (
+                datetime.now().replace(
+                    hour=0,
+                    minute=0,
+                    second=0,
+                    microsecond=0,
+                    tzinfo=timezone,
+                )
+                + one_day
+            )
             initial_msg = (
                 f"# Bonus Reminder for {gameD["name"]} on "
                 f"<t:{int(current.timestamp())}:f>"
@@ -57,7 +56,7 @@ class NotifyP8(commands.Cog):
             bonuses = get_sheet_data(
                 gameD["bonusId"],
                 gameD["bonusRange"],
-                "KR" if gameD["timezone"] == TIMEZONES["KST"] else None,
+                "KR" if timezone == TIMEZONES["KST"] else None,
             )
             artists = tuple(
                 dict.fromkeys(
@@ -87,19 +86,15 @@ class NotifyP8(commands.Cog):
                 next_birthday_end = None
                 for bonus in bonuses:
                     start = datetime.strptime(
-                        bonus[gameD["bonusColumns"].index("bonus_start")].replace(
-                            "\r", ""
-                        ),
+                        bonus[gameD["bonusColumns"].index("bonus_start")],
                         "%Y-%m-%d",
                     )
-                    start = start.replace(tzinfo=ZoneInfo("Asia/Manila"))
+                    start = start.replace(tzinfo=timezone)
                     end = datetime.strptime(
-                        bonus[gameD["bonusColumns"].index("bonus_end")].replace(
-                            "\r", ""
-                        ),
+                        bonus[gameD["bonusColumns"].index("bonus_end")],
                         "%Y-%m-%d",
                     )
-                    end = end.replace(tzinfo=ZoneInfo("Asia/Manila"))
+                    end = end.replace(tzinfo=timezone)
                     if (
                         start < current
                         and artist == bonus[gameD["bonusColumns"].index("artist_name")]
@@ -158,12 +153,12 @@ class NotifyP8(commands.Cog):
 
                     for dt in birthday_zip[gameD["bonusColumns"].index("bonus_start")]:
                         bs = datetime.strptime(dt, "%Y-%m-%d")
-                        bs = bs.replace(tzinfo=ZoneInfo("Asia/Manila"))
+                        bs = bs.replace(tzinfo=timezone)
                         birthday_starts.append(bs)
 
                     for dt in birthday_zip[gameD["bonusColumns"].index("bonus_end")]:
                         be = datetime.strptime(dt, "%Y-%m-%d")
-                        be = be.replace(tzinfo=ZoneInfo("Asia/Manila"))
+                        be = be.replace(tzinfo=timezone)
                         birthday_ends.append(be)
 
                 birthday_start = max(
@@ -212,23 +207,19 @@ class NotifyP8(commands.Cog):
 
                 for bonus in album_bonuses:
                     start = datetime.strptime(
-                        bonus[gameD["bonusColumns"].index("bonus_start")].replace(
-                            "\r", ""
-                        ),
+                        bonus[gameD["bonusColumns"].index("bonus_start")],
                         "%Y-%m-%d",
                     )
-                    start = start.replace(tzinfo=ZoneInfo("Asia/Manila"))
+                    start = start.replace(tzinfo=timezone)
                     song_start = max(
                         x for x in (start, birthday_start) if x is not None
                     )
 
                     end = datetime.strptime(
-                        bonus[gameD["bonusColumns"].index("bonus_end")].replace(
-                            "\r", ""
-                        ),
+                        bonus[gameD["bonusColumns"].index("bonus_end")],
                         "%Y-%m-%d",
                     )
-                    end = end.replace(tzinfo=ZoneInfo("Asia/Manila"))
+                    end = end.replace(tzinfo=timezone)
                     song_end = min(x for x in (end, birthday_end) if x is not None)
 
                     if song_start == current or song_end == current:
@@ -290,9 +281,9 @@ class NotifyP8(commands.Cog):
                         await user.send(embed=embed, silent=True)
 
     @notify_p8.before_loop
-    async def before_notify_p8(self):
+    async def before_notify_p8(self) -> None:
         await self.bot.wait_until_ready()
 
 
-async def setup(bot: commands.Bot):
+async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(NotifyP8(bot))
