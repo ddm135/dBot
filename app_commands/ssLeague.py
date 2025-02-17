@@ -91,7 +91,7 @@ class SSLeague(commands.GroupCog, name="ssl"):
                 api_url,
             )
         except StopIteration:
-            await itr.followup.send("Song not found")
+            await itr.followup.send("Song not found.")
 
     @app_commands.command(description="Pin SSL song of the day using Song ID")
     @app_commands.choices(game=GAME_CHOICES)
@@ -138,7 +138,7 @@ class SSLeague(commands.GroupCog, name="ssl"):
                 api_url,
             )
         except StopIteration:
-            await itr.followup.send("Song not found")
+            await itr.followup.send("Song not found.")
 
     async def _handle_ssl_command(
         self,
@@ -285,7 +285,7 @@ class SSLeague(commands.GroupCog, name="ssl"):
     ):
         if isinstance(error, app_commands.errors.NoPrivateMessage):
             await interaction.response.send_message(
-                "This command cannot be used in direct messages",
+                "This command cannot be used in direct messages.",
                 ephemeral=True,
                 silent=True,
             )
@@ -293,7 +293,7 @@ class SSLeague(commands.GroupCog, name="ssl"):
 
         if isinstance(error, app_commands.errors.MissingAnyRole):
             await interaction.response.send_message(
-                "You do not have permission to use this command",
+                "You do not have permission to use this command.",
                 ephemeral=True,
                 silent=True,
             )
