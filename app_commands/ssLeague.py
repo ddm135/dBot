@@ -233,7 +233,11 @@ class SSLeague(commands.GroupCog, name="ssl"):
         embed_title = f"SSL #{current_time.strftime("%w").replace("0", "7")}"
 
         embed = discord.Embed(
-            color=color or discord.Color.random(seed=current_time.timestamp()),
+            color=(
+                color
+                if color is not None
+                else discord.Color.random(seed=current_time.timestamp())
+            ),
             title=embed_title,
             description=f"**{artist_name} - {song_name}**",
         )

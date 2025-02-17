@@ -4,6 +4,7 @@ from zoneinfo import ZoneInfo
 from static.dTypes import GameDetails
 
 TEST_GUILD = 540849436868214784
+SSRG_GUILD = 360109303199432704
 STATUS_CHANNEL = 1335315390732963952
 MAX_AUTOCOMPLETE_RESULTS = 25
 
@@ -34,6 +35,7 @@ EXTENSIONS = [
     "commands.administrative",
     "commands.memes",
     "app_commands.bonus",
+    "app_commands.role",
     "app_commands.ssLeague",
     "tasks.clock",
     "tasks.notify_p8",
@@ -103,8 +105,8 @@ GAMES: dict[str, GameDetails] = {
         ),
         "color": 0x1A6DE1,
         "pinChannelIds": {
-            540849436868214784: 1335936325685084242,
-            360109303199432704: 951350075190313010,
+            TEST_GUILD: 1335936325685084242,
+            SSRG_GUILD: 951350075190313010,
         },
         "api": "https://ss-jyp-api-real.superstarjyp.jp",
         "timezone": TIMEZONES["JST"],
@@ -142,8 +144,8 @@ GAMES: dict[str, GameDetails] = {
         ),
         "color": 0xFF9700,
         "pinChannelIds": {
-            540849436868214784: 1340868523957813348,
-            360109303199432704: 1039132737979813908,
+            TEST_GUILD: 1340868523957813348,
+            SSRG_GUILD: 1039132737979813908,
         },
         "api": "https://ss-lapone-api-real.superstarlapone.jp",
         "timezone": TIMEZONES["JST"],
@@ -206,4 +208,9 @@ GAMES: dict[str, GameDetails] = {
         "api": "https://ssph-api-https.dalcomsoft.net/",
         "timezone": TIMEZONES["PHT"],
     },
+}
+
+ROLES: dict[int, tuple[int, ...]] = {
+    TEST_GUILD: (1341036401483055147, 1341036445900472403, 1341036487084609556),
+    SSRG_GUILD: (),
 }
