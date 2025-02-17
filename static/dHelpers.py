@@ -22,7 +22,7 @@ def get_sheet_data(
     instance: Optional[str] = None,
 ) -> list[list[str]]:
     _sheetService: "SheetsResource.SpreadsheetsResource.ValuesResource" = globals()[
-        f"sheetService{instance or ''}"
+        f"sheetService{instance or ""}"
     ]
 
     result = _sheetService.get(
@@ -40,7 +40,7 @@ def update_sheet_data(
     instance: Optional[str] = None,
 ) -> None:
     _sheetService: "SheetsResource.SpreadsheetsResource.ValuesResource" = globals()[
-        f"sheetService{instance or ''}"
+        f"sheetService{instance or ""}"
     ]
 
     _sheetService.update(

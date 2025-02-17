@@ -169,7 +169,7 @@ class SSLeague(commands.GroupCog, name="ssl"):
             await self._pin_new_ssl(itr, embed, pin_channel)
             await pin_channel.edit(
                 topic=(
-                    f"[{current_time.strftime('%m.%d.%y')}] "
+                    f"[{current_time.strftime("%m.%d.%y")}] "
                     f"{artist_name} - {song_name}"
                 )
             )
