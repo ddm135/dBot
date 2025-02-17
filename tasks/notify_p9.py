@@ -1,5 +1,4 @@
 from datetime import datetime, time, timedelta
-from zoneinfo import ZoneInfo
 
 import discord
 from discord.ext import commands, tasks
@@ -23,14 +22,17 @@ class NotifyP9(commands.Cog):
                 minute=0,
                 second=0,
                 microsecond=0,
-                tzinfo=ZoneInfo("Asia/Seoul"),
+                tzinfo=TIMEZONES["KST"],
             )
         ]
     )
     async def notify_p9(self) -> None:
         one_day = timedelta(days=1)
         for gameD in GAMES.values():
-            if (timezone := gameD["timezone"]) not in (TIMEZONES["PHT"],):
+            if (timezone := gameD["timezone"]) not in (
+                TIMEZONES["KST"],
+                TIMEZONES["JST"],
+            ):
                 continue
             current = (
                 datetime.now().replace(

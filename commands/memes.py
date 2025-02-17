@@ -1,13 +1,14 @@
 from datetime import datetime
-from zoneinfo import ZoneInfo
 
 from discord.ext import commands
 
+from static.dConsts import TIMEZONES
+
 
 class Memes(commands.Cog):
-    MOTS7_RELEASE = datetime(year=2020, month=2, day=21, tzinfo=ZoneInfo("Asia/Seoul"))
-    LP_RELEASE = datetime(year=2020, month=11, day=30, tzinfo=ZoneInfo("Asia/Seoul"))
-    BAEMON_DEBUT = datetime(year=2024, month=4, day=1, tzinfo=ZoneInfo("Asia/Seoul"))
+    MOTS7_RELEASE = datetime(year=2020, month=2, day=21, tzinfo=TIMEZONES["KST"])
+    LP_RELEASE = datetime(year=2020, month=11, day=30, tzinfo=TIMEZONES["KST"])
+    BAEMON_DEBUT = datetime(year=2024, month=4, day=1, tzinfo=TIMEZONES["KST"])
 
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot

@@ -1,12 +1,11 @@
 import os
 from datetime import datetime, time
-from zoneinfo import ZoneInfo
 
 import discord
 from discord.ext import commands, tasks
 from dotenv import load_dotenv
 
-from static.dConsts import EXTENSIONS, STATUS_CHANNEL
+from static.dConsts import EXTENSIONS, STATUS_CHANNEL, TIMEZONES
 
 # pyright: reportAttributeAccessIssue=false
 # pyright: reportOptionalMemberAccess=false
@@ -43,7 +42,7 @@ bot = dBot(command_prefix="db!", intents=intents)
             minute=59,
             second=59,
             microsecond=999999,
-            tzinfo=ZoneInfo("Asia/Seoul"),
+            tzinfo=TIMEZONES["KST"],
         )
     ]
 )
