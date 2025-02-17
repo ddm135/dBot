@@ -45,14 +45,10 @@ class NotifyP9(commands.Cog):
                 f"# Bonus Reminder for {gameD["name"]} on "
                 f"<t:{int(current.timestamp())}:f>"
             )
-            ping_result = (
-                sheetService
-                .get(
-                    spreadsheetId=gameD["pingId"],
-                    range=gameD["pingRange"],
-                )
-                .execute()
-            )
+            ping_result = sheetService.get(
+                spreadsheetId=gameD["pingId"],
+                range=gameD["pingRange"],
+            ).execute()
             pings = ping_result.get("values", [])
             pings_unpack = list(
                 tuple(p for p in pair if p is not None) for pair in zip_longest(*pings)
@@ -61,14 +57,10 @@ class NotifyP9(commands.Cog):
                 pings_unpack[gameD["pingColumns"].index("users")], False
             )
 
-            bonus_result = (
-                sheetService
-                .get(
-                    spreadsheetId=gameD["bonusId"],
-                    range=gameD["bonusRange"],
-                )
-                .execute()
-            )
+            bonus_result = sheetService.get(
+                spreadsheetId=gameD["bonusId"],
+                range=gameD["bonusRange"],
+            ).execute()
             bonuses = bonus_result.get("values")
             artists = list(
                 dict.fromkeys(
@@ -155,18 +147,18 @@ class NotifyP9(commands.Cog):
                         gameD["bonusColumns"].index("bonus_amount")
                     ]
                     for amt in birthday_amounts:
-                        birthday_total += int(amt.replace("%", "").replace("\r", ""))
+                        birthday_total += int(amt.replace("%", ""))
                     birthday_members = " + ".join(
                         list(zip(*birthday_bonuses))[
                             gameD["bonusColumns"].index("member_name")
                         ]
-                    ).replace("\r", "")
+                    )
 
                     birthday_ends = []
                     for dt in list(zip(*birthday_bonuses))[
                         gameD["bonusColumns"].index("bonus_end")
                     ]:
-                        be = datetime.strptime(dt.replace("\r", ""), "%Y-%m-%d")
+                        be = datetime.strptime(dt, "%Y-%m-%d")
                         be = be.replace(tzinfo=ZoneInfo("Asia/Seoul"))
                         birthday_ends.append(be)
                     birthday_bonus_end = min(
@@ -183,7 +175,7 @@ class NotifyP9(commands.Cog):
                     for dt in list(zip(*birthday_bonuses))[
                         gameD["bonusColumns"].index("bonus_start")
                     ]:
-                        bs = datetime.strptime(dt.replace("\r", ""), "%Y-%m-%d")
+                        bs = datetime.strptime(dt, "%Y-%m-%d")
                         bs = bs.replace(tzinfo=ZoneInfo("Asia/Seoul"))
                         birthday_starts.append(bs)
                     birthday_bonus_start = max(
@@ -212,9 +204,7 @@ class NotifyP9(commands.Cog):
 
                             for bonus in album_bonuses:
                                 end = datetime.strptime(
-                                    bonus[
-                                        gameD["bonusColumns"].index("bonus_end")
-                                    ].replace("\r", ""),
+                                    bonus[gameD["bonusColumns"].index("bonus_end")],
                                     "%Y-%m-%d",
                                 )
                                 end = end.replace(tzinfo=ZoneInfo("Asia/Seoul"))
@@ -229,19 +219,19 @@ class NotifyP9(commands.Cog):
                                 )
 
                                 song_total = birthday_total + int(
-                                    bonus[gameD["bonusColumns"].index("bonus_amount")]
-                                    .replace("%", "")
-                                    .replace("\r", "")
+                                    bonus[
+                                        gameD["bonusColumns"].index("bonus_amount")
+                                    ].replace("%", "")
                                 )
                                 album_name = bonus[
                                     gameD["bonusColumns"].index("album_name")
-                                ].replace("\r", "")
+                                ]
                                 song_name = bonus[
                                     gameD["bonusColumns"].index("song_name")
-                                ].replace("\r", "")
+                                ]
                                 song_duration = bonus[
                                     gameD["bonusColumns"].index("duration")
-                                ].replace("\r", "")
+                                ]
 
                                 msg = (
                                     f"> {album_name} - {song_name} ({song_duration})\n"
@@ -296,19 +286,19 @@ class NotifyP9(commands.Cog):
                                 )
 
                                 song_total = birthday_total + int(
-                                    bonus[gameD["bonusColumns"].index("bonus_amount")]
-                                    .replace("%", "")
-                                    .replace("\r", "")
+                                    bonus[
+                                        gameD["bonusColumns"].index("bonus_amount")
+                                    ].replace("%", "")
                                 )
                                 album_name = bonus[
                                     gameD["bonusColumns"].index("album_name")
-                                ].replace("\r", "")
+                                ]
                                 song_name = bonus[
                                     gameD["bonusColumns"].index("song_name")
-                                ].replace("\r", "")
+                                ]
                                 song_duration = bonus[
                                     gameD["bonusColumns"].index("duration")
-                                ].replace("\r", "")
+                                ]
 
                                 msg = (
                                     f"> {album_name} - {song_name}"
@@ -350,19 +340,13 @@ class NotifyP9(commands.Cog):
                         )
 
                         song_total = birthday_total + int(
-                            bonus[gameD["bonusColumns"].index("bonus_amount")]
-                            .replace("%", "")
-                            .replace("\r", "")
+                            bonus[gameD["bonusColumns"].index("bonus_amount")].replace(
+                                "%", ""
+                            )
                         )
-                        album_name = bonus[
-                            gameD["bonusColumns"].index("album_name")
-                        ].replace("\r", "")
-                        song_name = bonus[
-                            gameD["bonusColumns"].index("song_name")
-                        ].replace("\r", "")
-                        song_duration = bonus[
-                            gameD["bonusColumns"].index("duration")
-                        ].replace("\r", "")
+                        album_name = bonus[gameD["bonusColumns"].index("album_name")]
+                        song_name = bonus[gameD["bonusColumns"].index("song_name")]
+                        song_duration = bonus[gameD["bonusColumns"].index("duration")]
 
                         msg = (
                             f"> {album_name} - {song_name} ({song_duration})\n"
@@ -401,19 +385,13 @@ class NotifyP9(commands.Cog):
                         )
 
                         song_total = birthday_total + int(
-                            bonus[gameD["bonusColumns"].index("bonus_amount")]
-                            .replace("%", "")
-                            .replace("\r", "")
+                            bonus[gameD["bonusColumns"].index("bonus_amount")].replace(
+                                "%", ""
+                            )
                         )
-                        album_name = bonus[
-                            gameD["bonusColumns"].index("album_name")
-                        ].replace("\r", "")
-                        song_name = bonus[
-                            gameD["bonusColumns"].index("song_name")
-                        ].replace("\r", "")
-                        song_duration = bonus[
-                            gameD["bonusColumns"].index("duration")
-                        ].replace("\r", "")
+                        album_name = bonus[gameD["bonusColumns"].index("album_name")]
+                        song_name = bonus[gameD["bonusColumns"].index("song_name")]
+                        song_duration = bonus[gameD["bonusColumns"].index("duration")]
 
                         msg = (
                             f"> {album_name} - {song_name} ({song_duration})\n"

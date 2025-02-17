@@ -145,20 +145,20 @@ class NotifyP8(commands.Cog):
                     )
                     birthday_members = " + ".join(
                         birthday_zip[gameD["bonusColumns"].index("member_name")]
-                    ).replace("\r", "")
+                    )
                     birthday_amounts = birthday_zip[
                         gameD["bonusColumns"].index("bonus_amount")
                     ]
                     for amt in birthday_amounts:
-                        birthday_total += int(amt.replace("%", "").replace("\r", ""))
+                        birthday_total += int(amt.replace("%", ""))
 
                     for dt in birthday_zip[gameD["bonusColumns"].index("bonus_start")]:
-                        bs = datetime.strptime(dt.replace("\r", ""), "%Y-%m-%d")
+                        bs = datetime.strptime(dt, "%Y-%m-%d")
                         bs = bs.replace(tzinfo=ZoneInfo("Asia/Manila"))
                         birthday_starts.append(bs)
 
                     for dt in birthday_zip[gameD["bonusColumns"].index("bonus_end")]:
-                        be = datetime.strptime(dt.replace("\r", ""), "%Y-%m-%d")
+                        be = datetime.strptime(dt, "%Y-%m-%d")
                         be = be.replace(tzinfo=ZoneInfo("Asia/Manila"))
                         birthday_ends.append(be)
 
@@ -229,19 +229,13 @@ class NotifyP8(commands.Cog):
 
                     if song_start == current or song_end == current:
                         song_total = birthday_total + int(
-                            bonus[gameD["bonusColumns"].index("bonus_amount")]
-                            .replace("%", "")
-                            .replace("\r", "")
+                            bonus[gameD["bonusColumns"].index("bonus_amount")].replace(
+                                "%", ""
+                            )
                         )
-                        album_name = bonus[
-                            gameD["bonusColumns"].index("album_name")
-                        ].replace("\r", "")
-                        song_name = bonus[
-                            gameD["bonusColumns"].index("song_name")
-                        ].replace("\r", "")
-                        song_duration = bonus[
-                            gameD["bonusColumns"].index("duration")
-                        ].replace("\r", "")
+                        album_name = bonus[gameD["bonusColumns"].index("album_name")]
+                        song_name = bonus[gameD["bonusColumns"].index("song_name")]
+                        song_duration = bonus[gameD["bonusColumns"].index("duration")]
 
                         if song_start == current:
                             msg = (

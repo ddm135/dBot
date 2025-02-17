@@ -142,7 +142,7 @@ GAMES: dict[str, GameDetails] = {
         ),
         "color": 0xFF9700,
         "pinChannelIds": {
-            540849436868214784: 1336210286289616917,
+            540849436868214784: 1340868523957813348,
             360109303199432704: 1039132737979813908,
         },
         "api": "https://ss-lapone-api-real.superstarlapone.jp",

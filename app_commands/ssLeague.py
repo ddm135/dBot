@@ -156,8 +156,9 @@ class SSLeague(commands.GroupCog, name="ssl"):
     ) -> None:
         color = await self._get_song_color(song_id, api_url)
 
+        current_time = datetime.now(timezone) - offset
         embed, embed_title = self._generate_embed(
-            artist_name, song_name, duration, image_url, timezone, offset, color, skills
+            artist_name, song_name, duration, image_url, current_time, color, skills
         )
 
         pin_channel = self.bot.get_channel(pin_channel_id)
@@ -166,6 +167,12 @@ class SSLeague(commands.GroupCog, name="ssl"):
             assert isinstance(pin_channel, discord.TextChannel)
             await self._unpin_old_ssl(embed_title, pin_channel)
             await self._pin_new_ssl(itr, embed, pin_channel)
+            await pin_channel.edit(
+                topic=(
+                    f"[{current_time.strftime('%m.%d.%y')}] "
+                    f"{artist_name} - {song_name}"
+                )
+            )
         except AssertionError:
             await itr.followup.send("Bot is not in server")
 
@@ -219,12 +226,10 @@ class SSLeague(commands.GroupCog, name="ssl"):
         song_name: str,
         duration: str,
         image_url: str,
-        timezone: ZoneInfo,
-        offset: timedelta,
+        current_time: datetime,
         color: Optional[Union[int, discord.Color]],
         skills: Optional[str],
     ) -> tuple[discord.Embed, str]:
-        current_time = datetime.now(timezone) - offset
         embed_title = f"SSL #{current_time.strftime("%w").replace("0", "7")}"
 
         embed = discord.Embed(
