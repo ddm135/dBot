@@ -19,6 +19,7 @@ class Clock(commands.Cog):
 
     async def cog_unload(self) -> None:
         self.clock.cancel()
+        await super().cog_unload()
 
     @tasks.loop(seconds=10)
     async def clock(self) -> None:

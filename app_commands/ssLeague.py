@@ -20,14 +20,14 @@ from static.dConsts import (
     A_JSON_BODY,
     A_JSON_HEADERS,
     GAMES,
-    OK_ROLE_OWNER,
     SSRG_ROLE_MOD,
     SSRG_ROLE_SS,
+    TEST_ROLE_OWNER,
 )
 from static.dHelpers import decrypt_cbc, decrypt_ecb
 
 
-class SSLeague(commands.GroupCog, name="ssl"):
+class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the day"):
     GAME_CHOICES = [
         app_commands.Choice(name=game["name"], value=key)
         for key, game in GAMES.items()
@@ -46,7 +46,7 @@ class SSLeague(commands.GroupCog, name="ssl"):
     @app_commands.choices(game=GAME_CHOICES)
     @app_commands.autocomplete(artist_name=artist_autocomplete)
     @app_commands.autocomplete(song_name=song_autocomplete)
-    @app_commands.checks.has_any_role(OK_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
+    @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     async def pin_by_name(
         self,
         itr: discord.Interaction,
@@ -101,7 +101,7 @@ class SSLeague(commands.GroupCog, name="ssl"):
     )
     @app_commands.choices(game=GAME_CHOICES)
     @app_commands.autocomplete(song_id=song_id_autocomplete)
-    @app_commands.checks.has_any_role(OK_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
+    @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     async def pin_by_id(
         self,
         itr: discord.Interaction,
@@ -292,7 +292,6 @@ class SSLeague(commands.GroupCog, name="ssl"):
             await interaction.response.send_message(
                 "This command cannot be used in direct messages.",
                 ephemeral=True,
-                silent=True,
             )
             return
 
@@ -300,7 +299,6 @@ class SSLeague(commands.GroupCog, name="ssl"):
             await interaction.response.send_message(
                 "You do not have permission to use this command.",
                 ephemeral=True,
-                silent=True,
             )
             return
 

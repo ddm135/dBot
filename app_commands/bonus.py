@@ -10,7 +10,7 @@ from static.dHelpers import update_sheet_data
 from static.dTypes import GameDetails
 
 
-class Bonus(commands.GroupCog, name="bonus"):
+class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings"):
     GAME_CHOICES = [
         app_commands.Choice(name=game["name"], value=key) for key, game in GAMES.items()
     ]

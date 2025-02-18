@@ -1,8 +1,9 @@
+from pathlib import Path
+
 import discord
 from discord import app_commands
 
 from static.dConsts import MAX_AUTOCOMPLETE_RESULTS, ROLES
-from static.dHelpers import get_sheet_data, update_sheet_data
 
 
 async def role_add_autocomplete(
@@ -12,7 +13,7 @@ async def role_add_autocomplete(
         return []
     assert isinstance(itr.user, discord.Member)
     assert (guild_id := itr.guild_id)
-    _, stored_roles = _get_role_data(itr.user.id)
+    stored_roles = _get_role_data(itr.user.id)
 
     roles = [
         app_commands.Choice(
@@ -48,22 +49,13 @@ async def role_remove_autocomplete(
     return roles[:MAX_AUTOCOMPLETE_RESULTS]
 
 
-def _get_role_data(user_id: int) -> tuple[int, list[int]]:
-    role_data = get_sheet_data(
-        "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s", "Roles!A:C"
-    )
-    user_index = 1
-    for index, user in enumerate(role_data, start=1):
-        if user[0] == str(user_id):
-            return index, [int(role) for role in user[1].split(",") if role]
-    return user_index + 1, []
+def _get_role_data(user_id: int) -> list[int]:
+    role_file = Path(f"data/role/{user_id}.txt")
+    role_str = role_file.read_text()
+    return [int(role) for role in role_str.split(",") if role_str]
 
 
-def _update_role_data(user_index: int, user_id: int, roles: list[int]) -> None:
+def _update_role_data(user_id: int, roles: list[int]) -> None:
+    role_file = Path(f"data/role/{user_id}.txt")
     role_str = ",".join(str(role) for role in roles)
-    update_sheet_data(
-        "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-        f"Roles!A{user_index}",
-        False,
-        [[str(user_id), role_str, "."]],
-    )
+    role_file.write_text(role_str)
