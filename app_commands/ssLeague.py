@@ -38,7 +38,10 @@ class SSLeague(commands.GroupCog, name="ssl"):
         self.bot = bot
 
     @app_commands.command(
-        description="Pin SSL song of the day using Artist Name and Song Name"
+        description=(
+            "Pin SSL song of the day using Artist Name and Song Name "
+            "(Requires SUPERSTAR Role)"
+        )
     )
     @app_commands.choices(game=GAME_CHOICES)
     @app_commands.autocomplete(artist_name=artist_autocomplete)
@@ -93,7 +96,9 @@ class SSLeague(commands.GroupCog, name="ssl"):
         except StopIteration:
             await itr.followup.send("Song not found.")
 
-    @app_commands.command(description="Pin SSL song of the day using Song ID")
+    @app_commands.command(
+        description="Pin SSL song of the day using Song ID (Requires SUPERSTAR Role)"
+    )
     @app_commands.choices(game=GAME_CHOICES)
     @app_commands.autocomplete(song_id=song_id_autocomplete)
     @app_commands.checks.has_any_role(OK_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)

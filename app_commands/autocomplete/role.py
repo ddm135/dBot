@@ -15,13 +15,16 @@ async def role_add_autocomplete(
     _, stored_roles = _get_role_data(itr.user.id)
 
     roles = [
-        app_commands.Choice(name=role.name, value=str(role.id))
+        app_commands.Choice(
+            name=f"{role.name} ({role.id})",
+            value=f"{role.name} | {role.id}",
+        )
         for role in itr.guild.roles
         if current.lower() in role.name.lower()
         and role.id in stored_roles
         and role.id not in [r.id for r in itr.user.roles]
     ]
-    roles.sort(key=lambda x: ROLES[guild_id].index(int(x.value)))
+    roles.sort(key=lambda x: ROLES[guild_id].index(int(x.value.rsplit(" | ", 1)[1])))
     return roles[:MAX_AUTOCOMPLETE_RESULTS]
 
 
@@ -34,11 +37,14 @@ async def role_remove_autocomplete(
     assert (guild_id := itr.guild_id)
 
     roles = [
-        app_commands.Choice(name=role.name, value=str(role.id))
+        app_commands.Choice(
+            name=f"{role.name} ({role.id})",
+            value=f"{role.name} | {role.id}",
+        )
         for role in itr.user.roles
         if current.lower() in role.name.lower() and role.id in ROLES[itr.guild_id]
     ]
-    roles.sort(key=lambda x: ROLES[guild_id].index(int(x.value)))
+    roles.sort(key=lambda x: ROLES[guild_id].index(int(x.value.rsplit(" | ", 1)[1])))
     return roles[:MAX_AUTOCOMPLETE_RESULTS]
 
 
