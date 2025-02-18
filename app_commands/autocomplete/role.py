@@ -16,7 +16,7 @@ async def role_add_autocomplete(
 
     roles = [
         app_commands.Choice(
-            name=f"{role.name} ({role.id})",
+            name=f"{role.name}",
             value=f"{role.name} | {role.id}",
         )
         for role in itr.guild.roles
@@ -38,7 +38,7 @@ async def role_remove_autocomplete(
 
     roles = [
         app_commands.Choice(
-            name=f"{role.name} ({role.id})",
+            name=f"{role.name}",
             value=f"{role.name} | {role.id}",
         )
         for role in itr.user.roles
