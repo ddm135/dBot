@@ -12,7 +12,6 @@ async def role_add_autocomplete(
     if not itr.guild:
         return []
     assert isinstance(itr.user, discord.Member)
-    assert (guild_id := itr.guild_id)
     stored_roles = _get_role_data(itr.user.id)
 
     roles = [
@@ -25,7 +24,11 @@ async def role_add_autocomplete(
         and role.id in stored_roles
         and role.id not in [r.id for r in itr.user.roles]
     ]
-    roles.sort(key=lambda x: ROLES[guild_id].index(int(x.value.rsplit(" | ", 1)[1])))
+    roles.sort(
+        key=lambda x: ROLES[itr.guild.id].index(  # type: ignore
+            int(x.value.rsplit(" | ", 1)[1]),
+        )
+    )
     return roles[:MAX_AUTOCOMPLETE_RESULTS]
 
 
@@ -35,7 +38,6 @@ async def role_remove_autocomplete(
     if not itr.guild:
         return []
     assert isinstance(itr.user, discord.Member)
-    assert (guild_id := itr.guild_id)
 
     roles = [
         app_commands.Choice(
@@ -43,9 +45,13 @@ async def role_remove_autocomplete(
             value=f"{role.name} | {role.id}",
         )
         for role in itr.user.roles
-        if current.lower() in role.name.lower() and role.id in ROLES[itr.guild_id]
+        if current.lower() in role.name.lower() and role.id in ROLES[itr.guild.id]
     ]
-    roles.sort(key=lambda x: ROLES[guild_id].index(int(x.value.rsplit(" | ", 1)[1])))
+    roles.sort(
+        key=lambda x: ROLES[itr.guild.id].index(  # type: ignore
+            int(x.value.rsplit(" | ", 1)[1]),
+        )
+    )
     return roles[:MAX_AUTOCOMPLETE_RESULTS]
 
 

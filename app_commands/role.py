@@ -12,6 +12,7 @@ from app_commands.autocomplete.role import (
 )
 from static.dConsts import (
     ROLE_STORAGE_CHANNEL,
+    ROLES,
     SSRG_ROLE_MOD,
     SSRG_ROLE_SS,
     TEST_ROLE_OWNER,
@@ -63,21 +64,25 @@ class Role(
                 itr.guild.roles, name=role_args[0], id=int(role_args[1])
             )
             if not _role:
-                await itr.followup.send("Role not found.", silent=True)
+                await itr.followup.send("Role not found.")
+                return
+            if _role in itr.user.roles:
+                await itr.followup.send("Role is not in storage.")
                 return
             if _role.id not in stored_roles:
-                if _role in itr.user.roles:
-                    await itr.followup.send("Role is not in storage.", silent=True)
-                    return
-                await itr.followup.send("You do not own this role.", silent=True)
+                await itr.followup.send("You do not own this role.")
                 return
             stored_roles.remove(_role.id)
             _update_role_data(itr.user.id, stored_roles)
             self.LOCKED.touch()
             await itr.user.add_roles(_role)
-            await itr.followup.send(f"Added <@&{_role.id}>!", silent=True)
+            await itr.followup.send(
+                f"Added <@&{_role.id}>!",
+                allowed_mentions=discord.AllowedMentions.none(),
+                silent=True,
+            )
         except (ValueError, IndexError):
-            await itr.followup.send("Role not found.", silent=True)
+            await itr.followup.send("Role not found.")
 
     @app_commands.command(
         name="remove",
@@ -98,18 +103,25 @@ class Role(
                 itr.guild.roles, name=role_args[0], id=int(role_args[1])
             )
             if not _role:
-                await itr.followup.send("Role not found.", silent=True)
+                await itr.followup.send("Role not found.")
+                return
+            if _role.id not in ROLES[itr.guild.id]:
+                await itr.followup.send("This role cannot be removed.")
                 return
             if _role not in itr.user.roles:
-                await itr.followup.send("You do not own this role.", silent=True)
+                await itr.followup.send("You do not own this role.")
                 return
             stored_roles.append(_role.id)
             _update_role_data(itr.user.id, stored_roles)
             self.LOCKED.touch()
             await itr.user.remove_roles(_role)
-            await itr.followup.send(f"Removed <@&{_role.id}>!", silent=True)
+            await itr.followup.send(
+                f"Removed <@&{_role.id}>!",
+                allowed_mentions=discord.AllowedMentions.none(),
+                silent=True,
+            )
         except (ValueError, IndexError):
-            await itr.followup.send("Role not found.", silent=True)
+            await itr.followup.send("Role not found.")
 
     def _download_role_data(self) -> None:
         print("Downloading role data...")
