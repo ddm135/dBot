@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 import discord
@@ -24,6 +25,7 @@ class Role(
     commands.GroupCog, name="role", description="Add/Remove Group Roles you own"
 ):
     LOCKED = Path("data/role/locked")
+    ROLE_LOGGER = logging.getLogger(__name__)
 
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
@@ -124,7 +126,7 @@ class Role(
             await itr.followup.send("Role not found.")
 
     def _download_role_data(self) -> None:
-        print("Downloading role data...")
+        self.ROLE_LOGGER.info("Downloading role data...")
         role_data = get_sheet_data(
             "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s", "Roles!A:C"
         )
@@ -137,7 +139,7 @@ class Role(
         if not self.LOCKED.exists():
             return
 
-        print("Uploading role data...")
+        self.ROLE_LOGGER.info("Uploading role data...")
         data_path = Path("data/role")
         data_files = data_path.glob("*.txt")
         role_data = []
