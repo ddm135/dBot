@@ -1,3 +1,4 @@
+import logging
 import os
 from datetime import datetime, time
 
@@ -51,4 +52,7 @@ async def restart_clock(ctx: commands.Context):
     await ctx.send("Clock restarted!")
 
 
-bot.run(os.getenv("DISCORD_TOKEN"))  # type: ignore[arg-type]
+bot.run(
+    os.getenv("DISCORD_TOKEN"),  # type: ignore[arg-type]
+    root_logger=True,
+)
