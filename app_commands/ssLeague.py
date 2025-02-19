@@ -302,6 +302,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             )
             return
 
+        await super().cog_app_command_error(interaction, error)
         raise error
 
 

@@ -15,7 +15,10 @@ class Clock(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
         self.counter = 0
+
+    async def cog_load(self) -> None:
         self.clock.start()
+        await super().cog_load()
 
     async def cog_unload(self) -> None:
         self.clock.cancel()

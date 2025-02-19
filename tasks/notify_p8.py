@@ -10,10 +10,14 @@ from static.dHelpers import get_sheet_data
 class NotifyP8(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
+
+    async def cog_load(self) -> None:
         self.notify_p8.start()
+        await super().cog_load()
 
     async def cog_unload(self) -> None:
         self.notify_p8.cancel()
+        await super().cog_unload()
 
     @tasks.loop(
         time=[
