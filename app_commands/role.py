@@ -66,14 +66,11 @@ class Role(
                 itr.guild.roles, name=role_args[0], id=int(role_args[1])
             )
             if not _role:
-                await itr.followup.send("Role not found.")
-                return
+                return await itr.followup.send("Role not found.")
             if _role in itr.user.roles:
-                await itr.followup.send("Role is not in storage.")
-                return
+                return await itr.followup.send("Role is not in storage.")
             if _role.id not in stored_roles:
-                await itr.followup.send("You do not own this role.")
-                return
+                return await itr.followup.send("You do not own this role.")
             stored_roles.remove(_role.id)
             _update_role_data(itr.user.id, stored_roles)
             self.LOCKED.touch()
@@ -105,14 +102,11 @@ class Role(
                 itr.guild.roles, name=role_args[0], id=int(role_args[1])
             )
             if not _role:
-                await itr.followup.send("Role not found.")
-                return
+                return await itr.followup.send("Role not found.")
             if _role.id not in ROLES[itr.guild.id]:
-                await itr.followup.send("This role cannot be removed.")
-                return
+                return await itr.followup.send("This role cannot be removed.")
             if _role not in itr.user.roles:
-                await itr.followup.send("You do not own this role.")
-                return
+                return await itr.followup.send("You do not own this role.")
             stored_roles.append(_role.id)
             _update_role_data(itr.user.id, stored_roles)
             self.LOCKED.touch()
@@ -156,26 +150,23 @@ class Role(
         self, interaction: discord.Interaction, error: app_commands.AppCommandError
     ):
         if isinstance(error, app_commands.errors.NoPrivateMessage):
-            await interaction.response.send_message(
+            return await interaction.response.send_message(
                 "This command cannot be used in direct messages.",
                 ephemeral=True,
             )
-            return
 
         if isinstance(error, app_commands.errors.MissingAnyRole):
-            await interaction.response.send_message(
+            return await interaction.response.send_message(
                 "You do not have permission to use this command.",
                 ephemeral=True,
             )
-            return
 
         if isinstance(error, app_commands.errors.CheckFailure):
             assert (guild_id := interaction.guild_id)
-            await interaction.response.send_message(
+            return await interaction.response.send_message(
                 f"wrong channel bruv <#{ROLE_STORAGE_CHANNEL[guild_id]}>",
                 ephemeral=True,
             )
-            return
 
         await super().cog_app_command_error(interaction, error)
         raise error

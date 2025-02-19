@@ -289,18 +289,16 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         self, interaction: discord.Interaction, error: app_commands.AppCommandError
     ):
         if isinstance(error, app_commands.errors.NoPrivateMessage):
-            await interaction.response.send_message(
+            return await interaction.response.send_message(
                 "This command cannot be used in direct messages.",
                 ephemeral=True,
             )
-            return
 
         if isinstance(error, app_commands.errors.MissingAnyRole):
-            await interaction.response.send_message(
+            return await interaction.response.send_message(
                 "You do not have permission to use this command.",
                 ephemeral=True,
             )
-            return
 
         await super().cog_app_command_error(interaction, error)
         raise error

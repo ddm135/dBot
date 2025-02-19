@@ -77,14 +77,14 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                         operation, user_id, users
                     )
                 ):
-                    await itr.followup.send("Internal error.")
-                    return
+                    return await itr.followup.send("Internal error.")
 
                 if not message_prefix.startswith("Already"):
                     self._update_ping_data(game_details, users, i)
 
-                await itr.followup.send(f"{message_prefix} {_artist_name} ping list!")
-                return
+                return await itr.followup.send(
+                    f"{message_prefix} {_artist_name} ping list!"
+                )
 
         await itr.followup.send(
             f"{artist_name} is not a valid artist for {game_details["name"]}"

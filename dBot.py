@@ -25,6 +25,9 @@ class dBot(commands.Bot):
             f"Successful start at {datetime.now()}"
         )
 
+    async def on_message(self, message: discord.Message) -> None:
+        await super().on_message(message)
+
     async def close(self):
         await self.get_channel(STATUS_CHANNEL).send("Shutting down...")
         await super().close()
