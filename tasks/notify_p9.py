@@ -1,9 +1,9 @@
-from datetime import datetime, time, timedelta
+from datetime import datetime, time
 
 import discord
 from discord.ext import commands, tasks
 
-from static.dConsts import GAMES, TIMEZONES
+from static.dConsts import GAMES, ONE_DAY, THREE_DAYS, TIMEZONES
 from static.dHelpers import get_sheet_data
 
 
@@ -31,14 +31,13 @@ class NotifyP9(commands.Cog):
         ]
     )
     async def notify_p9(self) -> None:
-        one_day = timedelta(days=1)
-        for gameD in GAMES.values():
-            if (timezone := gameD["timezone"]) not in (
+        for game_details in GAMES.values():
+            if (timezone := game_details["timezone"]) not in (
                 TIMEZONES["KST"],
                 TIMEZONES["JST"],
             ):
                 continue
-            current = (
+            current_date = (
                 datetime.now().replace(
                     hour=0,
                     minute=0,
@@ -46,43 +45,48 @@ class NotifyP9(commands.Cog):
                     microsecond=0,
                     tzinfo=timezone,
                 )
-                + one_day
+                + ONE_DAY
             )
             initial_msg = (
-                f"# Bonus Reminder for {gameD["name"]} on "
-                f"<t:{int(current.timestamp())}:f>"
+                f"# Bonus Reminder for {game_details["name"]} on "
+                f"<t:{int(current_date.timestamp())}:f>"
             )
-            pings = get_sheet_data(gameD["pingId"], gameD["pingRange"])
-            game_pinged_list = dict.fromkeys(
+            ping_data = get_sheet_data(
+                game_details["pingId"], game_details["pingRange"]
+            )
+            game_ping_dict = dict.fromkeys(
                 (
                     user
-                    for users in tuple(zip(*pings))[gameD["pingColumns"].index("users")]
+                    for users in tuple(zip(*ping_data))[
+                        game_details["pingColumns"].index("users")
+                    ]
                     for user in users.split(",")
                 ),
                 False,
             )
-            game_pinged_list.pop("", None)
-            if not game_pinged_list:
+            game_ping_dict.pop("", None)
+            if not game_ping_dict:
                 continue
 
-            bonuses = get_sheet_data(
-                gameD["bonusId"],
-                gameD["bonusRange"],
+            artist_name_index = game_details["bonusColumns"].index("artist_name")
+            member_name_index = game_details["bonusColumns"].index("member_name")
+            bonus_date_index = game_details["bonusColumns"].index("bonus_date")
+            bonus_amount_index = game_details["bonusColumns"].index("bonus_amount")
+
+            bonus_data = get_sheet_data(
+                game_details["bonusId"],
+                game_details["bonusRange"],
                 "KR" if timezone == TIMEZONES["KST"] else None,
             )
-            artists = tuple(
-                dict.fromkeys(
-                    tuple(zip(*bonuses))[gameD["bonusColumns"].index("artist_name")]
-                )
-            )
+            artists = tuple(dict.fromkeys(tuple(zip(*bonus_data))[artist_name_index]))
             for artist in artists:
                 artist_pings = next(
                     ping
-                    for ping in pings
-                    if ping[gameD["pingColumns"].index("artist_name")] == artist
+                    for ping in ping_data
+                    if ping[game_details["pingColumns"].index("artist_name")] == artist
                 )
                 artist_ping_list = artist_pings[
-                    gameD["pingColumns"].index("users")
+                    game_details["pingColumns"].index("users")
                 ].split(",")
                 artist_ping_list.remove("") if "" in artist_ping_list else None
                 if not artist_ping_list:
@@ -96,52 +100,49 @@ class NotifyP9(commands.Cog):
                 last_birthday_end = None
                 next_birthday_start = None
                 next_birthday_end = None
-                for bonus in bonuses:
-                    start = datetime.strptime(
-                        bonus[gameD["bonusColumns"].index("bonus_start")],
+                for bonus in bonus_data:
+                    bonus_date = datetime.strptime(
+                        bonus[bonus_date_index],
                         "%Y-%m-%d",
-                    )
-                    start = start.replace(tzinfo=timezone)
-                    end = datetime.strptime(
-                        bonus[gameD["bonusColumns"].index("bonus_end")],
-                        "%Y-%m-%d",
-                    )
-                    end = end.replace(tzinfo=timezone)
-                    if (
-                        start < current
-                        and artist == bonus[gameD["bonusColumns"].index("artist_name")]
-                        and bonus[gameD["bonusColumns"].index("member_name")]
-                    ):
-                        last_birthday_start = start
+                    ).replace(tzinfo=timezone)
+                    start_date = bonus_date - THREE_DAYS
+                    end_date = bonus_date + THREE_DAYS
 
                     if (
-                        end < current
-                        and artist == bonus[gameD["bonusColumns"].index("artist_name")]
-                        and bonus[gameD["bonusColumns"].index("member_name")]
+                        start_date < current_date
+                        and artist == bonus[artist_name_index]
+                        and bonus[member_name_index]
                     ):
-                        last_birthday_end = end + one_day
+                        last_birthday_start = start_date
+
+                    if (
+                        end_date < current_date
+                        and artist == bonus[artist_name_index]
+                        and bonus[member_name_index]
+                    ):
+                        last_birthday_end = end_date + ONE_DAY
 
                     if (
                         not next_birthday_start
-                        and current < start
-                        and artist == bonus[gameD["bonusColumns"].index("artist_name")]
-                        and bonus[gameD["bonusColumns"].index("member_name")]
+                        and current_date < start_date
+                        and artist == bonus[artist_name_index]
+                        and bonus[member_name_index]
                     ):
-                        next_birthday_start = start - one_day
+                        next_birthday_start = start_date - ONE_DAY
 
                     if (
                         not next_birthday_end
-                        and current < end
-                        and artist == bonus[gameD["bonusColumns"].index("artist_name")]
-                        and bonus[gameD["bonusColumns"].index("member_name")]
+                        and current_date < end_date
+                        and artist == bonus[artist_name_index]
+                        and bonus[member_name_index]
                     ):
-                        next_birthday_end = end
+                        next_birthday_end = end_date
 
                     if (
-                        start <= current <= end
-                        and artist == bonus[gameD["bonusColumns"].index("artist_name")]
+                        start_date <= current_date <= end_date
+                        and artist == bonus[artist_name_index]
                     ):
-                        if bonus[gameD["bonusColumns"].index("member_name")]:
+                        if bonus[member_name_index]:
                             birthday_bonuses.append(bonus)
                         else:
                             album_bonuses.append(bonus)
@@ -154,24 +155,15 @@ class NotifyP9(commands.Cog):
                     birthday_zip: tuple[tuple[str, ...], ...] = tuple(
                         zip(*birthday_bonuses)
                     )
-                    birthday_members = " + ".join(
-                        birthday_zip[gameD["bonusColumns"].index("member_name")]
-                    )
-                    birthday_amounts = birthday_zip[
-                        gameD["bonusColumns"].index("bonus_amount")
-                    ]
+                    birthday_members = " + ".join(birthday_zip[member_name_index])
+                    birthday_amounts = birthday_zip[bonus_amount_index]
                     for amt in birthday_amounts:
                         birthday_total += int(amt.replace("%", ""))
 
-                    for dt in birthday_zip[gameD["bonusColumns"].index("bonus_start")]:
-                        bs = datetime.strptime(dt, "%Y-%m-%d")
-                        bs = bs.replace(tzinfo=timezone)
-                        birthday_starts.append(bs)
-
-                    for dt in birthday_zip[gameD["bonusColumns"].index("bonus_end")]:
-                        be = datetime.strptime(dt, "%Y-%m-%d")
-                        be = be.replace(tzinfo=timezone)
-                        birthday_ends.append(be)
+                    for dt in birthday_zip[bonus_date_index]:
+                        bd = datetime.strptime(dt, "%Y-%m-%d").replace(tzinfo=timezone)
+                        birthday_starts.append(bd - THREE_DAYS)
+                        birthday_ends.append(bd + THREE_DAYS)
 
                 birthday_start = max(
                     (
@@ -200,79 +192,78 @@ class NotifyP9(commands.Cog):
                 )
 
                 if birthday_start and birthday_end and birthday_bonuses:
-                    if birthday_start == current:
+                    if birthday_start == current_date:
                         msg = (
                             f"> {birthday_members} - All Songs\n> {birthday_total}% "
-                            f"| {birthday_start.strftime("%B %d").replace(" 0", " ")}"
-                            f" - {birthday_end.strftime("%B %d").replace(" 0", " ")}\n"
+                            f"| {birthday_start.strftime("%B %d").replace(" 0", " ")} "
+                            f"- {birthday_end.strftime("%B %d").replace(" 0", " ")}\n"
                         )
                         notify_start.append(msg)
 
-                    if birthday_end == current:
+                    if birthday_end == current_date:
                         msg = (
-                            f"> {birthday_members} - All Songs\n"
-                            f"> {birthday_total}% | "
-                            f"{birthday_start.strftime("%B %d").replace(" 0", " ")}"
-                            f" - {birthday_end.strftime("%B %d").replace(" 0", " ")}\n"
+                            f"> {birthday_members} - All Songs\n> {birthday_total}% "
+                            f"| {birthday_start.strftime("%B %d").replace(" 0", " ")} "
+                            f"- {birthday_end.strftime("%B %d").replace(" 0", " ")}\n"
                         )
                         notify_end.append(msg)
 
                 for bonus in album_bonuses:
-                    start = datetime.strptime(
-                        bonus[gameD["bonusColumns"].index("bonus_start")],
+                    bonus_date = datetime.strptime(
+                        bonus[bonus_date_index],
                         "%Y-%m-%d",
-                    )
-                    start = start.replace(tzinfo=timezone)
+                    ).replace(tzinfo=timezone)
+                    start_date = bonus_date - THREE_DAYS
+                    end_date = bonus_date + THREE_DAYS
+
                     song_start = max(
-                        x for x in (start, birthday_start) if x is not None
+                        x for x in (start_date, birthday_start) if x is not None
                     )
+                    song_end = min(x for x in (end_date, birthday_end) if x is not None)
 
-                    end = datetime.strptime(
-                        bonus[gameD["bonusColumns"].index("bonus_end")],
-                        "%Y-%m-%d",
-                    )
-                    end = end.replace(tzinfo=timezone)
-                    song_end = min(x for x in (end, birthday_end) if x is not None)
-
-                    if song_start == current or song_end == current:
+                    if song_start == current_date or song_end == current_date:
                         song_total = birthday_total + int(
-                            bonus[gameD["bonusColumns"].index("bonus_amount")].replace(
-                                "%", ""
-                            )
+                            bonus[bonus_amount_index].replace("%", "")
                         )
-                        album_name = bonus[gameD["bonusColumns"].index("album_name")]
-                        song_name = bonus[gameD["bonusColumns"].index("song_name")]
-                        song_duration = bonus[gameD["bonusColumns"].index("duration")]
+                        album_name = bonus[
+                            game_details["bonusColumns"].index("album_name")
+                        ]
+                        song_name = bonus[
+                            game_details["bonusColumns"].index("song_name")
+                        ]
+                        song_duration = bonus[
+                            game_details["bonusColumns"].index("duration")
+                        ]
 
-                        if song_start == current:
+                        if song_start == current_date:
                             msg = (
                                 f"> {album_name} - {song_name} ({song_duration})\n"
                                 f"> {song_total}% | "
-                                f"{song_start.strftime("%B %d").replace(" 0", " ")}"
-                                f" - {song_end.strftime("%B %d").replace(" 0", " ")}\n"
+                                f"{song_start.strftime("%B %d").replace(" 0", " ")} "
+                                f"- {song_end.strftime("%B %d").replace(" 0", " ")}\n"
                             )
                             notify_start.append(msg)
-                        elif song_end == current:
+                        elif song_end == current_date:
                             msg = (
                                 f"> {album_name} - {song_name} ({song_duration})\n"
                                 f"> {song_total}% | "
-                                f"{song_start.strftime("%B %d").replace(" 0", " ")}"
-                                f" - {song_end.strftime("%B %d").replace(" 0", " ")}\n"
+                                f"{song_start.strftime("%B %d").replace(" 0", " ")} "
+                                f"- {song_end.strftime("%B %d").replace(" 0", " ")}\n"
                             )
                             notify_end.append(msg)
 
                 if notify_start or notify_end:
                     for user_id in artist_ping_list:
                         user = await self.bot.fetch_user(int(user_id))
-                        if not game_pinged_list[user_id]:
+                        if not game_ping_dict[user_id]:
                             await user.send(f"{initial_msg}")
-                            game_pinged_list[user_id] = True
-                        embed = discord.Embed(title=artist, color=gameD["color"])
+                            game_ping_dict[user_id] = True
+                        embed = discord.Embed(title=artist, color=game_details["color"])
                         if notify_start:
                             embed.add_field(
                                 name=(
-                                    f"Available <t:{int(current.timestamp())}:R> "
-                                    f":green_circle:"
+                                    f"Available <t:{int(current_date.timestamp())}:R>"
+                                    f" :green_circle:"
                                 ),
                                 value="".join(notify_start),
                                 inline=False,
@@ -281,16 +272,19 @@ class NotifyP9(commands.Cog):
                             embed.add_field(
                                 name=(
                                     f"Ends "
-                                    f"<t:{int((current + one_day).timestamp())}:R> "
-                                    f":orange_circle:"
+                                    f"<t:{int((current_date + ONE_DAY).timestamp())}:R>"
+                                    f" :orange_circle:"
                                 ),
                                 value="".join(notify_end),
                                 inline=False,
                             )
                         embed.set_thumbnail(
-                            url=artist_pings[gameD["pingColumns"].index("emblem")]
+                            url=artist_pings[
+                                game_details["pingColumns"].index("emblem")
+                            ]
                         )
                         await user.send(embed=embed, silent=True)
+
         # for gameD in GAMES.values():
         #     if gameD["timezone"] not in (TIMEZONES["KST"], TIMEZONES["JST"]):
         #         continue
