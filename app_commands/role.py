@@ -54,11 +54,10 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
     @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     @app_commands.check(in_channels)
     async def role_add(self, itr: discord.Interaction, role: str) -> None:
-        if not itr.guild:
-            raise app_commands.errors.NoPrivateMessage
         await itr.response.defer()
         user_id = itr.user.id
         stored_roles = _get_role_data(user_id)
+        assert itr.guild
         assert isinstance(itr.user, discord.Member)
         role_args = role.rsplit(" | ", 1)
         user_roles = itr.user.roles
@@ -94,11 +93,10 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
     @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     @app_commands.check(in_channels)
     async def role_remove(self, itr: discord.Interaction, role: str) -> None:
-        if not itr.guild:
-            raise app_commands.errors.NoPrivateMessage
         await itr.response.defer()
         user_id = itr.user.id
         stored_roles = _get_role_data(user_id)
+        assert itr.guild
         assert isinstance(itr.user, discord.Member)
         role_args = role.rsplit(" | ", 1)
         user_roles = itr.user.roles
@@ -138,11 +136,10 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
     @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     @app_commands.check(in_channels)
     async def role_set(self, itr: discord.Interaction, role: str) -> None:
-        if not itr.guild:
-            raise app_commands.errors.NoPrivateMessage
         await itr.response.defer()
         user_id = itr.user.id
         stored_roles = _get_role_data(user_id)
+        assert itr.guild
         assert isinstance(itr.user, discord.Member)
         role_args = role.rsplit(" | ", 1)
         user_roles = itr.user.roles
@@ -206,11 +203,10 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
     )
     @app_commands.check(in_channels)
     async def role_inventory(self, itr: discord.Interaction) -> None:
-        if not itr.guild:
-            raise app_commands.errors.NoPrivateMessage
         await itr.response.defer()
         user_id = itr.user.id
         stored_roles = _get_role_data(user_id)
+        assert itr.guild
         assert isinstance(itr.user, discord.Member)
         group_roles = ROLES[itr.guild.id]
         sorted_stored_roles = sorted(
@@ -262,7 +258,10 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
     async def cog_app_command_error(
         self, interaction: discord.Interaction, error: app_commands.AppCommandError
     ):
-        if isinstance(error, app_commands.errors.NoPrivateMessage):
+        if (
+            isinstance(error, app_commands.errors.NoPrivateMessage)
+            or not interaction.guild
+        ):
             return await interaction.response.send_message(
                 "This command cannot be used in direct messages.",
                 ephemeral=True,
