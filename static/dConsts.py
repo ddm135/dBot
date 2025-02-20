@@ -32,8 +32,8 @@ A_JSON_BODY = (
 TIMEZONES = {
     "KST": ZoneInfo("Asia/Seoul"),
     "JST": ZoneInfo("Asia/Tokyo"),
+    "CST": ZoneInfo("Asia/Taipei"),
     "PHT": ZoneInfo("Asia/Manila"),
-    "ICT": ZoneInfo("Asia/Bangkok"),
 }
 
 EXTENSIONS = [
