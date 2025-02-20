@@ -265,6 +265,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
             return await interaction.response.send_message(
                 "This command cannot be used in direct messages.",
                 ephemeral=True,
+                silent=True,
             )
 
         if isinstance(error, app_commands.errors.MissingAnyRole):
