@@ -22,9 +22,7 @@ from static.dConsts import (
 from static.dHelpers import get_sheet_data, update_sheet_data
 
 
-class Role(
-    commands.GroupCog, name="role", description="Add/Remove Group Roles you own"
-):
+class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
     LOCKED = Path("data/role/locked")
     ROLE_LOGGER = logging.getLogger(__name__)
 
@@ -50,16 +48,17 @@ class Role(
 
     @app_commands.command(
         name="add",
-        description="Add a Group Role you own in storage (Requires SUPERSTAR Role)",
+        description="Apply a Group Role you own in inventory (Requires SUPERSTAR Role)",
     )
     @app_commands.autocomplete(role=role_add_autocomplete)
     @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     @app_commands.check(in_channels)
     async def role_add(self, itr: discord.Interaction, role: str) -> None:
+        if not itr.guild:
+            raise app_commands.errors.NoPrivateMessage
         await itr.response.defer()
         user_id = itr.user.id
         stored_roles = _get_role_data(user_id)
-        assert itr.guild
         assert isinstance(itr.user, discord.Member)
         role_args = role.rsplit(" | ", 1)
         user_roles = itr.user.roles
@@ -72,7 +71,7 @@ class Role(
             if not target_role:
                 return await itr.followup.send("Role not found.")
             if target_role in user_roles:
-                return await itr.followup.send("Role is not in storage.")
+                return await itr.followup.send("Role is already applied.")
             if target_role.id not in stored_roles:
                 return await itr.followup.send("You do not own this role.")
             stored_roles.remove(target_role.id)
@@ -89,16 +88,17 @@ class Role(
 
     @app_commands.command(
         name="remove",
-        description="Move a Group Role you own to storage (Requires SUPERSTAR Role)",
+        description="Move a Group Role you own to inventory (Requires SUPERSTAR Role)",
     )
     @app_commands.autocomplete(role=role_remove_autocomplete)
     @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     @app_commands.check(in_channels)
     async def role_remove(self, itr: discord.Interaction, role: str) -> None:
+        if not itr.guild:
+            raise app_commands.errors.NoPrivateMessage
         await itr.response.defer()
         user_id = itr.user.id
         stored_roles = _get_role_data(user_id)
-        assert itr.guild
         assert isinstance(itr.user, discord.Member)
         role_args = role.rsplit(" | ", 1)
         user_roles = itr.user.roles
@@ -130,7 +130,7 @@ class Role(
     @app_commands.command(
         name="set",
         description=(
-            "Remove higher Group Roles then add lower Group Roles and itself "
+            "Remove higher Group Roles then apply itself and lower Group Roles "
             "(Requires SUPERSTAR Role)"
         ),
     )
@@ -138,10 +138,11 @@ class Role(
     @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     @app_commands.check(in_channels)
     async def role_set(self, itr: discord.Interaction, role: str) -> None:
+        if not itr.guild:
+            raise app_commands.errors.NoPrivateMessage
         await itr.response.defer()
         user_id = itr.user.id
         stored_roles = _get_role_data(user_id)
-        assert itr.guild
         assert isinstance(itr.user, discord.Member)
         role_args = role.rsplit(" | ", 1)
         user_roles = itr.user.roles
@@ -198,6 +199,38 @@ class Role(
             )
         except (ValueError, IndexError):
             await itr.followup.send("Role not found.")
+
+    @app_commands.command(
+        name="inventory",
+        description=("View your Group Role inventory"),
+    )
+    @app_commands.check(in_channels)
+    async def role_inventory(self, itr: discord.Interaction) -> None:
+        if not itr.guild:
+            raise app_commands.errors.NoPrivateMessage
+        await itr.response.defer()
+        user_id = itr.user.id
+        stored_roles = _get_role_data(user_id)
+        assert isinstance(itr.user, discord.Member)
+        group_roles = ROLES[itr.guild.id]
+        sorted_stored_roles = sorted(
+            tuple(role for role in stored_roles if role in group_roles),
+            key=lambda x: group_roles.index(x),
+        )
+        embed = discord.Embed(
+            title="{itr.user.name}'s Inventory",
+            description=(
+                "\n".join(f"<@&{role}>" for role in sorted_stored_roles)
+                if sorted_stored_roles
+                else "Empty"
+            ),
+            color=itr.user.color,
+        )
+        await itr.followup.send(
+            embed=embed,
+            allowed_mentions=discord.AllowedMentions.none(),
+            silent=True,
+        )
 
     def _download_role_data(self) -> None:
         self.ROLE_LOGGER.info("Downloading role data...")
