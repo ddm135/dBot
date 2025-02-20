@@ -51,7 +51,12 @@ class NotifyP8(commands.Cog):
             )
             pings = get_sheet_data(gameD["pingId"], gameD["pingRange"])
             game_pinged_list = dict.fromkeys(
-                tuple(zip(*pings))[gameD["pingColumns"].index("users")], False
+                (
+                    user
+                    for users in tuple(zip(*pings))[gameD["pingColumns"].index("users")]
+                    for user in users.split(",")
+                ),
+                False,
             )
             game_pinged_list.pop("", None)
             if not game_pinged_list:
