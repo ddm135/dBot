@@ -23,6 +23,7 @@ from static.dConsts import (
     SSRG_ROLE_MOD,
     SSRG_ROLE_SS,
     TEST_ROLE_OWNER,
+    TIMEZONES,
 )
 from static.dHelpers import decrypt_cbc, decrypt_ecb
 
@@ -33,6 +34,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         for key, game in GAMES.items()
         if game["pinChannelIds"]
     ]
+    GAME_CHOICES.insert(0, app_commands.Choice(name="SUPERSTAR YG", value="Y"))
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -55,6 +57,24 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         song_name: str,
     ):
         await itr.response.defer(ephemeral=True)
+        if game.value == "Y":
+            return await self._handle_ssl_command(
+                itr,
+                "Dalcomsoft",
+                "End of Service",
+                0,
+                "99:59:59",
+                (
+                    "https://play-lh.googleusercontent.com/"
+                    "7uowhqx_ul4vYxEwjmu6Um7kOAn54b31tIlYc8"
+                    "LddbY7f1H52293yGCYOYFOM3Z2itCJ"
+                ),
+                None,
+                TIMEZONES["KST"],
+                timedelta(hours=2),
+                743313305388712016,
+                "",
+            )
         (
             game_details,
             ssl_data,
@@ -109,6 +129,24 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         song_id: str,
     ):
         await itr.response.defer(ephemeral=True)
+        if game.value == "Y":
+            return await self._handle_ssl_command(
+                itr,
+                "Dalcomsoft",
+                "End of Service",
+                0,
+                "99:59:59",
+                (
+                    "https://play-lh.googleusercontent.com/"
+                    "7uowhqx_ul4vYxEwjmu6Um7kOAn54b31tIlYc8"
+                    "LddbY7f1H52293yGCYOYFOM3Z2itCJ"
+                ),
+                None,
+                TIMEZONES["KST"],
+                timedelta(hours=2),
+                743313305388712016,
+                "",
+            )
         (
             game_details,
             ssl_data,
@@ -159,11 +197,20 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         pin_channel_id: int,
         api_url: str,
     ) -> None:
-        color = await self._get_song_color(song_id, api_url)
+        color: Optional[int] = 0
+        if api_url:
+            color = await self._get_song_color(song_id, api_url)
 
         current_time = datetime.now(timezone) - offset
         embed, embed_title = self._generate_embed(
-            artist_name, song_name, duration, image_url, current_time, color, skills
+            artist_name,
+            song_name,
+            duration,
+            image_url,
+            current_time,
+            color,
+            skills,
+            itr.user.name,
         )
 
         pin_channel = self.bot.get_channel(pin_channel_id)
@@ -234,6 +281,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         current_time: datetime,
         color: Optional[Union[int, discord.Color]],
         skills: Optional[str],
+        user_name: str,
     ) -> tuple[discord.Embed, str]:
         embed_title = f"SSL #{current_time.strftime("%w").replace("0", "7")}"
 
@@ -258,7 +306,12 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             )
 
         embed.set_thumbnail(url=image_url)
-        embed.set_footer(text=current_time.strftime("%A, %B %d, %Y").replace(" 0", " "))
+        embed.set_footer(
+            text=(
+                f"{current_time.strftime('%A, %B %d, %Y').replace(' 0', ' ')}"
+                f" · Pinned by {user_name}"
+            )
+        )
 
         return embed, embed_title
 

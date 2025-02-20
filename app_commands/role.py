@@ -10,6 +10,7 @@ from app_commands.autocomplete.role import (
     _update_role_data,
     role_add_autocomplete,
     role_remove_autocomplete,
+    role_set_autocomplete,
 )
 from static.dConsts import (
     ROLE_STORAGE_CHANNEL,
@@ -56,27 +57,30 @@ class Role(
     @app_commands.check(in_channels)
     async def role_add(self, itr: discord.Interaction, role: str) -> None:
         await itr.response.defer()
-        stored_roles = _get_role_data(itr.user.id)
+        user_id = itr.user.id
+        stored_roles = _get_role_data(user_id)
         assert itr.guild
         assert isinstance(itr.user, discord.Member)
         role_args = role.rsplit(" | ", 1)
+        user_roles = itr.user.roles
+        guild_roles = itr.guild.roles
 
         try:
-            _role = discord.utils.get(
-                itr.guild.roles, name=role_args[0], id=int(role_args[1])
+            target_role = discord.utils.get(
+                guild_roles, name=role_args[0], id=int(role_args[1])
             )
-            if not _role:
+            if not target_role:
                 return await itr.followup.send("Role not found.")
-            if _role in itr.user.roles:
+            if target_role in user_roles:
                 return await itr.followup.send("Role is not in storage.")
-            if _role.id not in stored_roles:
+            if target_role.id not in stored_roles:
                 return await itr.followup.send("You do not own this role.")
-            stored_roles.remove(_role.id)
+            stored_roles.remove(target_role.id)
             _update_role_data(itr.user.id, stored_roles)
             self.LOCKED.touch()
-            await itr.user.add_roles(_role)
+            await itr.user.add_roles(target_role)
             await itr.followup.send(
-                f"Added <@&{_role.id}>!",
+                f"Added <@&{target_role.id}>!",
                 allowed_mentions=discord.AllowedMentions.none(),
                 silent=True,
             )
@@ -92,27 +96,103 @@ class Role(
     @app_commands.check(in_channels)
     async def role_remove(self, itr: discord.Interaction, role: str) -> None:
         await itr.response.defer()
-        stored_roles = _get_role_data(itr.user.id)
+        user_id = itr.user.id
+        stored_roles = _get_role_data(user_id)
         assert itr.guild
         assert isinstance(itr.user, discord.Member)
         role_args = role.rsplit(" | ", 1)
+        user_roles = itr.user.roles
+        group_roles = ROLES[itr.guild.id]
+        guild_roles = itr.guild.roles
 
         try:
-            _role = discord.utils.get(
-                itr.guild.roles, name=role_args[0], id=int(role_args[1])
+            target_role = discord.utils.get(
+                guild_roles, name=role_args[0], id=int(role_args[1])
             )
-            if not _role:
+            if not target_role:
                 return await itr.followup.send("Role not found.")
-            if _role.id not in ROLES[itr.guild.id]:
+            if target_role.id not in group_roles:
                 return await itr.followup.send("This role cannot be removed.")
-            if _role not in itr.user.roles:
+            if target_role not in user_roles:
                 return await itr.followup.send("You do not own this role.")
-            stored_roles.append(_role.id)
-            _update_role_data(itr.user.id, stored_roles)
+            stored_roles.add(target_role.id)
+            _update_role_data(user_id, stored_roles)
             self.LOCKED.touch()
-            await itr.user.remove_roles(_role)
+            await itr.user.remove_roles(target_role)
             await itr.followup.send(
-                f"Removed <@&{_role.id}>!",
+                f"Removed <@&{target_role.id}>!",
+                allowed_mentions=discord.AllowedMentions.none(),
+                silent=True,
+            )
+        except (ValueError, IndexError):
+            await itr.followup.send("Role not found.")
+
+    @app_commands.command(
+        name="set",
+        description=(
+            "Remove higher Group Roles then add lower Group Roles and itself "
+            "(Requires SUPERSTAR Role)"
+        ),
+    )
+    @app_commands.autocomplete(role=role_set_autocomplete)
+    @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
+    @app_commands.check(in_channels)
+    async def role_set(self, itr: discord.Interaction, role: str) -> None:
+        await itr.response.defer()
+        user_id = itr.user.id
+        stored_roles = _get_role_data(user_id)
+        assert itr.guild
+        assert isinstance(itr.user, discord.Member)
+        role_args = role.rsplit(" | ", 1)
+        user_roles = itr.user.roles
+        group_roles = ROLES[itr.guild.id]
+        guild_roles = itr.guild.roles
+
+        try:
+            target_role = discord.utils.get(
+                guild_roles, name=role_args[0], id=int(role_args[1])
+            )
+            if not target_role:
+                return await itr.followup.send("Role not found.")
+            if target_role.id not in group_roles:
+                return await itr.followup.send("This role is not a Group Role.")
+            if target_role.id not in stored_roles and target_role not in user_roles:
+                return await itr.followup.send("You do not own this role.")
+            target_index = guild_roles.index(target_role)
+            remove_roles = tuple(
+                r
+                for i, r in enumerate(guild_roles)
+                if r.id in group_roles and i > target_index and r in user_roles
+            )
+            add_roles = tuple(
+                r
+                for i, r in enumerate(guild_roles)
+                if r.id in group_roles and i <= target_index and r.id in stored_roles
+            )
+            stored_roles.difference_update(r.id for r in add_roles)
+            stored_roles.update(r.id for r in remove_roles)
+            _update_role_data(user_id, stored_roles)
+            self.LOCKED.touch()
+            await itr.user.add_roles(*add_roles)
+            await itr.user.remove_roles(*remove_roles)
+            embed = discord.Embed(
+                title="Changes",
+                description="None" if not add_roles and not remove_roles else None,
+                color=target_role.color,
+            )
+            if add_roles:
+                embed.add_field(
+                    name="Added",
+                    value="\n".join(f"<@&{r.id}>" for r in reversed(add_roles)),
+                )
+            if remove_roles:
+                embed.add_field(
+                    name="Removed",
+                    value="\n".join(f"<@&{r.id}>" for r in reversed(remove_roles)),
+                )
+            await itr.followup.send(
+                f"Set to <@&{target_role.id}>!",
+                embed=embed,
                 allowed_mentions=discord.AllowedMentions.none(),
                 silent=True,
             )

@@ -11,6 +11,8 @@ from static.dTypes import GameDetails
 async def artist_autocomplete(
     itr: discord.Interaction, current: str
 ) -> list[app_commands.Choice[str]]:
+    if itr.namespace.game == "Y":
+        return [app_commands.Choice(name="Dalcomsoft", value="Dalcomsoft")]
     _, ssl_data, artist_name_index, _, _, _, _, _ = _ssl_preprocess(itr.namespace.game)
 
     artists = [
@@ -25,6 +27,11 @@ async def artist_autocomplete(
 async def song_autocomplete(
     itr: discord.Interaction, current: str
 ) -> list[app_commands.Choice[str]]:
+    if itr.namespace.game == "Y":
+        if itr.namespace.artist_name.lower() == "dalcomsoft":
+            return [app_commands.Choice(name="End of Service", value="End of Service")]
+        else:
+            return []
     artist_name: str = itr.namespace.artist_name
     _, ssl_data, artist_name_index, song_name_index, _, _, _, _ = _ssl_preprocess(
         itr.namespace.game
@@ -43,6 +50,12 @@ async def song_autocomplete(
 async def song_id_autocomplete(
     itr: discord.Interaction, current: str
 ) -> list[app_commands.Choice[str]]:
+    if itr.namespace.game == "Y":
+        return [
+            app_commands.Choice(
+                name="Dalcomsoft - End of Service", value="0"
+            )
+        ]
     _, ssl_data, artist_name_index, song_name_index, song_id_index, _, _, _ = (
         _ssl_preprocess(itr.namespace.game)
     )
