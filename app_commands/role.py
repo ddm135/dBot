@@ -22,6 +22,7 @@ from static.dConsts import (
 from static.dHelpers import get_sheet_data, update_sheet_data
 
 
+@app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)
 class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
     LOCKED = Path("data/role/locked")
     ROLE_LOGGER = logging.getLogger(__name__)

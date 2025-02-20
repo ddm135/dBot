@@ -28,6 +28,7 @@ from static.dConsts import (
 from static.dHelpers import decrypt_cbc, decrypt_ecb
 
 
+@app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)
 class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the day"):
     GAME_CHOICES = [
         app_commands.Choice(name=game["name"], value=key)
