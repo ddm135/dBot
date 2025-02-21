@@ -88,7 +88,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
 
     @app_commands.command(
         name="remove",
-        description="Move a Group Role you own to inventory (Requires SUPERSTAR Role)",
+        description="Store a Group Role you own in inventory (Requires SUPERSTAR Role)",
     )
     @app_commands.autocomplete(role=role_remove_autocomplete)
     @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
@@ -129,7 +129,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
     @app_commands.command(
         name="set",
         description=(
-            "Remove higher Group Roles then apply itself and lower Group Roles "
+            "Store higher Group Roles then apply chosen and lower Group Roles "
             "(Requires SUPERSTAR Role)"
         ),
     )
@@ -186,7 +186,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
                 )
             if remove_roles:
                 embed.add_field(
-                    name="Removed",
+                    name="Stored",
                     value="\n".join(f"<@&{r.id}>" for r in reversed(remove_roles)),
                 )
             await itr.followup.send(
