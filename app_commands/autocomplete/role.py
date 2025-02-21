@@ -92,6 +92,8 @@ async def role_set_autocomplete(
 
 def _get_role_data(user_id: int) -> set[int]:
     role_file = Path(f"data/role/{user_id}.txt")
+    if not role_file.exists():
+        return set()
     role_str = role_file.read_text()
     return {int(role) for role in role_str.split(",") if role_str}
 
