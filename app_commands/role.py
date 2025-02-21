@@ -230,7 +230,14 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         )
 
     def _download_role_data(self) -> None:
+        if self.LOCKED.exists():
+            return
+
         self.ROLE_LOGGER.info("Downloading role data...")
+        data_path = Path("data/role")
+        data_files = data_path.glob("*.txt")
+        for data_file in data_files:
+            data_file.unlink()
         role_data = get_sheet_data(
             "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s", "Roles!A:C"
         )
