@@ -259,16 +259,6 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
     async def cog_app_command_error(
         self, interaction: discord.Interaction, error: app_commands.AppCommandError
     ):
-        if (
-            isinstance(error, app_commands.errors.NoPrivateMessage)
-            or not interaction.guild
-        ):
-            return await interaction.response.send_message(
-                "This command cannot be used in direct messages.",
-                ephemeral=True,
-                silent=True,
-            )
-
         if isinstance(error, app_commands.errors.MissingAnyRole):
             return await interaction.response.send_message(
                 "You do not have permission to use this command.",
