@@ -19,7 +19,7 @@ from static.dConsts import (
     SSRG_ROLE_SS,
     TEST_ROLE_OWNER,
 )
-from static.dHelpers import get_sheet_data, update_sheet_data
+from static.dHelpers import clear_sheet_data, get_sheet_data, update_sheet_data
 
 
 @app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)
@@ -250,7 +250,8 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         for data_file in data_files:
             user_id = data_file.stem
             roles = data_file.read_text()
-            role_data.append([user_id, roles])
+            role_data.append([user_id, roles, "."])
+        clear_sheet_data("1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s", "Roles")
         update_sheet_data(
             "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s", "Roles!A1", False, role_data
         )

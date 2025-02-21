@@ -51,6 +51,20 @@ def update_sheet_data(
     ).execute()
 
 
+def clear_sheet_data(
+    spreadsheet_id: str,
+    range_str: str,
+    instance: Optional[str] = None,
+) -> None:
+    _sheetService: "SheetsResource.SpreadsheetsResource.ValuesResource" = globals()[
+        f"sheetService{instance or ""}"
+    ]
+
+    _sheetService.clear(
+        spreadsheetId=spreadsheet_id, range=range_str, body={}
+    ).execute()
+
+
 def decrypt_ecb(data: Union[str, bytes]) -> bytes:
     return unpad(cryptServiceECB.decrypt(b64decode(data)), AES.block_size)
 
