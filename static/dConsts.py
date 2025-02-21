@@ -18,7 +18,6 @@ ROLE_STORAGE_CHANNEL = {
 }
 
 ONE_DAY = timedelta(days=1)
-THREE_DAYS = timedelta(days=3)
 
 AES_KEY = "WnFKN1v_gUcgmUVZnjjjGXGwk557zBSO"
 AES_IV = "PUIEOQYGNEFFFUAX"
@@ -78,6 +77,7 @@ GAMES: dict[str, GameDetails] = {
         "color": 0x00ABC0,
         "pinChannelIds": None,
         "api": "https://ssg-api-https.dalcomsoft.net/api",
+        "dateFormat": "%Y-%m-%d",
         "timezone": TIMEZONES["KST"],
     },
     "JYP_JP": {
@@ -117,6 +117,7 @@ GAMES: dict[str, GameDetails] = {
             SSRG_GUILD: 951350075190313010,
         },
         "api": "https://ss-jyp-api-real.superstarjyp.jp",
+        "dateFormat": "%Y-%m-%d",
         "timezone": TIMEZONES["JST"],
     },
     "LP": {
@@ -156,6 +157,7 @@ GAMES: dict[str, GameDetails] = {
             SSRG_GUILD: 1039132737979813908,
         },
         "api": "https://ss-lapone-api-real.superstarlapone.jp",
+        "dateFormat": "%Y-%m-%d",
         "timezone": TIMEZONES["JST"],
     },
     "EB": {
@@ -185,6 +187,7 @@ GAMES: dict[str, GameDetails] = {
         "color": 0x960C19,
         "pinChannelIds": None,
         "api": "https://ss-ebidan-api-real.superstarebidan.jp",
+        "dateFormat": "%Y-%m-%d",
         "timezone": TIMEZONES["JST"],
     },
     "PH": {
@@ -213,7 +216,8 @@ GAMES: dict[str, GameDetails] = {
         ),
         "color": 0x071543,
         "pinChannelIds": None,
-        "api": "https://ssph-api-https.dalcomsoft.net/",
+        "api": "https://ssph-api-https.dalcomsoft.net",
+        "dateFormat": "%d-%m-%Y",
         "timezone": TIMEZONES["PHT"],
     },
 }

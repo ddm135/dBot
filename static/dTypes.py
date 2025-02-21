@@ -19,4 +19,5 @@ class GameDetails(TypedDict):
     color: int
     pinChannelIds: Optional[dict[int, int]]
     api: str
+    dateFormat: str
     timezone: ZoneInfo

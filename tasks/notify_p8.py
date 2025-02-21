@@ -3,7 +3,7 @@ from datetime import datetime, time
 import discord
 from discord.ext import commands, tasks
 
-from static.dConsts import GAMES, ONE_DAY, THREE_DAYS, TIMEZONES
+from static.dConsts import GAMES, ONE_DAY, TIMEZONES
 from static.dHelpers import get_sheet_data
 
 
@@ -34,6 +34,10 @@ class NotifyP8(commands.Cog):
         for game_details in GAMES.values():
             if (timezone := game_details["timezone"]) not in (TIMEZONES["PHT"],):
                 continue
+            date_format = game_details["dateFormat"]
+            ping_columns = game_details["pingColumns"]
+            bonus_columns = game_details["bonusColumns"]
+
             current_date = (
                 datetime.now().replace(
                     hour=0,
@@ -48,15 +52,14 @@ class NotifyP8(commands.Cog):
                 f"# Bonus Reminder for {game_details["name"]} on "
                 f"<t:{int(current_date.timestamp())}:f>"
             )
+
             ping_data = get_sheet_data(
                 game_details["pingId"], game_details["pingRange"]
             )
             game_ping_dict = dict.fromkeys(
                 (
                     user
-                    for users in tuple(zip(*ping_data))[
-                        game_details["pingColumns"].index("users")
-                    ]
+                    for users in tuple(zip(*ping_data))[ping_columns.index("users")]
                     for user in users.split(",")
                 ),
                 False,
@@ -65,10 +68,11 @@ class NotifyP8(commands.Cog):
             if not game_ping_dict:
                 continue
 
-            artist_name_index = game_details["bonusColumns"].index("artist_name")
-            member_name_index = game_details["bonusColumns"].index("member_name")
-            bonus_date_index = game_details["bonusColumns"].index("bonus_date")
-            bonus_amount_index = game_details["bonusColumns"].index("bonus_amount")
+            artist_name_index = bonus_columns.index("artist_name")
+            member_name_index = bonus_columns.index("member_name")
+            bonus_start_index = bonus_columns.index("bonus_start")
+            bonus_end_index = bonus_columns.index("bonus_end")
+            bonus_amount_index = bonus_columns.index("bonus_amount")
 
             bonus_data = get_sheet_data(
                 game_details["bonusId"],
@@ -80,11 +84,9 @@ class NotifyP8(commands.Cog):
                 artist_pings = next(
                     ping
                     for ping in ping_data
-                    if ping[game_details["pingColumns"].index("artist_name")] == artist
+                    if ping[ping_columns.index("artist_name")] == artist
                 )
-                artist_ping_list = artist_pings[
-                    game_details["pingColumns"].index("users")
-                ].split(",")
+                artist_ping_list = artist_pings[ping_columns.index("users")].split(",")
                 artist_ping_list.remove("") if "" in artist_ping_list else None
                 if not artist_ping_list:
                     continue
@@ -98,12 +100,12 @@ class NotifyP8(commands.Cog):
                 next_birthday_start = None
                 next_birthday_end = None
                 for bonus in bonus_data:
-                    bonus_date = datetime.strptime(
-                        bonus[bonus_date_index],
-                        "%Y-%m-%d",
+                    start_date = datetime.strptime(
+                        bonus[bonus_start_index], date_format
                     ).replace(tzinfo=timezone)
-                    start_date = bonus_date - THREE_DAYS
-                    end_date = bonus_date + THREE_DAYS
+                    end_date = datetime.strptime(
+                        bonus[bonus_end_index], date_format
+                    ).replace(tzinfo=timezone)
 
                     if (
                         start_date < current_date
@@ -157,10 +159,13 @@ class NotifyP8(commands.Cog):
                     for amt in birthday_amounts:
                         birthday_total += int(amt.replace("%", ""))
 
-                    for dt in birthday_zip[bonus_date_index]:
-                        bd = datetime.strptime(dt, "%Y-%m-%d").replace(tzinfo=timezone)
-                        birthday_starts.append(bd - THREE_DAYS)
-                        birthday_ends.append(bd + THREE_DAYS)
+                    for dt in birthday_zip[bonus_start_index]:
+                        bs = datetime.strptime(dt, date_format).replace(tzinfo=timezone)
+                        birthday_starts.append(bs)
+
+                    for dt in birthday_zip[bonus_end_index]:
+                        be = datetime.strptime(dt, date_format).replace(tzinfo=timezone)
+                        birthday_ends.append(be)
 
                 birthday_start = max(
                     (
@@ -188,7 +193,7 @@ class NotifyP8(commands.Cog):
                     default=None,
                 )
 
-                if birthday_start and birthday_end and birthday_bonuses:
+                if birthday_bonuses and birthday_start and birthday_end:
                     if birthday_start == current_date:
                         msg = (
                             f"> {birthday_members} - All Songs\n> {birthday_total}% "
@@ -206,12 +211,12 @@ class NotifyP8(commands.Cog):
                         notify_end.append(msg)
 
                 for bonus in album_bonuses:
-                    bonus_date = datetime.strptime(
-                        bonus[bonus_date_index],
-                        "%Y-%m-%d",
+                    start_date = datetime.strptime(
+                        bonus[bonus_start_index], date_format
                     ).replace(tzinfo=timezone)
-                    start_date = bonus_date - THREE_DAYS
-                    end_date = bonus_date + THREE_DAYS
+                    end_date = datetime.strptime(
+                        bonus[bonus_end_index], date_format
+                    ).replace(tzinfo=timezone)
 
                     song_start = max(
                         x for x in (start_date, birthday_start) if x is not None
@@ -222,15 +227,9 @@ class NotifyP8(commands.Cog):
                         song_total = birthday_total + int(
                             bonus[bonus_amount_index].replace("%", "")
                         )
-                        album_name = bonus[
-                            game_details["bonusColumns"].index("album_name")
-                        ]
-                        song_name = bonus[
-                            game_details["bonusColumns"].index("song_name")
-                        ]
-                        song_duration = bonus[
-                            game_details["bonusColumns"].index("duration")
-                        ]
+                        album_name = bonus[bonus_columns.index("album_name")]
+                        song_name = bonus[bonus_columns.index("song_name")]
+                        song_duration = bonus[bonus_columns.index("duration")]
 
                         if song_start == current_date:
                             msg = (
@@ -276,9 +275,7 @@ class NotifyP8(commands.Cog):
                                 inline=False,
                             )
                         embed.set_thumbnail(
-                            url=artist_pings[
-                                game_details["pingColumns"].index("emblem")
-                            ]
+                            url=artist_pings[ping_columns.index("emblem")]
                         )
                         await user.send(embed=embed, silent=True)
 
