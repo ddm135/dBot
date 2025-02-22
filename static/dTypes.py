@@ -8,7 +8,6 @@ class GameDetails(TypedDict):
     sslId: Optional[str]
     sslRange: Optional[str]
     sslColumns: Optional[tuple[str, ...]]
-    sslOffset: Optional[timedelta]
     pingId: str
     pingRange: str
     pingWrite: str
@@ -21,3 +20,4 @@ class GameDetails(TypedDict):
     api: str
     dateFormat: str
     timezone: ZoneInfo
+    resetOffset: timedelta

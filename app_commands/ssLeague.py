@@ -96,7 +96,6 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             )
 
             timezone = game_details["timezone"]
-            assert (offset := game_details["sslOffset"])
             assert (pin_channel_ids := game_details["pinChannelIds"])
             assert itr.guild_id
             api_url = game_details["api"]
@@ -110,7 +109,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
                 song[image_url_index],
                 song[skills_index] if skills_index else None,
                 timezone,
-                offset,
+                game_details["resetOffset"],
                 pin_channel_ids[itr.guild_id],
                 api_url,
             )
@@ -163,7 +162,6 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             song = next(s for s in ssl_data if s[song_id_index] == song_id)
 
             timezone = game_details["timezone"]
-            assert (offset := game_details["sslOffset"])
             assert (pin_channel_ids := game_details["pinChannelIds"])
             assert itr.guild_id
             api_url = game_details["api"]
@@ -177,7 +175,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
                 song[image_url_index],
                 song[skills_index] if skills_index else None,
                 timezone,
-                offset,
+                game_details["resetOffset"],
                 pin_channel_ids[itr.guild_id],
                 api_url,
             )
