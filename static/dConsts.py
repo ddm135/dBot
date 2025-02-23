@@ -83,13 +83,14 @@ GAMES: dict[str, GameDetails] = {
     "JYP_JP": {
         "name": "SUPERSTAR JYPNATION (JP)",
         "sslId": "1eVjwi0GudyMixnZtam8TeupRd3DQ6mheyRKp2lDA6qw",
-        "sslRange": "Songs!A2:F",
+        "sslRange": "Songs!A2:G",
         "sslColumns": (
             "song_id",
             "artist_name",
             "song_name",
             "duration",
             "image",
+            "search_term",
             "skills",
         ),
         "pingId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
@@ -123,13 +124,14 @@ GAMES: dict[str, GameDetails] = {
     "LP": {
         "name": "SUPERSTAR LAPONE",
         "sslId": "1Ng57BGCDj025bxwCBbQulYFhRjS5runy5HnbStY_xSw",
-        "sslRange": "Songs!A2:F",
+        "sslRange": "Songs!A2:G",
         "sslColumns": (
             "song_id",
             "artist_name",
             "song_name",
             "duration",
             "image",
+            "search_term",
             "skills",
         ),
         "pingId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",

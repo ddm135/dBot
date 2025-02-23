@@ -13,7 +13,9 @@ async def artist_autocomplete(
 ) -> list[app_commands.Choice[str]]:
     if itr.namespace.game == "Y":
         return [app_commands.Choice(name="Dalcomsoft", value="Dalcomsoft")]
-    _, ssl_data, artist_name_index, _, _, _, _, _ = _ssl_preprocess(itr.namespace.game)
+    _, ssl_data, artist_name_index, _, _, _, _, _, _ = _ssl_preprocess(
+        itr.namespace.game
+    )
 
     artists = [
         app_commands.Choice(name=artist, value=artist)
@@ -33,15 +35,18 @@ async def song_autocomplete(
         else:
             return []
     artist_name: str = itr.namespace.artist_name
-    _, ssl_data, artist_name_index, song_name_index, _, _, _, _ = _ssl_preprocess(
-        itr.namespace.game
+    _, ssl_data, artist_name_index, song_name_index, _, _, _, search_term_index, _ = (
+        _ssl_preprocess(itr.namespace.game)
     )
 
     songs = [
         app_commands.Choice(name=s[song_name_index], value=s[song_name_index])
         for s in ssl_data
         if artist_name.lower() == s[artist_name_index].lower()
-        and current.lower() in s[song_name_index].lower()
+        and (
+            current.lower() in s[song_name_index].lower()
+            or current.lower() in s[search_term_index].lower()
+        )
     ]
 
     return songs[:MAX_AUTOCOMPLETE_RESULTS]
@@ -51,12 +56,8 @@ async def song_id_autocomplete(
     itr: discord.Interaction, current: str
 ) -> list[app_commands.Choice[str]]:
     if itr.namespace.game == "Y":
-        return [
-            app_commands.Choice(
-                name="Dalcomsoft - End of Service", value="0"
-            )
-        ]
-    _, ssl_data, artist_name_index, song_name_index, song_id_index, _, _, _ = (
+        return [app_commands.Choice(name="Dalcomsoft - End of Service", value="0")]
+    _, ssl_data, artist_name_index, song_name_index, song_id_index, _, _, _, _ = (
         _ssl_preprocess(itr.namespace.game)
     )
 
@@ -78,7 +79,7 @@ def get_ssl_data(
 
 def _ssl_preprocess(
     game: str,
-) -> tuple[GameDetails, list[list[str]], int, int, int, int, int, Optional[int]]:
+) -> tuple[GameDetails, list[list[str]], int, int, int, int, int, int, Optional[int]]:
     game_details = GAMES[game]
     ssl_data = _get_ssl_data(game_details)
     assert (ssl_columns := game_details["sslColumns"])
@@ -97,12 +98,13 @@ def _get_ssl_data(game_details: GameDetails) -> list[list[str]]:
 
 def _get_ssl_indexes(
     ssl_columns: Union[list[str], tuple[str, ...]],
-) -> tuple[int, int, int, int, int, Optional[int]]:
+) -> tuple[int, int, int, int, int, int, Optional[int]]:
     song_id_index = ssl_columns.index("song_id")
     artist_name_index = ssl_columns.index("artist_name")
     song_name_index = ssl_columns.index("song_name")
     duration_index = ssl_columns.index("duration")
     image_url_index = ssl_columns.index("image")
+    search_term_index = ssl_columns.index("search_term")
     skills_index = ssl_columns.index("skills") if "skills" in ssl_columns else None
     return (
         artist_name_index,
@@ -110,5 +112,6 @@ def _get_ssl_indexes(
         song_id_index,
         duration_index,
         image_url_index,
+        search_term_index,
         skills_index,
     )

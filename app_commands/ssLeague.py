@@ -84,6 +84,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             song_id_index,
             duration_index,
             image_url_index,
+            search_term_index,
             skills_index,
         ) = _ssl_preprocess(game.value)
 
@@ -92,7 +93,10 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
                 s
                 for s in ssl_data
                 if s[artist_name_index].lower() == artist_name.lower()
-                and s[song_name_index].lower() == song_name.lower()
+                and (
+                    s[song_name_index].lower() == song_name.lower()
+                    or song_name.lower() in s[search_term_index].lower().split(";")
+                )
             )
 
             timezone = game_details["timezone"]
@@ -155,6 +159,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             song_id_index,
             duration_index,
             image_url_index,
+            _,
             skills_index,
         ) = _ssl_preprocess(game.value)
 
