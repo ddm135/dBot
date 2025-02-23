@@ -23,7 +23,6 @@ from static.dConsts import (
     SSRG_ROLE_MOD,
     SSRG_ROLE_SS,
     TEST_ROLE_OWNER,
-    TIMEZONES,
 )
 from static.dHelpers import decrypt_cbc, decrypt_ecb
 
@@ -35,7 +34,6 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         for key, game in GAMES.items()
         if game["pinChannelIds"]
     ]
-    GAME_CHOICES.insert(0, app_commands.Choice(name="SUPERSTAR YG", value="Y"))
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -58,24 +56,6 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         song_name: str,
     ):
         await itr.response.defer(ephemeral=True)
-        if game.value == "Y":
-            return await self._handle_ssl_command(
-                itr,
-                "Dalcomsoft",
-                "End of Service",
-                0,
-                "99:59:59",
-                (
-                    "https://play-lh.googleusercontent.com/"
-                    "7uowhqx_ul4vYxEwjmu6Um7kOAn54b31tIlYc8"
-                    "LddbY7f1H52293yGCYOYFOM3Z2itCJ"
-                ),
-                None,
-                TIMEZONES["KST"],
-                timedelta(hours=2),
-                743313305388712016,
-                "",
-            )
         (
             game_details,
             ssl_data,
@@ -133,24 +113,6 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         song_id: str,
     ):
         await itr.response.defer(ephemeral=True)
-        if game.value == "Y":
-            return await self._handle_ssl_command(
-                itr,
-                "Dalcomsoft",
-                "End of Service",
-                0,
-                "99:59:59",
-                (
-                    "https://play-lh.googleusercontent.com/"
-                    "7uowhqx_ul4vYxEwjmu6Um7kOAn54b31tIlYc8"
-                    "LddbY7f1H52293yGCYOYFOM3Z2itCJ"
-                ),
-                None,
-                TIMEZONES["KST"],
-                timedelta(hours=2),
-                743313305388712016,
-                "",
-            )
         (
             game_details,
             ssl_data,
