@@ -274,9 +274,9 @@ class NotifyP8(commands.Cog):
                                 value="".join(notify_end),
                                 inline=False,
                             )
-                        embed.set_thumbnail(
-                            url=artist_pings[ping_columns.index("emblem")]
-                        )
+                        # embed.set_thumbnail(
+                        #     url=artist_pings[ping_columns.index("emblem")]
+                        # )
                         await user.send(embed=embed, silent=True)
 
     @notify_p8.before_loop

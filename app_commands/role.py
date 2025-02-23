@@ -174,21 +174,26 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
             self.LOCKED.touch()
             await itr.user.add_roles(*add_roles)
             await itr.user.remove_roles(*remove_roles)
+
+            embed_description = ""
+            if add_roles:
+                embed_description += "**Applied**\n"
+                embed_description += "\n".join(
+                    f"<@&{r.id}>" for r in reversed(add_roles)
+                )
+
+                if remove_roles:
+                    embed_description += "\n\n"
+            if remove_roles:
+                embed_description += "**Stored**\n"
+                embed_description += "\n".join(
+                    f"<@&{r.id}>" for r in reversed(remove_roles)
+                )
             embed = discord.Embed(
                 title="Changes",
-                description="None" if not add_roles and not remove_roles else None,
+                description=embed_description or "None",
                 color=target_role.color,
             )
-            if add_roles:
-                embed.add_field(
-                    name="Applied",
-                    value="\n".join(f"<@&{r.id}>" for r in reversed(add_roles)),
-                )
-            if remove_roles:
-                embed.add_field(
-                    name="Stored",
-                    value="\n".join(f"<@&{r.id}>" for r in reversed(remove_roles)),
-                )
             await itr.followup.send(
                 f"Set to <@&{target_role.id}>!",
                 embed=embed,
