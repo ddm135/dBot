@@ -26,6 +26,10 @@ from static.dHelpers import clear_sheet_data, get_sheet_data, update_sheet_data
 class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
     LOCKED = Path("data/role/locked")
     ROLE_LOGGER = logging.getLogger(__name__)
+    NOTICE = (
+        "-# bonusBot and dBot does not share databases and as such, storing "
+        "roles on dBot will affect bonusBot role storage and shop functionality."
+    )
 
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
@@ -69,22 +73,26 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
                 guild_roles, name=role_args[0], id=int(role_args[1])
             )
             if not target_role:
-                return await itr.followup.send("Role not found.")
+                return await itr.followup.send(f"Role not found.\n{self.NOTICE}")
             if target_role in user_roles:
-                return await itr.followup.send("Role is already applied.")
+                return await itr.followup.send(
+                    f"Role is already applied.\n{self.NOTICE}"
+                )
             if target_role.id not in stored_roles:
-                return await itr.followup.send("You do not own this role.")
+                return await itr.followup.send(
+                    f"You do not own this role.\n{self.NOTICE}"
+                )
             stored_roles.remove(target_role.id)
             _update_role_data(itr.user.id, stored_roles)
             self.LOCKED.touch()
             await itr.user.add_roles(target_role)
             await itr.followup.send(
-                f"Added <@&{target_role.id}>!",
+                f"Added <@&{target_role.id}>!\n{self.NOTICE}",
                 allowed_mentions=discord.AllowedMentions.none(),
                 silent=True,
             )
         except (ValueError, IndexError):
-            await itr.followup.send("Role not found.")
+            await itr.followup.send(f"Role not found.\n{self.NOTICE}")
 
     @app_commands.command(
         name="remove",
@@ -109,22 +117,26 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
                 guild_roles, name=role_args[0], id=int(role_args[1])
             )
             if not target_role:
-                return await itr.followup.send("Role not found.")
+                return await itr.followup.send(f"Role not found.\n{self.NOTICE}")
             if target_role.id not in group_roles:
-                return await itr.followup.send("This role cannot be removed.")
+                return await itr.followup.send(
+                    f"This role cannot be removed.\n{self.NOTICE}"
+                )
             if target_role not in user_roles:
-                return await itr.followup.send("You do not own this role.")
+                return await itr.followup.send(
+                    f"You do not own this role.\n{self.NOTICE}"
+                )
             stored_roles.add(target_role.id)
             _update_role_data(user_id, stored_roles)
             self.LOCKED.touch()
             await itr.user.remove_roles(target_role)
             await itr.followup.send(
-                f"Removed <@&{target_role.id}>!",
+                f"Removed <@&{target_role.id}>!\n{self.NOTICE}",
                 allowed_mentions=discord.AllowedMentions.none(),
                 silent=True,
             )
         except (ValueError, IndexError):
-            await itr.followup.send("Role not found.")
+            await itr.followup.send(f"Role not found.\n{self.NOTICE}")
 
     @app_commands.command(
         name="set",
@@ -152,11 +164,15 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
                 guild_roles, name=role_args[0], id=int(role_args[1])
             )
             if not target_role:
-                return await itr.followup.send("Role not found.")
+                return await itr.followup.send(f"Role not found.\n{self.NOTICE}")
             if target_role.id not in group_roles:
-                return await itr.followup.send("This role is not a Group Role.")
+                return await itr.followup.send(
+                    f"This role is not a Group Role.\n{self.NOTICE}"
+                )
             if target_role.id not in stored_roles and target_role not in user_roles:
-                return await itr.followup.send("You do not own this role.")
+                return await itr.followup.send(
+                    f"You do not own this role.\n{self.NOTICE}"
+                )
             target_index = guild_roles.index(target_role)
             remove_roles = tuple(
                 r
@@ -194,6 +210,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
                 description=embed_description or "None",
                 color=target_role.color,
             )
+            embed.set_footer(text=self.NOTICE)
             await itr.followup.send(
                 f"Set to <@&{target_role.id}>!",
                 embed=embed,
@@ -201,7 +218,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
                 silent=True,
             )
         except (ValueError, IndexError):
-            await itr.followup.send("Role not found.")
+            await itr.followup.send(f"Role not found.\n{self.NOTICE}")
 
     @app_commands.command(
         name="inventory",
@@ -228,6 +245,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
             ),
             color=itr.user.color,
         )
+        embed.set_footer(text=self.NOTICE)
         await itr.followup.send(
             embed=embed,
             allowed_mentions=discord.AllowedMentions.none(),
@@ -288,7 +306,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         await super().cog_app_command_error(interaction, error)
         raise error
 
-    @tasks.loop(hours=1)
+    @tasks.loop(minutes=30)
     async def _sync_role_data(self):
         self._upload_role_data()
 
