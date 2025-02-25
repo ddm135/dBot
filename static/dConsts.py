@@ -50,6 +50,46 @@ EXTENSIONS = [
 ]
 
 GAMES: dict[str, GameDetails] = {
+    "SM_JP": {
+        "name": "SUPERSTAR SMTOWN (JP/TW)",
+        "sslId": "1kC38CLFd6xkDXD9qLHgnnv3s3jmM_4vf4RLsWuXs9NU",
+        "sslRange": "Songs!A2:F",
+        "sslColumns": (
+            "song_id",
+            "artist_name",
+            "song_name",
+            "search_term",
+            "duration",
+            "image",
+        ),
+        "pingId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
+        "pingRange": "SMTOWN!A1:D",
+        "pingWrite": "SMTOWN!C",
+        "pingColumns": ("artist_name", "emblem", "users"),
+        "bonusId": "1kC38CLFd6xkDXD9qLHgnnv3s3jmM_4vf4RLsWuXs9NU",
+        "bonusRange": "Bonuses!A2:J",
+        "bonusColumns": (
+            "song_id",
+            "bonus_amount",
+            "artist_name",
+            "member_name",
+            "album_name",
+            "song_name",
+            "duration",
+            "bonus_date",
+            "bonus_start",
+            "bonus_end",
+        ),
+        "color": 0xD60480,
+        "pinChannelIds": {
+            TEST_GUILD: 1343840449357418516,
+            SSRG_GUILD: 481907573948153857,
+        },
+        "api": "http://ss-sm-api-real.superstarsmtown.jp",
+        "dateFormat": "%Y-%m-%d",
+        "timezone": TIMEZONES["JST"],
+        "resetOffset": timedelta(hours=2),
+    },
     "G": {
         "name": "SUPERSTAR GFRIEND",
         "sslId": None,
