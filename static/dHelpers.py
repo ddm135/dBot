@@ -5,6 +5,7 @@ from typing import Optional, Union
 from Cryptodome.Cipher import AES
 from Cryptodome.Util.Padding import unpad
 
+from static.dConsts import MAX_RETRIES
 from static.dServices import (  # noqa: F401
     cryptServiceCBC,
     cryptServiceECB,
@@ -24,11 +25,10 @@ def get_sheet_data(
     _sheetService: "SheetsResource.SpreadsheetsResource.ValuesResource" = globals()[
         f"sheetService{instance or ""}"
     ]
-
     result = _sheetService.get(
         spreadsheetId=spreadsheet_id,
         range=range_str,
-    ).execute()
+    ).execute(num_retries=MAX_RETRIES)
     return result.get("values", [])
 
 
@@ -48,7 +48,7 @@ def update_sheet_data(
         range=range_str,
         valueInputOption="USER_ENTERED" if parse_input else "RAW",
         body={"values": data},
-    ).execute()
+    ).execute(num_retries=MAX_RETRIES)
 
 
 def clear_sheet_data(
@@ -61,8 +61,10 @@ def clear_sheet_data(
     ]
 
     _sheetService.clear(
-        spreadsheetId=spreadsheet_id, range=range_str, body={}
-    ).execute()
+        spreadsheetId=spreadsheet_id,
+        range=range_str,
+        body={},
+    ).execute(num_retries=MAX_RETRIES)
 
 
 def decrypt_ecb(data: Union[str, bytes]) -> bytes:
