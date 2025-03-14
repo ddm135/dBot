@@ -196,22 +196,24 @@ class NotifyP9(commands.Cog):
                     default=None,
                 )
 
-                if birthday_bonuses and birthday_start and birthday_end:
-                    if birthday_start == current_date:
-                        msg = (
-                            f"> {birthday_members} - All Songs\n> {birthday_total}% "
-                            f"| {birthday_start.strftime("%B %d").replace(" 0", " ")} "
-                            f"- {birthday_end.strftime("%B %d").replace(" 0", " ")}\n"
-                        )
-                        notify_start.append(msg)
+                start_check = last_birthday_end != current_date
+                end_check = next_birthday_start != current_date
 
-                    if birthday_end == current_date:
+                if birthday_bonuses and birthday_start and birthday_end:
+                    if birthday_end == current_date and end_check:
                         msg = (
                             f"> {birthday_members} - All Songs\n> {birthday_total}% "
                             f"| {birthday_start.strftime("%B %d").replace(" 0", " ")} "
                             f"- {birthday_end.strftime("%B %d").replace(" 0", " ")}\n"
                         )
                         notify_end.append(msg)
+                    elif birthday_start == current_date and start_check:
+                        msg = (
+                            f"> {birthday_members} - All Songs\n> {birthday_total}% "
+                            f"| {birthday_start.strftime("%B %d").replace(" 0", " ")} "
+                            f"- {birthday_end.strftime("%B %d").replace(" 0", " ")}\n"
+                        )
+                        notify_start.append(msg)
 
                 for bonus in album_bonuses:
                     start_date = datetime.strptime(
@@ -234,15 +236,7 @@ class NotifyP9(commands.Cog):
                         song_name = bonus[bonus_columns.index("song_name")]
                         song_duration = bonus[bonus_columns.index("duration")]
 
-                        if song_start == current_date:
-                            msg = (
-                                f"> {album_name} - {song_name} ({song_duration})\n"
-                                f"> {song_total}% | "
-                                f"{song_start.strftime("%B %d").replace(" 0", " ")} "
-                                f"- {song_end.strftime("%B %d").replace(" 0", " ")}\n"
-                            )
-                            notify_start.append(msg)
-                        elif song_end == current_date:
+                        if song_end == current_date and end_check:
                             msg = (
                                 f"> {album_name} - {song_name} ({song_duration})\n"
                                 f"> {song_total}% | "
@@ -250,6 +244,14 @@ class NotifyP9(commands.Cog):
                                 f"- {song_end.strftime("%B %d").replace(" 0", " ")}\n"
                             )
                             notify_end.append(msg)
+                        elif song_start == current_date and start_check:
+                            msg = (
+                                f"> {album_name} - {song_name} ({song_duration})\n"
+                                f"> {song_total}% | "
+                                f"{song_start.strftime("%B %d").replace(" 0", " ")} "
+                                f"- {song_end.strftime("%B %d").replace(" 0", " ")}\n"
+                            )
+                            notify_start.append(msg)
 
                 if notify_start or notify_end:
                     for user_id in artist_ping_list:
