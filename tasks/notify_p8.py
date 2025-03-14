@@ -276,6 +276,10 @@ class NotifyP8(commands.Cog):
                                 value="".join(notify_end),
                                 inline=False,
                             )
+                        # embed.set_footer(
+                        #     text="Today's bonuses are sent early as the bot "
+                        #     "won't be available 19:00 4/3 - 7:00 5/3 PHT"
+                        # )
                         # embed.set_thumbnail(
                         #     url=artist_pings[ping_columns.index("emblem")]
                         # )
