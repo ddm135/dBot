@@ -199,13 +199,14 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         try:
             assert isinstance(pin_channel, discord.TextChannel)
             await self._unpin_old_ssl(embed_title, pin_channel)
-            await self._pin_new_ssl(itr, embed, pin_channel)
+            await self._pin_new_ssl(embed, pin_channel)
             topic = f"[{current_time.strftime("%m.%d.%y")}] {artist_name} - {song_name}"
             if pin_role:
                 await pin_channel.send(f"<@&{pin_role}> {topic}")
             else:
                 await pin_channel.send(topic)
             await pin_channel.edit(topic=topic)
+            await itr.followup.send("Pinned!")
         except AssertionError:
             await itr.followup.send("Bot is not in server")
 
@@ -310,14 +311,18 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
 
     async def _pin_new_ssl(
         self,
-        itr: discord.Interaction,
         embed: discord.Embed,
         pin_channel: discord.TextChannel,
     ) -> None:
         msg = await pin_channel.send(embed=embed)
         await asyncio.sleep(1)
         await msg.pin()
-        await itr.followup.send("Pinned!")
+        await asyncio.sleep(1)
+
+        async for m in pin_channel.history(limit=10):
+            if m.type == discord.MessageType.pins_add:
+                await m.delete()
+                break
 
     async def cog_app_command_error(
         self, interaction: discord.Interaction, error: app_commands.AppCommandError
