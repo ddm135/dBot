@@ -317,12 +317,12 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         msg = await pin_channel.send(embed=embed)
         await asyncio.sleep(1)
         await msg.pin()
-        await asyncio.sleep(1)
+        # await asyncio.sleep(1)
 
-        async for m in pin_channel.history(limit=10):
-            if m.type == discord.MessageType.pins_add:
-                await m.delete()
-                break
+        # async for m in pin_channel.history(limit=10):
+        #     if m.type == discord.MessageType.pins_add:
+        #         await m.delete()
+        #         break
 
     async def cog_app_command_error(
         self, interaction: discord.Interaction, error: app_commands.AppCommandError
