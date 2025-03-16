@@ -34,6 +34,12 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         for key, game in GAMES.items()
         if game["pinChannelIds"]
     ]
+    _GAME_CHOICES = [
+        app_commands.Choice(name=game["name"], value=key)
+        for key, game in GAMES.items()
+        if game["pinChannelIds"]
+        and key != "SM"
+    ]
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -81,7 +87,10 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
 
             timezone = game_details["timezone"]
             assert (pin_channel_ids := game_details["pinChannelIds"])
-            assert itr.guild_id
+            assert (guild_id := itr.guild_id)
+            pin_role = (
+                game_details["pinRoles"][guild_id] if game_details["pinRoles"] else None
+            )
             api_url = game_details["api"]
 
             await self._handle_ssl_command(
@@ -94,7 +103,8 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
                 song[skills_index] if skills_index else None,
                 timezone,
                 game_details["resetOffset"],
-                pin_channel_ids[itr.guild_id],
+                pin_channel_ids[guild_id],
+                pin_role,
                 api_url,
             )
         except StopIteration:
@@ -103,7 +113,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
     @app_commands.command(
         description="Pin SSL song of the day using Song ID (Requires SUPERSTAR Role)"
     )
-    @app_commands.choices(game=GAME_CHOICES)
+    @app_commands.choices(game=_GAME_CHOICES)
     @app_commands.autocomplete(song_id=song_id_autocomplete)
     @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     async def pin_by_id(
@@ -130,7 +140,10 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
 
             timezone = game_details["timezone"]
             assert (pin_channel_ids := game_details["pinChannelIds"])
-            assert itr.guild_id
+            assert (guild_id := itr.guild_id)
+            pin_role = (
+                game_details["pinRoles"][guild_id] if game_details["pinRoles"] else None
+            )
             api_url = game_details["api"]
 
             await self._handle_ssl_command(
@@ -143,7 +156,8 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
                 song[skills_index] if skills_index else None,
                 timezone,
                 game_details["resetOffset"],
-                pin_channel_ids[itr.guild_id],
+                pin_channel_ids[guild_id],
+                pin_role,
                 api_url,
             )
         except StopIteration:
@@ -161,6 +175,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         timezone: ZoneInfo,
         offset: timedelta,
         pin_channel_id: int,
+        pin_role: Optional[int],
         api_url: str,
     ) -> None:
         color: Optional[int] = 0
@@ -185,12 +200,12 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             assert isinstance(pin_channel, discord.TextChannel)
             await self._unpin_old_ssl(embed_title, pin_channel)
             await self._pin_new_ssl(itr, embed, pin_channel)
-            await pin_channel.edit(
-                topic=(
-                    f"[{current_time.strftime("%m.%d.%y")}] "
-                    f"{artist_name} - {song_name}"
-                )
-            )
+            topic = f"[{current_time.strftime("%m.%d.%y")}] {artist_name} - {song_name}"
+            if pin_role:
+                await pin_channel.send(f"<@&{pin_role}> {topic}")
+            else:
+                await pin_channel.send(topic)
+            await pin_channel.edit(topic=topic)
         except AssertionError:
             await itr.followup.send("Bot is not in server")
 

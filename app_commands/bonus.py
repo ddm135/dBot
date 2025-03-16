@@ -12,7 +12,9 @@ from static.dTypes import GameDetails
 
 class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings"):
     GAME_CHOICES = [
-        app_commands.Choice(name=game["name"], value=key) for key, game in GAMES.items()
+        app_commands.Choice(name=game["name"], value=key)
+        for key, game in GAMES.items()
+        if key != "SM"
     ]
 
     def __init__(self, bot: commands.Bot) -> None:

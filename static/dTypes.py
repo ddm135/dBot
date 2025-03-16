@@ -17,6 +17,7 @@ class GameDetails(TypedDict):
     bonusColumns: tuple[str, ...]
     color: int
     pinChannelIds: Optional[dict[int, int]]
+    pinRoles: Optional[dict[int, Optional[int]]]
     api: str
     dateFormat: str
     timezone: ZoneInfo
