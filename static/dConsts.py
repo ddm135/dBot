@@ -76,7 +76,7 @@ GAMES: dict[str, GameDetails] = {
             SSRG_GUILD: 401291379810107394,
         },
         "pinRoles": {
-            TEST_GUILD: 1340873761271840863,
+            TEST_GUILD: 1350860245487845570,
             SSRG_GUILD: 420428449325252608,
         },
         "api": "https://smtown-api-https.dalcomsoft.net",
