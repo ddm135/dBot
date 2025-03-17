@@ -35,7 +35,6 @@ class NotifyP9(commands.Cog):
             if (timezone := game_details["timezone"]) not in (
                 TIMEZONES["KST"],
                 TIMEZONES["JST"],
-            ):
             ) or game_details["name"] == "SUPERSTAR SM":
                 continue
             date_format = game_details["dateFormat"]
