@@ -85,10 +85,15 @@ class NotifyP9(commands.Cog):
             artists = tuple(dict.fromkeys(tuple(zip(*bonus_data))[artist_name_index]))
             for artist in artists:
                 artist_pings = next(
-                    ping
-                    for ping in ping_data
-                    if ping[ping_columns.index("artist_name")] == artist
+                    (
+                        ping
+                        for ping in ping_data
+                        if ping[ping_columns.index("artist_name")] == artist
+                    ),
+                    None,
                 )
+                if not artist_pings:
+                    continue
                 artist_ping_list = artist_pings[ping_columns.index("users")].split(",")
                 artist_ping_list.remove("") if "" in artist_ping_list else None
                 if not artist_ping_list:
