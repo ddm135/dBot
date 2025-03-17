@@ -36,6 +36,7 @@ class NotifyP9(commands.Cog):
                 TIMEZONES["KST"],
                 TIMEZONES["JST"],
             ):
+            ) or game_details["name"] == "SUPERSTAR SM":
                 continue
             date_format = game_details["dateFormat"]
             ping_columns = game_details["pingColumns"]
