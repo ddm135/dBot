@@ -207,15 +207,15 @@ class NotifyP9(commands.Cog):
                 if birthday_bonuses and birthday_start and birthday_end:
                     if birthday_end == current_date and end_check:
                         msg = (
-                            f"> {birthday_members} - All Songs\n> {birthday_total}% "
-                            f"| {birthday_start.strftime("%B %d").replace(" 0", " ")} "
+                            f"> {birthday_members} - **All Songs**\n> {birthday_total}%"
+                            f" | {birthday_start.strftime("%B %d").replace(" 0", " ")} "
                             f"- {birthday_end.strftime("%B %d").replace(" 0", " ")}\n"
                         )
                         notify_end.append(msg)
                     elif birthday_start == current_date and start_check:
                         msg = (
-                            f"> {birthday_members} - All Songs\n> {birthday_total}% "
-                            f"| {birthday_start.strftime("%B %d").replace(" 0", " ")} "
+                            f"> {birthday_members} - **All Songs**\n> {birthday_total}%"
+                            f" | {birthday_start.strftime("%B %d").replace(" 0", " ")} "
                             f"- {birthday_end.strftime("%B %d").replace(" 0", " ")}\n"
                         )
                         notify_start.append(msg)
@@ -243,7 +243,7 @@ class NotifyP9(commands.Cog):
 
                         if song_end == current_date and end_check:
                             msg = (
-                                f"> {album_name} - {song_name} ({song_duration})\n"
+                                f"> {album_name} - **{song_name}** ({song_duration})\n"
                                 f"> {song_total}% | "
                                 f"{song_start.strftime("%B %d").replace(" 0", " ")} "
                                 f"- {song_end.strftime("%B %d").replace(" 0", " ")}\n"
@@ -251,7 +251,7 @@ class NotifyP9(commands.Cog):
                             notify_end.append(msg)
                         elif song_start == current_date and start_check:
                             msg = (
-                                f"> {album_name} - {song_name} ({song_duration})\n"
+                                f"> {album_name} - **{song_name}** ({song_duration})\n"
                                 f"> {song_total}% | "
                                 f"{song_start.strftime("%B %d").replace(" 0", " ")} "
                                 f"- {song_end.strftime("%B %d").replace(" 0", " ")}\n"
