@@ -306,7 +306,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         await super().cog_app_command_error(interaction, error)
         raise error
 
-    @tasks.loop(minutes=30)
+    @tasks.loop(hours=1)
     async def _sync_role_data(self):
         self._upload_role_data()
 
