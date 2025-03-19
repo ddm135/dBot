@@ -1,5 +1,4 @@
 from datetime import datetime, time
-from zoneinfo import ZoneInfo
 
 import discord
 from discord.ext import commands, tasks
@@ -24,27 +23,17 @@ class Clock(commands.Cog):
         self.clock.cancel()
         await super().cog_unload()
 
-    @tasks.loop(time=[
-        time(hour=h, minute=m, second=s)
-        for h in range(24)
-        for m in range(60)
-        for s in range(0, 60, 10)
-    ])
+    @tasks.loop(time=[time(hour=h, minute=m) for h in range(24) for m in range(60)])
     async def clock(self) -> None:
         short_name, timezone = self.TIMEZONE_ITEMS[self.counter]
-        current_time = self._format_current_time(timezone, short_name)
+        current_time = datetime.now(timezone).strftime(f"%H:%M {short_name} %b %d")
 
-        await self.bot.change_presence(
-            activity=discord.Game(name=f"{current_time}")
-        )
+        await self.bot.change_presence(activity=discord.Game(name=f"{current_time}"))
         self.counter = (self.counter + self.STEP) % self.TIMEZONE_COUNT
 
     @clock.before_loop
     async def before_loop(self) -> None:
         await self.bot.wait_until_ready()
-
-    def _format_current_time(self, timezone: ZoneInfo, short_name: str) -> str:
-        return datetime.now(timezone).strftime(f"%H:%M {short_name} %b %d")
 
 
 async def setup(bot: commands.Bot) -> None:
