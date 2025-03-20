@@ -77,7 +77,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         assert (ssl_full_range := game_details["sslSongs"])
         filter = (
             f'=QUERY({ssl_full_range}, "SELECT * WHERE LOWER('
-            f'{get_column_letter(artist_name_index)}) = ""{artist_name}"" '
+            f'{get_column_letter(artist_name_index)}) = LOWER(""{artist_name}"") '
             f"AND LOWER({get_column_letter(song_name_index)}) = "
             f'LOWER(""{song_name}"")", 0)'
         )

@@ -52,7 +52,7 @@ async def song_autocomplete(
     filter = (
         (
             f'=QUERY({ssl_full_range}, "SELECT * WHERE LOWER('
-            f'{get_column_letter(artist_name_index)}) = ""{artist_name}"" '
+            f'{get_column_letter(artist_name_index)}) = LOWER(""{artist_name}"") '
             f"AND (LOWER({get_column_letter(song_name_index)}) "
             f'CONTAINS LOWER(""{current}"") OR '
             f"LOWER({get_column_letter(search_term_index)}) "
@@ -62,7 +62,7 @@ async def song_autocomplete(
         else (
             f'=QUERY({ssl_full_range}, "SELECT * WHERE LOWER('
             f"{get_column_letter(artist_name_index)}) "
-            f'= ""{artist_name}""", 0)'
+            f'= LOWER(""{artist_name}"")", 0)'
         )
     )
     _update_ssl_filter(game_details, filter)
