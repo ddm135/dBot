@@ -57,7 +57,7 @@ async def song_autocomplete(
             [
                 (
                     (
-                        f'=QUERY(Songs!A2:G, "SELECT * WHERE B = ""{artist_name}"") AND'
+                        f'=QUERY(Songs!A2:G, "SELECT * WHERE B = ""{artist_name}"" AND'
                         f' (LOWER(C) CONTAINS LOWER(""{current}"") OR '
                         f'LOWER(D) CONTAINS LOWER(""{current}""))", 0)'
                     )
