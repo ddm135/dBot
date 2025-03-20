@@ -82,7 +82,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
                 [
                     (
                         f'=QUERY(Songs!A2:G, "SELECT * WHERE B = ""{artist_name}"" AND'
-                        f' (LOWER(C) = LOWER(""{song_name}"")'
+                        f' LOWER(C) = LOWER(""{song_name}"")", 0)'
                     )
                 ]
             ],
