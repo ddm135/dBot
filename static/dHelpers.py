@@ -5,7 +5,7 @@ from typing import Optional, Union
 from Cryptodome.Cipher import AES
 from Cryptodome.Util.Padding import unpad
 
-from static.dConsts import MAX_RETRIES
+from static.dConsts import AES_IV, MAX_RETRIES
 from static.dServices import (  # noqa: F401
     cryptServiceCBC,
     cryptServiceECB,
@@ -72,4 +72,5 @@ def decrypt_ecb(data: Union[str, bytes]) -> bytes:
 
 
 def decrypt_cbc(data: Union[str, bytes]) -> bytes:
+    cryptServiceCBC.iv = AES_IV.encode()
     return unpad(cryptServiceCBC.decrypt(b64decode(data)), AES.block_size)
