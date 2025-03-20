@@ -56,9 +56,13 @@ async def song_autocomplete(
         parse_input=True,
         data=[
             [
-                f'=ARRAYFORMULA(INDIRECT("Songs!A"&MATCH("{artist_name}", '
-                f'Songs!B2:B, 0)+1):INDIRECT("Songs!G"&MATCH("{artist_name}", '
-                f'Songs!B2:B, 0)+1+COUNTIF(Songs!B2:B, "{artist_name}")-1))'
+                (
+                    f'=QUERY(ARRAYFORMULA(INDIRECT("Songs!A"&MATCH("{artist_name}", '
+                    f'Songs!B2:B, 0)+1):INDIRECT("Songs!G"&MATCH("{artist_name}", '
+                    f'Songs!B2:B, 0)+1+COUNTIF(Songs!B2:B, "{artist_name}")-1))), '
+                    f'"SELECT * WHERE LOWER(C) CONTAINS LOWER(""{current}"") OR '
+                    f'LOWER(G) CONTAINS LOWER(""{current}"")", 0)'
+                )
             ]
         ],
     )
@@ -98,7 +102,7 @@ async def song_id_autocomplete(
         data=[
             [
                 (
-                    f'ARRAYFORMULA(INDIRECT("Songs!A"&MATCH({current}, Songs!A2:A,0'
+                    f'=ARRAYFORMULA(INDIRECT("Songs!A"&MATCH({current}, Songs!A2:A,0'
                     f')+1):INDIRECT("Songs!G"&MATCH({current}, Songs!A2:A,0)+1))'
                 )
             ]
