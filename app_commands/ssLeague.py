@@ -244,7 +244,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             ) as r:
                 try:
                     ajs = await r.json(content_type=None)
-                except (json.JSONDecodeError, json.decoder.JSONDecodeError):
+                except json.JSONDecodeError:
                     ajs = json.loads(decrypt_cbc(await r.text()))
         return ajs
 
@@ -359,7 +359,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             )
 
         await super().cog_app_command_error(interaction, error)
-        raise error
+        # raise error
 
 
 async def setup(bot: commands.Bot):
