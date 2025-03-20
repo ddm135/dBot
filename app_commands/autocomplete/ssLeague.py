@@ -63,7 +63,7 @@ async def song_autocomplete(
                     )
                     if current
                     else (
-                        f'=QUERY(Songs!A2:G, "SELECT * WHERE B = ""{artist_name}"", 0)'
+                        f'=QUERY(Songs!A2:G, "SELECT * WHERE B = ""{artist_name}""", 0)'
                     )
                 )
             ]
