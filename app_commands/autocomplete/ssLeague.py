@@ -17,7 +17,7 @@ async def artist_autocomplete(
     game_details = GAMES[itr.namespace.game]
 
     assert (ssl_id := game_details["sslId"])
-    assert (ssl_range := game_details["sslRange"])
+    assert (ssl_range := game_details["sslArtists"])
     ssl_artists = get_sheet_data(
         ssl_id,
         ssl_range,
