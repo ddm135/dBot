@@ -25,7 +25,13 @@ from static.dConsts import (
     TEST_ROLE_OWNER,
     TIMEZONES,
 )
-from static.dHelpers import decrypt_cbc, decrypt_ecb, get_sheet_data, update_sheet_data
+from static.dHelpers import (
+    decrypt_cbc,
+    decrypt_ecb,
+    get_column_letter,
+    get_sheet_data,
+    update_sheet_data,
+)
 
 
 @app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)
@@ -74,24 +80,27 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         ) = _ssl_preprocess(game.value)
 
         assert (ssl_id := game_details["sslId"])
+        assert (ssl_full_range := game_details["sslSongs"])
+        assert (ssl_filtered_range := game_details["sslFiltereds"])
         update_sheet_data(
             ssl_id,
-            "Filtered Songs!A2",
+            ssl_filtered_range,
             parse_input=True,
             data=[
                 [
                     (
-                        f'=QUERY(Songs!A2:G, "SELECT * WHERE B = ""{artist_name}"" AND'
-                        f' LOWER(C) = LOWER(""{song_name}"")", 0)'
+                        f'=QUERY({ssl_full_range}, "SELECT * WHERE '
+                        f'{get_column_letter(artist_name_index)} = ""{artist_name}"" '
+                        f"AND LOWER({get_column_letter(song_name_index)}) = "
+                        f'LOWER(""{song_name}"")", 0)'
                     )
                 ]
             ],
         )
 
-        assert (ssl_range := game_details["sslRange"])
         ssl_data = get_sheet_data(
             ssl_id,
-            ssl_range,
+            ssl_filtered_range,
             "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
         )
 
@@ -152,11 +161,11 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             skills_index,
         ) = _ssl_preprocess(game.value)
 
-        assert (ssl_range := game_details["sslRange"])
+        assert (ssl_filtered_range := game_details["sslFiltereds"])
         assert (ssl_id := game_details["sslId"])
         ssl_data = get_sheet_data(
             ssl_id,
-            ssl_range,
+            ssl_filtered_range,
             "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
         )
 

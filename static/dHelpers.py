@@ -70,3 +70,7 @@ def decrypt_ecb(data: Union[str, bytes]) -> bytes:
 def decrypt_cbc(data: Union[str, bytes]) -> bytes:
     cipherCBC = AES.new(AES_KEY.encode(), AES.MODE_CBC, AES_IV.encode())
     return unpad(cipherCBC.decrypt(b64decode(data)), AES.block_size)
+
+
+def get_column_letter(index: int) -> str:
+    return chr((index) % 26 + ord("A"))

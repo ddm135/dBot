@@ -5,7 +5,7 @@ import discord
 from discord import app_commands
 
 from static.dConsts import GAMES, MAX_AUTOCOMPLETE_RESULTS, TIMEZONES
-from static.dHelpers import get_sheet_data, update_sheet_data
+from static.dHelpers import get_column_letter, get_sheet_data, update_sheet_data
 from static.dTypes import GameDetails
 
 
@@ -17,10 +17,10 @@ async def artist_autocomplete(
     game_details = GAMES[itr.namespace.game]
 
     assert (ssl_id := game_details["sslId"])
-    assert (ssl_range := game_details["sslArtists"])
+    assert (ssl_filtered_range := game_details["sslArtists"])
     ssl_artists = get_sheet_data(
         ssl_id,
-        ssl_range,
+        ssl_filtered_range,
         "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
     )
 
@@ -49,31 +49,37 @@ async def song_autocomplete(
     ) = _ssl_preprocess(itr.namespace.game)
 
     assert (ssl_id := game_details["sslId"])
+    assert (ssl_full_range := game_details["sslSongs"])
+    assert (ssl_filtered_range := game_details["sslFiltereds"])
     update_sheet_data(
         ssl_id,
-        "Filtered Songs!A2",
+        ssl_filtered_range,
         parse_input=True,
         data=[
             [
                 (
                     (
-                        f'=QUERY(Songs!A2:G, "SELECT * WHERE B = ""{artist_name}"" AND'
-                        f' (LOWER(C) CONTAINS LOWER(""{current}"") OR '
-                        f'LOWER(D) CONTAINS LOWER(""{current}""))", 0)'
+                        f'=QUERY({ssl_full_range}, "SELECT * WHERE '
+                        f'{get_column_letter(artist_name_index)} = ""{artist_name}"" '
+                        f"AND (LOWER({get_column_letter(song_name_index)}) "
+                        f'CONTAINS LOWER(""{current}"") OR '
+                        f"LOWER({get_column_letter(search_term_index)}) "
+                        f'CONTAINS LOWER(""{current}""))", 0)'
                     )
                     if current
                     else (
-                        f'=QUERY(Songs!A2:G, "SELECT * WHERE B = ""{artist_name}""", 0)'
+                        f'=QUERY({ssl_full_range}, "SELECT * WHERE '
+                        f'{get_column_letter(artist_name_index)} = ""{artist_name}""'
+                        f'", 0)'
                     )
                 )
             ]
         ],
     )
 
-    assert (ssl_range := game_details["sslRange"])
     ssl_songs = get_sheet_data(
         ssl_id,
-        ssl_range,
+        ssl_filtered_range,
         "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
     )
 
@@ -105,17 +111,23 @@ async def song_id_autocomplete(
     ) = _ssl_preprocess(itr.namespace.game)
 
     assert (ssl_id := game_details["sslId"])
+    assert (ssl_full_range := game_details["sslSongs"])
+    assert (ssl_filtered_range := game_details["sslFiltereds"])
     update_sheet_data(
         ssl_id,
-        "Filtered Songs!A2",
+        ssl_filtered_range,
         parse_input=True,
-        data=[[f'=QUERY(Songs!A2:G, "SELECT * WHERE A = {current}, 0)']],
+        data=[
+            [
+                f'=QUERY({ssl_full_range}, "SELECT * WHERE '
+                f"{get_column_letter(song_id_index)} = {current}, 0)"
+            ]
+        ],
     )
 
-    assert (ssl_range := game_details["sslRange"])
     ssl_songs = get_sheet_data(
         ssl_id,
-        ssl_range,
+        ssl_filtered_range,
         "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
     )
 
@@ -127,12 +139,6 @@ async def song_id_autocomplete(
             )
         ]
     return []
-
-
-def get_ssl_data(
-    spreadsheet_id: str, range_str: str, instance: Optional[str] = None
-) -> list[list[str]]:
-    return get_sheet_data(spreadsheet_id, range_str, instance)
 
 
 def _ssl_preprocess(

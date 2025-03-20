@@ -7,7 +7,8 @@ class GameDetails(TypedDict):
     name: str
     sslId: Optional[str]
     sslArtists: Optional[str]
-    sslRange: Optional[str]
+    sslSongs: Optional[str]
+    sslFiltereds: Optional[str]
     sslColumns: Optional[tuple[str, ...]]
     pingId: str
     pingRange: str
