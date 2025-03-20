@@ -54,6 +54,7 @@ GAMES: dict[str, GameDetails] = {
     "SM": {
         "name": "SUPERSTAR SM",
         "sslId": "1kC38CLFd6xkDXD9qLHgnnv3s3jmM_4vf4RLsWuXs9NU",
+        "sslArtists": "Artists!A2:A",
         "sslRange": "Songs!A2:F",
         "sslColumns": (
             "song_id",
@@ -99,6 +100,7 @@ GAMES: dict[str, GameDetails] = {
     "SM_JP": {
         "name": "SUPERSTAR SMTOWN (JP/TW)",
         "sslId": "1kC38CLFd6xkDXD9qLHgnnv3s3jmM_4vf4RLsWuXs9NU",
+        "sslArtists": "Artists!A2:A",
         "sslRange": "Songs!A2:F",
         "sslColumns": (
             "song_id",
@@ -140,6 +142,7 @@ GAMES: dict[str, GameDetails] = {
     # "G": {
     #     "name": "SUPERSTAR GFRIEND",
     #     "sslId": None,
+    #     "sslArtists": None,
     #     "sslRange": None,
     #     "sslColumns": None,
     #     "pingId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
@@ -171,6 +174,7 @@ GAMES: dict[str, GameDetails] = {
     "JYP_JP": {
         "name": "SUPERSTAR JYPNATION (JP)",
         "sslId": "1eVjwi0GudyMixnZtam8TeupRd3DQ6mheyRKp2lDA6qw",
+        "sslArtists": "Artists!A2:A",
         "sslRange": "Songs!A2:G",
         "sslColumns": (
             "song_id",
@@ -213,6 +217,7 @@ GAMES: dict[str, GameDetails] = {
     "LP": {
         "name": "SUPERSTAR LAPONE",
         "sslId": "1Ng57BGCDj025bxwCBbQulYFhRjS5runy5HnbStY_xSw",
+        "sslArtists": "Artists!A2:A",
         "sslRange": "Songs!A2:G",
         "sslColumns": (
             "song_id",
@@ -255,6 +260,7 @@ GAMES: dict[str, GameDetails] = {
     "EB": {
         "name": "SUPERSTAR EBiDAN",
         "sslId": None,
+        "sslArtists": None,
         "sslRange": None,
         "sslColumns": None,
         "pingId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
@@ -286,6 +292,7 @@ GAMES: dict[str, GameDetails] = {
     "PH": {
         "name": "SuperStar Philippines",
         "sslId": None,
+        "sslArtists": None,
         "sslRange": None,
         "sslColumns": None,
         "pingId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",

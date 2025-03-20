@@ -1,3 +1,4 @@
+import itertools
 from typing import Optional, Union
 
 import discord
@@ -11,13 +12,21 @@ from static.dTypes import GameDetails
 async def artist_autocomplete(
     itr: discord.Interaction, current: str
 ) -> list[app_commands.Choice[str]]:
-    _, ssl_data, artist_name_index, _, _, _, _, _, _ = _ssl_preprocess(
-        itr.namespace.game
+    if not itr.namespace.game:
+        return []
+    game_details = GAMES[itr.namespace.game]
+
+    assert (ssl_id := game_details["sslId"])
+    assert (ssl_range := game_details["sslRange"])
+    ssl_artists = get_sheet_data(
+        ssl_id,
+        ssl_range,
+        "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
     )
 
     artists = [
         app_commands.Choice(name=artist, value=artist)
-        for artist in dict.fromkeys(tuple(zip(*ssl_data))[artist_name_index])
+        for artist in itertools.chain.from_iterable(ssl_artists)
         if current.lower() in artist.lower()
     ]
 

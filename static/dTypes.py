@@ -6,6 +6,7 @@ from zoneinfo import ZoneInfo
 class GameDetails(TypedDict):
     name: str
     sslId: Optional[str]
+    sslArtists: Optional[str]
     sslRange: Optional[str]
     sslColumns: Optional[tuple[str, ...]]
     pingId: str
