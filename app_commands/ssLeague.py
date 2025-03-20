@@ -242,9 +242,10 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
                 headers=A_JSON_HEADERS,
                 data=A_JSON_BODY,
             ) as r:
+                print(await r.text())
                 try:
                     ajs = await r.json(content_type=None)
-                except (json.JSONDecodeError, UnicodeDecodeError):
+                except json.JSONDecodeError:
                     ajs = json.loads(decrypt_cbc(await r.text()))
         return ajs
 
