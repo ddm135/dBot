@@ -17,10 +17,10 @@ async def artist_autocomplete(
     game_details = GAMES[itr.namespace.game]
 
     assert (ssl_id := game_details["sslId"])
-    assert (ssl_filtered_range := game_details["sslArtists"])
+    assert (ssl_artist_range := game_details["sslArtists"])
     ssl_artists = get_sheet_data(
         ssl_id,
-        ssl_filtered_range,
+        ssl_artist_range,
         "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
     )
 
@@ -48,40 +48,28 @@ async def song_autocomplete(
         _,
     ) = _ssl_preprocess(itr.namespace.game)
 
-    assert (ssl_id := game_details["sslId"])
     assert (ssl_full_range := game_details["sslSongs"])
-    assert (ssl_filtered_range := game_details["sslFiltereds"])
-    update_sheet_data(
-        ssl_id,
-        ssl_filtered_range,
-        parse_input=True,
-        data=[
-            [
-                (
-                    (
-                        f'=QUERY({ssl_full_range}, "SELECT * WHERE '
-                        f'{get_column_letter(artist_name_index)} = ""{artist_name}"" '
-                        f"AND (LOWER({get_column_letter(song_name_index)}) "
-                        f'CONTAINS LOWER(""{current}"") OR '
-                        f"LOWER({get_column_letter(search_term_index)}) "
-                        f'CONTAINS LOWER(""{current}""))", 0)'
-                    )
-                    if current
-                    else (
-                        f'=QUERY({ssl_full_range}, "SELECT * WHERE '
-                        f'{get_column_letter(artist_name_index)} = ""{artist_name}""'
-                        f'", 0)'
-                    )
-                )
-            ]
-        ],
+    filter = (
+        (
+            f'=QUERY({ssl_full_range}, "SELECT * WHERE LOWER('
+            f'{get_column_letter(artist_name_index)}) = ""{artist_name}"" '
+            f"AND (LOWER({get_column_letter(song_name_index)}) "
+            f'CONTAINS LOWER(""{current}"") OR '
+            f"LOWER({get_column_letter(search_term_index)}) "
+            f'CONTAINS LOWER(""{current}""))", 0)'
+        )
+        if current
+        else (
+            f'=QUERY({ssl_full_range}, "SELECT * WHERE LOWER('
+            f"{get_column_letter(artist_name_index)}) "
+            f'= ""{artist_name}""", 0)'
+        )
     )
+    _update_ssl_filter(game_details, filter)
 
-    ssl_songs = get_sheet_data(
-        ssl_id,
-        ssl_filtered_range,
-        "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
-    )
+    ssl_songs = _get_ssl_data(game_details)
+    if not ssl_songs:
+        return []
 
     songs = [
         app_commands.Choice(name=s[song_name_index], value=s[song_name_index])
@@ -110,26 +98,16 @@ async def song_id_autocomplete(
         _,
     ) = _ssl_preprocess(itr.namespace.game)
 
-    assert (ssl_id := game_details["sslId"])
     assert (ssl_full_range := game_details["sslSongs"])
-    assert (ssl_filtered_range := game_details["sslFiltereds"])
-    update_sheet_data(
-        ssl_id,
-        ssl_filtered_range,
-        parse_input=True,
-        data=[
-            [
-                f'=QUERY({ssl_full_range}, "SELECT * WHERE '
-                f"{get_column_letter(song_id_index)} = {current}, 0)"
-            ]
-        ],
+    filter = (
+        f'=QUERY({ssl_full_range}, "SELECT * WHERE '
+        f"{get_column_letter(song_id_index)} = {current}, 0)"
     )
+    _update_ssl_filter(game_details, filter)
 
-    ssl_songs = get_sheet_data(
-        ssl_id,
-        ssl_filtered_range,
-        "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
-    )
+    ssl_songs = _get_ssl_data(game_details)
+    if not ssl_songs:
+        return []
 
     if song := next((s for s in ssl_songs if current == s[song_id_index]), None):
         return [
@@ -141,12 +119,47 @@ async def song_id_autocomplete(
     return []
 
 
+def get_ssl_data(
+    spreadsheet_id: str, range_str: str, instance: Optional[str] = None
+) -> list[list[str]]:
+    return get_sheet_data(spreadsheet_id, range_str, instance)
+
+
+def update_ssl_filter(
+    spreadsheet_id: str,
+    range_str: str,
+    data: list[list[str]],
+    instance: Optional[str] = None,
+) -> None:
+    return update_sheet_data(spreadsheet_id, range_str, True, data, instance)
+
+
 def _ssl_preprocess(
     game: str,
 ) -> tuple[GameDetails, int, int, int, int, int, int, Optional[int]]:
     game_details = GAMES[game]
     assert (ssl_columns := game_details["sslColumns"])
     return game_details, *_get_ssl_indexes(ssl_columns)
+
+
+def _get_ssl_data(game_details: GameDetails) -> list[list[str]]:
+    assert (ssl_id := game_details["sslId"])
+    assert (ssl_filtered_range := game_details["sslFiltereds"])
+    return get_ssl_data(
+        ssl_id,
+        ssl_filtered_range,
+        "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
+    )
+
+
+def _update_ssl_filter(game_details: GameDetails, filter: str) -> None:
+    assert (ssl_id := game_details["sslId"])
+    assert (ssl_filtered_range := game_details["sslFiltereds"])
+    update_ssl_filter(
+        ssl_id,
+        ssl_filtered_range,
+        data=[[filter]],
+    )
 
 
 def _get_ssl_indexes(

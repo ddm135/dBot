@@ -11,7 +11,9 @@ from discord import app_commands
 from discord.ext import commands
 
 from app_commands.autocomplete.ssLeague import (
+    _get_ssl_data,
     _ssl_preprocess,
+    _update_ssl_filter,
     artist_autocomplete,
     song_autocomplete,
     song_id_autocomplete,
@@ -23,15 +25,8 @@ from static.dConsts import (
     SSRG_ROLE_MOD,
     SSRG_ROLE_SS,
     TEST_ROLE_OWNER,
-    TIMEZONES,
 )
-from static.dHelpers import (
-    decrypt_cbc,
-    decrypt_ecb,
-    get_column_letter,
-    get_sheet_data,
-    update_sheet_data,
-)
+from static.dHelpers import decrypt_cbc, decrypt_ecb, get_column_letter
 
 
 @app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)
@@ -79,63 +74,42 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             skills_index,
         ) = _ssl_preprocess(game.value)
 
-        assert (ssl_id := game_details["sslId"])
         assert (ssl_full_range := game_details["sslSongs"])
-        assert (ssl_filtered_range := game_details["sslFiltereds"])
-        update_sheet_data(
-            ssl_id,
-            ssl_filtered_range,
-            parse_input=True,
-            data=[
-                [
-                    (
-                        f'=QUERY({ssl_full_range}, "SELECT * WHERE '
-                        f'{get_column_letter(artist_name_index)} = ""{artist_name}"" '
-                        f"AND LOWER({get_column_letter(song_name_index)}) = "
-                        f'LOWER(""{song_name}"")", 0)'
-                    )
-                ]
-            ],
+        filter = (
+            f'=QUERY({ssl_full_range}, "SELECT * WHERE LOWER('
+            f'{get_column_letter(artist_name_index)}) = ""{artist_name}"" '
+            f"AND LOWER({get_column_letter(song_name_index)}) = "
+            f'LOWER(""{song_name}"")", 0)'
         )
+        _update_ssl_filter(game_details, filter)
 
-        ssl_data = get_sheet_data(
-            ssl_id,
-            ssl_filtered_range,
-            "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
+        ssl_songs = _get_ssl_data(game_details)
+        if not ssl_songs:
+            return await itr.followup.send("Song not found.")
+
+        song = ssl_songs[0]
+        timezone = game_details["timezone"]
+        assert (pin_channel_ids := game_details["pinChannelIds"])
+        assert (guild_id := itr.guild_id)
+        pin_role = (
+            game_details["pinRoles"][guild_id] if game_details["pinRoles"] else None
         )
+        api_url = game_details["api"]
 
-        try:
-            song = next(
-                s
-                for s in ssl_data
-                if s[artist_name_index].lower() == artist_name.lower()
-                and s[song_name_index].lower() == song_name.lower()
-            )
-
-            timezone = game_details["timezone"]
-            assert (pin_channel_ids := game_details["pinChannelIds"])
-            assert (guild_id := itr.guild_id)
-            pin_role = (
-                game_details["pinRoles"][guild_id] if game_details["pinRoles"] else None
-            )
-            api_url = game_details["api"]
-
-            await self._handle_ssl_command(
-                itr,
-                song[artist_name_index],
-                song[song_name_index],
-                int(song[song_id_index]),
-                song[duration_index],
-                song[image_url_index],
-                song[skills_index] if skills_index else None,
-                timezone,
-                game_details["resetOffset"],
-                pin_channel_ids[guild_id],
-                pin_role,
-                api_url,
-            )
-        except StopIteration:
-            await itr.followup.send("Song not found.")
+        await self._handle_ssl_command(
+            itr,
+            song[artist_name_index],
+            song[song_name_index],
+            int(song[song_id_index]),
+            song[duration_index],
+            song[image_url_index],
+            song[skills_index] if skills_index else None,
+            timezone,
+            game_details["resetOffset"],
+            pin_channel_ids[guild_id],
+            pin_role,
+            api_url,
+        )
 
     @app_commands.command(
         description="Pin SSL song of the day using Song ID (Requires SUPERSTAR Role)"
@@ -161,41 +135,33 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             skills_index,
         ) = _ssl_preprocess(game.value)
 
-        assert (ssl_filtered_range := game_details["sslFiltereds"])
-        assert (ssl_id := game_details["sslId"])
-        ssl_data = get_sheet_data(
-            ssl_id,
-            ssl_filtered_range,
-            "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
+        ssl_songs = _get_ssl_data(game_details)
+        if not ssl_songs:
+            return await itr.followup.send("Song not found.")
+
+        song = ssl_songs[0]
+        timezone = game_details["timezone"]
+        assert (pin_channel_ids := game_details["pinChannelIds"])
+        assert (guild_id := itr.guild_id)
+        pin_role = (
+            game_details["pinRoles"][guild_id] if game_details["pinRoles"] else None
         )
+        api_url = game_details["api"]
 
-        try:
-            song = next(s for s in ssl_data if s[song_id_index] == song_id)
-
-            timezone = game_details["timezone"]
-            assert (pin_channel_ids := game_details["pinChannelIds"])
-            assert (guild_id := itr.guild_id)
-            pin_role = (
-                game_details["pinRoles"][guild_id] if game_details["pinRoles"] else None
-            )
-            api_url = game_details["api"]
-
-            await self._handle_ssl_command(
-                itr,
-                song[artist_name_index],
-                song[song_name_index],
-                int(song[song_id_index]),
-                song[duration_index],
-                song[image_url_index],
-                song[skills_index] if skills_index else None,
-                timezone,
-                game_details["resetOffset"],
-                pin_channel_ids[guild_id],
-                pin_role,
-                api_url,
-            )
-        except StopIteration:
-            await itr.followup.send("Song not found.")
+        await self._handle_ssl_command(
+            itr,
+            song[artist_name_index],
+            song[song_name_index],
+            int(song[song_id_index]),
+            song[duration_index],
+            song[image_url_index],
+            song[skills_index] if skills_index else None,
+            timezone,
+            game_details["resetOffset"],
+            pin_channel_ids[guild_id],
+            pin_role,
+            api_url,
+        )
 
     async def _handle_ssl_command(
         self,
