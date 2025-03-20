@@ -101,7 +101,7 @@ async def song_id_autocomplete(
     assert (ssl_full_range := game_details["sslSongs"])
     filter = (
         f'=QUERY({ssl_full_range}, "SELECT * WHERE '
-        f"{get_column_letter(song_id_index)} = {current}, 0)"
+        f'{get_column_letter(song_id_index)} = {current}", 0)'
     )
     _update_ssl_filter(game_details, filter)
 
