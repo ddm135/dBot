@@ -245,9 +245,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
                 try:
                     ajs = await r.json(content_type=None)
                 except json.JSONDecodeError:
-                    tmp = decrypt_cbc(await r.text())
-                    print(tmp)
-                    ajs = json.loads(tmp)
+                    ajs = json.loads(decrypt_cbc(await r.text()))
         return ajs
 
     async def _get_music_data(self, api_url: str) -> dict:
