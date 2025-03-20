@@ -37,7 +37,6 @@ async def song_autocomplete(
     itr: discord.Interaction, current: str
 ) -> list[app_commands.Choice[str]]:
     artist_name: str = itr.namespace.artist_name
-
     (
         game_details,
         artist_name_index,
@@ -57,11 +56,15 @@ async def song_autocomplete(
         data=[
             [
                 (
-                    f'=QUERY(ARRAYFORMULA(INDIRECT("Songs!A"&MATCH("{artist_name}", '
-                    f'Songs!B2:B, 0)+1):INDIRECT("Songs!G"&MATCH("{artist_name}", '
-                    f'Songs!B2:B, 0)+1+COUNTIF(Songs!B2:B, "{artist_name}")-1)), '
-                    f'"SELECT * WHERE LOWER(C) CONTAINS LOWER(""{current}"") OR '
-                    f'LOWER(G) CONTAINS LOWER(""{current}"")", 0)'
+                    (
+                        f'=QUERY(Songs!A2:G, "SELECT * WHERE B = ""{artist_name}"") AND'
+                        f' (LOWER(C) CONTAINS LOWER(""{current}"") OR '
+                        f'LOWER(D) CONTAINS LOWER(""{current}""))", 0)'
+                    )
+                    if current
+                    else (
+                        f'=QUERY(Songs!A2:G, "SELECT * WHERE B = ""{artist_name}"", 0)'
+                    )
                 )
             ]
         ],
@@ -90,23 +93,23 @@ async def song_autocomplete(
 async def song_id_autocomplete(
     itr: discord.Interaction, current: str
 ) -> list[app_commands.Choice[str]]:
-    game_details, artist_name_index, song_name_index, song_id_index, _, _, _, _ = (
-        _ssl_preprocess(itr.namespace.game)
-    )
+    (
+        game_details,
+        artist_name_index,
+        song_name_index,
+        song_id_index,
+        _,
+        _,
+        _,
+        _,
+    ) = _ssl_preprocess(itr.namespace.game)
 
     assert (ssl_id := game_details["sslId"])
     update_sheet_data(
         ssl_id,
         "Filtered Songs!A2",
         parse_input=True,
-        data=[
-            [
-                (
-                    f'=ARRAYFORMULA(INDIRECT("Songs!A"&MATCH({current}, Songs!A2:A,0'
-                    f')+1):INDIRECT("Songs!G"&MATCH({current}, Songs!A2:A,0)+1))'
-                )
-            ]
-        ],
+        data=[[f'=QUERY(Songs!A2:G, "SELECT * WHERE A = {current}, 0)']],
     )
 
     assert (ssl_range := game_details["sslRange"])
@@ -138,16 +141,6 @@ def _ssl_preprocess(
     game_details = GAMES[game]
     assert (ssl_columns := game_details["sslColumns"])
     return game_details, *_get_ssl_indexes(ssl_columns)
-
-
-def _get_ssl_data(game_details: GameDetails) -> list[list[str]]:
-    assert (ssl_id := game_details["sslId"])
-    assert (ssl_range := game_details["sslRange"])
-    return get_ssl_data(
-        ssl_id,
-        ssl_range,
-        "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
-    )
 
 
 def _get_ssl_indexes(

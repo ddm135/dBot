@@ -25,7 +25,7 @@ from static.dConsts import (
     TEST_ROLE_OWNER,
     TIMEZONES,
 )
-from static.dHelpers import decrypt_cbc, decrypt_ecb, get_sheet_data
+from static.dHelpers import decrypt_cbc, decrypt_ecb, get_sheet_data, update_sheet_data
 
 
 @app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)
@@ -69,12 +69,26 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             song_id_index,
             duration_index,
             image_url_index,
-            search_term_index,
+            _,
             skills_index,
         ) = _ssl_preprocess(game.value)
 
-        assert (ssl_range := game_details["sslRange"])
         assert (ssl_id := game_details["sslId"])
+        update_sheet_data(
+            ssl_id,
+            "Filtered Songs!A2",
+            parse_input=True,
+            data=[
+                [
+                    (
+                        f'=QUERY(Songs!A2:G, "SELECT * WHERE B = ""{artist_name}"") AND'
+                        f' (LOWER(C) = LOWER(""{song_name}"")'
+                    )
+                ]
+            ],
+        )
+
+        assert (ssl_range := game_details["sslRange"])
         ssl_data = get_sheet_data(
             ssl_id,
             ssl_range,
@@ -86,10 +100,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
                 s
                 for s in ssl_data
                 if s[artist_name_index].lower() == artist_name.lower()
-                and (
-                    s[song_name_index].lower() == song_name.lower()
-                    or song_name.lower() in s[search_term_index].lower().split(";")
-                )
+                and s[song_name_index].lower() == song_name.lower()
             )
 
             timezone = game_details["timezone"]
@@ -137,7 +148,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             song_id_index,
             duration_index,
             image_url_index,
-            search_term_index,
+            _,
             skills_index,
         ) = _ssl_preprocess(game.value)
 
