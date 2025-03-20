@@ -23,8 +23,9 @@ from static.dConsts import (
     SSRG_ROLE_MOD,
     SSRG_ROLE_SS,
     TEST_ROLE_OWNER,
+    TIMEZONES,
 )
-from static.dHelpers import decrypt_cbc, decrypt_ecb
+from static.dHelpers import decrypt_cbc, decrypt_ecb, get_sheet_data
 
 
 @app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)
@@ -37,8 +38,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
     _GAME_CHOICES = [
         app_commands.Choice(name=game["name"], value=key)
         for key, game in GAMES.items()
-        if game["pinChannelIds"]
-        and key != "SM"
+        if game["pinChannelIds"] and key != "SM"
     ]
 
     def __init__(self, bot: commands.Bot):
@@ -64,7 +64,6 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         await itr.response.defer(ephemeral=True)
         (
             game_details,
-            ssl_data,
             artist_name_index,
             song_name_index,
             song_id_index,
@@ -73,6 +72,14 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             search_term_index,
             skills_index,
         ) = _ssl_preprocess(game.value)
+
+        assert (ssl_range := game_details["sslRange"])
+        assert (ssl_id := game_details["sslId"])
+        ssl_data = get_sheet_data(
+            ssl_id,
+            ssl_range,
+            "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
+        )
 
         try:
             song = next(
@@ -125,15 +132,22 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         await itr.response.defer(ephemeral=True)
         (
             game_details,
-            ssl_data,
             artist_name_index,
             song_name_index,
             song_id_index,
             duration_index,
             image_url_index,
-            _,
+            search_term_index,
             skills_index,
         ) = _ssl_preprocess(game.value)
+
+        assert (ssl_range := game_details["sslRange"])
+        assert (ssl_id := game_details["sslId"])
+        ssl_data = get_sheet_data(
+            ssl_id,
+            ssl_range,
+            "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
+        )
 
         try:
             song = next(s for s in ssl_data if s[song_id_index] == song_id)

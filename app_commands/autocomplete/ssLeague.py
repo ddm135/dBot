@@ -5,7 +5,7 @@ import discord
 from discord import app_commands
 
 from static.dConsts import GAMES, MAX_AUTOCOMPLETE_RESULTS, TIMEZONES
-from static.dHelpers import get_sheet_data
+from static.dHelpers import get_sheet_data, update_sheet_data
 from static.dTypes import GameDetails
 
 
@@ -37,13 +37,42 @@ async def song_autocomplete(
     itr: discord.Interaction, current: str
 ) -> list[app_commands.Choice[str]]:
     artist_name: str = itr.namespace.artist_name
-    _, ssl_data, artist_name_index, song_name_index, _, _, _, search_term_index, _ = (
-        _ssl_preprocess(itr.namespace.game)
+
+    (
+        game_details,
+        artist_name_index,
+        song_name_index,
+        _,
+        _,
+        _,
+        search_term_index,
+        _,
+    ) = _ssl_preprocess(itr.namespace.game)
+
+    assert (ssl_id := game_details["sslId"])
+    update_sheet_data(
+        ssl_id,
+        "Filtered Songs!A2",
+        parse_input=True,
+        data=[
+            [
+                f'=ARRAYFORMULA(INDIRECT("Songs!A"&MATCH("{artist_name}", '
+                f'Songs!B2:B, 0)+1):INDIRECT("Songs!G"&MATCH("{artist_name}", '
+                f'Songs!B2:B, 0)+1+COUNTIF(Songs!B2:B, "{artist_name}")-1))'
+            ]
+        ],
+    )
+
+    assert (ssl_range := game_details["sslRange"])
+    ssl_songs = get_sheet_data(
+        ssl_id,
+        ssl_range,
+        "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
     )
 
     songs = [
         app_commands.Choice(name=s[song_name_index], value=s[song_name_index])
-        for s in ssl_data
+        for s in ssl_songs
         if artist_name.lower() == s[artist_name_index].lower()
         and (
             current.lower() in s[song_name_index].lower()
@@ -57,11 +86,33 @@ async def song_autocomplete(
 async def song_id_autocomplete(
     itr: discord.Interaction, current: str
 ) -> list[app_commands.Choice[str]]:
-    _, ssl_data, artist_name_index, song_name_index, song_id_index, _, _, _, _ = (
+    game_details, artist_name_index, song_name_index, song_id_index, _, _, _, _ = (
         _ssl_preprocess(itr.namespace.game)
     )
 
-    if song := next((s for s in ssl_data if current == s[song_id_index]), None):
+    assert (ssl_id := game_details["sslId"])
+    update_sheet_data(
+        ssl_id,
+        "Filtered Songs!A2",
+        parse_input=True,
+        data=[
+            [
+                (
+                    f'ARRAYFORMULA(INDIRECT("Songs!A"&MATCH({current}, Songs!A2:A,0'
+                    f')+1):INDIRECT("Songs!G"&MATCH({current}, Songs!A2:A,0)+1))'
+                )
+            ]
+        ],
+    )
+
+    assert (ssl_range := game_details["sslRange"])
+    ssl_songs = get_sheet_data(
+        ssl_id,
+        ssl_range,
+        "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
+    )
+
+    if song := next((s for s in ssl_songs if current == s[song_id_index]), None):
         return [
             app_commands.Choice(
                 name=f"{song[artist_name_index]} - {song[song_name_index]}",
@@ -79,11 +130,10 @@ def get_ssl_data(
 
 def _ssl_preprocess(
     game: str,
-) -> tuple[GameDetails, list[list[str]], int, int, int, int, int, int, Optional[int]]:
+) -> tuple[GameDetails, int, int, int, int, int, int, Optional[int]]:
     game_details = GAMES[game]
-    ssl_data = _get_ssl_data(game_details)
     assert (ssl_columns := game_details["sslColumns"])
-    return game_details, ssl_data, *_get_ssl_indexes(ssl_columns)
+    return game_details, *_get_ssl_indexes(ssl_columns)
 
 
 def _get_ssl_data(game_details: GameDetails) -> list[list[str]]:
