@@ -59,7 +59,7 @@ async def song_autocomplete(
                 (
                     f'=QUERY(ARRAYFORMULA(INDIRECT("Songs!A"&MATCH("{artist_name}", '
                     f'Songs!B2:B, 0)+1):INDIRECT("Songs!G"&MATCH("{artist_name}", '
-                    f'Songs!B2:B, 0)+1+COUNTIF(Songs!B2:B, "{artist_name}")-1))), '
+                    f'Songs!B2:B, 0)+1+COUNTIF(Songs!B2:B, "{artist_name}")-1)), '
                     f'"SELECT * WHERE LOWER(C) CONTAINS LOWER(""{current}"") OR '
                     f'LOWER(G) CONTAINS LOWER(""{current}"")", 0)'
                 )
