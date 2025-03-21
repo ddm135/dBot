@@ -61,8 +61,8 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         await itr.response.defer(ephemeral=True)
         (
             game_details,
-            artist_name_index,
-            song_name_index,
+            _,
+            _,
             song_id_index,
             duration_index,
             image_url_index,
@@ -118,7 +118,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             game_details,
             artist_name_index,
             song_name_index,
-            song_id_index,
+            _,
             duration_index,
             image_url_index,
             _,
@@ -183,8 +183,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
 
         try:
             assert isinstance(pin_channel, discord.TextChannel)
-            await self._unpin_old_ssl(embed_title, pin_channel)
-            await self._pin_new_ssl(embed, pin_channel)
+            new_pin = await self._pin_new_ssl(embed, pin_channel)
             topic = f"[{current_time.strftime("%m.%d.%y")}] {artist_name} - {song_name}"
             if pin_role:
                 await pin_channel.send(f"<@&{pin_role}> {topic}")
@@ -192,6 +191,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
                 await pin_channel.send(topic)
             await pin_channel.edit(topic=topic)
             await itr.followup.send("Pinned!")
+            await self._unpin_old_ssl(embed_title, pin_channel, new_pin)
         except AssertionError:
             await itr.followup.send("Bot is not in server")
 
@@ -247,12 +247,12 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         return embed, embed_title
 
     async def _unpin_old_ssl(
-        self,
-        embed_title: str,
-        pin_channel: discord.TextChannel,
+        self, embed_title: str, pin_channel: discord.TextChannel, new_pin: int
     ) -> None:
         pins = await pin_channel.pins()
         for pin in pins:
+            if pin.id == new_pin:
+                continue
             embeds = pin.embeds
             if embeds and embeds[0].title and embed_title in embeds[0].title:
                 await pin.unpin()
@@ -262,10 +262,11 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         self,
         embed: discord.Embed,
         pin_channel: discord.TextChannel,
-    ) -> None:
+    ) -> int:
         msg = await pin_channel.send(embed=embed)
         await asyncio.sleep(1)
         await msg.pin()
+        return msg.id
         # await asyncio.sleep(1)
 
         # async for m in pin_channel.history(limit=10):
