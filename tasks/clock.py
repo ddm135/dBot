@@ -30,7 +30,12 @@ class Clock(commands.Cog):
     @tasks.loop(time=[time(hour=h, minute=m) for h in range(24) for m in range(60)])
     async def clock(self) -> None:
         short_name, timezone = self.TIMEZONE_ITEMS[self.counter]
-        current_time = datetime.now(timezone).strftime(f"%H:%M {short_name} %b %d")
+        current_time = (
+            datetime.now(timezone)
+            .strftime(f" %H:%M {short_name} %B %d %Y")
+            .replace(" 0", " ")
+            .strip()
+        )
 
         await self.bot.change_presence(
             activity=discord.CustomActivity(f"{current_time}")
