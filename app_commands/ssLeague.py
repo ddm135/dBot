@@ -1,11 +1,8 @@
 import asyncio
-import gzip
-import json
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Optional, Union
 from zoneinfo import ZoneInfo
 
-import aiohttp
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -16,15 +13,7 @@ from app_commands.autocomplete.ssLeague import (
     song_autocomplete,
     song_id_autocomplete,
 )
-from static.dConsts import (
-    A_JSON_BODY,
-    A_JSON_HEADERS,
-    GAMES,
-    SSRG_ROLE_MOD,
-    SSRG_ROLE_SS,
-    TEST_ROLE_OWNER,
-)
-from static.dHelpers import decrypt_cbc, decrypt_ecb
+from static.dConsts import GAMES, SSRG_ROLE_MOD, SSRG_ROLE_SS, TEST_ROLE_OWNER
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -91,7 +80,6 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         pin_role = (
             game_details["pinRoles"][guild_id] if game_details["pinRoles"] else None
         )
-        api_url = game_details["api"]
 
         await self._handle_ssl_command(
             itr,
@@ -105,7 +93,6 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             game_details["resetOffset"],
             pin_channel_ids[guild_id],
             pin_role,
-            api_url,
         )
 
     @app_commands.command(
@@ -148,7 +135,6 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         pin_role = (
             game_details["pinRoles"][guild_id] if game_details["pinRoles"] else None
         )
-        api_url = game_details["api"]
 
         await self._handle_ssl_command(
             itr,
@@ -162,7 +148,6 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             game_details["resetOffset"],
             pin_channel_ids[guild_id],
             pin_role,
-            api_url,
         )
 
     async def _handle_ssl_command(
@@ -178,11 +163,9 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         offset: timedelta,
         pin_channel_id: int,
         pin_role: Optional[int],
-        api_url: str,
     ) -> None:
         color: Optional[int] = 0
-        if api_url:
-            color = await self._get_song_color(song_id, api_url)
+        color = self._get_song_color(itr.namespace.game, song_id)
 
         current_time = datetime.now(timezone) - offset
         embed, embed_title = self._generate_embed(
@@ -212,44 +195,8 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         except AssertionError:
             await itr.followup.send("Bot is not in server")
 
-    async def _get_a_json(self, api_url: str) -> dict:
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                url=api_url,
-                headers=A_JSON_HEADERS,
-                data=A_JSON_BODY,
-            ) as r:
-                try:
-                    ajs = await r.json(content_type=None)
-                except json.JSONDecodeError:
-                    ajs = json.loads(decrypt_cbc(await r.text()))
-        return ajs
-
-    async def _get_music_data(self, api_url: str) -> dict:
-        ajs = await self._get_a_json(api_url)
-        msd_url = ajs["result"]["context"]["MusicData"]["file"]
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url=msd_url) as r:
-                msd_enc = b""
-                while True:
-                    chunk = await r.content.read(1024)
-                    if not chunk:
-                        break
-                    msd_enc += chunk
-
-        msd_js = json.loads(
-            decrypt_ecb(gzip.decompress(msd_enc))
-            .replace(rb"\/", rb"/")
-            .replace(rb"\u", rb"ddm135-u")
-        )
-        return json.loads(
-            json.dumps(msd_js, indent="\t", ensure_ascii=False)
-            .replace(r"ddm135-u", r"\u")
-            .encode()
-        )
-
-    async def _get_song_color(self, song_id: int, api_url: str) -> Optional[int]:
-        msd_data = await self._get_music_data(api_url)
+    def _get_song_color(self, game: str, song_id: int) -> Optional[int]:
+        msd_data = self.bot.info_color[game]
         for s in msd_data:
             if s["code"] == song_id:
                 color = s["albumBgColor"][:-2]
