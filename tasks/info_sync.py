@@ -19,7 +19,6 @@ class InfoSync(commands.Cog):
         self.bot = bot
 
     async def cog_load(self) -> None:
-        await self.info_sync()
         self.info_sync.start()
         await super().cog_load()
 
@@ -31,6 +30,7 @@ class InfoSync(commands.Cog):
     @tasks.loop(time=time(hour=12, tzinfo=TIMEZONES["KST"]))
     async def info_sync(self) -> None:
         self.ROLE_LOGGER.info("Downloading song data...")
+        await self.bot.wait_until_ready()
         await self.bot.change_presence(
             status=discord.Status.dnd, activity=self.bot.activity
         )
@@ -54,6 +54,7 @@ class InfoSync(commands.Cog):
     @info_sync.before_loop
     async def before_loop(self) -> None:
         await self.bot.wait_until_ready()
+        await self.info_sync()
 
 
 async def setup(bot: "dBot") -> None:
