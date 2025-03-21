@@ -31,6 +31,8 @@ class InfoSync(commands.Cog):
         self.bot.info_data_ready = False
         self.info_sync.cancel()
         self.bot.info_by_name.clear()
+        self.bot.info_by_id.clear()
+        self.bot.info_color.clear()
         await super().cog_unload()
 
     @tasks.loop(time=time(hour=12, tzinfo=TIMEZONES["KST"]))
@@ -39,6 +41,7 @@ class InfoSync(commands.Cog):
         await asyncio.sleep(5)
         self.LOGGER.info("Downloading song data...")
         self.bot.info_by_name.clear()
+        self.bot.info_by_id.clear()
         self.bot.info_color.clear()
         for game, game_details in GAMES.items():
             if not game_details["pinChannelIds"]:
