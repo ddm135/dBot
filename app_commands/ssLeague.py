@@ -35,6 +35,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
     def __init__(self, bot: "dBot"):
         self.bot = bot
 
+    @app_commands.command()
     @app_commands.choices(game=GAME_CHOICES)
     @app_commands.autocomplete(artist_name=artist_autocomplete)
     @app_commands.autocomplete(song_name=song_autocomplete)
@@ -103,6 +104,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             pin_role,
         )
 
+    @app_commands.command()
     @app_commands.choices(game=_GAME_CHOICES)
     @app_commands.autocomplete(song_id=song_id_autocomplete)
     @app_commands.rename(song_id="id")

@@ -31,8 +31,9 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         game: app_commands.Choice[str],
         artist_name: str,
     ) -> None:
-        """Add an artist to the bonus ping list (1 hour
-        before bonus starts, 1 day 1 hour before bonus ends)
+        """Add an artist to your bonus ping list
+        (1 hour before bonus starts,
+        1 day 1 hour before bonus ends)
 
         Parameters
         -----------
