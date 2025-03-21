@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from dBot import dBot
 
 
-class InfoSync(commands.Cog):
+class RoleSync(commands.Cog):
     LOCKED = Path("data/role/locked")
     LOGGER = logging.getLogger(__name__)
     SHEET = "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s"
@@ -80,3 +80,7 @@ class InfoSync(commands.Cog):
         if not self.role_sync.is_being_cancelled():
             await asyncio.sleep(5)
             self.bot.role_data_ready = True
+
+
+async def setup(bot: "dBot") -> None:
+    await bot.add_cog(RoleSync(bot))
