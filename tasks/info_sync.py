@@ -39,6 +39,7 @@ class InfoSync(commands.Cog):
         await asyncio.sleep(5)
         self.LOGGER.info("Downloading song data...")
         self.bot.info_by_name.clear()
+        self.bot.info_color.clear()
         for game, game_details in GAMES.items():
             if not game_details["pinChannelIds"]:
                 continue
