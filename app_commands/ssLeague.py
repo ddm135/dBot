@@ -83,8 +83,8 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
 
         await self._handle_ssl_command(
             itr,
-            ssl_song[artist_name_index],
-            ssl_song[song_name_index],
+            artist_name,
+            song_name,
             int(ssl_song[song_id_index]),
             ssl_song[duration_index],
             ssl_song[image_url_index],
@@ -140,7 +140,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             itr,
             ssl_song[artist_name_index],
             ssl_song[song_name_index],
-            int(ssl_song[song_id_index]),
+            int(song_id),
             ssl_song[duration_index],
             ssl_song[image_url_index],
             ssl_song[skills_index] if skills_index else None,
