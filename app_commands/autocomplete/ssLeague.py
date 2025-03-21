@@ -14,9 +14,9 @@ if TYPE_CHECKING:
 async def artist_autocomplete(
     itr: discord.Interaction["dBot"], current: str
 ) -> list[app_commands.Choice[str]]:
-    if not itr.namespace.game or not itr.client.info_data_ready:
+    if not (game := itr.namespace.game) or not itr.client.info_data_ready:
         return []
-    ssl_artists = itr.client.info_by_name[itr.namespace.game].keys()
+    ssl_artists = itr.client.info_by_name[game].keys()
 
     artists = [
         app_commands.Choice(name=artist, value=artist)
@@ -30,32 +30,21 @@ async def artist_autocomplete(
 async def song_autocomplete(
     itr: discord.Interaction["dBot"], current: str
 ) -> list[app_commands.Choice[str]]:
-    if not itr.namespace.game or not itr.client.info_data_ready:
+    if not (game := itr.namespace.game) or not itr.client.info_data_ready:
         return []
+    ssl_columns = GAMES[game]["infoColumns"]
     artist_name: str = itr.namespace.artist_name
-    (
-        _,
-        artist_name_index,
-        song_name_index,
-        _,
-        _,
-        _,
-        search_term_index,
-        _,
-    ) = _ssl_preprocess(itr.namespace.game)
+    search_term_index = ssl_columns.index("search_term")
 
-    ssl_songs = itr.client.info_by_name[itr.namespace.game][artist_name].keys()
+    ssl_songs = itr.client.info_by_name[game][artist_name]
     if not ssl_songs:
         return []
 
     songs = [
-        app_commands.Choice(name=s[song_name_index], value=s[song_name_index])
-        for s in ssl_songs
-        if artist_name.lower() == s[artist_name_index].lower()
-        and (
-            current.lower() in s[song_name_index].lower()
-            or current.lower() in s[search_term_index].lower()
-        )
+        app_commands.Choice(name=song_name, value=song_name)
+        for song_name, song_details in ssl_songs.items()
+        if current.lower() in song_name.lower()
+        or current.lower() in song_details[search_term_index].lower()
     ]
 
     return songs[:MAX_AUTOCOMPLETE_RESULTS]
@@ -64,27 +53,20 @@ async def song_autocomplete(
 async def song_id_autocomplete(
     itr: discord.Interaction["dBot"], current: str
 ) -> list[app_commands.Choice[str]]:
-    if not itr.namespace.game or not itr.client.info_data_ready:
+    if not (game := itr.namespace.game) or not itr.client.info_data_ready:
         return []
-    (
-        _,
-        artist_name_index,
-        song_name_index,
-        song_id_index,
-        _,
-        _,
-        _,
-        _,
-    ) = _ssl_preprocess(itr.namespace.game)
+    ssl_columns = GAMES[game]["infoColumns"]
+    artist_name_index = ssl_columns.index("artist_name")
+    song_name_index = ssl_columns.index("song_name")
 
-    ssl_song = itr.client.info_by_id[itr.namespace.game][current]
+    ssl_song = itr.client.info_by_id[game][current]
     if not ssl_song:
         return []
 
     return [
         app_commands.Choice(
             name=f"{ssl_song[artist_name_index]} - {ssl_song[song_name_index]}",
-            value=ssl_song[song_id_index],
+            value=current,
         )
     ]
 
