@@ -18,7 +18,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         app_commands.Choice(name=game["name"], value=key) for key, game in GAMES.items()
     ]
 
-    def __init__(self, bot: dBot) -> None:
+    def __init__(self, bot: "dBot") -> None:
         self.bot = bot
 
     @app_commands.command(
@@ -130,5 +130,5 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         )
 
 
-async def setup(bot: dBot) -> None:
+async def setup(bot: "dBot") -> None:
     await bot.add_cog(Bonus(bot))

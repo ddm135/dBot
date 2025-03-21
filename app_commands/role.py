@@ -35,7 +35,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         "roles on dBot will affect bonusBot role storage and shop functionality."
     )
 
-    def __init__(self, bot: dBot) -> None:
+    def __init__(self, bot: "dBot") -> None:
         self.bot = bot
 
     async def cog_load(self) -> None:
@@ -319,5 +319,5 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         await self.bot.wait_until_ready()
 
 
-async def setup(bot: dBot) -> None:
+async def setup(bot: "dBot") -> None:
     await bot.add_cog(Role(bot))

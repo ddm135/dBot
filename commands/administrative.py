@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 
 class Administrative(commands.Cog):
-    def __init__(self, bot: dBot) -> None:
+    def __init__(self, bot: "dBot") -> None:
         self.bot = bot
 
     @commands.command()
@@ -41,5 +41,5 @@ class Administrative(commands.Cog):
             await msg.edit(content="Reloaded!")
 
 
-async def setup(bot: dBot) -> None:
+async def setup(bot: "dBot") -> None:
     await bot.add_cog(Administrative(bot))

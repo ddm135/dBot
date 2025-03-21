@@ -45,7 +45,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         if game["pinChannelIds"] and key != "SM"
     ]
 
-    def __init__(self, bot: dBot):
+    def __init__(self, bot: "dBot"):
         self.bot = bot
 
     @app_commands.command(
@@ -349,5 +349,5 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         raise error
 
 
-async def setup(bot: dBot):
+async def setup(bot: "dBot"):
     await bot.add_cog(SSLeague(bot))

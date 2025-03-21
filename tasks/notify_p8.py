@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 
 class NotifyP8(commands.Cog):
-    def __init__(self, bot: dBot) -> None:
+    def __init__(self, bot: "dBot") -> None:
         self.bot = bot
 
     async def cog_load(self) -> None:
@@ -299,5 +299,5 @@ class NotifyP8(commands.Cog):
         await self.bot.wait_until_ready()
 
 
-async def setup(bot: dBot) -> None:
+async def setup(bot: "dBot") -> None:
     await bot.add_cog(NotifyP8(bot))
