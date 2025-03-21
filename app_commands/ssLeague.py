@@ -1,19 +1,18 @@
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import TYPE_CHECKING, Optional, Union
-from zoneinfo import ZoneInfo
 
 import discord
 from discord import app_commands
 from discord.ext import commands
 
 from app_commands.autocomplete.ssLeague import (
-    _ssl_preprocess,
     artist_autocomplete,
     song_autocomplete,
     song_id_autocomplete,
 )
 from static.dConsts import GAMES, SSRG_ROLE_MOD, SSRG_ROLE_SS, TEST_ROLE_OWNER
+from static.dTypes import GameDetails
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -36,15 +35,15 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         self.bot = bot
 
     @app_commands.command()
-    @app_commands.choices(game=GAME_CHOICES)
+    @app_commands.choices(game_choice=GAME_CHOICES)
     @app_commands.autocomplete(artist_name=artist_autocomplete)
     @app_commands.autocomplete(song_name=song_autocomplete)
-    @app_commands.rename(artist_name="artist", song_name="song")
+    @app_commands.rename(game_choice="game", artist_name="artist", song_name="song")
     @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     async def pin_by_name(
         self,
         itr: discord.Interaction["dBot"],
-        game: app_commands.Choice[str],
+        game_choice: app_commands.Choice[str],
         artist_name: str,
         song_name: str,
     ):
@@ -53,7 +52,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
 
         Parameters
         -----------
-        game: Choice[:class:`str`]
+        game_choice: Choice[:class:`str`]
             Game
         artist_name: :class:`str`
             Artist Name
@@ -67,28 +66,17 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
                 ephemeral=True,
             )
 
-        await itr.response.defer(ephemeral=True)
-        (
-            game_details,
-            _,
-            _,
-            song_id_index,
-            duration_index,
-            image_url_index,
-            _,
-            skills_index,
-        ) = _ssl_preprocess(game.value)
+        game = game_choice.value
+        game_details = GAMES[game]
+        ssl_columns = game_details["infoColumns"]
+        song_id_index = ssl_columns.index("song_id")
+        duration_index = ssl_columns.index("duration")
+        image_url_index = ssl_columns.index("image_url")
+        skills_index = ssl_columns.index("skills") if "skills" in ssl_columns else None
 
-        ssl_song = self.bot.info_by_name[game.value][artist_name][song_name]
+        ssl_song = self.bot.info_by_name[game][artist_name][song_name]
         if not ssl_song:
             return await itr.followup.send("Song not found.")
-
-        timezone = game_details["timezone"]
-        assert (pin_channel_ids := game_details["pinChannelIds"])
-        assert (guild_id := itr.guild_id)
-        pin_role = (
-            game_details["pinRoles"][guild_id] if game_details["pinRoles"] else None
-        )
 
         await self._handle_ssl_command(
             itr,
@@ -98,21 +86,18 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             ssl_song[duration_index],
             ssl_song[image_url_index],
             ssl_song[skills_index] if skills_index else None,
-            timezone,
-            game_details["resetOffset"],
-            pin_channel_ids[guild_id],
-            pin_role,
+            game_details,
         )
 
     @app_commands.command()
-    @app_commands.choices(game=_GAME_CHOICES)
+    @app_commands.choices(game_choice=_GAME_CHOICES)
     @app_commands.autocomplete(song_id=song_id_autocomplete)
-    @app_commands.rename(song_id="id")
+    @app_commands.rename(game_choice="game", song_id="id")
     @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     async def pin_by_id(
         self,
         itr: discord.Interaction["dBot"],
-        game: app_commands.Choice[str],
+        game_choice: app_commands.Choice[str],
         song_id: str,
     ):
         """Pin SSL song of the day using Song ID
@@ -120,7 +105,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
 
         Parameters
         -----------
-        game: Choice[:class:`str`]
+        game_choice: Choice[:class:`str`]
             Game
         song_id: :class:`str`
             Song ID
@@ -132,28 +117,18 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
                 ephemeral=True,
             )
 
-        await itr.response.defer(ephemeral=True)
-        (
-            game_details,
-            artist_name_index,
-            song_name_index,
-            _,
-            duration_index,
-            image_url_index,
-            _,
-            skills_index,
-        ) = _ssl_preprocess(game.value)
+        game = game_choice.value
+        game_details = GAMES[game]
+        ssl_columns = game_details["infoColumns"]
+        artist_name_index = ssl_columns.index("artist_name")
+        song_name_index = ssl_columns.index("song_name")
+        duration_index = ssl_columns.index("duration")
+        image_url_index = ssl_columns.index("image_url")
+        skills_index = ssl_columns.index("skills") if "skills" in ssl_columns else None
 
-        ssl_song = self.bot.info_by_id[game.value][song_id]
+        ssl_song = self.bot.info_by_id[game][song_id]
         if not ssl_song:
             return await itr.followup.send("Song not found.")
-
-        timezone = game_details["timezone"]
-        assert (pin_channel_ids := game_details["pinChannelIds"])
-        assert (guild_id := itr.guild_id)
-        pin_role = (
-            game_details["pinRoles"][guild_id] if game_details["pinRoles"] else None
-        )
 
         await self._handle_ssl_command(
             itr,
@@ -163,10 +138,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             ssl_song[duration_index],
             ssl_song[image_url_index],
             ssl_song[skills_index] if skills_index else None,
-            timezone,
-            game_details["resetOffset"],
-            pin_channel_ids[guild_id],
-            pin_role,
+            game_details,
         )
 
     async def _handle_ssl_command(
@@ -178,12 +150,17 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         duration: str,
         image_url: str,
         skills: Optional[str],
-        timezone: ZoneInfo,
-        offset: timedelta,
-        pin_channel_id: int,
-        pin_role: Optional[int],
+        game_details: GameDetails,
     ) -> None:
-        color: Optional[int] = 0
+
+        timezone = game_details["timezone"]
+        offset = game_details["resetOffset"]
+        assert (pin_channel_ids := game_details["pinChannelIds"])
+        assert (guild_id := itr.guild_id)
+        pin_channel_id = pin_channel_ids[guild_id]
+        pin_role = (
+            game_details["pinRoles"][guild_id] if game_details["pinRoles"] else None
+        )
         color = self._get_song_color(itr.namespace.game, song_id)
 
         current_time = datetime.now(timezone) - offset

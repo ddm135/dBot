@@ -1,11 +1,10 @@
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Optional
 
 import discord
 from discord import app_commands
 
 from static.dConsts import GAMES, MAX_AUTOCOMPLETE_RESULTS
 from static.dHelpers import get_sheet_data, update_sheet_data
-from static.dTypes import GameDetails
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -84,31 +83,3 @@ def update_ssl_filter(
     instance: Optional[str] = None,
 ) -> None:
     return update_sheet_data(spreadsheet_id, range_str, True, data, instance)
-
-
-def _ssl_preprocess(
-    game: str,
-) -> tuple[GameDetails, int, int, int, int, int, int, Optional[int]]:
-    game_details = GAMES[game]
-    return game_details, *_get_ssl_indexes(game_details["infoColumns"])
-
-
-def _get_ssl_indexes(
-    ssl_columns: Union[list[str], tuple[str, ...]],
-) -> tuple[int, int, int, int, int, int, Optional[int]]:
-    song_id_index = ssl_columns.index("song_id")
-    artist_name_index = ssl_columns.index("artist_name")
-    song_name_index = ssl_columns.index("song_name")
-    duration_index = ssl_columns.index("duration")
-    image_url_index = ssl_columns.index("image")
-    search_term_index = ssl_columns.index("search_term")
-    skills_index = ssl_columns.index("skills") if "skills" in ssl_columns else None
-    return (
-        artist_name_index,
-        song_name_index,
-        song_id_index,
-        duration_index,
-        image_url_index,
-        search_term_index,
-        skills_index,
-    )
