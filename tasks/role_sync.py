@@ -24,8 +24,8 @@ class RoleSync(commands.Cog):
             self._upload_role_data()
         else:
             self._download_role_data()
-        self.bot.role_data_ready = True
         self.role_sync.start()
+        self.bot.role_data_ready = True
         await super().cog_load()
 
     async def cog_unload(self) -> None:

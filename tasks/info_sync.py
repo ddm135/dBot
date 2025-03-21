@@ -20,8 +20,8 @@ class InfoSync(commands.Cog):
 
     async def cog_load(self) -> None:
         await self.info_sync()
-        self.bot.info_data_ready = True
         self.info_sync.start()
+        self.bot.info_data_ready = True
         await super().cog_load()
 
     async def cog_unload(self) -> None:
