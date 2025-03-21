@@ -20,8 +20,8 @@ class InfoSync(commands.Cog):
 
     async def cog_load(self) -> None:
         await self.info_sync()
-        self.info_sync.start()
         self.bot.info_data_ready = True
+        self.info_sync.start()
         await super().cog_load()
 
     async def cog_unload(self) -> None:
@@ -32,6 +32,8 @@ class InfoSync(commands.Cog):
 
     @tasks.loop(time=time(hour=12, tzinfo=TIMEZONES["KST"]))
     async def info_sync(self) -> None:
+        self.bot.info_data_ready = False
+        await asyncio.sleep(5)
         self.LOGGER.info("Downloading song data...")
         self.bot.info_by_name.clear()
         for game, game_details in GAMES.items():
@@ -53,8 +55,6 @@ class InfoSync(commands.Cog):
     @info_sync.before_loop
     async def before_loop(self) -> None:
         await self.bot.wait_until_ready()
-        self.bot.info_data_ready = False
-        await asyncio.sleep(5)
 
     @info_sync.after_loop
     async def after_loop(self) -> None:
