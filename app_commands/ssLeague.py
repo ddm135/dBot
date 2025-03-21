@@ -35,15 +35,10 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
     def __init__(self, bot: "dBot"):
         self.bot = bot
 
-    @app_commands.command(
-        description=(
-            "Pin SSL song of the day using Artist Name and Song Name "
-            "(Requires SUPERSTAR Role)"
-        )
-    )
     @app_commands.choices(game=GAME_CHOICES)
     @app_commands.autocomplete(artist_name=artist_autocomplete)
     @app_commands.autocomplete(song_name=song_autocomplete)
+    @app_commands.rename(artist_name="artist", song_name="song")
     @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     async def pin_by_name(
         self,
@@ -52,6 +47,19 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         artist_name: str,
         song_name: str,
     ):
+        """Pin SSL song of the day using Artist Name and Song Name
+        (Requires SUPERSTAR Role)
+
+        Parameters
+        -----------
+        game: Choice[:class:`str`]
+            Game
+        artist_name: :class:`str`
+            Artist Name
+        song_name: :class:`str`
+            Song Name
+        """
+
         if not self.bot.info_data_ready:
             return await itr.response.send_message(
                 "Song data synchronization in progress, feature unavailable.",
@@ -95,11 +103,9 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             pin_role,
         )
 
-    @app_commands.command(
-        description="Pin SSL song of the day using Song ID (Requires SUPERSTAR Role)"
-    )
     @app_commands.choices(game=_GAME_CHOICES)
     @app_commands.autocomplete(song_id=song_id_autocomplete)
+    @app_commands.rename(song_id="id")
     @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     async def pin_by_id(
         self,
@@ -107,6 +113,17 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         game: app_commands.Choice[str],
         song_id: str,
     ):
+        """Pin SSL song of the day using Song ID
+        (Requires SUPERSTAR Role)
+
+        Parameters
+        -----------
+        game: Choice[:class:`str`]
+            Game
+        song_id: :class:`str`
+            Song ID
+        """
+
         if not self.bot.info_data_ready:
             return await itr.response.send_message(
                 "Song data synchronization in progress, feature unavailable.",

@@ -39,14 +39,19 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
     def in_channels(itr: discord.Interaction["dBot"]) -> bool:
         return itr.channel_id in ROLE_STORAGE_CHANNEL.values()
 
-    @app_commands.command(
-        name="add",
-        description="Apply a Group Role you own in inventory (Requires SUPERSTAR Role)",
-    )
+    @app_commands.command(name="add")
     @app_commands.autocomplete(role=role_add_autocomplete)
     @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     @app_commands.check(in_channels)
     async def role_add(self, itr: discord.Interaction["dBot"], role: str) -> None:
+        """Apply a Group Role you own in inventory (Requires SUPERSTAR Role)
+
+        Parameters
+        -----------
+        role: :class:`str`
+            Role
+        """
+
         if not self.bot.info_data_ready:
             return await itr.response.send_message(
                 "Role data synchronization in progress, feature unavailable.",
@@ -88,14 +93,19 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         except (ValueError, IndexError):
             await itr.followup.send(f"Role not found.\n{self.NOTICE}")
 
-    @app_commands.command(
-        name="remove",
-        description="Store a Group Role you own in inventory (Requires SUPERSTAR Role)",
-    )
+    @app_commands.command(name="remove")
     @app_commands.autocomplete(role=role_remove_autocomplete)
     @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     @app_commands.check(in_channels)
     async def role_remove(self, itr: discord.Interaction["dBot"], role: str) -> None:
+        """Store a Group Role you own in inventory (Requires SUPERSTAR Role)
+
+        Parameters
+        -----------
+        role: :class:`str`
+            Role
+        """
+
         if not self.bot.info_data_ready:
             return await itr.response.send_message(
                 "Role data synchronization in progress, feature unavailable.",
@@ -138,17 +148,20 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         except (ValueError, IndexError):
             await itr.followup.send(f"Role not found.\n{self.NOTICE}")
 
-    @app_commands.command(
-        name="set",
-        description=(
-            "Store higher Group Roles then apply chosen and lower Group Roles "
-            "(Requires SUPERSTAR Role)"
-        ),
-    )
+    @app_commands.command(name="set")
     @app_commands.autocomplete(role=role_set_autocomplete)
     @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     @app_commands.check(in_channels)
     async def role_set(self, itr: discord.Interaction["dBot"], role: str) -> None:
+        """Store higher Group Roles then apply chosen and lower Group Roles
+        (Requires SUPERSTAR Role)
+
+        Parameters
+        -----------
+        role: :class:`str`
+            Role
+        """
+
         if not self.bot.info_data_ready:
             return await itr.response.send_message(
                 "Role data synchronization in progress, feature unavailable.",
@@ -226,12 +239,11 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         except (ValueError, IndexError):
             await itr.followup.send(f"Role not found.\n{self.NOTICE}")
 
-    @app_commands.command(
-        name="inventory",
-        description=("View your Group Role inventory"),
-    )
+    @app_commands.command(name="inventory")
     @app_commands.check(in_channels)
     async def role_inventory(self, itr: discord.Interaction["dBot"]) -> None:
+        """View your Group Role inventory"""
+
         await itr.response.defer()
         user_id = itr.user.id
         stored_roles = _get_role_data(user_id)

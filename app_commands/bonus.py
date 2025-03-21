@@ -21,35 +21,50 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
 
-    @app_commands.command(
-        name="add",
-        description=(
-            "Add an artist to the bonus ping list (1 hour "
-            "before bonus starts, 1 day 1 hour before bonus ends)"
-        ),
-    )
+    @app_commands.command(name="add")
     @app_commands.autocomplete(artist_name=artist_autocomplete)
     @app_commands.choices(game=GAME_CHOICES)
+    @app_commands.rename(artist_name="artist")
     async def bonus_add(
         self,
         itr: discord.Interaction["dBot"],
         game: app_commands.Choice[str],
         artist_name: str,
     ) -> None:
+        """Add an artist to the bonus ping list (1 hour
+        before bonus starts, 1 day 1 hour before bonus ends)
+
+        Parameters
+        -----------
+        game: Choice[:class:`str`]
+            Game
+        artist_name: :class:`str`
+            Artist Name
+        """
+
         assert itr.command
         await self._handle_bonus_command(itr, game.value, artist_name, itr.command.name)
 
-    @app_commands.command(
-        name="remove", description="Remove an artist from the bonus ping list"
-    )
+    @app_commands.command(name="remove")
     @app_commands.autocomplete(artist_name=artist_autocomplete)
     @app_commands.choices(game=GAME_CHOICES)
+    @app_commands.rename(artist_name="artist")
     async def bonus_remove(
         self,
         itr: discord.Interaction["dBot"],
         game: app_commands.Choice[str],
         artist_name: str,
     ) -> None:
+        """Remove an artist from your bonus ping list
+
+        Parameters
+        -----------
+        game: Choice[:class:`str`]
+            Game
+        artist_name: :class:`str`
+            Artist Name
+        """
+
         assert itr.command
         await self._handle_bonus_command(itr, game.value, artist_name, itr.command.name)
 
