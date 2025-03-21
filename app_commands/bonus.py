@@ -1,14 +1,16 @@
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 import discord
 from discord import app_commands
 from discord.ext import commands
 
 from app_commands.autocomplete.bonus import _ping_preprocess, artist_autocomplete
-from dBot import dBot
 from static.dConsts import GAMES
 from static.dHelpers import update_sheet_data
 from static.dTypes import GameDetails
+
+if TYPE_CHECKING:
+    from dBot import dBot
 
 
 class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings"):

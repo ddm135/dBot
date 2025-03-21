@@ -1,9 +1,9 @@
-import typing
+from typing import TYPE_CHECKING
 
 from apiclient.discovery import build  # type: ignore
 from google.oauth2.service_account import Credentials
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from googleapiclient._apis.sheets.v4 import SheetsResource  # type: ignore
 
 _gCredentials = Credentials.from_service_account_file(

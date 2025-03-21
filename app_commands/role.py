@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import discord
 from discord import app_commands
@@ -12,7 +13,6 @@ from app_commands.autocomplete.role import (
     role_remove_autocomplete,
     role_set_autocomplete,
 )
-from dBot import dBot
 from static.dConsts import (
     ROLE_STORAGE_CHANNEL,
     ROLES,
@@ -21,6 +21,9 @@ from static.dConsts import (
     TEST_ROLE_OWNER,
 )
 from static.dHelpers import clear_sheet_data, get_sheet_data, update_sheet_data
+
+if TYPE_CHECKING:
+    from dBot import dBot
 
 
 @app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)

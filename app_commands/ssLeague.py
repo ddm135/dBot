@@ -2,7 +2,7 @@ import asyncio
 import gzip
 import json
 from datetime import datetime, timedelta
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 from zoneinfo import ZoneInfo
 
 import aiohttp
@@ -18,7 +18,6 @@ from app_commands.autocomplete.ssLeague import (
     song_autocomplete,
     song_id_autocomplete,
 )
-from dBot import dBot
 from static.dConsts import (
     A_JSON_BODY,
     A_JSON_HEADERS,
@@ -28,6 +27,9 @@ from static.dConsts import (
     TEST_ROLE_OWNER,
 )
 from static.dHelpers import decrypt_cbc, decrypt_ecb, get_column_letter
+
+if TYPE_CHECKING:
+    from dBot import dBot
 
 
 @app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)

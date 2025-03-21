@@ -1,8 +1,12 @@
+from typing import TYPE_CHECKING
+
 import discord
 from discord.ext import commands
 
-from dBot import dBot
 from static.dConsts import EXTENSIONS, STATUS_CHANNEL
+
+if TYPE_CHECKING:
+    from dBot import dBot
 
 
 class Administrative(commands.Cog):

@@ -1,13 +1,15 @@
 import itertools
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 import discord
 from discord import app_commands
 
-from dBot import dBot
 from static.dConsts import GAMES, MAX_AUTOCOMPLETE_RESULTS, TIMEZONES
 from static.dHelpers import get_column_letter, get_sheet_data, update_sheet_data
 from static.dTypes import GameDetails
+
+if TYPE_CHECKING:
+    from dBot import dBot
 
 
 async def artist_autocomplete(

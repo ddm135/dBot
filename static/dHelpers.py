@@ -1,6 +1,5 @@
-import typing
 from base64 import b64decode
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 from Cryptodome.Cipher import AES
 from Cryptodome.Util.Padding import unpad
@@ -8,7 +7,7 @@ from Cryptodome.Util.Padding import unpad
 from static.dConsts import AES_IV, AES_KEY, MAX_RETRIES
 from static.dServices import sheetService, sheetServiceKR  # noqa: F401
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from googleapiclient._apis.sheets.v4 import SheetsResource  # type: ignore
 
 

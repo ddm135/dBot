@@ -1,11 +1,14 @@
 from datetime import datetime, time
+from typing import TYPE_CHECKING
 
 import discord
 from discord.ext import commands, tasks
 
-from dBot import dBot
 from static.dConsts import GAMES, ONE_DAY, TIMEZONES
 from static.dHelpers import get_sheet_data
+
+if TYPE_CHECKING:
+    from dBot import dBot
 
 
 class NotifyP9(commands.Cog):

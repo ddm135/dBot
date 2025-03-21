@@ -1,10 +1,13 @@
 from datetime import datetime, time
+from typing import TYPE_CHECKING
 
 import discord
 from discord.ext import commands, tasks
 
-from dBot import dBot
 from static.dConsts import TIMEZONES
+
+if TYPE_CHECKING:
+    from dBot import dBot
 
 
 class Clock(commands.Cog):

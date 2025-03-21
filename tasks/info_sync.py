@@ -1,10 +1,13 @@
 from datetime import time
+from typing import TYPE_CHECKING
 
 from discord.ext import commands, tasks
 
-from dBot import dBot
 from static.dConsts import GAMES, TIMEZONES
 from static.dHelpers import get_sheet_data
+
+if TYPE_CHECKING:
+    from dBot import dBot
 
 
 class InfoSync(commands.Cog):
