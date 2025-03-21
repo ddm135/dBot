@@ -15,6 +15,7 @@ class InfoSync(commands.Cog):
         self.bot = bot
 
     async def cog_load(self) -> None:
+        await self.info_sync()
         self.info_sync.start()
         await super().cog_load()
 

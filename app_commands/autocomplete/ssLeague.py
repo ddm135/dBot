@@ -1,5 +1,4 @@
-import itertools
-from typing import TYPE_CHECKING, Optional, Union
+from typing import Optional, Union
 
 import discord
 from discord import app_commands
@@ -8,21 +7,17 @@ from static.dConsts import GAMES, MAX_AUTOCOMPLETE_RESULTS, TIMEZONES
 from static.dHelpers import get_column_letter, get_sheet_data, update_sheet_data
 from static.dTypes import GameDetails
 
-if TYPE_CHECKING:
-    from dBot import dBot
-
 
 async def artist_autocomplete(
     itr: discord.Interaction, current: str
 ) -> list[app_commands.Choice[str]]:
     if not itr.namespace.game:
         return []
-    assert isinstance(itr.client, dBot)
     ssl_artists = itr.client.info[itr.namespace.game].keys()
 
     artists = [
         app_commands.Choice(name=artist, value=artist)
-        for artist in itertools.chain.from_iterable(ssl_artists)
+        for artist in ssl_artists
         if current.lower() in artist.lower()
     ]
 
