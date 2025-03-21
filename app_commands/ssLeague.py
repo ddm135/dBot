@@ -1,6 +1,5 @@
 import asyncio
 from datetime import datetime, timedelta
-import logging
 from typing import TYPE_CHECKING, Optional, Union
 from zoneinfo import ZoneInfo
 
@@ -22,7 +21,6 @@ if TYPE_CHECKING:
 
 @app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)
 class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the day"):
-    LOGGER = logging.getLogger(__name__)
     GAME_CHOICES = [
         app_commands.Choice(name=game["name"], value=key)
         for key, game in GAMES.items()
@@ -60,24 +58,21 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
                 ephemeral=True,
             )
 
-        self.LOGGER.info("Start")
         await itr.response.defer(ephemeral=True)
         (
             game_details,
-            _,
-            _,
+            artist_name_index,
+            song_name_index,
             song_id_index,
             duration_index,
             image_url_index,
             _,
             skills_index,
         ) = _ssl_preprocess(game.value)
-        self.LOGGER.info("Preprocess done")
 
         ssl_song = self.bot.info_by_name[game.value][artist_name][song_name]
         if not ssl_song:
             return await itr.followup.send("Song not found.")
-        self.LOGGER.info("Song found")
 
         timezone = game_details["timezone"]
         assert (pin_channel_ids := game_details["pinChannelIds"])
@@ -85,7 +80,6 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         pin_role = (
             game_details["pinRoles"][guild_id] if game_details["pinRoles"] else None
         )
-        self.LOGGER.info("Pin channel found")
 
         await self._handle_ssl_command(
             itr,
@@ -119,24 +113,21 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
                 ephemeral=True,
             )
 
-        self.LOGGER.info("Start")
         await itr.response.defer(ephemeral=True)
         (
             game_details,
             artist_name_index,
             song_name_index,
-            _,
+            song_id_index,
             duration_index,
             image_url_index,
             _,
             skills_index,
         ) = _ssl_preprocess(game.value)
-        self.LOGGER.info("Preprocess done")
 
         ssl_song = self.bot.info_by_id[game.value][song_id]
         if not ssl_song:
             return await itr.followup.send("Song not found.")
-        self.LOGGER.info("Song found")
 
         timezone = game_details["timezone"]
         assert (pin_channel_ids := game_details["pinChannelIds"])
@@ -144,7 +135,6 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         pin_role = (
             game_details["pinRoles"][guild_id] if game_details["pinRoles"] else None
         )
-        self.LOGGER.info("Pin channel found")
 
         await self._handle_ssl_command(
             itr,
@@ -188,24 +178,19 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             skills,
             itr.user.name,
         )
-        self.LOGGER.info("Embed generated")
 
         pin_channel = self.bot.get_channel(pin_channel_id)
 
         try:
             assert isinstance(pin_channel, discord.TextChannel)
             await self._unpin_old_ssl(embed_title, pin_channel)
-            self.LOGGER.info("Unpin old SSL")
             await self._pin_new_ssl(embed, pin_channel)
-            self.LOGGER.info("Pin new SSL")
             topic = f"[{current_time.strftime("%m.%d.%y")}] {artist_name} - {song_name}"
             if pin_role:
                 await pin_channel.send(f"<@&{pin_role}> {topic}")
             else:
                 await pin_channel.send(topic)
-            self.LOGGER.info("Topic sent")
             await pin_channel.edit(topic=topic)
-            self.LOGGER.info("Topic edited")
             await itr.followup.send("Pinned!")
         except AssertionError:
             await itr.followup.send("Bot is not in server")
@@ -240,7 +225,6 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             title=embed_title,
             description=f"**{artist_name} - {song_name}**",
         )
-        self.LOGGER.info("Color found")
 
         embed.add_field(
             name="Duration",
