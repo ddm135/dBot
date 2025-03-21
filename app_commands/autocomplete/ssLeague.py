@@ -3,8 +3,8 @@ from typing import TYPE_CHECKING, Optional, Union
 import discord
 from discord import app_commands
 
-from static.dConsts import GAMES, MAX_AUTOCOMPLETE_RESULTS, TIMEZONES
-from static.dHelpers import get_column_letter, get_sheet_data, update_sheet_data
+from static.dConsts import GAMES, MAX_AUTOCOMPLETE_RESULTS
+from static.dHelpers import get_sheet_data, update_sheet_data
 from static.dTypes import GameDetails
 
 if TYPE_CHECKING:
@@ -14,9 +14,9 @@ if TYPE_CHECKING:
 async def artist_autocomplete(
     itr: discord.Interaction["dBot"], current: str
 ) -> list[app_commands.Choice[str]]:
-    if not itr.namespace.game or not itr.client.info_ready:
+    if not itr.namespace.game or not itr.client.info_data_ready:
         return []
-    ssl_artists = itr.client.info[itr.namespace.game].keys()
+    ssl_artists = itr.client.info_by_name[itr.namespace.game].keys()
 
     artists = [
         app_commands.Choice(name=artist, value=artist)
@@ -30,11 +30,11 @@ async def artist_autocomplete(
 async def song_autocomplete(
     itr: discord.Interaction["dBot"], current: str
 ) -> list[app_commands.Choice[str]]:
-    if not itr.namespace.game or not itr.client.info_ready:
+    if not itr.namespace.game or not itr.client.info_data_ready:
         return []
     artist_name: str = itr.namespace.artist_name
     (
-        game_details,
+        _,
         artist_name_index,
         song_name_index,
         _,
@@ -44,25 +44,7 @@ async def song_autocomplete(
         _,
     ) = _ssl_preprocess(itr.namespace.game)
 
-    filter = (
-        (
-            f'=QUERY({game_details["infoSongs"]}, "SELECT * WHERE LOWER('
-            f'{get_column_letter(artist_name_index)}) = LOWER(""{artist_name}"") '
-            f"AND (LOWER({get_column_letter(song_name_index)}) "
-            f'CONTAINS LOWER(""{current}"") OR '
-            f"LOWER({get_column_letter(search_term_index)}) "
-            f'CONTAINS LOWER(""{current}""))", 0)'
-        )
-        if current
-        else (
-            f'=QUERY({game_details["infoSongs"]}, "SELECT * WHERE LOWER('
-            f"{get_column_letter(artist_name_index)}) "
-            f'= LOWER(""{artist_name}"")", 0)'
-        )
-    )
-    _update_ssl_filter(game_details, filter)
-
-    ssl_songs = _get_ssl_data(game_details)
+    ssl_songs = itr.client.info_by_name[itr.namespace.game][artist_name]
     if not ssl_songs:
         return []
 
@@ -82,10 +64,10 @@ async def song_autocomplete(
 async def song_id_autocomplete(
     itr: discord.Interaction["dBot"], current: str
 ) -> list[app_commands.Choice[str]]:
-    if not itr.namespace.game or not itr.client.info_ready:
+    if not itr.namespace.game or not itr.client.info_data_ready:
         return []
     (
-        game_details,
+        _,
         artist_name_index,
         song_name_index,
         song_id_index,
@@ -95,24 +77,16 @@ async def song_id_autocomplete(
         _,
     ) = _ssl_preprocess(itr.namespace.game)
 
-    filter = (
-        f'=QUERY({game_details["infoSongs"]}, "SELECT * WHERE '
-        f'{get_column_letter(song_id_index)} = {current}", 0)'
-    )
-    _update_ssl_filter(game_details, filter)
-
-    ssl_songs = _get_ssl_data(game_details)
-    if not ssl_songs:
+    ssl_song = itr.client.info_by_id[itr.namespace.game][current]
+    if not ssl_song:
         return []
 
-    if song := next((s for s in ssl_songs if current == s[song_id_index]), None):
-        return [
-            app_commands.Choice(
-                name=f"{song[artist_name_index]} - {song[song_name_index]}",
-                value=song[song_id_index],
-            )
-        ]
-    return []
+    return [
+        app_commands.Choice(
+            name=f"{ssl_song[artist_name_index]} - {ssl_song[song_name_index]}",
+            value=ssl_song[song_id_index],
+        )
+    ]
 
 
 def get_ssl_data(
@@ -135,22 +109,6 @@ def _ssl_preprocess(
 ) -> tuple[GameDetails, int, int, int, int, int, int, Optional[int]]:
     game_details = GAMES[game]
     return game_details, *_get_ssl_indexes(game_details["infoColumns"])
-
-
-def _get_ssl_data(game_details: GameDetails) -> list[list[str]]:
-    return get_ssl_data(
-        game_details["infoId"],
-        game_details["infoFiltereds"],
-        "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
-    )
-
-
-def _update_ssl_filter(game_details: GameDetails, filter: str) -> None:
-    update_ssl_filter(
-        game_details["infoId"],
-        game_details["infoFiltereds"],
-        data=[[filter]],
-    )
 
 
 def _get_ssl_indexes(

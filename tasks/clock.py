@@ -40,7 +40,6 @@ class Clock(commands.Cog):
     @clock.before_loop
     async def before_loop(self) -> None:
         await self.bot.wait_until_ready()
-        await self.clock()
 
 
 async def setup(bot: "dBot") -> None:

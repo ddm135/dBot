@@ -1,10 +1,9 @@
-import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import discord
 from discord import app_commands
-from discord.ext import commands, tasks
+from discord.ext import commands
 
 from app_commands.autocomplete.role import (
     _get_role_data,
@@ -20,7 +19,6 @@ from static.dConsts import (
     SSRG_ROLE_SS,
     TEST_ROLE_OWNER,
 )
-from static.dHelpers import clear_sheet_data, get_sheet_data, update_sheet_data
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -29,7 +27,6 @@ if TYPE_CHECKING:
 @app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)
 class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
     LOCKED = Path("data/role/locked")
-    ROLE_LOGGER = logging.getLogger(__name__)
     NOTICE = (
         "-# bonusBot and dBot does not share databases and as such, storing "
         "roles on dBot will affect bonusBot role storage and shop functionality."
@@ -37,19 +34,6 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
 
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
-
-    async def cog_load(self) -> None:
-        if self.LOCKED.exists():
-            self._upload_role_data()
-        else:
-            self._download_role_data()
-        self._sync_role_data.start()
-        await super().cog_load()
-
-    async def cog_unload(self) -> None:
-        self._sync_role_data.cancel()
-        self._upload_role_data()
-        await super().cog_unload()
 
     @staticmethod
     def in_channels(itr: discord.Interaction["dBot"]) -> bool:
@@ -63,6 +47,12 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
     @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     @app_commands.check(in_channels)
     async def role_add(self, itr: discord.Interaction["dBot"], role: str) -> None:
+        if not self.bot.info_data_ready:
+            return await itr.response.send_message(
+                "Role data synchronization in progress, feature unavailable.",
+                ephemeral=True,
+            )
+
         await itr.response.defer()
         user_id = itr.user.id
         stored_roles = _get_role_data(user_id)
@@ -106,6 +96,12 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
     @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     @app_commands.check(in_channels)
     async def role_remove(self, itr: discord.Interaction["dBot"], role: str) -> None:
+        if not self.bot.info_data_ready:
+            return await itr.response.send_message(
+                "Role data synchronization in progress, feature unavailable.",
+                ephemeral=True,
+            )
+
         await itr.response.defer()
         user_id = itr.user.id
         stored_roles = _get_role_data(user_id)
@@ -153,6 +149,12 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
     @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     @app_commands.check(in_channels)
     async def role_set(self, itr: discord.Interaction["dBot"], role: str) -> None:
+        if not self.bot.info_data_ready:
+            return await itr.response.send_message(
+                "Role data synchronization in progress, feature unavailable.",
+                ephemeral=True,
+            )
+
         await itr.response.defer()
         user_id = itr.user.id
         stored_roles = _get_role_data(user_id)
@@ -256,41 +258,6 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
             silent=True,
         )
 
-    def _download_role_data(self) -> None:
-        if self.LOCKED.exists():
-            return
-
-        self.ROLE_LOGGER.info("Downloading role data...")
-        data_path = Path("data/role")
-        data_files = data_path.glob("*.txt")
-        for data_file in data_files:
-            data_file.unlink()
-        role_data = get_sheet_data(
-            "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s", "Roles!A:C"
-        )
-        for row in role_data:
-            file_path = Path(f"data/role/{row[0]}.txt")
-            file_path.parent.mkdir(parents=True, exist_ok=True)
-            file_path.write_text(row[1])
-
-    def _upload_role_data(self) -> None:
-        if not self.LOCKED.exists():
-            return
-
-        self.ROLE_LOGGER.info("Uploading role data...")
-        data_path = Path("data/role")
-        data_files = data_path.glob("*.txt")
-        role_data = []
-        for data_file in data_files:
-            user_id = data_file.stem
-            roles = data_file.read_text()
-            role_data.append([user_id, roles, "."])
-        clear_sheet_data("1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s", "Roles")
-        update_sheet_data(
-            "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s", "Roles!A1", False, role_data
-        )
-        self.LOCKED.unlink()
-
     async def cog_app_command_error(
         self,
         interaction: discord.Interaction,
@@ -311,14 +278,6 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
 
         await super().cog_app_command_error(interaction, error)
         raise error
-
-    @tasks.loop(hours=1)
-    async def _sync_role_data(self):
-        self._upload_role_data()
-
-    @_sync_role_data.before_loop
-    async def before_loop(self):
-        await self.bot.wait_until_ready()
 
 
 async def setup(bot: "dBot") -> None:

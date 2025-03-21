@@ -16,10 +16,14 @@ load_dotenv()
 
 
 class dBot(commands.Bot):
-    info: defaultdict[str, defaultdict[str, list]] = defaultdict(
+    info_by_name: defaultdict[str, defaultdict[str, list[list[str]]]] = defaultdict(
         lambda: defaultdict(list)
     )
-    info_ready: bool = False
+    info_by_id: defaultdict[str, defaultdict[str, list[str]]] = defaultdict(
+        lambda: defaultdict(list)
+    )
+    info_data_ready: bool = False
+    role_data_ready: bool = False
 
     async def setup_hook(self):
         self.remove_command("help")
@@ -46,7 +50,7 @@ bot = dBot(
     command_prefix="db!",
     intents=intents,
     status=discord.Status.dnd,
-    activity=discord.CustomActivity("Loading..."),
+    activity=discord.CustomActivity("Starting..."),
 )
 
 

@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 async def role_add_autocomplete(
     itr: discord.Interaction["dBot"], current: str
 ) -> list[app_commands.Choice[str]]:
-    if not itr.guild:
+    if not itr.guild or not itr.client.role_data_ready:
         return []
     assert isinstance(itr.user, discord.Member)
     stored_roles = _get_role_data(itr.user.id)
@@ -42,7 +42,7 @@ async def role_add_autocomplete(
 async def role_remove_autocomplete(
     itr: discord.Interaction["dBot"], current: str
 ) -> list[app_commands.Choice[str]]:
-    if not itr.guild:
+    if not itr.guild or not itr.client.role_data_ready:
         return []
     assert isinstance(itr.user, discord.Member)
     user_roles = itr.user.roles
@@ -67,7 +67,7 @@ async def role_remove_autocomplete(
 async def role_set_autocomplete(
     itr: discord.Interaction["dBot"], current: str
 ) -> list[app_commands.Choice[str]]:
-    if not itr.guild:
+    if not itr.guild or not itr.client.role_data_ready:
         return []
     assert isinstance(itr.user, discord.Member)
     stored_roles = _get_role_data(itr.user.id)

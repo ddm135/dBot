@@ -45,6 +45,7 @@ EXTENSIONS = [
     "app_commands.bonus",
     "app_commands.role",
     "app_commands.ssLeague",
+    "tasks.clock",
     "tasks.info_sync",
     "tasks.notify_p8",
     "tasks.notify_p9",
