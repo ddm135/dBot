@@ -8,7 +8,6 @@ class GameDetails(TypedDict):
     infoId: str
     infoArtists: str
     infoSongs: str
-    infoFiltereds: str
     infoColumns: tuple[str, ...]
     pingId: str
     pingRange: str

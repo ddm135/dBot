@@ -58,7 +58,6 @@ GAMES: dict[str, GameDetails] = {
         "infoId": "1kC38CLFd6xkDXD9qLHgnnv3s3jmM_4vf4RLsWuXs9NU",
         "infoArtists": "Artists!A2:A",
         "infoSongs": "Songs!A2:F",
-        "infoFiltereds": "Filtered Songs!A2:F",
         "infoColumns": (
             "song_id",
             "artist_name",
@@ -105,7 +104,6 @@ GAMES: dict[str, GameDetails] = {
         "infoId": "1kC38CLFd6xkDXD9qLHgnnv3s3jmM_4vf4RLsWuXs9NU",
         "infoArtists": "Artists!A2:A",
         "infoSongs": "Songs!A2:F",
-        "infoFiltereds": "Filtered Songs!A2:F",
         "infoColumns": (
             "song_id",
             "artist_name",
@@ -148,7 +146,6 @@ GAMES: dict[str, GameDetails] = {
     #     "infoId": "",
     #     "infoArtists": "",
     #     "infoSongs": "",
-    #     "infoFiltereds": "",
     #     "infoColumns": (),
     #     "pingId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
     #     "pingRange": "GFRIEND!A1:D",
@@ -181,7 +178,6 @@ GAMES: dict[str, GameDetails] = {
         "infoId": "1eVjwi0GudyMixnZtam8TeupRd3DQ6mheyRKp2lDA6qw",
         "infoArtists": "Artists!A2:A",
         "infoSongs": "Songs!A2:G",
-        "infoFiltereds": "Filtered Songs!A2:G",
         "infoColumns": (
             "song_id",
             "artist_name",
@@ -225,7 +221,6 @@ GAMES: dict[str, GameDetails] = {
         "infoId": "1Ng57BGCDj025bxwCBbQulYFhRjS5runy5HnbStY_xSw",
         "infoArtists": "Artists!A2:A",
         "infoSongs": "Songs!A2:G",
-        "infoFiltereds": "Filtered Songs!A2:G",
         "infoColumns": (
             "song_id",
             "artist_name",
@@ -269,7 +264,6 @@ GAMES: dict[str, GameDetails] = {
         "infoId": "",
         "infoArtists": "",
         "infoSongs": "",
-        "infoFiltereds": "",
         "infoColumns": (),
         "pingId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
         "pingRange": "EBiDAN!A1:D",
@@ -302,7 +296,6 @@ GAMES: dict[str, GameDetails] = {
         "infoId": "",
         "infoArtists": "",
         "infoSongs": "",
-        "infoFiltereds": "",
         "infoColumns": (),
         "pingId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
         "pingRange": "Philippines!A1:D",
