@@ -55,9 +55,7 @@ class InfoSync(commands.Cog):
                     row[game_details["infoColumns"].index("song_id")]
                 ] = row
 
-        self.bot.info_color[game] = await self.get_music_data(
-            game_details["api"]
-        )
+            self.bot.info_color[game] = await self.get_music_data(game_details["api"])
 
     async def get_a_json(self, api_url: str) -> dict:
         async with aiohttp.ClientSession() as session:
