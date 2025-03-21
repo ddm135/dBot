@@ -16,8 +16,8 @@ load_dotenv()
 
 
 class dBot(commands.Bot):
-    info_by_name: defaultdict[str, defaultdict[str, list[list[str]]]] = defaultdict(
-        lambda: defaultdict(list)
+    info_by_name: defaultdict[str, defaultdict[str, defaultdict[str, list[str]]]] = (
+        defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
     )
     info_by_id: defaultdict[str, defaultdict[str, list[str]]] = defaultdict(
         lambda: defaultdict(list)

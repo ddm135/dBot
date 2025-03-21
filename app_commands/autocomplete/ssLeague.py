@@ -44,7 +44,7 @@ async def song_autocomplete(
         _,
     ) = _ssl_preprocess(itr.namespace.game)
 
-    ssl_songs = itr.client.info_by_name[itr.namespace.game][artist_name]
+    ssl_songs = itr.client.info_by_name[itr.namespace.game][artist_name].keys()
     if not ssl_songs:
         return []
 

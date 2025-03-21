@@ -47,7 +47,7 @@ class InfoSync(commands.Cog):
             for row in info:
                 self.bot.info_by_name[game][
                     row[game_details["infoColumns"].index("artist_name")]
-                ].append(row)
+                ][row[game_details["infoColumns"].index("song_name")]] = row
                 self.bot.info_by_id[game][
                     row[game_details["infoColumns"].index("song_id")]
                 ] = row
