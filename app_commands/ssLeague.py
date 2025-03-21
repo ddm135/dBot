@@ -71,7 +71,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         ssl_columns = game_details["infoColumns"]
         song_id_index = ssl_columns.index("song_id")
         duration_index = ssl_columns.index("duration")
-        image_url_index = ssl_columns.index("image_url")
+        image_url_index = ssl_columns.index("image")
         skills_index = ssl_columns.index("skills") if "skills" in ssl_columns else None
 
         ssl_song = self.bot.info_by_name[game][artist_name][song_name]
@@ -123,7 +123,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         artist_name_index = ssl_columns.index("artist_name")
         song_name_index = ssl_columns.index("song_name")
         duration_index = ssl_columns.index("duration")
-        image_url_index = ssl_columns.index("image_url")
+        image_url_index = ssl_columns.index("image")
         skills_index = ssl_columns.index("skills") if "skills" in ssl_columns else None
 
         ssl_song = self.bot.info_by_id[game][song_id]
