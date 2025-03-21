@@ -65,6 +65,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
                 "Song data synchronization in progress, feature unavailable.",
                 ephemeral=True,
             )
+        await itr.response.defer(ephemeral=True)
 
         game = game_choice.value
         game_details = GAMES[game]
@@ -116,6 +117,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
                 "Song data synchronization in progress, feature unavailable.",
                 ephemeral=True,
             )
+        await itr.response.defer(ephemeral=True)
 
         game = game_choice.value
         game_details = GAMES[game]
