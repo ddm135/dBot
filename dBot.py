@@ -1,12 +1,12 @@
 import os
 from collections import defaultdict
-from datetime import datetime, time
+from datetime import datetime
 
 import discord
-from discord.ext import commands, tasks
+from discord.ext import commands
 from dotenv import load_dotenv
 
-from static.dConsts import EXTENSIONS, STATUS_CHANNEL, TIMEZONES
+from static.dConsts import EXTENSIONS, STATUS_CHANNEL
 
 # pyright: reportAttributeAccessIssue=false
 # pyright: reportOptionalMemberAccess=false
@@ -53,22 +53,6 @@ bot = dBot(
     status=discord.Status.dnd,
     activity=discord.CustomActivity("Waiting for clock..."),
 )
-
-
-@tasks.loop(
-    time=[
-        time(
-            hour=11,
-            minute=59,
-            second=59,
-            microsecond=999999,
-            tzinfo=TIMEZONES["KST"],
-        )
-    ]
-)
-async def restart_clock(ctx: commands.Context):
-    await bot.reload_extension("tasks.clock")
-    await ctx.send("Clock restarted!")
 
 
 bot.run(

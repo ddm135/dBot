@@ -56,7 +56,6 @@ GAMES: dict[str, GameDetails] = {
     "SM": {
         "name": "SUPERSTAR SM",
         "infoId": "1kC38CLFd6xkDXD9qLHgnnv3s3jmM_4vf4RLsWuXs9NU",
-        "infoArtists": "Artists!A2:A",
         "infoSongs": "Songs!A2:F",
         "infoColumns": (
             "song_id",
@@ -102,7 +101,6 @@ GAMES: dict[str, GameDetails] = {
     "SM_JP": {
         "name": "SUPERSTAR SMTOWN (JP/TW)",
         "infoId": "1kC38CLFd6xkDXD9qLHgnnv3s3jmM_4vf4RLsWuXs9NU",
-        "infoArtists": "Artists!A2:A",
         "infoSongs": "Songs!A2:F",
         "infoColumns": (
             "song_id",
@@ -144,7 +142,6 @@ GAMES: dict[str, GameDetails] = {
     # "G": {
     #     "name": "SUPERSTAR GFRIEND",
     #     "infoId": "",
-    #     "infoArtists": "",
     #     "infoSongs": "",
     #     "infoColumns": (),
     #     "pingId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
@@ -176,7 +173,6 @@ GAMES: dict[str, GameDetails] = {
     "JYP_JP": {
         "name": "SUPERSTAR JYPNATION (JP)",
         "infoId": "1eVjwi0GudyMixnZtam8TeupRd3DQ6mheyRKp2lDA6qw",
-        "infoArtists": "Artists!A2:A",
         "infoSongs": "Songs!A2:G",
         "infoColumns": (
             "song_id",
@@ -219,7 +215,6 @@ GAMES: dict[str, GameDetails] = {
     "LP": {
         "name": "SUPERSTAR LAPONE",
         "infoId": "1Ng57BGCDj025bxwCBbQulYFhRjS5runy5HnbStY_xSw",
-        "infoArtists": "Artists!A2:A",
         "infoSongs": "Songs!A2:G",
         "infoColumns": (
             "song_id",
@@ -262,7 +257,6 @@ GAMES: dict[str, GameDetails] = {
     "EB": {
         "name": "SUPERSTAR EBiDAN",
         "infoId": "",
-        "infoArtists": "",
         "infoSongs": "",
         "infoColumns": (),
         "pingId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
@@ -294,7 +288,6 @@ GAMES: dict[str, GameDetails] = {
     "PH": {
         "name": "SuperStar Philippines",
         "infoId": "",
-        "infoArtists": "",
         "infoSongs": "",
         "infoColumns": (),
         "pingId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",

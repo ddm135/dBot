@@ -6,7 +6,6 @@ from zoneinfo import ZoneInfo
 class GameDetails(TypedDict):
     name: str
     infoId: str
-    infoArtists: str
     infoSongs: str
     infoColumns: tuple[str, ...]
     pingId: str
