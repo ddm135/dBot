@@ -1,6 +1,8 @@
+import logging
 from datetime import time
 from typing import TYPE_CHECKING
 
+import discord
 from discord.ext import commands, tasks
 
 from static.dConsts import GAMES, TIMEZONES
@@ -11,6 +13,8 @@ if TYPE_CHECKING:
 
 
 class InfoSync(commands.Cog):
+    ROLE_LOGGER = logging.getLogger(__name__)
+
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
 
@@ -21,10 +25,15 @@ class InfoSync(commands.Cog):
 
     async def cog_unload(self) -> None:
         self.info_sync.cancel()
+        self.bot.info.clear()
         await super().cog_unload()
 
     @tasks.loop(time=time(hour=12, tzinfo=TIMEZONES["KST"]))
     async def info_sync(self) -> None:
+        self.ROLE_LOGGER.info("Downloading song data...")
+        await self.bot.change_presence(
+            status=discord.Status.dnd, activity=self.bot.activity
+        )
         self.bot.info.clear()
         for game, game_details in GAMES.items():
             if not game_details["pinChannelIds"]:
@@ -38,6 +47,9 @@ class InfoSync(commands.Cog):
                 self.bot.info[game][
                     row[game_details["infoColumns"].index("artist_name")]
                 ].append(row)
+        await self.bot.change_presence(
+            status=discord.Status.online, activity=self.bot.activity
+        )
 
     @info_sync.before_loop
     async def before_loop(self) -> None:

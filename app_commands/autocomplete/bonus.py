@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 import discord
 from discord import app_commands
@@ -7,9 +7,12 @@ from static.dConsts import GAMES, MAX_AUTOCOMPLETE_RESULTS, TIMEZONES
 from static.dHelpers import get_sheet_data
 from static.dTypes import GameDetails
 
+if TYPE_CHECKING:
+    from dBot import dBot
+
 
 async def artist_autocomplete(
-    itr: discord.Interaction, current: str
+    itr: discord.Interaction["dBot"], current: str
 ) -> list[app_commands.Choice[str]]:
     _, ping_data, artist_name_index, _ = _ping_preprocess(itr.namespace.game)
 
@@ -44,7 +47,7 @@ def _get_ping_data(game_details: GameDetails) -> list[list[str]]:
 
 
 def _get_ping_indexes(
-    ping_columns: Union[list[str], tuple[str, ...]]
+    ping_columns: Union[list[str], tuple[str, ...]],
 ) -> tuple[int, int]:
     artist_name_index = ping_columns.index("artist_name")
     users_index = ping_columns.index("users")

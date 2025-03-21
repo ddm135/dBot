@@ -1,14 +1,17 @@
 from pathlib import Path
-from typing import Iterable
+from typing import TYPE_CHECKING, Iterable
 
 import discord
 from discord import app_commands
 
 from static.dConsts import MAX_AUTOCOMPLETE_RESULTS, ROLES
 
+if TYPE_CHECKING:
+    from dBot import dBot
+
 
 async def role_add_autocomplete(
-    itr: discord.Interaction, current: str
+    itr: discord.Interaction["dBot"], current: str
 ) -> list[app_commands.Choice[str]]:
     if not itr.guild:
         return []
@@ -37,7 +40,7 @@ async def role_add_autocomplete(
 
 
 async def role_remove_autocomplete(
-    itr: discord.Interaction, current: str
+    itr: discord.Interaction["dBot"], current: str
 ) -> list[app_commands.Choice[str]]:
     if not itr.guild:
         return []
@@ -62,7 +65,7 @@ async def role_remove_autocomplete(
 
 
 async def role_set_autocomplete(
-    itr: discord.Interaction, current: str
+    itr: discord.Interaction["dBot"], current: str
 ) -> list[app_commands.Choice[str]]:
     if not itr.guild:
         return []

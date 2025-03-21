@@ -32,7 +32,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
     @app_commands.choices(game=GAME_CHOICES)
     async def bonus_add(
         self,
-        itr: discord.Interaction,
+        itr: discord.Interaction["dBot"],
         game: app_commands.Choice[str],
         artist_name: str,
     ) -> None:
@@ -46,7 +46,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
     @app_commands.choices(game=GAME_CHOICES)
     async def bonus_remove(
         self,
-        itr: discord.Interaction,
+        itr: discord.Interaction["dBot"],
         game: app_commands.Choice[str],
         artist_name: str,
     ) -> None:
@@ -55,7 +55,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
 
     async def _handle_bonus_command(
         self,
-        itr: discord.Interaction,
+        itr: discord.Interaction["dBot"],
         game_key: str,
         artist_name: str,
         operation: str,

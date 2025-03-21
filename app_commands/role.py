@@ -52,7 +52,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         await super().cog_unload()
 
     @staticmethod
-    def in_channels(itr: discord.Interaction) -> bool:
+    def in_channels(itr: discord.Interaction["dBot"]) -> bool:
         return itr.channel_id in ROLE_STORAGE_CHANNEL.values()
 
     @app_commands.command(
@@ -62,7 +62,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
     @app_commands.autocomplete(role=role_add_autocomplete)
     @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     @app_commands.check(in_channels)
-    async def role_add(self, itr: discord.Interaction, role: str) -> None:
+    async def role_add(self, itr: discord.Interaction["dBot"], role: str) -> None:
         await itr.response.defer()
         user_id = itr.user.id
         stored_roles = _get_role_data(user_id)
@@ -105,7 +105,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
     @app_commands.autocomplete(role=role_remove_autocomplete)
     @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     @app_commands.check(in_channels)
-    async def role_remove(self, itr: discord.Interaction, role: str) -> None:
+    async def role_remove(self, itr: discord.Interaction["dBot"], role: str) -> None:
         await itr.response.defer()
         user_id = itr.user.id
         stored_roles = _get_role_data(user_id)
@@ -152,7 +152,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
     @app_commands.autocomplete(role=role_set_autocomplete)
     @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     @app_commands.check(in_channels)
-    async def role_set(self, itr: discord.Interaction, role: str) -> None:
+    async def role_set(self, itr: discord.Interaction["dBot"], role: str) -> None:
         await itr.response.defer()
         user_id = itr.user.id
         stored_roles = _get_role_data(user_id)
@@ -229,7 +229,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         description=("View your Group Role inventory"),
     )
     @app_commands.check(in_channels)
-    async def role_inventory(self, itr: discord.Interaction) -> None:
+    async def role_inventory(self, itr: discord.Interaction["dBot"]) -> None:
         await itr.response.defer()
         user_id = itr.user.id
         stored_roles = _get_role_data(user_id)
@@ -292,7 +292,9 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         self.LOCKED.unlink()
 
     async def cog_app_command_error(
-        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+        self,
+        interaction: discord.Interaction,
+        error: app_commands.AppCommandError,
     ):
         if isinstance(error, app_commands.errors.MissingAnyRole):
             return await interaction.response.send_message(

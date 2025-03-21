@@ -60,14 +60,15 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
     @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     async def pin_by_name(
         self,
-        itr: discord.Interaction,
+        itr: discord.Interaction["dBot"],
         game: app_commands.Choice[str],
         artist_name: str,
         song_name: str,
     ):
         if self.bot.status == discord.Status.dnd:
             return await itr.response.send_message(
-                "Data synchronization in progress, feature unavailable.", ephemeral=True
+                "Song data synchronization in progress, feature unavailable.",
+                ephemeral=True,
             )
 
         await itr.response.defer(ephemeral=True)
@@ -126,13 +127,14 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
     @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     async def pin_by_id(
         self,
-        itr: discord.Interaction,
+        itr: discord.Interaction["dBot"],
         game: app_commands.Choice[str],
         song_id: str,
     ):
         if self.bot.status == discord.Status.dnd:
             return await itr.response.send_message(
-                "Data synchronization in progress, feature unavailable.", ephemeral=True
+                "Song data synchronization in progress, feature unavailable.",
+                ephemeral=True,
             )
 
         await itr.response.defer(ephemeral=True)
@@ -177,7 +179,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
 
     async def _handle_ssl_command(
         self,
-        itr: discord.Interaction,
+        itr: discord.Interaction["dBot"],
         artist_name: str,
         song_name: str,
         song_id: int,
@@ -337,7 +339,9 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         #         break
 
     async def cog_app_command_error(
-        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+        self,
+        interaction: discord.Interaction,
+        error: app_commands.AppCommandError,
     ):
         if isinstance(error, app_commands.errors.MissingAnyRole):
             return await interaction.response.send_message(
