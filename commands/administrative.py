@@ -34,10 +34,14 @@ class Administrative(commands.Cog):
             msg = await ctx.send("Reloading extensions...")
             await self.bot.change_presence(
                 status=discord.Status.dnd,
-                activity=discord.Game(name="Reloading extensions..."),
+                activity=discord.CustomActivity("Reloading extensions..."),
             )
             for ext in EXTENSIONS:
                 await self.bot.reload_extension(ext)
+            await self.bot.change_presence(
+                status=discord.Status.dnd,
+                activity=discord.CustomActivity("Waiting for clock..."),
+            )
             await msg.edit(content="Reloaded!")
 
 
