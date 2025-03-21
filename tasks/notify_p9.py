@@ -41,6 +41,7 @@ class NotifyP9(commands.Cog):
                 TIMEZONES["JST"],
             ) or game_details["name"] == "SUPERSTAR SM":
                 continue
+            print(game_details["name"])
             date_format = game_details["dateFormat"]
             ping_columns = game_details["pingColumns"]
             bonus_columns = game_details["bonusColumns"]
@@ -88,6 +89,7 @@ class NotifyP9(commands.Cog):
             )
             artists = tuple(dict.fromkeys(tuple(zip(*bonus_data))[artist_name_index]))
             for artist in artists:
+                print(artist)
                 artist_pings = next(
                     (
                         ping
@@ -157,6 +159,9 @@ class NotifyP9(commands.Cog):
                             birthday_bonuses.append(bonus)
                         else:
                             album_bonuses.append(bonus)
+
+                print(birthday_bonuses)
+                print(album_bonuses)
 
                 birthday_members = ""
                 birthday_total = 0
