@@ -3,12 +3,13 @@ from datetime import datetime, time
 import discord
 from discord.ext import commands, tasks
 
+from dBot import dBot
 from static.dConsts import GAMES, ONE_DAY, TIMEZONES
 from static.dHelpers import get_sheet_data
 
 
 class NotifyP9(commands.Cog):
-    def __init__(self, bot: commands.Bot) -> None:
+    def __init__(self, bot: dBot) -> None:
         self.bot = bot
 
     async def cog_load(self) -> None:
@@ -298,5 +299,5 @@ class NotifyP9(commands.Cog):
         await self.bot.wait_until_ready()
 
 
-async def setup(bot: commands.Bot) -> None:
+async def setup(bot: dBot) -> None:
     await bot.add_cog(NotifyP9(bot))

@@ -3,6 +3,7 @@ from datetime import datetime, time
 import discord
 from discord.ext import commands, tasks
 
+from dBot import dBot
 from static.dConsts import TIMEZONES
 
 
@@ -12,7 +13,7 @@ class Clock(commands.Cog):
     TIMEZONE_COUNT = len(TIMEZONES)
     counter = 0
 
-    def __init__(self, bot: commands.Bot) -> None:
+    def __init__(self, bot: dBot) -> None:
         self.bot = bot
 
     async def cog_load(self) -> None:
@@ -38,5 +39,5 @@ class Clock(commands.Cog):
         await self.bot.wait_until_ready()
 
 
-async def setup(bot: commands.Bot) -> None:
+async def setup(bot: dBot) -> None:
     await bot.add_cog(Clock(bot))

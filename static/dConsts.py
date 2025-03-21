@@ -53,11 +53,11 @@ EXTENSIONS = [
 GAMES: dict[str, GameDetails] = {
     "SM": {
         "name": "SUPERSTAR SM",
-        "sslId": "1kC38CLFd6xkDXD9qLHgnnv3s3jmM_4vf4RLsWuXs9NU",
-        "sslArtists": "Artists!A2:A",
-        "sslSongs": "Songs!A2:F",
-        "sslFiltereds": "Filtered Songs!A2:F",
-        "sslColumns": (
+        "infoId": "1kC38CLFd6xkDXD9qLHgnnv3s3jmM_4vf4RLsWuXs9NU",
+        "infoArtists": "Artists!A2:A",
+        "infoSongs": "Songs!A2:F",
+        "infoFiltereds": "Filtered Songs!A2:F",
+        "infoColumns": (
             "song_id",
             "artist_name",
             "song_name",
@@ -100,11 +100,11 @@ GAMES: dict[str, GameDetails] = {
     },
     "SM_JP": {
         "name": "SUPERSTAR SMTOWN (JP/TW)",
-        "sslId": "1kC38CLFd6xkDXD9qLHgnnv3s3jmM_4vf4RLsWuXs9NU",
-        "sslArtists": "Artists!A2:A",
-        "sslSongs": "Songs!A2:F",
-        "sslFiltereds": "Filtered Songs!A2:F",
-        "sslColumns": (
+        "infoId": "1kC38CLFd6xkDXD9qLHgnnv3s3jmM_4vf4RLsWuXs9NU",
+        "infoArtists": "Artists!A2:A",
+        "infoSongs": "Songs!A2:F",
+        "infoFiltereds": "Filtered Songs!A2:F",
+        "infoColumns": (
             "song_id",
             "artist_name",
             "song_name",
@@ -143,11 +143,11 @@ GAMES: dict[str, GameDetails] = {
     },
     # "G": {
     #     "name": "SUPERSTAR GFRIEND",
-    #     "sslId": None,
-    #     "sslArtists": None,
-    #     "sslSongs": None,
-    #     "sslFiltereds": None,
-    #     "sslColumns": None,
+    #     "infoId": "",
+    #     "infoArtists": "",
+    #     "infoSongs": "",
+    #     "infoFiltereds": "",
+    #     "infoColumns": (),
     #     "pingId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
     #     "pingRange": "GFRIEND!A1:D",
     #     "pingWrite": "GFRIEND!C",
@@ -176,11 +176,11 @@ GAMES: dict[str, GameDetails] = {
     # },
     "JYP_JP": {
         "name": "SUPERSTAR JYPNATION (JP)",
-        "sslId": "1eVjwi0GudyMixnZtam8TeupRd3DQ6mheyRKp2lDA6qw",
-        "sslArtists": "Artists!A2:A",
-        "sslSongs": "Songs!A2:G",
-        "sslFiltereds": "Filtered Songs!A2:G",
-        "sslColumns": (
+        "infoId": "1eVjwi0GudyMixnZtam8TeupRd3DQ6mheyRKp2lDA6qw",
+        "infoArtists": "Artists!A2:A",
+        "infoSongs": "Songs!A2:G",
+        "infoFiltereds": "Filtered Songs!A2:G",
+        "infoColumns": (
             "song_id",
             "artist_name",
             "song_name",
@@ -220,11 +220,11 @@ GAMES: dict[str, GameDetails] = {
     },
     "LP": {
         "name": "SUPERSTAR LAPONE",
-        "sslId": "1Ng57BGCDj025bxwCBbQulYFhRjS5runy5HnbStY_xSw",
-        "sslArtists": "Artists!A2:A",
-        "sslSongs": "Songs!A2:G",
-        "sslFiltereds": "Filtered Songs!A2:G",
-        "sslColumns": (
+        "infoId": "1Ng57BGCDj025bxwCBbQulYFhRjS5runy5HnbStY_xSw",
+        "infoArtists": "Artists!A2:A",
+        "infoSongs": "Songs!A2:G",
+        "infoFiltereds": "Filtered Songs!A2:G",
+        "infoColumns": (
             "song_id",
             "artist_name",
             "song_name",
@@ -264,11 +264,11 @@ GAMES: dict[str, GameDetails] = {
     },
     "EB": {
         "name": "SUPERSTAR EBiDAN",
-        "sslId": None,
-        "sslArtists": None,
-        "sslSongs": None,
-        "sslFiltereds": None,
-        "sslColumns": None,
+        "infoId": "",
+        "infoArtists": "",
+        "infoSongs": "",
+        "infoFiltereds": "",
+        "infoColumns": (),
         "pingId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
         "pingRange": "EBiDAN!A1:D",
         "pingWrite": "EBiDAN!C",
@@ -297,11 +297,11 @@ GAMES: dict[str, GameDetails] = {
     },
     "PH": {
         "name": "SuperStar Philippines",
-        "sslId": None,
-        "sslArtists": None,
-        "sslSongs": None,
-        "sslFiltereds": None,
-        "sslColumns": None,
+        "infoId": "",
+        "infoArtists": "",
+        "infoSongs": "",
+        "infoFiltereds": "",
+        "infoColumns": (),
         "pingId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
         "pingRange": "Philippines!A1:D",
         "pingWrite": "Philippines!C",

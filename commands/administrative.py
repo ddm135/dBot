@@ -1,11 +1,12 @@
 import discord
 from discord.ext import commands
 
+from dBot import dBot
 from static.dConsts import EXTENSIONS, STATUS_CHANNEL
 
 
 class Administrative(commands.Cog):
-    def __init__(self, bot: commands.Bot) -> None:
+    def __init__(self, bot: dBot) -> None:
         self.bot = bot
 
     @commands.command()
@@ -36,5 +37,5 @@ class Administrative(commands.Cog):
             await msg.edit(content="Reloaded!")
 
 
-async def setup(bot: commands.Bot) -> None:
+async def setup(bot: dBot) -> None:
     await bot.add_cog(Administrative(bot))

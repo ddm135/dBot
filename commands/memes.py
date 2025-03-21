@@ -2,6 +2,7 @@ from datetime import datetime
 
 from discord.ext import commands
 
+from dBot import dBot
 from static.dConsts import TIMEZONES
 
 
@@ -10,7 +11,7 @@ class Memes(commands.Cog):
     LP_RELEASE = datetime(year=2020, month=11, day=30, tzinfo=TIMEZONES["KST"])
     BAEMON_DEBUT = datetime(year=2024, month=4, day=1, tzinfo=TIMEZONES["KST"])
 
-    def __init__(self, bot: commands.Bot) -> None:
+    def __init__(self, bot: dBot) -> None:
         self.bot = bot
 
     @commands.command()
@@ -37,5 +38,5 @@ class Memes(commands.Cog):
         return diff.days
 
 
-async def setup(bot: commands.Bot) -> None:
+async def setup(bot: dBot) -> None:
     await bot.add_cog(Memes(bot))

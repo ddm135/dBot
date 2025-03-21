@@ -5,6 +5,7 @@ from discord import app_commands
 from discord.ext import commands
 
 from app_commands.autocomplete.bonus import _ping_preprocess, artist_autocomplete
+from dBot import dBot
 from static.dConsts import GAMES
 from static.dHelpers import update_sheet_data
 from static.dTypes import GameDetails
@@ -15,7 +16,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         app_commands.Choice(name=game["name"], value=key) for key, game in GAMES.items()
     ]
 
-    def __init__(self, bot: commands.Bot) -> None:
+    def __init__(self, bot: dBot) -> None:
         self.bot = bot
 
     @app_commands.command(
@@ -127,5 +128,5 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         )
 
 
-async def setup(bot: commands.Bot) -> None:
+async def setup(bot: dBot) -> None:
     await bot.add_cog(Bonus(bot))

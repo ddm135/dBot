@@ -5,11 +5,11 @@ from zoneinfo import ZoneInfo
 
 class GameDetails(TypedDict):
     name: str
-    sslId: Optional[str]
-    sslArtists: Optional[str]
-    sslSongs: Optional[str]
-    sslFiltereds: Optional[str]
-    sslColumns: Optional[tuple[str, ...]]
+    infoId: str
+    infoArtists: str
+    infoSongs: str
+    infoFiltereds: str
+    infoColumns: tuple[str, ...]
     pingId: str
     pingRange: str
     pingWrite: str

@@ -4,6 +4,7 @@ from typing import Optional, Union
 import discord
 from discord import app_commands
 
+from dBot import dBot
 from static.dConsts import GAMES, MAX_AUTOCOMPLETE_RESULTS, TIMEZONES
 from static.dHelpers import get_column_letter, get_sheet_data, update_sheet_data
 from static.dTypes import GameDetails
@@ -14,15 +15,8 @@ async def artist_autocomplete(
 ) -> list[app_commands.Choice[str]]:
     if not itr.namespace.game:
         return []
-    game_details = GAMES[itr.namespace.game]
-
-    assert (ssl_id := game_details["sslId"])
-    assert (ssl_artist_range := game_details["sslArtists"])
-    ssl_artists = get_sheet_data(
-        ssl_id,
-        ssl_artist_range,
-        "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
-    )
+    assert isinstance(itr.client, dBot)
+    ssl_artists = itr.client.info[itr.namespace.game].keys()
 
     artists = [
         app_commands.Choice(name=artist, value=artist)
@@ -48,10 +42,9 @@ async def song_autocomplete(
         _,
     ) = _ssl_preprocess(itr.namespace.game)
 
-    assert (ssl_full_range := game_details["sslSongs"])
     filter = (
         (
-            f'=QUERY({ssl_full_range}, "SELECT * WHERE LOWER('
+            f'=QUERY({game_details["infoSongs"]}, "SELECT * WHERE LOWER('
             f'{get_column_letter(artist_name_index)}) = LOWER(""{artist_name}"") '
             f"AND (LOWER({get_column_letter(song_name_index)}) "
             f'CONTAINS LOWER(""{current}"") OR '
@@ -60,7 +53,7 @@ async def song_autocomplete(
         )
         if current
         else (
-            f'=QUERY({ssl_full_range}, "SELECT * WHERE LOWER('
+            f'=QUERY({game_details["infoSongs"]}, "SELECT * WHERE LOWER('
             f"{get_column_letter(artist_name_index)}) "
             f'= LOWER(""{artist_name}"")", 0)'
         )
@@ -98,9 +91,8 @@ async def song_id_autocomplete(
         _,
     ) = _ssl_preprocess(itr.namespace.game)
 
-    assert (ssl_full_range := game_details["sslSongs"])
     filter = (
-        f'=QUERY({ssl_full_range}, "SELECT * WHERE '
+        f'=QUERY({game_details["infoSongs"]}, "SELECT * WHERE '
         f'{get_column_letter(song_id_index)} = {current}", 0)'
     )
     _update_ssl_filter(game_details, filter)
@@ -138,26 +130,21 @@ def _ssl_preprocess(
     game: str,
 ) -> tuple[GameDetails, int, int, int, int, int, int, Optional[int]]:
     game_details = GAMES[game]
-    assert (ssl_columns := game_details["sslColumns"])
-    return game_details, *_get_ssl_indexes(ssl_columns)
+    return game_details, *_get_ssl_indexes(game_details["infoColumns"])
 
 
 def _get_ssl_data(game_details: GameDetails) -> list[list[str]]:
-    assert (ssl_id := game_details["sslId"])
-    assert (ssl_filtered_range := game_details["sslFiltereds"])
     return get_ssl_data(
-        ssl_id,
-        ssl_filtered_range,
+        game_details["infoId"],
+        game_details["infoFiltereds"],
         "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
     )
 
 
 def _update_ssl_filter(game_details: GameDetails, filter: str) -> None:
-    assert (ssl_id := game_details["sslId"])
-    assert (ssl_filtered_range := game_details["sslFiltereds"])
     update_ssl_filter(
-        ssl_id,
-        ssl_filtered_range,
+        game_details["infoId"],
+        game_details["infoFiltereds"],
         data=[[filter]],
     )
 

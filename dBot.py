@@ -1,4 +1,5 @@
 import os
+from collections import defaultdict
 from datetime import datetime, time
 
 import discord
@@ -15,6 +16,10 @@ load_dotenv()
 
 
 class dBot(commands.Bot):
+    info: defaultdict[str, defaultdict[str, list]] = defaultdict(
+        lambda: defaultdict(list)
+    )
+
     async def setup_hook(self):
         self.remove_command("help")
         for ext in EXTENSIONS:

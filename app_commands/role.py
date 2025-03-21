@@ -12,6 +12,7 @@ from app_commands.autocomplete.role import (
     role_remove_autocomplete,
     role_set_autocomplete,
 )
+from dBot import dBot
 from static.dConsts import (
     ROLE_STORAGE_CHANNEL,
     ROLES,
@@ -31,7 +32,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         "roles on dBot will affect bonusBot role storage and shop functionality."
     )
 
-    def __init__(self, bot: commands.Bot) -> None:
+    def __init__(self, bot: dBot) -> None:
         self.bot = bot
 
     async def cog_load(self) -> None:
@@ -315,5 +316,5 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         await self.bot.wait_until_ready()
 
 
-async def setup(bot: commands.Bot) -> None:
+async def setup(bot: dBot) -> None:
     await bot.add_cog(Role(bot))

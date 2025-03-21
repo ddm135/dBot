@@ -18,6 +18,7 @@ from app_commands.autocomplete.ssLeague import (
     song_autocomplete,
     song_id_autocomplete,
 )
+from dBot import dBot
 from static.dConsts import (
     A_JSON_BODY,
     A_JSON_HEADERS,
@@ -42,7 +43,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         if game["pinChannelIds"] and key != "SM"
     ]
 
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: dBot):
         self.bot = bot
 
     @app_commands.command(
@@ -79,9 +80,8 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             skills_index,
         ) = _ssl_preprocess(game.value)
 
-        assert (ssl_full_range := game_details["sslSongs"])
         filter = (
-            f'=QUERY({ssl_full_range}, "SELECT * WHERE LOWER('
+            f'=QUERY({game_details["infoSongs"]}, "SELECT * WHERE LOWER('
             f'{get_column_letter(artist_name_index)}) = LOWER(""{artist_name}"") '
             f"AND LOWER({get_column_letter(song_name_index)}) = "
             f'LOWER(""{song_name}"")", 0)'
@@ -347,5 +347,5 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         raise error
 
 
-async def setup(bot: commands.Bot):
+async def setup(bot: dBot):
     await bot.add_cog(SSLeague(bot))
