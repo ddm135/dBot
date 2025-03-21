@@ -65,7 +65,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         artist_name: str,
         song_name: str,
     ):
-        if self.bot.status == discord.Status.dnd:
+        if not self.bot.info_ready:
             return await itr.response.send_message(
                 "Song data synchronization in progress, feature unavailable.",
                 ephemeral=True,
@@ -131,7 +131,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         game: app_commands.Choice[str],
         song_id: str,
     ):
-        if self.bot.status == discord.Status.dnd:
+        if not self.bot.info_ready:
             return await itr.response.send_message(
                 "Song data synchronization in progress, feature unavailable.",
                 ephemeral=True,

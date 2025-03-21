@@ -32,7 +32,9 @@ class Clock(commands.Cog):
         short_name, timezone = self.TIMEZONE_ITEMS[self.counter]
         current_time = datetime.now(timezone).strftime(f"%H:%M {short_name} %b %d")
 
-        await self.bot.change_presence(activity=discord.Game(name=f"{current_time}"))
+        await self.bot.change_presence(
+            activity=discord.CustomActivity(f"{current_time}")
+        )
         self.counter = (self.counter + self.STEP) % self.TIMEZONE_COUNT
 
     @clock.before_loop

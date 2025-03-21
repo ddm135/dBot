@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 async def artist_autocomplete(
     itr: discord.Interaction["dBot"], current: str
 ) -> list[app_commands.Choice[str]]:
-    if not itr.namespace.game:
+    if not itr.namespace.game or not itr.client.info_ready:
         return []
     ssl_artists = itr.client.info[itr.namespace.game].keys()
 
@@ -30,6 +30,8 @@ async def artist_autocomplete(
 async def song_autocomplete(
     itr: discord.Interaction["dBot"], current: str
 ) -> list[app_commands.Choice[str]]:
+    if not itr.namespace.game or not itr.client.info_ready:
+        return []
     artist_name: str = itr.namespace.artist_name
     (
         game_details,
@@ -80,6 +82,8 @@ async def song_autocomplete(
 async def song_id_autocomplete(
     itr: discord.Interaction["dBot"], current: str
 ) -> list[app_commands.Choice[str]]:
+    if not itr.namespace.game or not itr.client.info_ready:
+        return []
     (
         game_details,
         artist_name_index,
