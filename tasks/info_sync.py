@@ -31,9 +31,7 @@ class InfoSync(commands.Cog):
     async def info_sync(self) -> None:
         self.ROLE_LOGGER.info("Downloading song data...")
         await self.bot.wait_until_ready()
-        await self.bot.change_presence(
-            status=discord.Status.dnd, activity=self.bot.activity
-        )
+        await self.bot.change_presence(status=discord.Status.dnd)
         self.bot.info.clear()
         for game, game_details in GAMES.items():
             if not game_details["pinChannelIds"]:
@@ -47,9 +45,7 @@ class InfoSync(commands.Cog):
                 self.bot.info[game][
                     row[game_details["infoColumns"].index("artist_name")]
                 ].append(row)
-        await self.bot.change_presence(
-            status=discord.Status.online, activity=self.bot.activity
-        )
+        await self.bot.change_presence(status=discord.Status.online)
 
     @info_sync.before_loop
     async def before_loop(self) -> None:

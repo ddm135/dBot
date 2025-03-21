@@ -1,6 +1,7 @@
 import os
 from collections import defaultdict
 from datetime import datetime, time
+from typing import Any
 
 import discord
 from discord.ext import commands, tasks
@@ -19,6 +20,15 @@ class dBot(commands.Bot):
     info: defaultdict[str, defaultdict[str, list]] = defaultdict(
         lambda: defaultdict(list)
     )
+    presence: discord.Status = discord.Status.online
+
+    def __init__(
+        self, command_prefix, *, intents: discord.Intents, **options: Any
+    ) -> None:
+        options["status"] = discord.Status.dnd
+        super().__init__(
+            command_prefix=command_prefix, intents=intents, options=options
+        )
 
     async def setup_hook(self):
         self.remove_command("help")
