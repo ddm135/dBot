@@ -56,9 +56,10 @@ class InfoSync(commands.Cog):
                 self.bot.info_by_name[game][
                     row[game_details["infoColumns"].index("artist_name")]
                 ][row[game_details["infoColumns"].index("song_name")]] = row
-                self.bot.info_by_id[game][
-                    row[game_details["infoColumns"].index("song_id")]
-                ] = row
+                if "song_id" in game_details["infoColumns"]:
+                    self.bot.info_by_id[game][
+                        row[game_details["infoColumns"].index("song_id")]
+                    ] = row
 
             self.bot.info_color[game] = await self.get_music_data(game_details["api"])
 
