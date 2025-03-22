@@ -1,6 +1,5 @@
 import asyncio
 from datetime import datetime
-from pprint import pprint
 from typing import TYPE_CHECKING
 
 import discord
@@ -34,8 +33,6 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
 
     def __init__(self, bot: "dBot"):
         self.bot = bot
-        pprint(self.GAME_CHOICES)
-        pprint(self._GAME_CHOICES)
 
     @app_commands.command()
     @app_commands.choices(game_choice=GAME_CHOICES)
@@ -174,8 +171,6 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         pin_channel_id: int,
         game_details: "GameDetails",
     ) -> None:
-        print(song_id)
-        pprint(itr.namespace)
 
         timezone = game_details["timezone"]
         offset = game_details["resetOffset"]
