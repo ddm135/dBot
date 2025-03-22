@@ -91,10 +91,10 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             itr,
             artist_name,
             song_name,
-            int(ssl_song[song_id_index]) if song_id_index else None,
+            int(ssl_song[song_id_index]) if song_id_index is not None else None,
             ssl_song[duration_index],
             ssl_song[image_url_index],
-            ssl_song[skills_index] if skills_index else None,
+            ssl_song[skills_index] if skills_index is not None else None,
             pin_channel_id,
             game_details,
         )
@@ -154,7 +154,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             int(song_id),
             ssl_song[duration_index],
             ssl_song[image_url_index],
-            ssl_song[skills_index] if skills_index else None,
+            ssl_song[skills_index] if skills_index is not None else None,
             pin_channel_id,
             game_details,
         )
@@ -178,7 +178,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         pin_role = game_details["pinRoles"].get(guild_id)
         color = (
             self._get_song_color(itr.namespace.game, song_id)
-            if song_id
+            if song_id is not None
             else game_details["color"]
         )
 
