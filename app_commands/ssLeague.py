@@ -64,7 +64,6 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         if not self.bot.info_data_ready:
             return await itr.response.send_message(
                 "Song data synchronization in progress, feature unavailable.",
-                ephemeral=True,
             )
 
         game = game_choice.value
@@ -74,7 +73,6 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         if not pin_channel_id:
             return await itr.followup.send(
                 f"Pin channel for {game_choice.name} is not set for this server.",
-                ephemeral=True,
             )
 
         ssl_columns = game_details["infoColumns"]
@@ -87,7 +85,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
 
         ssl_song = self.bot.info_by_name[game][artist_name][song_name]
         if not ssl_song:
-            return await itr.followup.send("Song not found.", ephemeral=True)
+            return await itr.followup.send("Song not found.")
 
         await self._handle_ssl_command(
             itr,
@@ -127,7 +125,6 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         if not self.bot.info_data_ready:
             return await itr.response.send_message(
                 "Song data synchronization in progress, feature unavailable.",
-                ephemeral=True,
             )
 
         game = game_choice.value
@@ -137,7 +134,6 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         if not pin_channel_id:
             return await itr.followup.send(
                 f"Pin channel for {game_choice.name} is not set for this server.",
-                ephemeral=True,
             )
 
         ssl_columns = game_details["infoColumns"]
@@ -149,7 +145,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
 
         ssl_song = self.bot.info_by_id[game][song_id]
         if not ssl_song:
-            return await itr.followup.send("Song not found.", ephemeral=True)
+            return await itr.followup.send("Song not found.")
 
         await self._handle_ssl_command(
             itr,
@@ -180,7 +176,11 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         offset = game_details["resetOffset"]
         assert (guild_id := itr.guild_id)
         pin_role = game_details["pinRoles"].get(guild_id)
-        color = self._get_song_color(itr.namespace.game, song_id) if song_id else None
+        color = (
+            self._get_song_color(itr.namespace.game, song_id)
+            if song_id
+            else game_details["color"]
+        )
 
         current_time = datetime.now(timezone) - offset
         embed, embed_title = self._generate_embed(

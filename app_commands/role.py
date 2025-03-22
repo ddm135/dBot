@@ -41,8 +41,8 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
 
     @app_commands.command(name="add")
     @app_commands.autocomplete(role=role_add_autocomplete)
-    @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     @app_commands.check(in_channels)
+    @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     async def role_add(self, itr: discord.Interaction["dBot"], role: str) -> None:
         """Apply a Group Role you own in inventory (Requires SUPERSTAR Role)
 
@@ -52,13 +52,12 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
             Role
         """
 
+        await itr.response.defer()
         if not self.bot.info_data_ready:
             return await itr.response.send_message(
                 "Role data synchronization in progress, feature unavailable.",
-                ephemeral=True,
             )
 
-        await itr.response.defer(ephemeral=True)
         user_id = itr.user.id
         stored_roles = get_role_data(user_id)
         assert itr.guild
@@ -72,16 +71,14 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
                 guild_roles, name=role_args[0], id=int(role_args[1])
             )
             if not target_role:
-                return await itr.followup.send(
-                    f"Role not found.\n{self.NOTICE}", ephemeral=True
-                )
+                return await itr.followup.send(f"Role not found.\n{self.NOTICE}")
             if target_role in user_roles:
                 return await itr.followup.send(
-                    f"Role is already applied.\n{self.NOTICE}", ephemeral=True
+                    f"Role is already applied.\n{self.NOTICE}"
                 )
             if target_role.id not in stored_roles:
                 return await itr.followup.send(
-                    f"You do not own this role.\n{self.NOTICE}", ephemeral=True
+                    f"You do not own this role.\n{self.NOTICE}"
                 )
             stored_roles.remove(target_role.id)
             update_role_data(user_id, stored_roles)
@@ -91,15 +88,14 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
                 f"Added <@&{target_role.id}>!\n{self.NOTICE}",
                 allowed_mentions=discord.AllowedMentions.none(),
                 silent=True,
-                ephemeral=False,
             )
         except (ValueError, IndexError):
-            await itr.followup.send(f"Role not found.\n{self.NOTICE}", ephemeral=True)
+            await itr.followup.send(f"Role not found.\n{self.NOTICE}")
 
     @app_commands.command(name="remove")
     @app_commands.autocomplete(role=role_remove_autocomplete)
-    @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     @app_commands.check(in_channels)
+    @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     async def role_remove(self, itr: discord.Interaction["dBot"], role: str) -> None:
         """Store a Group Role you own in inventory (Requires SUPERSTAR Role)
 
@@ -109,13 +105,12 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
             Role
         """
 
+        await itr.response.defer()
         if not self.bot.info_data_ready:
             return await itr.response.send_message(
                 "Role data synchronization in progress, feature unavailable.",
-                ephemeral=True,
             )
 
-        await itr.response.defer(ephemeral=True)
         user_id = itr.user.id
         stored_roles = get_role_data(user_id)
         assert itr.guild
@@ -130,16 +125,14 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
                 guild_roles, name=role_args[0], id=int(role_args[1])
             )
             if not target_role:
-                return await itr.followup.send(
-                    f"Role not found.\n{self.NOTICE}", ephemeral=True
-                )
+                return await itr.followup.send(f"Role not found.\n{self.NOTICE}")
             if target_role.id not in group_roles:
                 return await itr.followup.send(
-                    f"This role cannot be removed.\n{self.NOTICE}", ephemeral=True
+                    f"This role cannot be removed.\n{self.NOTICE}"
                 )
             if target_role not in user_roles:
                 return await itr.followup.send(
-                    f"You do not own this role.\n{self.NOTICE}", ephemeral=True
+                    f"You do not own this role.\n{self.NOTICE}"
                 )
             stored_roles.add(target_role.id)
             update_role_data(user_id, stored_roles)
@@ -149,15 +142,14 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
                 f"Removed <@&{target_role.id}>!\n{self.NOTICE}",
                 allowed_mentions=discord.AllowedMentions.none(),
                 silent=True,
-                ephemeral=False,
             )
         except (ValueError, IndexError):
             await itr.followup.send(f"Role not found.\n{self.NOTICE}")
 
     @app_commands.command(name="set")
     @app_commands.autocomplete(role=role_set_autocomplete)
-    @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     @app_commands.check(in_channels)
+    @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     async def role_set(self, itr: discord.Interaction["dBot"], role: str) -> None:
         """Store higher Group Roles then apply chosen and lower Group Roles
         (Requires SUPERSTAR Role)
@@ -168,13 +160,12 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
             Role
         """
 
+        await itr.response.defer()
         if not self.bot.info_data_ready:
             return await itr.response.send_message(
                 "Role data synchronization in progress, feature unavailable.",
-                ephemeral=True,
             )
 
-        await itr.response.defer(ephemeral=True)
         user_id = itr.user.id
         stored_roles = get_role_data(user_id)
         assert itr.guild
@@ -189,16 +180,14 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
                 guild_roles, name=role_args[0], id=int(role_args[1])
             )
             if not target_role:
-                return await itr.followup.send(
-                    f"Role not found.\n{self.NOTICE}", ephemeral=True
-                )
+                return await itr.followup.send(f"Role not found.\n{self.NOTICE}")
             if target_role.id not in group_roles:
                 return await itr.followup.send(
-                    f"This role is not a Group Role.\n{self.NOTICE}", ephemeral=True
+                    f"This role is not a Group Role.\n{self.NOTICE}"
                 )
             if target_role.id not in stored_roles and target_role not in user_roles:
                 return await itr.followup.send(
-                    f"You do not own this role.\n{self.NOTICE}", ephemeral=True
+                    f"You do not own this role.\n{self.NOTICE}"
                 )
             target_index = guild_roles.index(target_role)
             remove_roles = tuple(
@@ -243,7 +232,6 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
                 embed=embed,
                 allowed_mentions=discord.AllowedMentions.none(),
                 silent=True,
-                ephemeral=False,
             )
         except (ValueError, IndexError):
             await itr.followup.send(f"Role not found.\n{self.NOTICE}")
@@ -253,7 +241,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
     async def role_inventory(self, itr: discord.Interaction["dBot"]) -> None:
         """View your Group Role inventory"""
 
-        await itr.response.defer(ephemeral=True)
+        await itr.response.defer()
         user_id = itr.user.id
         stored_roles = get_role_data(user_id)
         assert itr.guild
@@ -277,7 +265,6 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
             embed=embed,
             allowed_mentions=discord.AllowedMentions.none(),
             silent=True,
-            ephemeral=False,
         )
 
     async def cog_app_command_error(
@@ -285,17 +272,16 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         interaction: discord.Interaction,
         error: app_commands.AppCommandError,
     ):
-        if isinstance(error, app_commands.errors.MissingAnyRole):
-            return await interaction.response.send_message(
-                "You do not have permission to use this command.",
-                ephemeral=True,
-            )
-
         if isinstance(error, app_commands.errors.CheckFailure):
             assert (guild_id := interaction.guild_id)
             return await interaction.response.send_message(
                 f"wrong channel bruv <#{ROLE_STORAGE_CHANNEL[guild_id]}>",
                 ephemeral=True,
+            )
+
+        if isinstance(error, app_commands.errors.MissingAnyRole):
+            return await interaction.response.send_message(
+                "You do not have permission to use this command.",
             )
 
         await super().cog_app_command_error(interaction, error)
