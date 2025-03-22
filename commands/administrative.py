@@ -40,10 +40,6 @@ class Administrative(commands.Cog):
                     if ext not in EXTENSIONS:
                         await msg.edit(content=f"Invalid extension: {ext}")
                         return
-            await self.bot.change_presence(
-                status=discord.Status.dnd,
-                activity=discord.CustomActivity("Reloading extensions..."),
-            )
 
             for ext in extensions:
                 await self.bot.reload_extension(ext)

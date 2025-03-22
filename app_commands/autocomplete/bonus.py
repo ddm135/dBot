@@ -1,14 +1,14 @@
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING
 
 import discord
 from discord import app_commands
 
 from static.dConsts import GAMES, MAX_AUTOCOMPLETE_RESULTS, TIMEZONES
 from static.dHelpers import get_sheet_data
-from static.dTypes import GameDetails
 
 if TYPE_CHECKING:
     from dBot import dBot
+    from static.dTypes import GameDetails
 
 
 async def artist_autocomplete(
@@ -26,19 +26,19 @@ async def artist_autocomplete(
 
 
 def get_ping_data(
-    spreadsheet_id: str, range_str: str, instance: Optional[str] = None
+    spreadsheet_id: str, range_str: str, instance: str | None = None
 ) -> list[list[str]]:
     return get_sheet_data(spreadsheet_id, range_str, instance)
 
 
-def _ping_preprocess(game: str) -> tuple[GameDetails, list[list[str]], int, int]:
+def _ping_preprocess(game: str) -> tuple["GameDetails", list[list[str]], int, int]:
     game_details = GAMES[game]
     ping_data = _get_ping_data(game_details)
     ping_columns = game_details["pingColumns"]
     return game_details, ping_data, *_get_ping_indexes(ping_columns)
 
 
-def _get_ping_data(game_details: GameDetails) -> list[list[str]]:
+def _get_ping_data(game_details: "GameDetails") -> list[list[str]]:
     return get_ping_data(
         game_details["pingId"],
         game_details["pingRange"],
@@ -47,7 +47,7 @@ def _get_ping_data(game_details: GameDetails) -> list[list[str]]:
 
 
 def _get_ping_indexes(
-    ping_columns: Union[list[str], tuple[str, ...]],
+    ping_columns: tuple[str, ...],
 ) -> tuple[int, int]:
     artist_name_index = ping_columns.index("artist_name")
     users_index = ping_columns.index("users")

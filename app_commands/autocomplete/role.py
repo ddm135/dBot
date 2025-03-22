@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import TYPE_CHECKING, Iterable
+from typing import TYPE_CHECKING
 
 import discord
 from discord import app_commands
@@ -101,7 +101,7 @@ def get_role_data(user_id: int) -> set[int]:
     return {int(role) for role in role_str.split(",") if role_str}
 
 
-def update_role_data(user_id: int, roles: Iterable[int]) -> None:
+def update_role_data(user_id: int, roles: set[int]) -> None:
     role_file = Path(f"data/role/{user_id}.txt")
     role_str = ",".join(str(role) for role in roles)
     role_file.write_text(role_str)

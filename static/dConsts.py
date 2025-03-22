@@ -1,7 +1,9 @@
 from datetime import timedelta
+from typing import TYPE_CHECKING
 from zoneinfo import ZoneInfo
 
-from static.dTypes import GameDetails
+if TYPE_CHECKING:
+    from static.dTypes import GameDetails
 
 TEST_GUILD = 540849436868214784
 SSRG_GUILD = 360109303199432704
@@ -52,7 +54,7 @@ EXTENSIONS = (
     "tasks.notify_p9",
 )
 
-GAMES: dict[str, GameDetails] = {
+GAMES: dict[str, "GameDetails"] = {
     "SM": {
         "name": "SUPERSTAR SM",
         "infoId": "1kC38CLFd6xkDXD9qLHgnnv3s3jmM_4vf4RLsWuXs9NU",

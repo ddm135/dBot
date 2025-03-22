@@ -1,5 +1,5 @@
 from datetime import timedelta
-from typing import Optional, TypedDict
+from typing import TypedDict
 from zoneinfo import ZoneInfo
 
 
@@ -16,8 +16,8 @@ class GameDetails(TypedDict):
     bonusRange: str
     bonusColumns: tuple[str, ...]
     color: int
-    pinChannelIds: dict[int, Optional[int]]
-    pinRoles: dict[int, Optional[int]]
+    pinChannelIds: dict[int, int | None]
+    pinRoles: dict[int, int | None]
     api: str
     dateFormat: str
     timezone: ZoneInfo

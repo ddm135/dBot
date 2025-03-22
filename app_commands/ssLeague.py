@@ -1,6 +1,6 @@
 import asyncio
 from datetime import datetime
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING
 
 import discord
 from discord import app_commands
@@ -12,10 +12,10 @@ from app_commands.autocomplete.ssLeague import (
     song_id_autocomplete,
 )
 from static.dConsts import GAMES, SSRG_ROLE_MOD, SSRG_ROLE_SS, TEST_ROLE_OWNER
-from static.dTypes import GameDetails
 
 if TYPE_CHECKING:
     from dBot import dBot
+    from static.dTypes import GameDetails
 
 
 @app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)
@@ -166,12 +166,12 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         itr: discord.Interaction["dBot"],
         artist_name: str,
         song_name: str,
-        song_id: Optional[int],
+        song_id: int | None,
         duration: str,
         image_url: str,
-        skills: Optional[str],
+        skills: str | None,
         pin_channel_id: int,
-        game_details: GameDetails,
+        game_details: "GameDetails",
     ) -> None:
 
         timezone = game_details["timezone"]
@@ -208,7 +208,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         except AssertionError:
             await itr.followup.send("Bot is not in server")
 
-    def _get_song_color(self, game: str, song_id: int) -> Optional[int]:
+    def _get_song_color(self, game: str, song_id: int) -> int | None:
         msd_data = self.bot.info_color[game]
         for s in msd_data:
             if s["code"] == song_id:
@@ -223,8 +223,8 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         duration: str,
         image_url: str,
         current_time: datetime,
-        color: Optional[Union[int, discord.Color]],
-        skills: Optional[str],
+        color: int | discord.Color | None,
+        skills: str | None,
         user_name: str,
     ) -> tuple[discord.Embed, str]:
         embed_title = f"SSL #{current_time.strftime("%w").replace("0", "7")}"

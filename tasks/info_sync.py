@@ -3,7 +3,7 @@ import gzip
 import json
 import logging
 from datetime import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import aiohttp
 from discord.ext import commands, tasks
@@ -63,7 +63,7 @@ class InfoSync(commands.Cog):
 
             self.bot.info_color[game] = await self.get_music_data(game_details["api"])
 
-    async def get_a_json(self, api_url: str) -> dict:
+    async def get_a_json(self, api_url: str) -> dict[str, Any]:
         async with aiohttp.ClientSession() as session:
             async with session.post(
                 url=api_url,

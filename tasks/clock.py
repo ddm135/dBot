@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 class Clock(commands.Cog):
     STEP = 1
-    TIMEZONE_ITEMS = list(TIMEZONES.items())
+    TIMEZONE_ITEMS = tuple(TIMEZONES.items())
     TIMEZONE_COUNT = len(TIMEZONES)
     counter = 0
 

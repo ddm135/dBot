@@ -82,7 +82,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
                     f"You do not own this role.\n{self.NOTICE}"
                 )
             stored_roles.remove(target_role.id)
-            update_role_data(itr.user.id, stored_roles)
+            update_role_data(user_id, stored_roles)
             self.LOCKED.touch()
             await itr.user.add_roles(target_role)
             await itr.followup.send(

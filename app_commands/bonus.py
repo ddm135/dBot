@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import discord
 from discord import app_commands
@@ -7,10 +7,10 @@ from discord.ext import commands
 from app_commands.autocomplete.bonus import _ping_preprocess, artist_autocomplete
 from static.dConsts import GAMES
 from static.dHelpers import update_sheet_data
-from static.dTypes import GameDetails
 
 if TYPE_CHECKING:
     from dBot import dBot
+    from static.dTypes import GameDetails
 
 
 class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings"):
@@ -114,7 +114,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         operation: str,
         user_id: str,
         users: list[str],
-    ) -> Optional[str]:
+    ) -> str | None:
         if operation == "add":
             if user_id not in users:
                 users.append(user_id)
@@ -134,7 +134,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
 
     def _update_ping_data(
         self,
-        game_details: GameDetails,
+        game_details: "GameDetails",
         users: list[str],
         artist_index: int,
     ) -> None:
