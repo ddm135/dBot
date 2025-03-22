@@ -73,7 +73,8 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         pin_channel_id = game_details["pinChannelIds"].get(guild_id)
         if not pin_channel_id:
             return await itr.followup.send(
-                f"Pin channel for {game_choice.name} is not set for this server."
+                f"Pin channel for {game_choice.name} is not set for this server.",
+                ephemeral=True,
             )
 
         ssl_columns = game_details["infoColumns"]
@@ -86,7 +87,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
 
         ssl_song = self.bot.info_by_name[game][artist_name][song_name]
         if not ssl_song:
-            return await itr.followup.send("Song not found.")
+            return await itr.followup.send("Song not found.", ephemeral=True)
 
         await self._handle_ssl_command(
             itr,
@@ -135,7 +136,8 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         pin_channel_id = game_details["pinChannelIds"].get(guild_id)
         if not pin_channel_id:
             return await itr.followup.send(
-                f"Pin channel for {game_choice.name} is not set for this server."
+                f"Pin channel for {game_choice.name} is not set for this server.",
+                ephemeral=True,
             )
 
         ssl_columns = game_details["infoColumns"]
@@ -147,7 +149,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
 
         ssl_song = self.bot.info_by_id[game][song_id]
         if not ssl_song:
-            return await itr.followup.send("Song not found.")
+            return await itr.followup.send("Song not found.", ephemeral=True)
 
         await self._handle_ssl_command(
             itr,
@@ -194,19 +196,16 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
 
         pin_channel = self.bot.get_channel(pin_channel_id)
 
-        try:
-            assert isinstance(pin_channel, discord.TextChannel)
-            new_pin = await self._pin_new_ssl(embed, pin_channel)
-            topic = f"[{current_time.strftime("%m.%d.%y")}] {artist_name} - {song_name}"
-            if pin_role:
-                await pin_channel.send(f"<@&{pin_role}> {topic}")
-            else:
-                await pin_channel.send(topic)
-            await pin_channel.edit(topic=topic)
-            await itr.followup.send("Pinned!")
-            await self._unpin_old_ssl(embed_title, pin_channel, new_pin)
-        except AssertionError:
-            await itr.followup.send("Bot is not in server")
+        assert isinstance(pin_channel, discord.TextChannel)
+        new_pin = await self._pin_new_ssl(embed, pin_channel)
+        topic = f"[{current_time.strftime("%m.%d.%y")}] {artist_name} - {song_name}"
+        if pin_role:
+            await pin_channel.send(f"<@&{pin_role}> {topic}")
+        else:
+            await pin_channel.send(topic)
+        await pin_channel.edit(topic=topic)
+        await itr.followup.send("Pinned!")
+        await self._unpin_old_ssl(embed_title, pin_channel, new_pin)
 
     def _get_song_color(self, game: str, song_id: int) -> int | None:
         msd_data = self.bot.info_color[game]
