@@ -1,6 +1,5 @@
 import asyncio
 from datetime import datetime
-from pprint import pprint
 from typing import TYPE_CHECKING
 
 import discord
@@ -77,11 +76,9 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             )
 
         ssl_columns = game_details["infoColumns"]
-        print(ssl_columns)
         song_id_index = (
             ssl_columns.index("song_id") if "song_id" in ssl_columns else None
         )
-        print(song_id_index)
         duration_index = ssl_columns.index("duration")
         image_url_index = ssl_columns.index("image")
         skills_index = ssl_columns.index("skills") if "skills" in ssl_columns else None
@@ -184,7 +181,6 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             if song_id
             else game_details["color"]
         )
-        print(color)
 
         current_time = datetime.now(timezone) - offset
         embed, embed_title = self._generate_embed(
@@ -213,7 +209,6 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
 
     def _get_song_color(self, game: str, song_id: int) -> int | None:
         msd_data = self.bot.info_color[game]
-        pprint(msd_data)
         for s in msd_data:
             if s["code"] == song_id:
                 color = s["albumBgColor"][:-2]
