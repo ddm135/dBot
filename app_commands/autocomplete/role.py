@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 import discord
 from discord import app_commands
 
-from static.dConsts import MAX_AUTOCOMPLETE_RESULTS, ROLES
+from static.dConsts import MAX_AUTOCOMPLETE, ROLES
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -36,7 +36,7 @@ async def role_add_autocomplete(
             int(x.value.rsplit(" | ", 1)[1]),
         )
     )
-    return roles[:MAX_AUTOCOMPLETE_RESULTS]
+    return roles[:MAX_AUTOCOMPLETE]
 
 
 async def role_remove_autocomplete(
@@ -61,7 +61,7 @@ async def role_remove_autocomplete(
             int(x.value.rsplit(" | ", 1)[1]),
         )
     )
-    return roles[:MAX_AUTOCOMPLETE_RESULTS]
+    return roles[:MAX_AUTOCOMPLETE]
 
 
 async def role_set_autocomplete(
@@ -90,7 +90,7 @@ async def role_set_autocomplete(
             int(x.value.rsplit(" | ", 1)[1]),
         )
     )
-    return roles[:MAX_AUTOCOMPLETE_RESULTS]
+    return roles[:MAX_AUTOCOMPLETE]
 
 
 def get_role_data(user_id: int) -> set[int]:

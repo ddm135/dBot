@@ -1,9 +1,10 @@
+from itertools import islice
 from typing import TYPE_CHECKING
 
 import discord
 from discord import app_commands
 
-from static.dConsts import GAMES, MAX_AUTOCOMPLETE_RESULTS, TIMEZONES
+from static.dConsts import GAMES, MAX_AUTOCOMPLETE, TIMEZONES
 from static.dHelpers import get_sheet_data
 
 if TYPE_CHECKING:
@@ -16,13 +17,13 @@ async def artist_autocomplete(
 ) -> list[app_commands.Choice[str]]:
     _, ping_data, artist_name_index, _ = _ping_preprocess(itr.namespace.game)
 
-    artists = [
+    artists = (
         app_commands.Choice(name=artist, value=artist)
         for artist in dict.fromkeys(tuple(zip(*ping_data))[artist_name_index])
         if current.lower() in artist.lower()
-    ]
+    )
 
-    return artists[:MAX_AUTOCOMPLETE_RESULTS]
+    return list(islice(artists, MAX_AUTOCOMPLETE))
 
 
 def get_ping_data(

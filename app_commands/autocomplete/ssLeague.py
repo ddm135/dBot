@@ -1,9 +1,10 @@
+from itertools import islice
 from typing import TYPE_CHECKING
 
 import discord
 from discord import app_commands
 
-from static.dConsts import GAMES, MAX_AUTOCOMPLETE_RESULTS
+from static.dConsts import GAMES, MAX_AUTOCOMPLETE
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -16,13 +17,13 @@ async def artist_autocomplete(
         return []
     ssl_artists = itr.client.info_by_name[game].keys()
 
-    artists = [
+    artists = (
         app_commands.Choice(name=artist, value=artist)
         for artist in ssl_artists
         if current.lower() in artist.lower()
-    ]
+    )
 
-    return artists[:MAX_AUTOCOMPLETE_RESULTS]
+    return list(islice(artists, MAX_AUTOCOMPLETE))
 
 
 async def song_autocomplete(
@@ -38,14 +39,14 @@ async def song_autocomplete(
     if not ssl_songs:
         return []
 
-    songs = [
+    songs = (
         app_commands.Choice(name=song_name, value=song_name)
         for song_name, song_details in ssl_songs.items()
         if current.lower() in song_name.lower()
         or current.lower() in song_details[search_term_index].lower()
-    ]
+    )
 
-    return songs[:MAX_AUTOCOMPLETE_RESULTS]
+    return list(islice(songs, MAX_AUTOCOMPLETE))
 
 
 async def song_id_autocomplete(
