@@ -271,7 +271,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         self,
         interaction: discord.Interaction,
         error: app_commands.AppCommandError,
-    ):
+    ) -> None:
         if isinstance(error, app_commands.errors.CheckFailure):
             assert (guild_id := interaction.guild_id)
             return await interaction.response.send_message(

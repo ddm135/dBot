@@ -31,7 +31,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         if game["pinChannelIds"] and "song_id" in game["infoColumns"]
     ]
 
-    def __init__(self, bot: "dBot"):
+    def __init__(self, bot: "dBot") -> None:
         self.bot = bot
 
     @app_commands.command()
@@ -46,7 +46,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         game_choice: app_commands.Choice[str],
         artist_name: str,
         song_name: str,
-    ):
+    ) -> None:
         """Pin SSL song of the day using Artist Name and Song Name
         (Requires SUPERSTAR Role)
 
@@ -109,7 +109,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         itr: discord.Interaction["dBot"],
         game_choice: app_commands.Choice[str],
         song_id: str,
-    ):
+    ) -> None:
         """Pin SSL song of the day using Song ID
         (Requires SUPERSTAR Role)
 
@@ -286,7 +286,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         self,
         interaction: discord.Interaction,
         error: app_commands.AppCommandError,
-    ):
+    ) -> None:
         if isinstance(error, app_commands.errors.MissingAnyRole):
             return await interaction.response.send_message(
                 "You do not have permission to use this command.",
@@ -297,5 +297,5 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         raise error
 
 
-async def setup(bot: "dBot"):
+async def setup(bot: "dBot") -> None:
     await bot.add_cog(SSLeague(bot))

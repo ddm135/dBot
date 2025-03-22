@@ -1,12 +1,14 @@
+# pyright: reportMissingModuleSource = false
+
 from typing import TYPE_CHECKING
 
-from apiclient.discovery import build  # type: ignore
+from apiclient.discovery import build
 from google.oauth2.service_account import Credentials
 
 from static.dConsts import MAX_RETRIES
 
 if TYPE_CHECKING:
-    from googleapiclient._apis.sheets.v4 import SheetsResource  # type: ignore
+    from googleapiclient._apis.sheets.v4 import SheetsResource
 
 _gCredentials = Credentials.from_service_account_file(
     filename="dBotDefault.json",

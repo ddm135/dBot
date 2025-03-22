@@ -8,10 +8,6 @@ from dotenv import load_dotenv
 
 from static.dConsts import EXTENSIONS, STATUS_CHANNEL
 
-# pyright: reportAttributeAccessIssue=false
-# pyright: reportOptionalMemberAccess=false
-
-
 load_dotenv()
 
 
@@ -26,18 +22,21 @@ class dBot(commands.Bot):
     info_data_ready: bool = False
     role_data_ready: bool = False
 
-    async def setup_hook(self):
+    async def setup_hook(self) -> None:
         for ext in EXTENSIONS:
             await self.load_extension(ext)
         await super().setup_hook()
 
-    async def on_ready(self):
-        await self.get_channel(STATUS_CHANNEL).send(
+    async def on_ready(self) -> None:
+        await self.get_channel(STATUS_CHANNEL).send(  # type: ignore[union-attr]
             f"Successful start at {datetime.now()}"
         )
 
-    async def close(self):
-        await self.get_channel(STATUS_CHANNEL).send("Shutting down...")
+    async def close(self) -> None:
+        if self is not None:
+            await self.get_channel(STATUS_CHANNEL).send(  # type: ignore[union-attr]
+                "Shutting down..."
+            )
         await super().close()
 
 
