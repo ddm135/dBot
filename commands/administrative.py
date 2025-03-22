@@ -29,19 +29,29 @@ class Administrative(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
-    async def reload(self, ctx: commands.Context) -> None:
+    async def reload(self, ctx: commands.Context, *extensions: str) -> None:
         if ctx.channel.id == STATUS_CHANNEL:
             msg = await ctx.send("Reloading extensions...")
+
+            if not extensions:
+                extensions = EXTENSIONS
+            else:
+                for ext in extensions:
+                    if ext not in EXTENSIONS:
+                        await msg.edit(content=f"Invalid extension: {ext}")
+                        return
             await self.bot.change_presence(
                 status=discord.Status.dnd,
                 activity=discord.CustomActivity("Reloading extensions..."),
             )
-            for ext in EXTENSIONS:
+
+            for ext in extensions:
                 await self.bot.reload_extension(ext)
-            await self.bot.change_presence(
-                status=discord.Status.dnd,
-                activity=discord.CustomActivity("Waiting for clock..."),
-            )
+                if ext == "tasks.clock":
+                    await self.bot.change_presence(
+                        status=discord.Status.dnd,
+                        activity=discord.CustomActivity("Waiting for clock..."),
+                    )
             await msg.edit(content="Reloaded!")
 
 

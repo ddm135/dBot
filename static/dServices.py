@@ -3,6 +3,8 @@ from typing import TYPE_CHECKING
 from apiclient.discovery import build  # type: ignore
 from google.oauth2.service_account import Credentials
 
+from static.dConsts import MAX_RETRIES
+
 if TYPE_CHECKING:
     from googleapiclient._apis.sheets.v4 import SheetsResource  # type: ignore
 
@@ -11,7 +13,13 @@ _gCredentials = Credentials.from_service_account_file(
     scopes=["https://www.googleapis.com/auth/spreadsheets"],
 )
 sheetService: "SheetsResource.SpreadsheetsResource.ValuesResource" = (
-    build(serviceName="sheets", version="v4", credentials=_gCredentials)
+    build(
+        serviceName="sheets",
+        version="v4",
+        credentials=_gCredentials,
+        num_retries=MAX_RETRIES,
+        static_discovery=True,
+    )
     .spreadsheets()
     .values()
 )
@@ -20,7 +28,13 @@ _gCredentialsKR = Credentials.from_service_account_file(
     scopes=["https://www.googleapis.com/auth/spreadsheets"],
 )
 sheetServiceKR: "SheetsResource.SpreadsheetsResource.ValuesResource" = (
-    build(serviceName="sheets", version="v4", credentials=_gCredentialsKR)
+    build(
+        serviceName="sheets",
+        version="v4",
+        credentials=_gCredentialsKR,
+        num_retries=MAX_RETRIES,
+        static_discovery=True,
+    )
     .spreadsheets()
     .values()
 )

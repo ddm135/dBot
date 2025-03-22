@@ -39,7 +39,7 @@ TIMEZONES = {
     "PHT": ZoneInfo("Asia/Manila"),
 }
 
-EXTENSIONS = [
+EXTENSIONS = (
     "commands.administrative",
     "commands.memes",
     "app_commands.bonus",
@@ -50,7 +50,7 @@ EXTENSIONS = [
     "tasks.role_sync",
     "tasks.notify_p8",
     "tasks.notify_p9",
-]
+)
 
 GAMES: dict[str, GameDetails] = {
     "SM": {
@@ -58,7 +58,7 @@ GAMES: dict[str, GameDetails] = {
         "infoId": "1kC38CLFd6xkDXD9qLHgnnv3s3jmM_4vf4RLsWuXs9NU",
         "infoSongs": "Songs!A2:F",
         "infoColumns": (
-            "song_id",
+            "_song_id",
             "artist_name",
             "song_name",
             "search_term",
@@ -92,8 +92,7 @@ GAMES: dict[str, GameDetails] = {
             TEST_GUILD: 1350860245487845570,
             SSRG_GUILD: 420428449325252608,
         },
-        # "api": "https://smtown-api-https.dalcomsoft.net",
-        "api": "http://ss-sm-api-real.superstarsmtown.jp",
+        "api": "https://smtown-api-https.dalcomsoft.net",
         "dateFormat": "%Y-%m-%d",
         "timezone": TIMEZONES["KST"],
         "resetOffset": timedelta(hours=2),
@@ -133,7 +132,7 @@ GAMES: dict[str, GameDetails] = {
             TEST_GUILD: 1343840449357418516,
             SSRG_GUILD: 481907573948153857,
         },
-        "pinRoles": None,
+        "pinRoles": {},
         "api": "http://ss-sm-api-real.superstarsmtown.jp",
         "dateFormat": "%Y-%m-%d",
         "timezone": TIMEZONES["JST"],
@@ -163,8 +162,8 @@ GAMES: dict[str, GameDetails] = {
     #         "bonus_end",
     #     ),
     #     "color": 0x00ABC0,
-    #     "pinChannelIds": None,
-    #     "pinRoles": None,
+    #     "pinChannelIds": {},
+    #     "pinRoles": {},
     #     "api": "https://ssg-api-https.dalcomsoft.net/api",
     #     "dateFormat": "%Y-%m-%d",
     #     "timezone": TIMEZONES["KST"],
@@ -206,7 +205,7 @@ GAMES: dict[str, GameDetails] = {
             TEST_GUILD: 1335936325685084242,
             SSRG_GUILD: 951350075190313010,
         },
-        "pinRoles": None,
+        "pinRoles": {},
         "api": "https://ss-jyp-api-real.superstarjyp.jp",
         "dateFormat": "%Y-%m-%d",
         "timezone": TIMEZONES["JST"],
@@ -248,7 +247,7 @@ GAMES: dict[str, GameDetails] = {
             TEST_GUILD: 1340868523957813348,
             SSRG_GUILD: 1039132737979813908,
         },
-        "pinRoles": None,
+        "pinRoles": {},
         "api": "https://ss-lapone-api-real.superstarlapone.jp",
         "dateFormat": "%Y-%m-%d",
         "timezone": TIMEZONES["JST"],
@@ -278,8 +277,8 @@ GAMES: dict[str, GameDetails] = {
             "bonus_end",
         ),
         "color": 0x960C19,
-        "pinChannelIds": None,
-        "pinRoles": None,
+        "pinChannelIds": {},
+        "pinRoles": {},
         "api": "https://ss-ebidan-api-real.superstarebidan.jp",
         "dateFormat": "%Y-%m-%d",
         "timezone": TIMEZONES["JST"],
@@ -309,8 +308,8 @@ GAMES: dict[str, GameDetails] = {
             "bonus_end",
         ),
         "color": 0x071543,
-        "pinChannelIds": None,
-        "pinRoles": None,
+        "pinChannelIds": {},
+        "pinRoles": {},
         "api": "https://ssph-api-https.dalcomsoft.net",
         "dateFormat": "%d-%m-%Y",
         "timezone": TIMEZONES["PHT"],

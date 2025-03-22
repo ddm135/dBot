@@ -1,10 +1,9 @@
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import discord
 from discord import app_commands
 
 from static.dConsts import GAMES, MAX_AUTOCOMPLETE_RESULTS
-from static.dHelpers import get_sheet_data, update_sheet_data
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -68,18 +67,3 @@ async def song_id_autocomplete(
             value=current,
         )
     ]
-
-
-def get_ssl_data(
-    spreadsheet_id: str, range_str: str, instance: Optional[str] = None
-) -> list[list[str]]:
-    return get_sheet_data(spreadsheet_id, range_str, instance)
-
-
-def update_ssl_filter(
-    spreadsheet_id: str,
-    range_str: str,
-    data: list[list[str]],
-    instance: Optional[str] = None,
-) -> None:
-    return update_sheet_data(spreadsheet_id, range_str, True, data, instance)

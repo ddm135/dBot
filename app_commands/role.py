@@ -6,11 +6,11 @@ from discord import app_commands
 from discord.ext import commands
 
 from app_commands.autocomplete.role import (
-    _get_role_data,
-    _update_role_data,
+    get_role_data,
     role_add_autocomplete,
     role_remove_autocomplete,
     role_set_autocomplete,
+    update_role_data,
 )
 from static.dConsts import (
     ROLE_STORAGE_CHANNEL,
@@ -60,7 +60,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
 
         await itr.response.defer()
         user_id = itr.user.id
-        stored_roles = _get_role_data(user_id)
+        stored_roles = get_role_data(user_id)
         assert itr.guild
         assert isinstance(itr.user, discord.Member)
         role_args = role.rsplit(" | ", 1)
@@ -82,7 +82,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
                     f"You do not own this role.\n{self.NOTICE}"
                 )
             stored_roles.remove(target_role.id)
-            _update_role_data(itr.user.id, stored_roles)
+            update_role_data(itr.user.id, stored_roles)
             self.LOCKED.touch()
             await itr.user.add_roles(target_role)
             await itr.followup.send(
@@ -114,7 +114,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
 
         await itr.response.defer()
         user_id = itr.user.id
-        stored_roles = _get_role_data(user_id)
+        stored_roles = get_role_data(user_id)
         assert itr.guild
         assert isinstance(itr.user, discord.Member)
         role_args = role.rsplit(" | ", 1)
@@ -137,7 +137,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
                     f"You do not own this role.\n{self.NOTICE}"
                 )
             stored_roles.add(target_role.id)
-            _update_role_data(user_id, stored_roles)
+            update_role_data(user_id, stored_roles)
             self.LOCKED.touch()
             await itr.user.remove_roles(target_role)
             await itr.followup.send(
@@ -170,7 +170,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
 
         await itr.response.defer()
         user_id = itr.user.id
-        stored_roles = _get_role_data(user_id)
+        stored_roles = get_role_data(user_id)
         assert itr.guild
         assert isinstance(itr.user, discord.Member)
         role_args = role.rsplit(" | ", 1)
@@ -205,7 +205,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
             )
             stored_roles.difference_update(r.id for r in add_roles)
             stored_roles.update(r.id for r in remove_roles)
-            _update_role_data(user_id, stored_roles)
+            update_role_data(user_id, stored_roles)
             self.LOCKED.touch()
             await itr.user.add_roles(*add_roles)
             await itr.user.remove_roles(*remove_roles)
@@ -246,7 +246,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
 
         await itr.response.defer()
         user_id = itr.user.id
-        stored_roles = _get_role_data(user_id)
+        stored_roles = get_role_data(user_id)
         assert itr.guild
         assert isinstance(itr.user, discord.Member)
         group_roles = ROLES[itr.guild.id]

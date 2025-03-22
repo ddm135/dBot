@@ -32,9 +32,8 @@ class Clock(commands.Cog):
         short_name, timezone = self.TIMEZONE_ITEMS[self.counter]
         current_time = (
             datetime.now(timezone)
-            .strftime(f" %H:%M {short_name} %B %d %Y")
+            .strftime(f"%B %d %Y, %H:%M {short_name}")
             .replace(" 0", " ")
-            .strip()
         )
 
         await self.bot.change_presence(

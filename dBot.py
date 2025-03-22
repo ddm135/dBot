@@ -27,7 +27,6 @@ class dBot(commands.Bot):
     role_data_ready: bool = False
 
     async def setup_hook(self):
-        self.remove_command("help")
         for ext in EXTENSIONS:
             await self.load_extension(ext)
         await super().setup_hook()
@@ -49,6 +48,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 bot = dBot(
     command_prefix="db!",
+    help_command=None,
     intents=intents,
     status=discord.Status.dnd,
     activity=discord.CustomActivity("Waiting for clock..."),

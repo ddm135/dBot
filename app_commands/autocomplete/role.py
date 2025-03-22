@@ -16,7 +16,7 @@ async def role_add_autocomplete(
     if not itr.guild or not itr.client.role_data_ready:
         return []
     assert isinstance(itr.user, discord.Member)
-    stored_roles = _get_role_data(itr.user.id)
+    stored_roles = get_role_data(itr.user.id)
     user_roles = itr.user.roles
     group_roles = ROLES[itr.guild.id]
     guild_roles = itr.guild.roles
@@ -70,7 +70,7 @@ async def role_set_autocomplete(
     if not itr.guild or not itr.client.role_data_ready:
         return []
     assert isinstance(itr.user, discord.Member)
-    stored_roles = _get_role_data(itr.user.id)
+    stored_roles = get_role_data(itr.user.id)
     user_roles = itr.user.roles
     group_roles = ROLES[itr.guild.id]
     guild_roles = itr.guild.roles
@@ -93,7 +93,7 @@ async def role_set_autocomplete(
     return roles[:MAX_AUTOCOMPLETE_RESULTS]
 
 
-def _get_role_data(user_id: int) -> set[int]:
+def get_role_data(user_id: int) -> set[int]:
     role_file = Path(f"data/role/{user_id}.txt")
     if not role_file.exists():
         return set()
@@ -101,7 +101,7 @@ def _get_role_data(user_id: int) -> set[int]:
     return {int(role) for role in role_str.split(",") if role_str}
 
 
-def _update_role_data(user_id: int, roles: Iterable[int]) -> None:
+def update_role_data(user_id: int, roles: Iterable[int]) -> None:
     role_file = Path(f"data/role/{user_id}.txt")
     role_str = ",".join(str(role) for role in roles)
     role_file.write_text(role_str)

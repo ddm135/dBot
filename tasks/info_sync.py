@@ -50,6 +50,7 @@ class InfoSync(commands.Cog):
             info = get_sheet_data(
                 game_details["infoId"],
                 game_details["infoSongs"],
+                "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
             )
             for row in info:
                 self.bot.info_by_name[game][
