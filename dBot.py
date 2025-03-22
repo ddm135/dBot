@@ -16,11 +16,11 @@ load_dotenv()
 
 
 class dBot(commands.Bot):
-    info_by_name: defaultdict[str, defaultdict[str, defaultdict[str, list[str]]]] = (
-        defaultdict(lambda: defaultdict(lambda: defaultdict(list[str])))
-    )
-    info_by_id: defaultdict[str, defaultdict[str, list[str]]] = defaultdict(
-        lambda: defaultdict(list[str])
+    info_by_name: defaultdict[
+        str, defaultdict[str, defaultdict[str, tuple[str, ...]]]
+    ] = defaultdict(lambda: defaultdict(lambda: defaultdict(tuple[str, ...])))
+    info_by_id: defaultdict[str, defaultdict[str, tuple[str, ...]]] = defaultdict(
+        lambda: defaultdict(tuple[str, ...])
     )
     info_color: defaultdict[str, list[dict]] = defaultdict(list[dict])
     info_data_ready: bool = False

@@ -53,13 +53,14 @@ class InfoSync(commands.Cog):
                 "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
             )
             for row in info:
+                _row = tuple(row)
                 self.bot.info_by_name[game][
                     row[game_details["infoColumns"].index("artist_name")]
-                ][row[game_details["infoColumns"].index("song_name")]] = row
+                ][row[game_details["infoColumns"].index("song_name")]] = _row
                 if "song_id" in game_details["infoColumns"]:
                     self.bot.info_by_id[game][
                         row[game_details["infoColumns"].index("song_id")]
-                    ] = row
+                    ] = _row
 
             self.bot.info_color[game] = await self.get_music_data(game_details["api"])
 
