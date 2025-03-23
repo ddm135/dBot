@@ -33,7 +33,7 @@ async def role_add_autocomplete(
     ]
     roles.sort(
         key=lambda x: group_roles.index(
-            int(x.value.rsplit(" | ", 1)[1]),
+            int(x.value.rpartition(" | ")[2]),
         )
     )
     return roles[:MAX_AUTOCOMPLETE]
@@ -58,7 +58,7 @@ async def role_remove_autocomplete(
     ]
     roles.sort(
         key=lambda x: group_roles.index(
-            int(x.value.rsplit(" | ", 1)[1]),
+            int(x.value.rpartition(" | ")[2]),
         )
     )
     return roles[:MAX_AUTOCOMPLETE]
@@ -87,7 +87,7 @@ async def role_set_autocomplete(
     ]
     roles.sort(
         key=lambda x: group_roles.index(
-            int(x.value.rsplit(" | ", 1)[1]),
+            int(x.value.rpartition(" | ")[2]),
         )
     )
     return roles[:MAX_AUTOCOMPLETE]

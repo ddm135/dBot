@@ -62,13 +62,13 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         stored_roles = get_role_data(user_id)
         assert itr.guild
         assert isinstance(itr.user, discord.Member)
-        role_args = role.rsplit(" | ", 1)
+        role_name, _, role_id = role.rpartition(" | ")
         user_roles = itr.user.roles
         guild_roles = itr.guild.roles
 
         try:
             target_role = discord.utils.get(
-                guild_roles, name=role_args[0], id=int(role_args[1])
+                guild_roles, name=role_name, id=int(role_id)
             )
             if not target_role:
                 return await itr.followup.send(f"Role not found.\n{self.NOTICE}")
@@ -89,7 +89,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
                 allowed_mentions=discord.AllowedMentions.none(),
                 silent=True,
             )
-        except (ValueError, IndexError):
+        except ValueError:
             await itr.followup.send(f"Role not found.\n{self.NOTICE}")
 
     @app_commands.command(name="remove")
@@ -115,14 +115,14 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         stored_roles = get_role_data(user_id)
         assert itr.guild
         assert isinstance(itr.user, discord.Member)
-        role_args = role.rsplit(" | ", 1)
+        role_name, _, role_id = role.rpartition(" | ")
         user_roles = itr.user.roles
         group_roles = ROLES[itr.guild.id]
         guild_roles = itr.guild.roles
 
         try:
             target_role = discord.utils.get(
-                guild_roles, name=role_args[0], id=int(role_args[1])
+                guild_roles, name=role_name, id=int(role_id)
             )
             if not target_role:
                 return await itr.followup.send(f"Role not found.\n{self.NOTICE}")
@@ -143,7 +143,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
                 allowed_mentions=discord.AllowedMentions.none(),
                 silent=True,
             )
-        except (ValueError, IndexError):
+        except ValueError:
             await itr.followup.send(f"Role not found.\n{self.NOTICE}")
 
     @app_commands.command(name="set")
@@ -170,14 +170,14 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         stored_roles = get_role_data(user_id)
         assert itr.guild
         assert isinstance(itr.user, discord.Member)
-        role_args = role.rsplit(" | ", 1)
+        role_name, _, role_id = role.rpartition(" | ")
         user_roles = itr.user.roles
         group_roles = ROLES[itr.guild.id]
         guild_roles = itr.guild.roles
 
         try:
             target_role = discord.utils.get(
-                guild_roles, name=role_args[0], id=int(role_args[1])
+                guild_roles, name=role_name, id=int(role_id)
             )
             if not target_role:
                 return await itr.followup.send(f"Role not found.\n{self.NOTICE}")
@@ -233,7 +233,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
                 allowed_mentions=discord.AllowedMentions.none(),
                 silent=True,
             )
-        except (ValueError, IndexError):
+        except ValueError:
             await itr.followup.send(f"Role not found.\n{self.NOTICE}")
 
     @app_commands.command(name="inventory")
