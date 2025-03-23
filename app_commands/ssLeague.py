@@ -177,7 +177,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             msd_data = self.bot.info_msd[game]
             for song in msd_data:
                 if song["code"] == song_id:
-                    color = song["albumBgColor"][:-2]
+                    color = int(song["albumBgColor"][:-2], 16)
                     image_url = song["album"]
                     break
 
