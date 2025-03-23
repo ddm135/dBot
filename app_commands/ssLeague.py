@@ -62,7 +62,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
 
         await itr.response.defer(ephemeral=True)
         if not self.bot.info_data_ready:
-            return await itr.response.send_message(
+            return await itr.followup.send(
                 "Song data synchronization in progress, feature unavailable.",
             )
 
@@ -123,7 +123,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
 
         await itr.response.defer(ephemeral=True)
         if not self.bot.info_data_ready:
-            return await itr.response.send_message(
+            return await itr.followup.send(
                 "Song data synchronization in progress, feature unavailable.",
             )
 

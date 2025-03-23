@@ -19,8 +19,8 @@ class dBot(commands.Bot):
         lambda: defaultdict(tuple[str, ...])
     )
     info_color: defaultdict[str, list[dict]] = defaultdict(list[dict])
-    info_data_ready: bool = False
-    role_data_ready: bool = False
+    info_data_ready = False
+    role_data_ready = False
 
     async def setup_hook(self) -> None:
         for ext in EXTENSIONS:
