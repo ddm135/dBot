@@ -158,7 +158,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         itr: discord.Interaction["dBot"],
         artist_name: str,
         song_name: str,
-        song_id: int | None,
+        song_id: int,
         duration: str,
         skills: str | None,
         pin_channel_id: int,
@@ -173,15 +173,15 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
 
         color = game_details["color"]
         image_url = None
-        if song_id is not None:
-            msd_data = self.bot.info_msd[game]
-            for song in msd_data:
-                if song["code"] == song_id:
-                    color = int(song["albumBgColor"][:-2], 16)
-                    image_url = song["album"]
-                    break
 
-        if isinstance(image_url, int):
+        msd_data = self.bot.info_msd[game]
+        for song in msd_data:
+            if song["code"] == song_id:
+                color = int(song["albumBgColor"][:-2], 16)
+                image_url = song["album"]
+                break
+
+        if game_details["legacyUrlScheme"]:
             url_data = self.bot.info_url[game]
             for url in url_data:
                 if url["code"] == image_url:
