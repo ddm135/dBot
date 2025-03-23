@@ -35,7 +35,7 @@ class InfoSync(commands.Cog):
         self.bot.info_color.clear()
         await super().cog_unload()
 
-    @tasks.loop(time=time(hour=12, tzinfo=TIMEZONES["KST"]))
+    @tasks.loop(time=time(hour=14, tzinfo=TIMEZONES["KST"]))
     async def info_sync(self) -> None:
         self.bot.info_data_ready = False
         await asyncio.sleep(5)
