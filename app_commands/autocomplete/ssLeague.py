@@ -15,8 +15,8 @@ async def artist_autocomplete(
 ) -> list[app_commands.Choice[str]]:
     if not (game := itr.namespace.game) or not itr.client.info_data_ready:
         return []
-    ssl_artists = itr.client.info_by_name[game].keys()
 
+    ssl_artists = itr.client.info_by_name[game].keys()
     artists = (
         app_commands.Choice(name=artist, value=artist)
         for artist in ssl_artists
@@ -31,11 +31,9 @@ async def song_autocomplete(
 ) -> list[app_commands.Choice[str]]:
     if not (game := itr.namespace.game) or not itr.client.info_data_ready:
         return []
-    ssl_columns = GAMES[game]["infoColumns"]
-    artist_name = itr.namespace.artist
-    search_term_index = ssl_columns.index("search_term")
 
-    ssl_songs = itr.client.info_by_name[game][artist_name]
+    search_term_index = GAMES[game]["infoColumns"].index("search_term")
+    ssl_songs = itr.client.info_by_name[game][itr.namespace.artist]
     if not ssl_songs:
         return []
 
