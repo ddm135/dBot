@@ -75,3 +75,7 @@ def decrypt_cbc(data: str | bytes) -> bytes:
 
 def get_column_letter(index: int) -> str:
     return chr((index) % 26 + ord("A"))
+
+
+def jsondict_str2int(x: dict[str, str]) -> dict[int, int]:
+    return {int(k): int(v) for k, v in x.items()}

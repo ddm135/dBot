@@ -7,11 +7,13 @@ from discord import app_commands
 from discord.ext import commands
 
 from app_commands.autocomplete.ssLeague import (
+    _game_autocomplete,
     artist_autocomplete,
+    game_autocomplete,
     song_autocomplete,
     song_id_autocomplete,
 )
-from static.dConsts import GAMES, SSRG_ROLE_MOD, SSRG_ROLE_SS, TEST_ROLE_OWNER
+from static.dConsts import SSRG_ROLE_MOD, SSRG_ROLE_SS, TEST_ROLE_OWNER
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -20,22 +22,12 @@ if TYPE_CHECKING:
 
 @app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)
 class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the day"):
-    GAME_CHOICES = [
-        app_commands.Choice(name=game["name"], value=key)
-        for key, game in GAMES.items()
-        if game["pinChannelIds"]
-    ]
-    _GAME_CHOICES = [
-        app_commands.Choice(name=game["name"], value=key)
-        for key, game in GAMES.items()
-        if game["pinChannelIds"] and "song_id" in game["infoColumns"]
-    ]
 
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
 
     @app_commands.command()
-    @app_commands.choices(game_choice=GAME_CHOICES)
+    @app_commands.autocomplete(game_choice=game_autocomplete)
     @app_commands.autocomplete(artist_name=artist_autocomplete)
     @app_commands.autocomplete(song_name=song_autocomplete)
     @app_commands.rename(game_choice="game", artist_name="artist", song_name="song")
@@ -67,7 +59,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             )
 
         game = game_choice.value
-        game_details = GAMES[game]
+        game_details = self.bot.games[game]
         assert (guild_id := itr.guild_id)
         pin_channel_id = game_details["pinChannelIds"].get(guild_id)
         if not pin_channel_id:
@@ -100,7 +92,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         )
 
     @app_commands.command()
-    @app_commands.choices(game_choice=_GAME_CHOICES)
+    @app_commands.autocomplete(game_choice=_game_autocomplete)
     @app_commands.autocomplete(song_id=song_id_autocomplete)
     @app_commands.rename(game_choice="game", song_id="id")
     @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
@@ -128,7 +120,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             )
 
         game = game_choice.value
-        game_details = GAMES[game]
+        game_details = self.bot.games[game]
         assert (guild_id := itr.guild_id)
         pin_channel_id = game_details["pinChannelIds"].get(guild_id)
         if not pin_channel_id:

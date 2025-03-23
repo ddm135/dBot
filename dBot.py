@@ -1,6 +1,7 @@
 import os
 from collections import defaultdict
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 import discord
 from discord.ext import commands
@@ -8,10 +9,14 @@ from dotenv import load_dotenv
 
 from static.dConsts import EXTENSIONS, STATUS_CHANNEL
 
+if TYPE_CHECKING:
+    from static.dTypes import GameDetails
+
 load_dotenv()
 
 
 class dBot(commands.Bot):
+    games: defaultdict[str, "GameDetails"] = defaultdict(dict)  # type: ignore
     info_by_name: defaultdict[
         str, defaultdict[str, defaultdict[str, tuple[str, ...]]]
     ] = defaultdict(lambda: defaultdict(lambda: defaultdict(tuple[str, ...])))

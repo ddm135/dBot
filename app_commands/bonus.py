@@ -4,8 +4,11 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from app_commands.autocomplete.bonus import _ping_preprocess, artist_autocomplete
-from static.dConsts import GAMES
+from app_commands.autocomplete.bonus import (
+    _ping_preprocess,
+    artist_autocomplete,
+    game_autocomplete,
+)
 from static.dHelpers import update_sheet_data
 
 if TYPE_CHECKING:
@@ -14,16 +17,13 @@ if TYPE_CHECKING:
 
 
 class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings"):
-    GAME_CHOICES = [
-        app_commands.Choice(name=game["name"], value=key) for key, game in GAMES.items()
-    ]
 
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
 
     @app_commands.command(name="add")
+    @app_commands.autocomplete(game_choice=game_autocomplete)
     @app_commands.autocomplete(artist_name=artist_autocomplete)
-    @app_commands.choices(game=GAME_CHOICES)
     @app_commands.rename(artist_name="artist")
     async def bonus_add(
         self,
@@ -44,11 +44,11 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         """
 
         assert itr.command
-        await self._handle_bonus_command(itr, game.value, artist_name, itr.command.name)
+        await self._handle_bonus_command(itr, artist_name, itr.command.name)
 
     @app_commands.command(name="remove")
+    @app_commands.autocomplete(game_choice=game_autocomplete)
     @app_commands.autocomplete(artist_name=artist_autocomplete)
-    @app_commands.choices(game=GAME_CHOICES)
     @app_commands.rename(artist_name="artist")
     async def bonus_remove(
         self,
@@ -67,12 +67,11 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         """
 
         assert itr.command
-        await self._handle_bonus_command(itr, game.value, artist_name, itr.command.name)
+        await self._handle_bonus_command(itr, artist_name, itr.command.name)
 
     async def _handle_bonus_command(
         self,
         itr: discord.Interaction["dBot"],
-        game_key: str,
         artist_name: str,
         operation: str,
     ) -> None:
@@ -83,7 +82,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
             ping_data,
             artist_name_index,
             users_index,
-        ) = _ping_preprocess(game_key)
+        ) = _ping_preprocess(itr)
 
         for i, row in enumerate(ping_data, start=1):
             _artist_name = row[artist_name_index]

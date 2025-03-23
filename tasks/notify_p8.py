@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 import discord
 from discord.ext import commands, tasks
 
-from static.dConsts import GAMES, ONE_DAY, TIMEZONES
+from static.dConsts import ONE_DAY, TIMEZONES
 from static.dHelpers import get_sheet_data
 
 if TYPE_CHECKING:
@@ -35,7 +35,7 @@ class NotifyP8(commands.Cog):
         ]
     )
     async def notify_p8(self) -> None:
-        for game_details in GAMES.values():
+        for game_details in self.bot.games.values():
             if (timezone := game_details["timezone"]) not in (TIMEZONES["PHT"],):
                 continue
             print(game_details["name"])

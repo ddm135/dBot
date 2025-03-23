@@ -4,10 +4,44 @@ from typing import TYPE_CHECKING
 import discord
 from discord import app_commands
 
-from static.dConsts import GAMES, MAX_AUTOCOMPLETE
+from static.dConsts import MAX_AUTOCOMPLETE
 
 if TYPE_CHECKING:
     from dBot import dBot
+
+
+async def game_autocomplete(
+    itr: discord.Interaction["dBot"], current: str
+) -> list[app_commands.Choice[str]]:
+    if not itr.client.info_data_ready:
+        return []
+    ssl_games = itr.client.games
+
+    games = (
+        app_commands.Choice(name=game["name"], value=key)
+        for key, game in ssl_games.items()
+        if game["pinChannelIds"] and current.lower() in game["name"].lower()
+    )
+
+    return list(islice(games, MAX_AUTOCOMPLETE))
+
+
+async def _game_autocomplete(
+    itr: discord.Interaction["dBot"], current: str
+) -> list[app_commands.Choice[str]]:
+    if not itr.client.info_data_ready:
+        return []
+    ssl_games = itr.client.games
+
+    games = (
+        app_commands.Choice(name=game["name"], value=key)
+        for key, game in ssl_games.items()
+        if game["pinChannelIds"]
+        and current.lower() in game["name"].lower()
+        and "song_id" in game["infoColumns"]
+    )
+
+    return list(islice(games, MAX_AUTOCOMPLETE))
 
 
 async def artist_autocomplete(
@@ -31,11 +65,9 @@ async def song_autocomplete(
 ) -> list[app_commands.Choice[str]]:
     if not (game := itr.namespace.game) or not itr.client.info_data_ready:
         return []
-    ssl_columns = GAMES[game]["infoColumns"]
-    artist_name = itr.namespace.artist
-    search_term_index = ssl_columns.index("search_term")
+    search_term_index = itr.client.games[game]["infoColumns"].index("search_term")
 
-    ssl_songs = itr.client.info_by_name[game][artist_name]
+    ssl_songs = itr.client.info_by_name[game][itr.namespace.artist]
     if not ssl_songs:
         return []
 
@@ -54,7 +86,7 @@ async def song_id_autocomplete(
 ) -> list[app_commands.Choice[str]]:
     if not (game := itr.namespace.game) or not itr.client.info_data_ready:
         return []
-    ssl_columns = GAMES[game]["infoColumns"]
+    ssl_columns = itr.client.games[game]["infoColumns"]
     artist_name_index = ssl_columns.index("artist_name")
     song_name_index = ssl_columns.index("song_name")
 

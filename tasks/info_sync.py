@@ -1,15 +1,26 @@
+# mypy: disable-error-code="literal-required"
+
 import asyncio
 import gzip
+import inspect
 import json
 import logging
-from datetime import time
+from datetime import time, timedelta
 from typing import TYPE_CHECKING, Any
+from zoneinfo import ZoneInfo
 
 import aiohttp
 from discord.ext import commands, tasks
 
-from static.dConsts import A_JSON_BODY, A_JSON_HEADERS, GAMES, TIMEZONES
-from static.dHelpers import decrypt_cbc, decrypt_ecb, get_sheet_data
+from static.dConsts import A_JSON_BODY, A_JSON_HEADERS, TIMEZONES
+from static.dHelpers import (
+    decrypt_cbc,
+    decrypt_ecb,
+    get_column_letter,
+    get_sheet_data,
+    jsondict_str2int,
+)
+from static.dTypes import GameDetails
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -30,6 +41,7 @@ class InfoSync(commands.Cog):
     async def cog_unload(self) -> None:
         self.bot.info_data_ready = False
         self.info_sync.cancel()
+        self.bot.games.clear()
         self.bot.info_by_name.clear()
         self.bot.info_by_id.clear()
         self.bot.info_color.clear()
@@ -39,11 +51,37 @@ class InfoSync(commands.Cog):
     async def info_sync(self) -> None:
         self.bot.info_data_ready = False
         await asyncio.sleep(5)
-        self.LOGGER.info("Downloading song data...")
+        self.LOGGER.info("Downloading game data...")
+        self.bot.games.clear()
         self.bot.info_by_name.clear()
         self.bot.info_by_id.clear()
         self.bot.info_color.clear()
-        for game, game_details in GAMES.items():
+
+        game_attr = inspect.get_annotations(GameDetails)
+        games = get_sheet_data(
+            "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
+            f"Games!A2:{get_column_letter(len(game_attr) - 1)}",
+        )
+        for key, *details in games:
+            vals = zip(game_attr, game_attr.values(), details)
+            for val in vals:
+                if val[1] == str:
+                    self.bot.games[key][val[0]] = val[2]
+                elif val[1] == tuple[str, ...]:
+                    self.bot.games[key][val[0]] = tuple(val[2].split(","))
+                elif val[1] == int:
+                    self.bot.games[key][val[0]] = int(val[2], 16)
+                elif val[1] == ZoneInfo:
+                    self.bot.games[key][val[0]] = TIMEZONES[val[2]]
+                elif val[1] == timedelta:
+                    self.bot.games[key][val[0]] = timedelta(hours=int(val[2]))
+                else:
+                    self.bot.games[key][val[0]] = json.loads(
+                        val[2], object_hook=jsondict_str2int
+                    )
+
+        self.LOGGER.info("Downloading song data...")
+        for game, game_details in self.bot.games.items():
             if not game_details["pinChannelIds"]:
                 continue
 
