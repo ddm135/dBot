@@ -37,20 +37,28 @@ class InfoSync(commands.Cog):
         self.bot.info_by_id.clear()
         await super().cog_unload()
 
-    @tasks.loop(time=time(hour=14, tzinfo=TIMEZONES["KST"]))
+    @tasks.loop(time=time(hour=10, tzinfo=TIMEZONES["KST"]))
     async def info_sync(self) -> None:
         self.bot.info_data_ready = False
         await asyncio.sleep(5)
         self.LOGGER.info("Downloading song data...")
-        self.bot.info_ajs.clear()
-        self.bot.info_msd.clear()
-        self.bot.info_url.clear()
-        self.bot.info_by_name.clear()
-        self.bot.info_by_id.clear()
+
         for game, game_details in GAMES.items():
+            self.bot.info_ajs[game].clear()
             ajs = self.bot.info_ajs[game] = await self.get_a_json(game_details["api"])
+            if ajs["code"] != 1000:
+                self.LOGGER.info(
+                    f"{game_details["name"]} server is unavailable. Skipping..."
+                )
+                continue
+
+            self.bot.info_msd[game].clear()
+            self.bot.info_by_name[game].clear()
+            self.bot.info_by_id[game].clear()
+
             self.bot.info_msd[game] = await self.get_music_data(ajs)
             if game_details["legacyUrlScheme"]:
+                self.bot.info_url[game].clear()
                 self.bot.info_url[game] = await self.get_url_data(ajs)
 
             if not game_details["infoId"]:
