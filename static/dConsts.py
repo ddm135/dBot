@@ -57,7 +57,7 @@ EXTENSIONS = (
 GAMES: dict[str, "GameDetails"] = {
     "SM": {
         "name": "SUPERSTAR SM",
-        "infoId": "1kC38CLFd6xkDXD9qLHgnnv3s3jmM_4vf4RLsWuXs9NU",
+        "infoId": "1dX_5lWxenT7CDVXpgyScTHDiwazUZIO3441RaNpN55g",
         "infoRange": "Songs!A2:E",
         "infoColumns": (
             "song_id",
@@ -96,8 +96,7 @@ GAMES: dict[str, "GameDetails"] = {
         "dateFormat": "%Y-%m-%d",
         "timezone": TIMEZONES["KST"],
         "resetOffset": timedelta(hours=2),
-        # "api": "https://smtown-api-https.dalcomsoft.net",
-        "api": "http://ss-sm-api-real.superstarsmtown.jp",
+        "api": "https://smtown-api-https.dalcomsoft.net",
         "legacyUrlScheme": False,
     },
     "SM_JP": {

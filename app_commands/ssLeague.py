@@ -164,6 +164,8 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         pin_channel_id: int,
         game_details: "GameDetails",
     ) -> None:
+        _duration = int(duration)
+        duration = f"{_duration // 60}:{_duration % 60:02d}"
 
         game = itr.namespace.game
         timezone = game_details["timezone"]
