@@ -23,7 +23,6 @@ class InfoSync(commands.Cog):
 
     async def cog_load(self) -> None:
         await self.info_sync()
-        self.bot.info_data_ready = True
         self.info_sync.start()
         await super().cog_load()
 
@@ -77,6 +76,8 @@ class InfoSync(commands.Cog):
                     row[game_details["infoColumns"].index("song_id")]
                 ] = row
 
+        self.bot.info_data_ready = True
+
     async def get_a_json(self, api_url: str) -> dict[str, Any]:
         async with aiohttp.ClientSession() as session:
             async with session.post(
@@ -122,12 +123,6 @@ class InfoSync(commands.Cog):
     @info_sync.before_loop
     async def before_loop(self) -> None:
         await self.bot.wait_until_ready()
-
-    @info_sync.after_loop
-    async def after_loop(self) -> None:
-        if not self.info_sync.is_being_cancelled():
-            await asyncio.sleep(5)
-            self.bot.info_data_ready = True
 
 
 async def setup(bot: "dBot") -> None:
