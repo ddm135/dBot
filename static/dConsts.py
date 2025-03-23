@@ -58,14 +58,13 @@ GAMES: dict[str, "GameDetails"] = {
     "SM": {
         "name": "SUPERSTAR SM",
         "infoId": "1kC38CLFd6xkDXD9qLHgnnv3s3jmM_4vf4RLsWuXs9NU",
-        "infoRange": "Songs!A2:F",
+        "infoRange": "Songs!A2:E",
         "infoColumns": (
             "song_id",
             "artist_name",
             "song_name",
             "search_term",
             "duration",
-            "image",
         ),
         "pingId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
         "pingRange": "SM!A1:D",
@@ -104,14 +103,13 @@ GAMES: dict[str, "GameDetails"] = {
     "SM_JP": {
         "name": "SUPERSTAR SMTOWN (JP/TW)",
         "infoId": "1kC38CLFd6xkDXD9qLHgnnv3s3jmM_4vf4RLsWuXs9NU",
-        "infoRange": "Songs!A2:F",
+        "infoRange": "Songs!A2:E",
         "infoColumns": (
             "song_id",
             "artist_name",
             "song_name",
             "search_term",
             "duration",
-            "image",
         ),
         "pingId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
         "pingRange": "SMTOWN!A1:D",
@@ -178,14 +176,13 @@ GAMES: dict[str, "GameDetails"] = {
     "JYP_JP": {
         "name": "SUPERSTAR JYPNATION (JP)",
         "infoId": "1eVjwi0GudyMixnZtam8TeupRd3DQ6mheyRKp2lDA6qw",
-        "infoRange": "Songs!A2:G",
+        "infoRange": "Songs!A2:F",
         "infoColumns": (
             "song_id",
             "artist_name",
             "song_name",
             "search_term",
             "duration",
-            "image",
             "skills",
         ),
         "pingId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
@@ -221,14 +218,13 @@ GAMES: dict[str, "GameDetails"] = {
     "LP": {
         "name": "SUPERSTAR LAPONE",
         "infoId": "1Ng57BGCDj025bxwCBbQulYFhRjS5runy5HnbStY_xSw",
-        "infoRange": "Songs!A2:G",
+        "infoRange": "Songs!A2:F",
         "infoColumns": (
             "song_id",
             "artist_name",
             "song_name",
             "search_term",
             "duration",
-            "image",
             "skills",
         ),
         "pingId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
