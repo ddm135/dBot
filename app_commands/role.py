@@ -248,7 +248,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         assert isinstance(itr.user, discord.Member)
         group_roles = ROLES[itr.guild.id]
         sorted_stored_roles = sorted(
-            tuple(role for role in stored_roles if role in group_roles),
+            (role for role in stored_roles if role in group_roles),
             key=lambda x: group_roles.index(x),
         )
         embed = discord.Embed(

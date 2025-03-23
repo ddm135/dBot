@@ -20,22 +20,22 @@ class Memes(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def mots7(self, ctx: commands.Context) -> None:
-        diff = self._days_since(self.MOTS7_RELEASE)
+        diff = self.days_since(self.MOTS7_RELEASE)
         await ctx.send(f"It has been {diff} days since Map of The Soul: 7 release.")
 
     @commands.command()
     @commands.is_owner()
     async def got7(self, ctx: commands.Context) -> None:
-        diff = self._days_since(self.LP_RELEASE)
+        diff = self.days_since(self.LP_RELEASE)
         await ctx.send(f"It has been {diff} days since Last Piece release.")
 
     @commands.command()
     @commands.is_owner()
     async def baemon(self, ctx: commands.Context) -> None:
-        diff = self._days_since(self.BAEMON_DEBUT)
+        diff = self.days_since(self.BAEMON_DEBUT)
         await ctx.send(f"It has been {diff} days since BABYMONSTER official debut.")
 
-    def _days_since(self, date: datetime) -> int:
+    def days_since(self, date: datetime) -> int:
         current = datetime.now(tz=date.tzinfo)
         diff = current - date
         return diff.days

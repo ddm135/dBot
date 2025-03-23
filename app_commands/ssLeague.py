@@ -23,12 +23,12 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
     GAME_CHOICES = [
         app_commands.Choice(name=game["name"], value=key)
         for key, game in GAMES.items()
-        if game["pinChannelIds"]
+        if game["infoId"]
     ]
     _GAME_CHOICES = [
         app_commands.Choice(name=game["name"], value=key)
         for key, game in GAMES.items()
-        if game["pinChannelIds"] and "song_id" in game["infoColumns"]
+        if game["infoId"] and key != "SM"
     ]
 
     def __init__(self, bot: "dBot") -> None:
@@ -76,24 +76,20 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             )
 
         ssl_columns = game_details["infoColumns"]
-        song_id_index = (
-            ssl_columns.index("song_id") if "song_id" in ssl_columns else None
-        )
+        song_id_index = ssl_columns.index("song_id")
         duration_index = ssl_columns.index("duration")
-        image_url_index = ssl_columns.index("image")
         skills_index = ssl_columns.index("skills") if "skills" in ssl_columns else None
 
         ssl_song = self.bot.info_by_name[game][artist_name][song_name]
         if not ssl_song:
             return await itr.followup.send("Song not found.")
 
-        await self._handle_ssl_command(
+        await self.handle_ssl_command(
             itr,
             artist_name,
             song_name,
-            int(ssl_song[song_id_index]) if song_id_index is not None else None,
+            int(ssl_song[song_id_index]),
             ssl_song[duration_index],
-            ssl_song[image_url_index],
             ssl_song[skills_index] if skills_index is not None else None,
             pin_channel_id,
             game_details,
@@ -140,64 +136,74 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         artist_name_index = ssl_columns.index("artist_name")
         song_name_index = ssl_columns.index("song_name")
         duration_index = ssl_columns.index("duration")
-        image_url_index = ssl_columns.index("image")
         skills_index = ssl_columns.index("skills") if "skills" in ssl_columns else None
 
         ssl_song = self.bot.info_by_id[game][song_id]
         if not ssl_song:
             return await itr.followup.send("Song not found.")
 
-        await self._handle_ssl_command(
+        await self.handle_ssl_command(
             itr,
             ssl_song[artist_name_index],
             ssl_song[song_name_index],
             int(song_id),
             ssl_song[duration_index],
-            ssl_song[image_url_index],
             ssl_song[skills_index] if skills_index is not None else None,
             pin_channel_id,
             game_details,
         )
 
-    async def _handle_ssl_command(
+    async def handle_ssl_command(
         self,
         itr: discord.Interaction["dBot"],
         artist_name: str,
         song_name: str,
         song_id: int | None,
         duration: str,
-        image_url: str,
         skills: str | None,
         pin_channel_id: int,
         game_details: "GameDetails",
     ) -> None:
 
+        game = itr.namespace.game
         timezone = game_details["timezone"]
         offset = game_details["resetOffset"]
         assert (guild_id := itr.guild_id)
         pin_role = game_details["pinRoles"].get(guild_id)
-        color = (
-            self._get_song_color(itr.namespace.game, song_id)
-            if song_id is not None
-            else game_details["color"]
-        )
+
+        color = game_details["color"]
+        image_url = None
+        if song_id is not None:
+            msd_data = self.bot.info_msd[game]
+            for song in msd_data:
+                if song["code"] == song_id:
+                    color = song["albumBgColor"][:-2]
+                    image_url = song["album"]
+                    break
+
+        if isinstance(image_url, int):
+            url_data = self.bot.info_url[game]
+            for url in url_data:
+                if url["code"] == image_url:
+                    image_url = url["url"]
+                    break
 
         current_time = datetime.now(timezone) - offset
-        embed, embed_title = self._generate_embed(
+        embed, embed_title = self.generate_embed(
             artist_name,
             song_name,
             duration,
-            image_url,
-            current_time,
+            image_url,  # pyright: ignore[reportArgumentType]
             color,
             skills,
+            current_time,
             itr.user.name,
         )
 
         pin_channel = self.bot.get_channel(pin_channel_id)
 
         assert isinstance(pin_channel, discord.TextChannel)
-        new_pin = await self._pin_new_ssl(embed, pin_channel)
+        new_pin = await self.pin_new_ssl(embed, pin_channel)
         topic = f"[{current_time.strftime("%m.%d.%y")}] {artist_name} - {song_name}"
         if pin_role:
             await pin_channel.send(f"<@&{pin_role}> {topic}")
@@ -205,31 +211,23 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             await pin_channel.send(topic)
         await pin_channel.edit(topic=topic)
         await itr.followup.send("Pinned!")
-        await self._unpin_old_ssl(embed_title, pin_channel, new_pin)
+        await self.unpin_old_ssl(embed_title, pin_channel, new_pin)
 
-    def _get_song_color(self, game: str, song_id: int) -> int | None:
-        msd_data = self.bot.info_color[game]
-        for s in msd_data:
-            if s["code"] == song_id:
-                color = s["albumBgColor"][:-2]
-                return int(color, 16)
-        return None
-
-    def _generate_embed(
+    def generate_embed(
         self,
         artist_name: str,
         song_name: str,
         duration: str,
-        image_url: str,
-        current_time: datetime,
-        color: int | discord.Color | None,
+        image_url: str | None,
+        color: int,
         skills: str | None,
+        current_time: datetime,
         user_name: str,
     ) -> tuple[discord.Embed, str]:
         embed_title = f"SSL #{current_time.strftime("%w").replace("0", "7")}"
 
         embed = discord.Embed(
-            color=color or discord.Color.random(seed=current_time.timestamp()),
+            color=color,
             title=embed_title,
             description=f"**{artist_name} - {song_name}**",
         )
@@ -254,7 +252,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
 
         return embed, embed_title
 
-    async def _unpin_old_ssl(
+    async def unpin_old_ssl(
         self, embed_title: str, pin_channel: discord.TextChannel, new_pin: int
     ) -> None:
         pins = await pin_channel.pins()
@@ -266,7 +264,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
                 await pin.unpin()
                 break
 
-    async def _pin_new_ssl(
+    async def pin_new_ssl(
         self,
         embed: discord.Embed,
         pin_channel: discord.TextChannel,

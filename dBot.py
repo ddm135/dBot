@@ -1,6 +1,7 @@
 import os
 from collections import defaultdict
 from datetime import datetime
+from typing import Any
 
 import discord
 from discord.ext import commands
@@ -12,13 +13,15 @@ load_dotenv()
 
 
 class dBot(commands.Bot):
-    info_by_name: defaultdict[
-        str, defaultdict[str, defaultdict[str, tuple[str, ...]]]
-    ] = defaultdict(lambda: defaultdict(lambda: defaultdict(tuple[str, ...])))
-    info_by_id: defaultdict[str, defaultdict[str, tuple[str, ...]]] = defaultdict(
-        lambda: defaultdict(tuple[str, ...])
+    info_ajs: defaultdict[str, dict[str, Any]] = defaultdict(dict[str, Any])
+    info_msd: defaultdict[str, list[dict[str, Any]]] = defaultdict(list[dict[str, Any]])
+    info_url: defaultdict[str, list[dict[str, Any]]] = defaultdict(list[dict[str, Any]])
+    info_by_name: defaultdict[str, defaultdict[str, defaultdict[str, list[str]]]] = (
+        defaultdict(lambda: defaultdict(lambda: defaultdict(list[str])))
     )
-    info_color: defaultdict[str, list[dict]] = defaultdict(list[dict])
+    info_by_id: defaultdict[str, defaultdict[str, list[str]]] = defaultdict(
+        lambda: defaultdict(list[str])
+    )
     info_data_ready = False
     role_data_ready = False
 

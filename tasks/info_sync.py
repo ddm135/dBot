@@ -30,9 +30,11 @@ class InfoSync(commands.Cog):
     async def cog_unload(self) -> None:
         self.bot.info_data_ready = False
         self.info_sync.cancel()
+        self.bot.info_ajs.clear()
+        self.bot.info_msd.clear()
+        self.bot.info_url.clear()
         self.bot.info_by_name.clear()
         self.bot.info_by_id.clear()
-        self.bot.info_color.clear()
         await super().cog_unload()
 
     @tasks.loop(time=time(hour=14, tzinfo=TIMEZONES["KST"]))
@@ -40,29 +42,32 @@ class InfoSync(commands.Cog):
         self.bot.info_data_ready = False
         await asyncio.sleep(5)
         self.LOGGER.info("Downloading song data...")
+        self.bot.info_ajs.clear()
+        self.bot.info_msd.clear()
+        self.bot.info_url.clear()
         self.bot.info_by_name.clear()
         self.bot.info_by_id.clear()
-        self.bot.info_color.clear()
         for game, game_details in GAMES.items():
-            if not game_details["pinChannelIds"]:
+            ajs = self.bot.info_ajs[game] = await self.get_a_json(game_details["api"])
+            self.bot.info_msd[game] = await self.get_music_data(ajs)
+            if game_details["legacyUrlScheme"]:
+                self.bot.info_url[game] = await self.get_url_data(ajs)
+
+            if not game_details["infoId"]:
                 continue
 
             info = get_sheet_data(
                 game_details["infoId"],
-                game_details["infoSongs"],
+                game_details["infoRange"],
                 "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
             )
             for row in info:
-                _row = tuple(row)
                 self.bot.info_by_name[game][
                     row[game_details["infoColumns"].index("artist_name")]
-                ][row[game_details["infoColumns"].index("song_name")]] = _row
-                if "song_id" in game_details["infoColumns"]:
-                    self.bot.info_by_id[game][
-                        row[game_details["infoColumns"].index("song_id")]
-                    ] = _row
-
-            self.bot.info_color[game] = await self.get_music_data(game_details["api"])
+                ][row[game_details["infoColumns"].index("song_name")]] = row
+                self.bot.info_by_id[game][
+                    row[game_details["infoColumns"].index("song_id")]
+                ] = row
 
     async def get_a_json(self, api_url: str) -> dict[str, Any]:
         async with aiohttp.ClientSession() as session:
@@ -77,11 +82,17 @@ class InfoSync(commands.Cog):
                     ajs = json.loads(decrypt_cbc(await r.text()))
         return ajs
 
-    async def get_music_data(self, api_url: str) -> list[dict]:
-        ajs = await self.get_a_json(api_url)
+    async def get_music_data(self, ajs: dict[str, Any]) -> list[dict[str, Any]]:
         msd_url = ajs["result"]["context"]["MusicData"]["file"]
+        return await self.get_game_data(msd_url)
+
+    async def get_url_data(self, ajs: dict[str, Any]) -> list[dict[str, Any]]:
+        url_url = ajs["result"]["context"]["URLs"]["file"]
+        return await self.get_game_data(url_url)
+
+    async def get_game_data(self, url: str) -> list[dict[str, Any]]:
         async with aiohttp.ClientSession() as session:
-            async with session.get(url=msd_url) as r:
+            async with session.get(url=url) as r:
                 msd_enc = b""
                 while True:
                     chunk = await r.content.read(1024)

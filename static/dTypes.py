@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo
 class GameDetails(TypedDict):
     name: str
     infoId: str
-    infoSongs: str
+    infoRange: str
     infoColumns: tuple[str, ...]
     pingId: str
     pingRange: str
@@ -18,7 +18,8 @@ class GameDetails(TypedDict):
     color: int
     pinChannelIds: dict[int, int | None]
     pinRoles: dict[int, int | None]
-    api: str
     dateFormat: str
     timezone: ZoneInfo
     resetOffset: timedelta
+    api: str
+    legacyUrlScheme: bool
