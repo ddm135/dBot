@@ -23,12 +23,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
     GAME_CHOICES = [
         app_commands.Choice(name=game["name"], value=key)
         for key, game in GAMES.items()
-        if game["infoId"]
-    ]
-    _GAME_CHOICES = [
-        app_commands.Choice(name=game["name"], value=key)
-        for key, game in GAMES.items()
-        if game["infoId"] and key != "SM"
+        if game["pinChannelIds"]
     ]
 
     def __init__(self, bot: "dBot") -> None:
@@ -96,7 +91,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         )
 
     @app_commands.command()
-    @app_commands.choices(game_choice=_GAME_CHOICES)
+    @app_commands.choices(game_choice=GAME_CHOICES)
     @app_commands.autocomplete(song_id=song_id_autocomplete)
     @app_commands.rename(game_choice="game", song_id="id")
     @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
