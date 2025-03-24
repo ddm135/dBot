@@ -75,6 +75,7 @@ class dBot(commands.Bot):
                             f"{message.content}"
                         ),
                         color=message.author.color,
+                        url=message.jump_url,
                     )
                     embed.set_author(
                         name=f"Word Ping in {message.guild.name}",
