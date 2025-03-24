@@ -56,7 +56,7 @@ class dBot(commands.Bot):
 
     async def on_message(self, message: discord.Message) -> None:
         if message.guild is not None and not message.author.bot:
-            for word in self.ping[message.guild.id]:
+            for word in self.ping.get(message.guild.id, []):
                 if word not in message.content:
                     continue
 
@@ -70,9 +70,7 @@ class dBot(commands.Bot):
                     ):
                         continue
 
-                    print(owner)
-                    user = self.get_user(owner)
-                    print(user)
+                    user = await self.fetch_user(owner)
                     if user is None:
                         continue
 
@@ -80,6 +78,7 @@ class dBot(commands.Bot):
                         f"`{message.author.name}` mentioned "
                         f"`{word}` in <#{message.id}>"
                     )
+
         return await super().on_message(message)
 
     async def close(self) -> None:
