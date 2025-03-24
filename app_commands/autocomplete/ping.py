@@ -18,7 +18,7 @@ async def word_autocomplete(
 
     words = (
         app_commands.Choice(name=word, value=word)
-        for word in itr.client.pings
+        for word in itr.client.pings[str(itr.guild.id)]
         if current.lower() in word.lower()
         and str(itr.user.id) in itr.client.pings[word]
     )
