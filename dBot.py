@@ -26,14 +26,46 @@ class dBot(commands.Bot):
     info_data_ready = False
     role_data_ready = False
 
-    pings: dict[int, dict[str, dict[int, dict[str, list[int]]]]]
+    pings: defaultdict[
+        int, defaultdict[str, defaultdict[int, defaultdict[str, list[int]]]]
+    ] = defaultdict(
+        lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(list[int])))
+    )
+
+    # pings = {
+    #     360109303199432704: {
+    #         "ddm": {
+    #             180925261531840512: {
+    #                 "users": [1335307588597710868],
+    #                 "channels": [401412343629742090],
+    #             }
+    #         }
+    #     },
+    #     540849436868214784: {
+    #         "ddm": {
+    #             180925261531840512: {
+    #                 "users": [],
+    #                 "channels": [1335315390732963952],
+    #             }
+    #         }
+    #     },
+    # }
 
     async def setup_hook(self) -> None:
         if PING_DATA.exists():
             with open(PING_DATA, "r") as f:
-                self.pings = json.load(f)
+                pings = json.load(f)
+            self.pings = defaultdict(
+                lambda: defaultdict(
+                    lambda: defaultdict(lambda: defaultdict(list[int]))
+                ),
+                pings,
+            )
+
         else:
-            self.pings = {}
+            self.pings = defaultdict(
+                lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(list[int])))
+            )
             with open(PING_DATA, "w") as f:
                 json.dump(self.pings, f, indent=4)
 
@@ -75,7 +107,6 @@ class dBot(commands.Bot):
                             f"{message.content}"
                         ),
                         color=message.author.color,
-                        url=message.jump_url,
                     )
                     embed.set_author(
                         name=f"Word Ping in {message.guild.name}",
