@@ -67,6 +67,8 @@ class Ping(commands.GroupCog, name="ping", description="Manage Word Pings"):
         self.bot.pings[guild_id][word].pop(user_id)
         if not self.bot.pings[guild_id][word]:
             self.bot.pings[guild_id].pop(word)
+        if not self.bot.pings[guild_id]:
+            self.bot.pings.pop(guild_id)
         with open(PING_DATA, "w") as f:
             json.dump(self.bot.pings, f, indent=4)
         return await itr.followup.send(
