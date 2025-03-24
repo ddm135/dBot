@@ -29,9 +29,7 @@ class dBot(commands.Bot):
 
     pings: defaultdict[
         str, defaultdict[str, defaultdict[str, defaultdict[str, list[int]]]]
-    ] = defaultdict(
-        lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(list[int])))
-    )
+    ]
 
     async def setup_hook(self) -> None:
         if PING_DATA.exists():
