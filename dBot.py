@@ -59,7 +59,7 @@ class dBot(commands.Bot):
             for word in self.ping[message.guild.id]:
                 if word not in message.content:
                     continue
-                for owner in self.ping[message.channel.id][word]:
+                for owner in self.ping[message.guild.id][word]:
                     if (
                         message.author.id
                         in self.ping[message.guild.id][word][owner]["users"]
