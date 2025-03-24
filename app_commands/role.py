@@ -309,7 +309,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
             key=lambda x: group_roles.index(x),
         )
         embed = discord.Embed(
-            title=f"{itr.user.name}'s Inventory",
+            title="Inventory",
             description=(
                 "\n".join(f"<@&{role}>" for role in sorted_stored_roles)
                 if sorted_stored_roles
