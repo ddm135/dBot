@@ -30,13 +30,14 @@ class Ping(commands.GroupCog, name="ping", description="Manage Word Pings"):
             Word to be pinged for
         """
         await itr.response.defer(ephemeral=True)
-        assert itr.guild_id
-        if itr.user.id in self.bot.pings[itr.guild_id][word]:
+        guild_id = str(itr.guild_id)
+        user_id = str(itr.user.id)
+        if itr.user.id in self.bot.pings[guild_id][word]:
             return await itr.followup.send(
                 f"You are already pinged for `{word}` in this server."
             )
-        self.bot.pings[itr.guild_id][word][itr.user.id]["users"] = []
-        self.bot.pings[itr.guild_id][word][itr.user.id]["channels"] = []
+        self.bot.pings[guild_id][word][user_id]["users"] = []
+        self.bot.pings[guild_id][word][user_id]["channels"] = []
         with open(PING_DATA, "w") as f:
             json.dump(self.bot.pings, f, indent=4)
         return await itr.followup.send(
@@ -57,14 +58,15 @@ class Ping(commands.GroupCog, name="ping", description="Manage Word Pings"):
             Word to be removed from the ping list
         """
         await itr.response.defer(ephemeral=True)
-        assert itr.guild_id
-        if itr.user.id not in self.bot.pings[itr.guild_id][word]:
+        guild_id = str(itr.guild_id)
+        user_id = str(itr.user.id)
+        if itr.user.id not in self.bot.pings[guild_id][word]:
             return await itr.followup.send(
                 f"You are not pinged for `{word}` in this server."
             )
-        self.bot.pings[itr.guild_id][word].pop(itr.user.id)
-        if not self.bot.pings[itr.guild_id][word]:
-            self.bot.pings[itr.guild_id].pop(word)
+        self.bot.pings[guild_id][word].pop(user_id)
+        if not self.bot.pings[guild_id][word]:
+            self.bot.pings[guild_id].pop(word)
         with open(PING_DATA, "w") as f:
             json.dump(self.bot.pings, f, indent=4)
         return await itr.followup.send(

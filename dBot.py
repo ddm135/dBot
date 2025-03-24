@@ -27,29 +27,10 @@ class dBot(commands.Bot):
     role_data_ready = False
 
     pings: defaultdict[
-        int, defaultdict[str, defaultdict[int, defaultdict[str, list[int]]]]
+        str, defaultdict[str, defaultdict[str, defaultdict[str, list[int]]]]
     ] = defaultdict(
         lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(list[int])))
     )
-
-    # pings = {
-    #     360109303199432704: {
-    #         "ddm": {
-    #             180925261531840512: {
-    #                 "users": [1335307588597710868],
-    #                 "channels": [401412343629742090],
-    #             }
-    #         }
-    #     },
-    #     540849436868214784: {
-    #         "ddm": {
-    #             180925261531840512: {
-    #                 "users": [],
-    #                 "channels": [1335315390732963952],
-    #             }
-    #         }
-    #     },
-    # }
 
     async def setup_hook(self) -> None:
         if PING_DATA.exists():
@@ -81,21 +62,23 @@ class dBot(commands.Bot):
 
     async def on_message(self, message: discord.Message) -> None:
         if message.guild is not None and not message.author.bot:
-            for word in self.pings.get(message.guild.id, []):
+            guild_id = str(message.guild.id)
+            for word in self.pings[guild_id]:
                 if word not in message.content:
                     continue
 
-                for owner in self.pings[message.guild.id][word]:
+                for owner in self.pings[guild_id][word]:
+                    _owner = int(owner)
                     if (
-                        message.author.id == owner
+                        message.author.id == _owner
                         or message.author.id
-                        in self.pings[message.guild.id][word][owner]["users"]
+                        in self.pings[guild_id][word][owner]["users"]
                         or message.channel.id
-                        in self.pings[message.guild.id][word][owner]["channels"]
+                        in self.pings[guild_id][word][owner]["channels"]
                     ):
                         continue
 
-                    user = await self.fetch_user(owner)
+                    user = await self.fetch_user(_owner)
                     if user is None:
                         continue
 
