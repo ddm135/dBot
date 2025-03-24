@@ -32,7 +32,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage Word Pings"):
         await itr.response.defer(ephemeral=True)
         guild_id = str(itr.guild_id)
         user_id = str(itr.user.id)
-        if itr.user.id in self.bot.pings[guild_id][word]:
+        if user_id in self.bot.pings[guild_id][word]:
             return await itr.followup.send(
                 f"You are already pinged for `{word}` in this server."
             )
@@ -60,7 +60,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage Word Pings"):
         await itr.response.defer(ephemeral=True)
         guild_id = str(itr.guild_id)
         user_id = str(itr.user.id)
-        if itr.user.id not in self.bot.pings[guild_id][word]:
+        if user_id not in self.bot.pings[guild_id][word]:
             return await itr.followup.send(
                 f"You are not pinged for `{word}` in this server."
             )
