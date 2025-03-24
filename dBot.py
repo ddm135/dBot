@@ -74,10 +74,23 @@ class dBot(commands.Bot):
                     if user is None:
                         continue
 
-                    await user.send(
-                        f"`{message.author.name}` mentioned "
-                        f"`{word}` in <#{message.id}>"
+                    embed = discord.Embed(
+                        description=(
+                            f"`{message.author.name}` mentioned `{word}` in "
+                            f"<#{message.channel.id}> on "
+                            f"<t:{int(message.created_at.timestamp())}:f>\n\n"
+                            f"{message.content}"
+                        ),
+                        color=message.author.color,
                     )
+                    embed.set_author(
+                        name=f"Word Ping in {message.guild.name}",
+                        url=message.jump_url,
+                        icon_url=message.guild.icon.url if message.guild.icon else None,
+                    )
+                    embed.set_thumbnail(url=message.author.display_avatar.url)
+
+                    await user.send(embed=embed)
 
         return await super().on_message(message)
 
