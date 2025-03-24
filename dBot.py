@@ -59,20 +59,27 @@ class dBot(commands.Bot):
             for word in self.ping[message.guild.id]:
                 if word not in message.content:
                     continue
+
                 for owner in self.ping[message.guild.id][word]:
                     if (
-                        message.author.id
+                        message.author.id == owner
+                        or message.author.id
                         in self.ping[message.guild.id][word][owner]["users"]
                         or message.channel.id
                         in self.ping[message.guild.id][word][owner]["channels"]
                     ):
                         continue
+
+                    print(owner)
                     user = self.get_user(owner)
-                    if user is not None:
-                        await user.send(
-                            f"`{message.author.name}` mentioned "
-                            f"`{word}` in <#{message.id}>"
-                        )
+                    print(user)
+                    if user is None:
+                        continue
+
+                    await user.send(
+                        f"`{message.author.name}` mentioned "
+                        f"`{word}` in <#{message.id}>"
+                    )
         return await super().on_message(message)
 
     async def close(self) -> None:
