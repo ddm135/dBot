@@ -37,7 +37,7 @@ class dBot(commands.Bot):
         if PING_DATA.exists():
             with open(PING_DATA, "r") as f:
                 self.pings = json.load(
-                    f, object_hook_pairs=partial(defaultdict, lambda: None)
+                    f, object_pairs_hook=partial(defaultdict, lambda: None)
                 )
 
         else:
