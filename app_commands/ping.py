@@ -70,3 +70,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage Word Pings"):
         return await itr.followup.send(
             f"Removed from the ping list for `{word}` in this server!"
         )
+
+
+async def setup(bot: "dBot") -> None:
+    await bot.add_cog(Ping(bot))
