@@ -13,32 +13,8 @@ if TYPE_CHECKING:
 
 @app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)
 class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
-    ACC = app_commands.AppCommandContext(
-        guild=True, dm_channel=False, private_channel=False
-    )
-
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
-        self.ctx_ignore = app_commands.ContextMenu(
-            name="Ignore User",
-            callback=self.context_ignore_user,
-            allowed_contexts=self.ACC,
-        )
-        self.ctx_unignore = app_commands.ContextMenu(
-            name="Unignore User",
-            callback=self.context_unignore_user,
-            allowed_contexts=self.ACC,
-        )
-        self.bot.tree.add_command(self.ctx_ignore)
-        self.bot.tree.add_command(self.ctx_unignore)
-
-    async def cog_load(self) -> None:
-        self.bot.tree.remove_command(
-            self.ctx_ignore.name, type=self.ctx_unignore.type
-        )
-        self.bot.tree.remove_command(
-            self.ctx_unignore.name, type=self.ctx_unignore.type
-        )
 
     @app_commands.command(name="add")
     async def word_add(
@@ -212,37 +188,6 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
                 f"for all current word pings in this server!"
             )
 
-    async def context_ignore_user(
-        self,
-        itr: discord.Interaction["dBot"],
-        user: discord.User,
-    ) -> None:
-        """Ignore a user for all current word pings
-
-        Parameters
-        -----------
-        user: :class:`discord.User`
-            User to be ignored
-        """
-        await itr.response.defer(ephemeral=True)
-        guild_id = str(itr.guild_id)
-        user_id = str(itr.user.id)
-        for word in self.bot.pings[guild_id]:
-            if user_id not in self.bot.pings[guild_id][word]:
-                continue
-
-            if user.id in self.bot.pings[guild_id][word][user_id]["users"]:
-                continue
-
-            self.bot.pings[guild_id][word][user_id]["users"].append(user.id)
-
-        with open(PING_DATA, "w") as f:
-            json.dump(self.bot.pings, f, indent=4)
-        return await itr.followup.send(
-            f"Added {user.mention} to the ignore list "
-            f"for all current word pings in this server!"
-        )
-
     word_unignore = app_commands.Group(
         name="unignore",
         description="Unignore an user or channel for one or all current word pings",
@@ -358,37 +303,6 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
                 f"Removed {channel.mention} from the ignore list "
                 f"for all current word pings in this server!"
             )
-
-    async def context_unignore_user(
-        self,
-        itr: discord.Interaction["dBot"],
-        user: discord.User,
-    ) -> None:
-        """Unignore a user for all current word pings
-
-        Parameters
-        -----------
-        user: :class:`discord.User`
-            User to be unignored
-        """
-        await itr.response.defer(ephemeral=True)
-        guild_id = str(itr.guild_id)
-        user_id = str(itr.user.id)
-        for word in self.bot.pings[guild_id]:
-            if user_id not in self.bot.pings[guild_id][word]:
-                continue
-
-            if user.id not in self.bot.pings[guild_id][word][user_id]["users"]:
-                continue
-
-            self.bot.pings[guild_id][word][user_id]["users"].remove(user.id)
-
-        with open(PING_DATA, "w") as f:
-            json.dump(self.bot.pings, f, indent=4)
-        return await itr.followup.send(
-            f"Removed {user.mention} from the ignore list "
-            f"for all current word pings in this server!"
-        )
 
 
 async def setup(bot: "dBot") -> None:
