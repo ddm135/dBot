@@ -5,6 +5,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+from app_commands.autocomplete.ping import word_autocomplete
 from statics.consts import PING_DATA
 
 if TYPE_CHECKING:
@@ -45,6 +46,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
         )
 
     @app_commands.command(name="remove")
+    @app_commands.autocomplete(word=word_autocomplete)
     async def word_remove(
         self,
         itr: discord.Interaction["dBot"],
@@ -81,6 +83,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
     )
 
     @word_ignore.command(name="user")
+    @app_commands.autocomplete(word=word_autocomplete)
     async def word_ignore_user(
         self,
         itr: discord.Interaction["dBot"],
@@ -135,6 +138,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
             )
 
     @word_ignore.command(name="channel")
+    @app_commands.autocomplete(word=word_autocomplete)
     async def word_ignore_channel(
         self,
         itr: discord.Interaction["dBot"],
@@ -194,6 +198,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
     )
 
     @word_unignore.command(name="user")
+    @app_commands.autocomplete(word=word_autocomplete)
     async def word_unignore_user(
         self,
         itr: discord.Interaction["dBot"],
@@ -248,6 +253,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
             )
 
     @word_unignore.command(name="channel")
+    @app_commands.autocomplete(word=word_autocomplete)
     async def word_unignore_channel(
         self,
         itr: discord.Interaction["dBot"],
