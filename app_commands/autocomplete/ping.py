@@ -15,12 +15,13 @@ async def word_autocomplete(
 ) -> list[app_commands.Choice[str]]:
     if not itr.guild:
         return []
+    guild_id = str(itr.guild_id)
 
     words = (
         app_commands.Choice(name=word, value=word)
-        for word in itr.client.pings[str(itr.guild.id)]
+        for word in itr.client.pings[guild_id]
         if current.lower() in word.lower()
-        and str(itr.user.id) in itr.client.pings[word]
+        and str(itr.user.id) in itr.client.pings[guild_id][word]
     )
 
     return list(islice(words, MAX_AUTOCOMPLETE))
