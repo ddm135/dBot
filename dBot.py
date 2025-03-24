@@ -2,6 +2,7 @@ import json
 import os
 from collections import defaultdict
 from datetime import datetime
+from functools import partial
 from typing import Any
 
 import discord
@@ -35,13 +36,9 @@ class dBot(commands.Bot):
     async def setup_hook(self) -> None:
         if PING_DATA.exists():
             with open(PING_DATA, "r") as f:
-                pings = json.load(f)
-            self.pings = defaultdict(
-                lambda: defaultdict(
-                    lambda: defaultdict(lambda: defaultdict(list[int]))
-                ),
-                pings,
-            )
+                self.pings = json.load(
+                    f, object_hook_pairs=partial(defaultdict, lambda: None)
+                )
 
         else:
             self.pings = defaultdict(
