@@ -2,7 +2,7 @@ import asyncio
 import gzip
 import json
 import logging
-from datetime import time
+from datetime import datetime, time
 from typing import TYPE_CHECKING, Any
 
 import aiohttp
@@ -38,6 +38,9 @@ class InfoSync(commands.Cog):
 
     @tasks.loop(time=time(hour=10, tzinfo=TIMEZONES["KST"]))
     async def info_sync(self) -> None:
+        if self.bot.info_data_ready and datetime.now().weekday() != 0:
+            return
+
         self.bot.info_data_ready = False
         await asyncio.sleep(5)
         self.LOGGER.info("Downloading song data...")
