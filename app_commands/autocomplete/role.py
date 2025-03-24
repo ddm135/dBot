@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 import discord
 from discord import app_commands
 
-from static.dConsts import MAX_AUTOCOMPLETE, ROLES
+from statics.consts import MAX_AUTOCOMPLETE, ROLES
 
 if TYPE_CHECKING:
     from dBot import dBot

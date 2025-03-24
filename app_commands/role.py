@@ -12,7 +12,7 @@ from app_commands.autocomplete.role import (
     role_set_autocomplete,
     update_role_data,
 )
-from static.dConsts import (
+from statics.consts import (
     ROLE_STORAGE_CHANNEL,
     ROLES,
     SSRG_ROLE_MOD,

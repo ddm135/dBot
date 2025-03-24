@@ -5,12 +5,12 @@ from discord import app_commands
 from discord.ext import commands
 
 from app_commands.autocomplete.bonus import _ping_preprocess, artist_autocomplete
-from static.dConsts import GAMES
-from static.dHelpers import update_sheet_data
+from statics.consts import GAMES
+from statics.helpers import update_sheet_data
 
 if TYPE_CHECKING:
     from dBot import dBot
-    from static.dTypes import GameDetails
+    from statics.types import GameDetails
 
 
 class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings"):

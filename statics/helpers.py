@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING
 from Cryptodome.Cipher import AES
 from Cryptodome.Util.Padding import unpad
 
-from static.dConsts import AES_IV, AES_KEY, MAX_RETRIES
-from static.dServices import sheetService, sheetServiceKR  # noqa: F401
+from statics.consts import AES_IV, AES_KEY, MAX_RETRIES
+from statics.services import sheetService, sheetServiceKR  # noqa: F401
 
 if TYPE_CHECKING:
     from googleapiclient._apis.sheets.v4 import SheetsResource

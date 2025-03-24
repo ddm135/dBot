@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 import discord
 from discord.ext import commands
 
-from static.dConsts import EXTENSIONS, STATUS_CHANNEL
+from statics.consts import EXTENSIONS, STATUS_CHANNEL
 
 if TYPE_CHECKING:
     from dBot import dBot

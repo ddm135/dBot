@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING
 import discord
 from discord.ext import commands, tasks
 
-from static.dConsts import GAMES, ONE_DAY, TIMEZONES
-from static.dHelpers import get_sheet_data
+from statics.consts import GAMES, ONE_DAY, TIMEZONES
+from statics.helpers import get_sheet_data
 
 if TYPE_CHECKING:
     from dBot import dBot

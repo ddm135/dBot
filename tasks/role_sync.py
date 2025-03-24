@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 from discord.ext import commands, tasks
 
-from static.dHelpers import clear_sheet_data, get_sheet_data, update_sheet_data
+from statics.helpers import clear_sheet_data, get_sheet_data, update_sheet_data
 
 if TYPE_CHECKING:
     from dBot import dBot

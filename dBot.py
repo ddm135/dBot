@@ -1,3 +1,4 @@
+import json
 import os
 from collections import defaultdict
 from datetime import datetime
@@ -7,7 +8,7 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 
-from static.dConsts import EXTENSIONS, STATUS_CHANNEL
+from statics.consts import EXTENSIONS, PING_DATA, STATUS_CHANNEL
 
 load_dotenv()
 
@@ -25,28 +26,20 @@ class dBot(commands.Bot):
     info_data_ready = False
     role_data_ready = False
 
-    ping = {
-        360109303199432704: {
-            "ddm": {
-                180925261531840512: {
-                    "users": [1335307588597710868],
-                    "channels": [401412343629742090],
-                }
-            }
-        },
-        540849436868214784: {
-            "ddm": {
-                180925261531840512: {
-                    "users": [],
-                    "channels": [1335315390732963952],
-                }
-            }
-        },
-    }
+    pings: dict[int, dict[str, dict[int, dict[str, list[int]]]]]
 
     async def setup_hook(self) -> None:
+        if PING_DATA.exists():
+            with open(PING_DATA, "r") as f:
+                self.pings = json.load(f)
+        else:
+            self.pings = {}
+            with open(PING_DATA, "w") as f:
+                json.dump(self.pings, f, indent=4)
+
         for ext in EXTENSIONS:
             await self.load_extension(ext)
+
         await super().setup_hook()
 
     async def on_ready(self) -> None:
@@ -56,17 +49,17 @@ class dBot(commands.Bot):
 
     async def on_message(self, message: discord.Message) -> None:
         if message.guild is not None and not message.author.bot:
-            for word in self.ping.get(message.guild.id, []):
+            for word in self.pings.get(message.guild.id, []):
                 if word not in message.content:
                     continue
 
-                for owner in self.ping[message.guild.id][word]:
+                for owner in self.pings[message.guild.id][word]:
                     if (
                         message.author.id == owner
                         or message.author.id
-                        in self.ping[message.guild.id][word][owner]["users"]
+                        in self.pings[message.guild.id][word][owner]["users"]
                         or message.channel.id
-                        in self.ping[message.guild.id][word][owner]["channels"]
+                        in self.pings[message.guild.id][word][owner]["channels"]
                     ):
                         continue
 

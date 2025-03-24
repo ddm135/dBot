@@ -1,9 +1,10 @@
 from datetime import timedelta
+from pathlib import Path
 from typing import TYPE_CHECKING
 from zoneinfo import ZoneInfo
 
 if TYPE_CHECKING:
-    from static.dTypes import GameDetails
+    from statics.types import GameDetails
 
 TEST_GUILD = 540849436868214784
 SSRG_GUILD = 360109303199432704
@@ -45,14 +46,17 @@ EXTENSIONS = (
     "commands.administrative",
     "commands.memes",
     "app_commands.bonus",
+    "app_commands.ping",
     "app_commands.role",
-    "app_commands.ssLeague",
+    "app_commands.ssleague",
     "tasks.clock",
     "tasks.info_sync",
     "tasks.role_sync",
     "tasks.notify_p8",
     "tasks.notify_p9",
 )
+
+PING_DATA = Path("data/pings.json")
 
 GAMES: dict[str, "GameDetails"] = {
     "SM": {

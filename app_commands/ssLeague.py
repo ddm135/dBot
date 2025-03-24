@@ -6,16 +6,16 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from app_commands.autocomplete.ssLeague import (
+from app_commands.autocomplete.ssleague import (
     artist_autocomplete,
     song_autocomplete,
     song_id_autocomplete,
 )
-from static.dConsts import GAMES, SSRG_ROLE_MOD, SSRG_ROLE_SS, TEST_ROLE_OWNER
+from statics.consts import GAMES, SSRG_ROLE_MOD, SSRG_ROLE_SS, TEST_ROLE_OWNER
 
 if TYPE_CHECKING:
     from dBot import dBot
-    from static.dTypes import GameDetails
+    from statics.types import GameDetails
 
 
 @app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)

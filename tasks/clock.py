@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 import discord
 from discord.ext import commands, tasks
 
-from static.dConsts import TIMEZONES
+from statics.consts import TIMEZONES
 
 if TYPE_CHECKING:
     from dBot import dBot

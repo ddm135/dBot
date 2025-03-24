@@ -8,8 +8,8 @@ from typing import TYPE_CHECKING, Any
 import aiohttp
 from discord.ext import commands, tasks
 
-from static.dConsts import A_JSON_BODY, A_JSON_HEADERS, GAMES, TIMEZONES
-from static.dHelpers import decrypt_cbc, decrypt_ecb, get_sheet_data
+from statics.consts import A_JSON_BODY, A_JSON_HEADERS, GAMES, TIMEZONES
+from statics.helpers import decrypt_cbc, decrypt_ecb, get_sheet_data
 
 if TYPE_CHECKING:
     from dBot import dBot
