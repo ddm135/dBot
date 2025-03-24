@@ -15,7 +15,9 @@ if TYPE_CHECKING:
 
 class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings"):
     GAME_CHOICES = [
-        app_commands.Choice(name=game["name"], value=key) for key, game in GAMES.items()
+        app_commands.Choice(name=game["name"], value=key)
+        for key, game in GAMES.items()
+        if game["pingId"]
     ]
 
     def __init__(self, bot: "dBot") -> None:

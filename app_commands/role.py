@@ -35,6 +35,80 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
     def in_channels(itr: discord.Interaction["dBot"]) -> bool:
         return itr.channel_id in ROLE_STORAGE_CHANNEL.values()
 
+    @app_commands.command(name="force_add")
+    @app_commands.check(in_channels)
+    @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD)
+    async def force_add(
+        self,
+        itr: discord.Interaction["dBot"],
+        member: discord.Member,
+        role: discord.Role,
+    ) -> None:
+        await itr.response.defer()
+        if not self.bot.info_data_ready:
+            return await itr.followup.send(
+                "Role data synchronization in progress, feature unavailable.",
+            )
+
+        assert itr.guild
+        user_id = member.id
+        stored_roles = get_role_data(user_id)
+        user_roles = member.roles
+
+        if role.id not in ROLES[itr.guild.id]:
+            return await itr.response.send_message("This role cannot be added.")
+        if role in user_roles:
+            return await itr.followup.send("Role is already applied.")
+        if role.id in stored_roles:
+            return await itr.followup.send("Role is already in inventory.")
+
+        await member.add_roles(role)
+        await itr.followup.send(
+            f"Added {role.mention} to {member.mention}!",
+            allowed_mentions=discord.AllowedMentions.none(),
+            silent=True,
+        )
+
+    @app_commands.command(name="force_remove")
+    @app_commands.check(in_channels)
+    @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD)
+    async def force_remove(
+        self,
+        itr: discord.Interaction["dBot"],
+        member: discord.Member,
+        role: discord.Role,
+    ) -> None:
+        await itr.response.defer()
+        if not self.bot.info_data_ready:
+            return await itr.followup.send(
+                "Role data synchronization in progress, feature unavailable.",
+            )
+
+        assert itr.guild
+        user_id = member.id
+        stored_roles = get_role_data(user_id)
+        user_roles = member.roles
+        removed = False
+
+        if role.id not in ROLES[itr.guild.id]:
+            return await itr.response.send_message("This role cannot be removed.")
+        if role in user_roles:
+            await member.remove_roles(role)
+            removed = True
+        if role.id in stored_roles:
+            stored_roles.remove(role.id)
+            update_role_data(user_id, stored_roles)
+            self.LOCKED.touch()
+            removed = True
+        if not removed:
+            return await itr.followup.send("Role is neither applied nor in inventory.")
+
+        await itr.followup.send(
+            f"Removed {role.mention} from {member.mention}!",
+            allowed_mentions=discord.AllowedMentions.none(),
+            silent=True,
+        )
+
     @app_commands.command(name="add")
     @app_commands.autocomplete(role=role_add_autocomplete)
     @app_commands.check(in_channels)
@@ -77,7 +151,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
             self.LOCKED.touch()
             await itr.user.add_roles(target_role)
             await itr.followup.send(
-                f"Added <@&{target_role.id}>!",
+                f"Added {target_role.mention}!",
                 allowed_mentions=discord.AllowedMentions.none(),
                 silent=True,
             )
@@ -127,7 +201,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
             self.LOCKED.touch()
             await itr.user.remove_roles(target_role)
             await itr.followup.send(
-                f"Removed <@&{target_role.id}>!",
+                f"Removed {target_role.mention}!",
                 allowed_mentions=discord.AllowedMentions.none(),
                 silent=True,
             )
@@ -195,7 +269,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
             if add_roles:
                 embed_description += "**Applied**\n"
                 embed_description += "\n".join(
-                    f"<@&{r.id}>" for r in reversed(add_roles)
+                    f"{r.mention}" for r in reversed(add_roles)
                 )
 
                 if remove_roles:
@@ -203,7 +277,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
             if remove_roles:
                 embed_description += "**Stored**\n"
                 embed_description += "\n".join(
-                    f"<@&{r.id}>" for r in reversed(remove_roles)
+                    f"{r.mention}" for r in reversed(remove_roles)
                 )
             embed = discord.Embed(
                 title="Changes",
@@ -211,7 +285,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
                 color=target_role.color,
             )
             await itr.followup.send(
-                f"Set to <@&{target_role.id}>!",
+                f"Set to {target_role.mention}!",
                 embed=embed,
                 allowed_mentions=discord.AllowedMentions.none(),
                 silent=True,
