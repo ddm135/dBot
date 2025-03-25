@@ -260,7 +260,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
 
     def update_role_data(self) -> None:
         with open(ROLE_DATA, "w") as f:
-            json.dump(self.bot.pings, f, indent=4)
+            json.dump(self.bot.roles, f, indent=4)
 
     async def cog_app_command_error(
         self,
