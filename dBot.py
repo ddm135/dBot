@@ -64,7 +64,7 @@ class dBot(commands.Bot):
             guild_id = str(message.guild.id)
             for word in self.pings[guild_id]:
                 regexp = rf"(?:\s+|^){re.escape(word)}(?:\s+|$)"
-                if re.search(regexp, message.content):
+                if not re.search(regexp, message.content):
                     continue
 
                 for owner in self.pings[guild_id][word]:
