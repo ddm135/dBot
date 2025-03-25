@@ -44,7 +44,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         member: discord.Member,
         role: discord.Role,
     ) -> None:
-        await itr.response.defer()
+        await itr.response.defer(ephemeral=True)
         if not itr.user.id == OWNER_ID or not itr.user.guild_permissions.manage_roles:
             raise app_commands.errors.MissingPermissions(
                 missing_permissions=["manage_roles"],
@@ -84,7 +84,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         member: discord.Member,
         role: discord.Role,
     ) -> None:
-        await itr.response.defer()
+        await itr.response.defer(ephemeral=True)
         if not itr.user.id == OWNER_ID or not itr.user.guild_permissions.manage_roles:
             raise app_commands.errors.MissingPermissions(
                 missing_permissions=["manage_roles"],
