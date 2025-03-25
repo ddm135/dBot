@@ -27,7 +27,6 @@ class DataSync(commands.Cog):
         self.bot = bot
 
     async def cog_load(self) -> None:
-        await self.data_sync()
         self.data_sync.start()
         await super().cog_load()
 
