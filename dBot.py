@@ -32,8 +32,6 @@ class dBot(commands.Bot):
         str, defaultdict[str, defaultdict[str, defaultdict[str, list[int]]]]
     ]
 
-    regexp = re.compile(r"(?:\s+|^)your mom(?:\s+|$)")
-
     async def setup_hook(self) -> None:
         if PING_DATA.exists():
             with open(PING_DATA, "r") as f:
