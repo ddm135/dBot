@@ -57,7 +57,7 @@ class NotifyP9(commands.Cog):
                 + ONE_DAY
             )
             initial_msg = (
-                f"# Bonus Reminder for {game_details["name"]} on "
+                f"## Bonus Reminder for {game_details["name"]} on "
                 f"<t:{int(current_date.timestamp())}:f>"
             )
 
@@ -273,7 +273,7 @@ class NotifyP9(commands.Cog):
                         if not game_ping_dict[user_id]:
                             await user.send(f"{initial_msg}")
                             game_ping_dict[user_id] = True
-                        embed = discord.Embed(title=artist, color=game_details["color"])
+                        embed = discord.Embed(color=game_details["color"])
                         if notify_start:
                             embed.add_field(
                                 name=(
@@ -293,12 +293,13 @@ class NotifyP9(commands.Cog):
                                 value="".join(notify_end),
                                 inline=False,
                             )
+                        embed.set_author(
+                            name=artist,
+                            icon_url=artist_pings[ping_columns.index("emblem")] or None,
+                        )
                         # embed.set_footer(
                         #     text="Today's bonuses are sent early as the bot "
                         #     "won't be available 20:00 4/3 - 8:00 5/3 KST/JST"
-                        # )
-                        # embed.set_thumbnail(
-                        #     url=artist_pings[ping_columns.index("emblem")]
                         # )
                         await user.send(embed=embed, silent=True)
 
