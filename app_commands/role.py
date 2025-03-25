@@ -13,6 +13,7 @@ from app_commands.autocomplete.role import (
     update_role_data,
 )
 from statics.consts import (
+    OWNER_ID,
     ROLE_STORAGE_CHANNEL,
     ROLES,
     SSRG_ROLE_MOD,
@@ -37,7 +38,6 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
 
     @app_commands.command(name="force_add")
     @app_commands.check(in_channels)
-    @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD)
     async def force_add(
         self,
         itr: discord.Interaction["dBot"],
@@ -45,6 +45,11 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         role: discord.Role,
     ) -> None:
         await itr.response.defer()
+        if not itr.user.id == OWNER_ID or itr.user.guild_permissions.manage_roles:
+            raise app_commands.errors.MissingPermissions(
+                missing_permissions=["manage_roles"],
+            )
+
         if not self.bot.info_data_ready:
             return await itr.followup.send(
                 "Role data synchronization in progress, feature unavailable.",
@@ -73,7 +78,6 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
 
     @app_commands.command(name="force_remove")
     @app_commands.check(in_channels)
-    @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD)
     async def force_remove(
         self,
         itr: discord.Interaction["dBot"],
@@ -81,6 +85,11 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         role: discord.Role,
     ) -> None:
         await itr.response.defer()
+        if not itr.user.id == OWNER_ID or itr.user.guild_permissions.manage_roles:
+            raise app_commands.errors.MissingPermissions(
+                missing_permissions=["manage_roles"],
+            )
+
         if not self.bot.info_data_ready:
             return await itr.followup.send(
                 "Role data synchronization in progress, feature unavailable.",
@@ -330,16 +339,18 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         interaction: discord.Interaction,
         error: app_commands.AppCommandError,
     ) -> None:
+        if isinstance(error, app_commands.errors.MissingAnyRole) or isinstance(
+            error, app_commands.errors.MissingPermissions
+        ):
+            return await interaction.response.send_message(
+                "You do not have permission to use this command.",
+            )
+
         if isinstance(error, app_commands.errors.CheckFailure):
             assert (guild_id := interaction.guild_id)
             return await interaction.response.send_message(
                 f"wrong channel bruv <#{ROLE_STORAGE_CHANNEL[guild_id]}>",
                 ephemeral=True,
-            )
-
-        if isinstance(error, app_commands.errors.MissingAnyRole):
-            return await interaction.response.send_message(
-                "You do not have permission to use this command.",
             )
 
         await super().cog_app_command_error(interaction, error)
