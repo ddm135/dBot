@@ -15,7 +15,9 @@ if TYPE_CHECKING:
 async def artist_autocomplete(
     itr: discord.Interaction["dBot"], current: str
 ) -> list[app_commands.Choice[str]]:
-    _, ping_data, artist_name_index, _ = _ping_preprocess(itr.namespace.game)
+    if not (game := itr.namespace.game):
+        return []
+    _, ping_data, artist_name_index, _ = _ping_preprocess(game)
 
     artists = (
         app_commands.Choice(name=artist, value=artist)
