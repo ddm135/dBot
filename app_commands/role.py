@@ -13,7 +13,6 @@ from app_commands.autocomplete.role import (
     update_role_data,
 )
 from statics.consts import (
-    OWNER_ID,
     ROLE_STORAGE_CHANNEL,
     ROLES,
     SSRG_ROLE_MOD,
@@ -35,90 +34,6 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
     @staticmethod
     def in_channels(itr: discord.Interaction["dBot"]) -> bool:
         return itr.channel_id in ROLE_STORAGE_CHANNEL.values()
-
-    @app_commands.command(name="force_add")
-    @app_commands.check(in_channels)
-    async def force_add(
-        self,
-        itr: discord.Interaction["dBot"],
-        member: discord.Member,
-        role: discord.Role,
-    ) -> None:
-        await itr.response.defer(ephemeral=True)
-        if not itr.user.id == OWNER_ID and not itr.user.guild_permissions.manage_roles:
-            raise app_commands.errors.MissingPermissions(
-                missing_permissions=["manage_roles"],
-            )
-
-        if not self.bot.info_data_ready:
-            return await itr.followup.send(
-                "Role data synchronization in progress, feature unavailable.",
-            )
-
-        assert itr.guild
-        user_id = member.id
-        stored_roles = get_role_data(user_id)
-        user_roles = member.roles
-
-        if role.id not in ROLES[itr.guild.id]:
-            return await itr.followup.send("This role cannot be added.")
-        if role in user_roles:
-            return await itr.followup.send("Role is already applied.")
-        if role.id in stored_roles:
-            return await itr.followup.send("Role is already in inventory.")
-
-        stored_roles.add(role.id)
-        update_role_data(user_id, stored_roles)
-        self.LOCKED.touch()
-        await itr.followup.send(
-            f"Added {role.mention} to {member.mention}'s inventory!",
-            allowed_mentions=discord.AllowedMentions.none(),
-            silent=True,
-        )
-
-    @app_commands.command(name="force_remove")
-    @app_commands.check(in_channels)
-    async def force_remove(
-        self,
-        itr: discord.Interaction["dBot"],
-        member: discord.Member,
-        role: discord.Role,
-    ) -> None:
-        await itr.response.defer(ephemeral=True)
-        if not itr.user.id == OWNER_ID and not itr.user.guild_permissions.manage_roles:
-            raise app_commands.errors.MissingPermissions(
-                missing_permissions=["manage_roles"],
-            )
-
-        if not self.bot.info_data_ready:
-            return await itr.followup.send(
-                "Role data synchronization in progress, feature unavailable.",
-            )
-
-        assert itr.guild
-        user_id = member.id
-        stored_roles = get_role_data(user_id)
-        user_roles = member.roles
-        removed = False
-
-        if role.id not in ROLES[itr.guild.id]:
-            return await itr.followup.send("This role cannot be removed.")
-        if role in user_roles:
-            await member.remove_roles(role)
-            removed = True
-        if role.id in stored_roles:
-            stored_roles.remove(role.id)
-            update_role_data(user_id, stored_roles)
-            self.LOCKED.touch()
-            removed = True
-        if not removed:
-            return await itr.followup.send("Role is neither applied nor in inventory.")
-
-        await itr.followup.send(
-            f"Removed {role.mention} from {member.mention}!",
-            allowed_mentions=discord.AllowedMentions.none(),
-            silent=True,
-        )
 
     @app_commands.command(name="add")
     @app_commands.autocomplete(role=role_add_autocomplete)
@@ -342,12 +257,6 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         if isinstance(error, app_commands.errors.MissingAnyRole):
             return await interaction.response.send_message(
                 "You do not have permission to use this command.",
-            )
-
-        if isinstance(error, app_commands.errors.MissingPermissions):
-            return await interaction.followup.send(
-                "You do not have permission to use this command.",
-                ephemeral=True,
             )
 
         if isinstance(error, app_commands.errors.CheckFailure):
