@@ -1,5 +1,6 @@
 # pyright: reportTypedDictNotRequiredAccess=false
 
+import logging
 from datetime import time
 from typing import TYPE_CHECKING
 
@@ -16,6 +17,7 @@ if TYPE_CHECKING:
 class DataSync(commands.Cog):
     data = [PING_DATA, ROLE_DATA]
     data_folder = "1yugfZQu3T8G9sC6WQR_YzK7bXhpdXoy4"
+    LOGGER = logging.getLogger(__name__)
 
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
@@ -33,6 +35,7 @@ class DataSync(commands.Cog):
     async def data_sync(self) -> None:
         drive_files = get_drive_data()
         for data in self.data:
+            self.LOGGER.info(f"Uploading {data.name}...")
             updated = False
             media = MediaFileUpload(data)
             for file in drive_files["files"]:
