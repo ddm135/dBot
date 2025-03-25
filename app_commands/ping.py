@@ -104,6 +104,8 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
         guild_id = str(itr.guild_id)
         user_id = str(itr.user.id)
         if word:
+            if user.id == itr.user.id:
+                return await itr.followup.send("You cannot ignore yourself.")
             if user_id not in self.bot.pings[guild_id][word]:
                 return await itr.followup.send(
                     f"You are not pinged for `{word}` in this server."
@@ -219,6 +221,8 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
         guild_id = str(itr.guild_id)
         user_id = str(itr.user.id)
         if word:
+            if user.id == itr.user.id:
+                return await itr.followup.send("You cannot unignore yourself.")
             if user_id not in self.bot.pings[guild_id][word]:
                 return await itr.followup.send(
                     f"You are not pinged for `{word}` in this server."
