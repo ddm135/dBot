@@ -1,5 +1,3 @@
-# pyright: reportMissingModuleSource = false
-
 from base64 import b64decode
 from typing import TYPE_CHECKING
 
@@ -10,7 +8,7 @@ from statics.consts import AES_IV, AES_KEY, MAX_RETRIES
 from statics.services import sheetService, sheetServiceKR  # noqa: F401
 
 if TYPE_CHECKING:
-    from googleapiclient._apis.sheets.v4 import SheetsResource
+    from googleapiclient._apis.sheets.v4 import SheetsResource  # type: ignore
 
 
 def get_sheet_data(

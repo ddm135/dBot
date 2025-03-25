@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -6,13 +7,12 @@ from discord import app_commands
 from discord.ext import commands
 
 from app_commands.autocomplete.role import (
-    get_role_data,
     role_add_autocomplete,
     role_remove_autocomplete,
     role_set_autocomplete,
-    update_role_data,
 )
 from statics.consts import (
+    ROLE_DATA,
     ROLE_STORAGE_CHANNEL,
     ROLES,
     SSRG_ROLE_MOD,
@@ -54,8 +54,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
                 "Role data synchronization in progress, feature unavailable.",
             )
 
-        user_id = itr.user.id
-        stored_roles = get_role_data(user_id)
+        user_id = str(itr.user.id)
         assert itr.guild
         assert isinstance(itr.user, discord.Member)
         role_name, _, role_id = role.rpartition(" | ")
@@ -70,10 +69,12 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
                 return await itr.followup.send("Role not found.")
             if target_role in user_roles:
                 return await itr.followup.send("Role is already applied.")
-            if target_role.id not in stored_roles:
+            if target_role.id not in self.bot.roles[user_id]:
                 return await itr.followup.send("You do not own this role.")
-            stored_roles.remove(target_role.id)
-            update_role_data(user_id, stored_roles)
+            self.bot.roles[user_id].remove(target_role.id)
+            if not self.bot.roles[user_id]:
+                self.bot.roles.pop(user_id)
+            self.update_role_data()
             self.LOCKED.touch()
             await itr.user.add_roles(target_role)
             await itr.followup.send(
@@ -103,8 +104,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
                 "Role data synchronization in progress, feature unavailable.",
             )
 
-        user_id = itr.user.id
-        stored_roles = get_role_data(user_id)
+        user_id = str(itr.user.id)
         assert itr.guild
         assert isinstance(itr.user, discord.Member)
         role_name, _, role_id = role.rpartition(" | ")
@@ -122,8 +122,8 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
                 return await itr.followup.send("This role cannot be removed.")
             if target_role not in user_roles:
                 return await itr.followup.send("You do not own this role.")
-            stored_roles.add(target_role.id)
-            update_role_data(user_id, stored_roles)
+            self.bot.roles[user_id].append(target_role.id)
+            self.update_role_data()
             self.LOCKED.touch()
             await itr.user.remove_roles(target_role)
             await itr.followup.send(
@@ -154,8 +154,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
                 "Role data synchronization in progress, feature unavailable.",
             )
 
-        user_id = itr.user.id
-        stored_roles = get_role_data(user_id)
+        user_id = str(itr.user.id)
         assert itr.guild
         assert isinstance(itr.user, discord.Member)
         role_name, _, role_id = role.rpartition(" | ")
@@ -171,7 +170,10 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
                 return await itr.followup.send("Role not found.")
             if target_role.id not in group_roles:
                 return await itr.followup.send("This role is not a Group Role.")
-            if target_role.id not in stored_roles and target_role not in user_roles:
+            if (
+                target_role.id not in self.bot.roles[user_id]
+                and target_role not in user_roles
+            ):
                 return await itr.followup.send("You do not own this role.")
             target_index = guild_roles.index(target_role)
             remove_roles = tuple(
@@ -182,11 +184,19 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
             add_roles = tuple(
                 r
                 for i, r in enumerate(guild_roles)
-                if r.id in group_roles and i <= target_index and r.id in stored_roles
+                if r.id in group_roles
+                and i <= target_index
+                and r.id in self.bot.roles[user_id]
             )
-            stored_roles.difference_update(r.id for r in add_roles)
-            stored_roles.update(r.id for r in remove_roles)
-            update_role_data(user_id, stored_roles)
+            for r in add_roles:
+                if r.id in self.bot.roles[user_id]:
+                    self.bot.roles[user_id].remove(r.id)
+            for r in remove_roles:
+                if r.id not in self.bot.roles[user_id]:
+                    self.bot.roles[user_id].append(r.id)
+            if not self.bot.roles[user_id]:
+                self.bot.roles.pop(user_id)
+            self.update_role_data()
             self.LOCKED.touch()
             await itr.user.add_roles(*add_roles)
             await itr.user.remove_roles(*remove_roles)
@@ -225,13 +235,12 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         """View your Group Role inventory"""
 
         await itr.response.defer()
-        user_id = itr.user.id
-        stored_roles = get_role_data(user_id)
+        user_id = str(itr.user.id)
         assert itr.guild
         assert isinstance(itr.user, discord.Member)
         group_roles = ROLES[itr.guild.id]
         sorted_stored_roles = sorted(
-            (role for role in stored_roles if role in group_roles),
+            (role for role in self.bot.roles[user_id] if role in group_roles),
             key=lambda x: group_roles.index(x),
         )
         embed = discord.Embed(
@@ -248,6 +257,10 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
             allowed_mentions=discord.AllowedMentions.none(),
             silent=True,
         )
+
+    def update_role_data(self) -> None:
+        with open(ROLE_DATA, "w") as f:
+            json.dump(self.bot.pings, f, indent=4)
 
     async def cog_app_command_error(
         self,

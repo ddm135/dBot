@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 import discord
@@ -16,7 +15,6 @@ async def role_add_autocomplete(
     if not itr.guild or not itr.client.role_data_ready:
         return []
     assert isinstance(itr.user, discord.Member)
-    stored_roles = get_role_data(itr.user.id)
     user_roles = itr.user.roles
     group_roles = ROLES[itr.guild.id]
     guild_roles = itr.guild.roles
@@ -27,7 +25,7 @@ async def role_add_autocomplete(
             value=f"{role.name} | {role.id}",
         )
         for role in guild_roles
-        if role.id in stored_roles
+        if role.id in itr.client.roles[str(itr.user.id)]
         and role not in user_roles
         and current.lower() in role.name.lower()
     ]
@@ -70,7 +68,6 @@ async def role_set_autocomplete(
     if not itr.guild or not itr.client.role_data_ready:
         return []
     assert isinstance(itr.user, discord.Member)
-    stored_roles = get_role_data(itr.user.id)
     user_roles = itr.user.roles
     group_roles = ROLES[itr.guild.id]
     guild_roles = itr.guild.roles
@@ -82,7 +79,7 @@ async def role_set_autocomplete(
         )
         for role in guild_roles
         if role.id in group_roles
-        and (role.id in stored_roles or role in user_roles)
+        and (role.id in itr.client.roles[str(itr.user.id)] or role in user_roles)
         and current.lower() in role.name.lower()
     ]
     roles.sort(
@@ -91,17 +88,3 @@ async def role_set_autocomplete(
         )
     )
     return roles[:MAX_AUTOCOMPLETE]
-
-
-def get_role_data(user_id: int) -> set[int]:
-    role_file = Path(f"data/role/{user_id}.txt")
-    if not role_file.exists():
-        return set()
-    role_str = role_file.read_text()
-    return {int(role) for role in role_str.split(",") if role_str}
-
-
-def update_role_data(user_id: int, roles: set[int]) -> None:
-    role_file = Path(f"data/role/{user_id}.txt")
-    role_str = ",".join(str(role) for role in roles)
-    role_file.write_text(role_str)

@@ -57,6 +57,7 @@ EXTENSIONS = (
 )
 
 PING_DATA = Path("data/pings.json")
+ROLE_DATA = Path("data/roles.json")
 
 GAMES: dict[str, "GameDetails"] = {
     "SM": {

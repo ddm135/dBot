@@ -10,7 +10,7 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 
-from statics.consts import EXTENSIONS, PING_DATA, STATUS_CHANNEL
+from statics.consts import EXTENSIONS, PING_DATA, ROLE_DATA, STATUS_CHANNEL
 
 load_dotenv()
 
@@ -31,20 +31,38 @@ class dBot(commands.Bot):
     pings: defaultdict[
         str, defaultdict[str, defaultdict[str, defaultdict[str, list[int]]]]
     ]
+    roles: defaultdict[str, list[int]]
 
     async def setup_hook(self) -> None:
         if PING_DATA.exists():
             with open(PING_DATA, "r") as f:
                 self.pings = json.load(
-                    f, object_pairs_hook=partial(defaultdict, lambda: defaultdict(dict))
+                    f,
+                    object_pairs_hook=partial(
+                        defaultdict,
+                        lambda: defaultdict(dict),
+                    ),
                 )
-
         else:
             self.pings = defaultdict(
                 lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(list[int])))
             )
             with open(PING_DATA, "w") as f:
                 json.dump(self.pings, f, indent=4)
+
+        if ROLE_DATA.exists():
+            with open(ROLE_DATA, "r") as f:
+                self.roles = json.load(
+                    f,
+                    object_pairs_hook=partial(
+                        defaultdict,
+                        lambda: defaultdict(list[int]),
+                    ),
+                )
+        else:
+            self.roles = defaultdict(list[int])
+            with open(ROLE_DATA, "w") as f:
+                json.dump(self.roles, f, indent=4)
 
         for ext in EXTENSIONS:
             await self.load_extension(ext)

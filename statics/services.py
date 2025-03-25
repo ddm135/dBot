@@ -1,18 +1,20 @@
-# pyright: reportMissingModuleSource = false
-
 from typing import TYPE_CHECKING
 
-from apiclient.discovery import build
 from google.oauth2.service_account import Credentials
+from googleapiclient.discovery import build
 
 from statics.consts import MAX_RETRIES
 
 if TYPE_CHECKING:
-    from googleapiclient._apis.sheets.v4 import SheetsResource
+    from googleapiclient._apis.drive.v3 import DriveResource  # type: ignore
+    from googleapiclient._apis.sheets.v4 import SheetsResource  # type: ignore
 
 _gCredentials = Credentials.from_service_account_file(
     filename="dBotDefault.json",
-    scopes=["https://www.googleapis.com/auth/spreadsheets"],
+    scopes=[
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive.file",
+    ],
 )
 sheetService: "SheetsResource.SpreadsheetsResource.ValuesResource" = (
     build(
@@ -25,6 +27,14 @@ sheetService: "SheetsResource.SpreadsheetsResource.ValuesResource" = (
     .spreadsheets()
     .values()
 )
+driveService: "DriveResource.FilesResource" = build(
+    serviceName="drive",
+    version="v3",
+    credentials=_gCredentials,
+    num_retries=MAX_RETRIES,
+    static_discovery=True,
+).files()
+
 _gCredentialsKR = Credentials.from_service_account_file(
     filename="dBotKR.json",
     scopes=["https://www.googleapis.com/auth/spreadsheets"],

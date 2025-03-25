@@ -39,8 +39,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
             )
         self.bot.pings[guild_id][word][user_id]["users"] = []
         self.bot.pings[guild_id][word][user_id]["channels"] = []
-        with open(PING_DATA, "w") as f:
-            json.dump(self.bot.pings, f, indent=4)
+        self.update_ping_data()
         return await itr.followup.send(
             f"Added to the ping list for `{word}` in this server!"
         )
@@ -71,8 +70,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
             self.bot.pings[guild_id].pop(word)
         if not self.bot.pings[guild_id]:
             self.bot.pings.pop(guild_id)
-        with open(PING_DATA, "w") as f:
-            json.dump(self.bot.pings, f, indent=4)
+        self.update_ping_data()
         return await itr.followup.send(
             f"Removed from the ping list for `{word}` in this server!"
         )
@@ -116,8 +114,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
                     f"for `{word}` in this server."
                 )
             self.bot.pings[guild_id][word][user_id]["users"].append(user.id)
-            with open(PING_DATA, "w") as f:
-                json.dump(self.bot.pings, f, indent=4)
+            self.update_ping_data()
             return await itr.followup.send(
                 f"Added {user.mention} to the ignore list "
                 f"for `{word}` in this server!"
@@ -132,8 +129,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
 
                 self.bot.pings[guild_id][word][user_id]["users"].append(user.id)
 
-            with open(PING_DATA, "w") as f:
-                json.dump(self.bot.pings, f, indent=4)
+            self.update_ping_data()
             return await itr.followup.send(
                 f"Added {user.mention} to the ignore list "
                 f"for all current word pings in this server!"
@@ -171,8 +167,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
                     f"for `{word}` in this server."
                 )
             self.bot.pings[guild_id][word][user_id]["channels"].append(channel.id)
-            with open(PING_DATA, "w") as f:
-                json.dump(self.bot.pings, f, indent=4)
+            self.update_ping_data()
             return await itr.followup.send(
                 f"Added {channel.mention} to the ignore list "
                 f"for `{word}` in this server!"
@@ -187,8 +182,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
 
                 self.bot.pings[guild_id][word][user_id]["channels"].append(channel.id)
 
-            with open(PING_DATA, "w") as f:
-                json.dump(self.bot.pings, f, indent=4)
+            self.update_ping_data()
             return await itr.followup.send(
                 f"Added {channel.mention} to the ignore list "
                 f"for all current word pings in this server!"
@@ -233,8 +227,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
                     f"for `{word}` in this server."
                 )
             self.bot.pings[guild_id][word][user_id]["users"].remove(user.id)
-            with open(PING_DATA, "w") as f:
-                json.dump(self.bot.pings, f, indent=4)
+            self.update_ping_data()
             return await itr.followup.send(
                 f"Removed {user.mention} from the ignore list "
                 f"for `{word}` in this server!"
@@ -249,8 +242,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
 
                 self.bot.pings[guild_id][word][user_id]["users"].remove(user.id)
 
-            with open(PING_DATA, "w") as f:
-                json.dump(self.bot.pings, f, indent=4)
+            self.update_ping_data()
             return await itr.followup.send(
                 f"Removed {user.mention} from the ignore list "
                 f"for all current word pings in this server!"
@@ -288,8 +280,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
                     f"for `{word}` in this server."
                 )
             self.bot.pings[guild_id][word][user_id]["channels"].remove(channel.id)
-            with open(PING_DATA, "w") as f:
-                json.dump(self.bot.pings, f, indent=4)
+            self.update_ping_data()
             return await itr.followup.send(
                 f"Removed {channel.mention} from the ignore list "
                 f"for `{word}` in this server!"
@@ -307,12 +298,15 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
 
                 self.bot.pings[guild_id][word][user_id]["channels"].remove(channel.id)
 
-            with open(PING_DATA, "w") as f:
-                json.dump(self.bot.pings, f, indent=4)
+            self.update_ping_data()
             return await itr.followup.send(
                 f"Removed {channel.mention} from the ignore list "
                 f"for all current word pings in this server!"
             )
+
+    def update_ping_data(self) -> None:
+        with open(PING_DATA, "w") as f:
+            json.dump(self.bot.pings, f, indent=4)
 
 
 async def setup(bot: "dBot") -> None:
