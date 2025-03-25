@@ -63,20 +63,20 @@ def clear_sheet_data(
     ).execute(num_retries=MAX_RETRIES)
 
 
-def create_drive_file(data: MediaFileUpload, metadata: File) -> None:
+def create_drive_data_file(data: MediaFileUpload, metadata: File) -> None:
     driveService.create(
         body=metadata,
         media_body=data,
     ).execute(num_retries=MAX_RETRIES)
 
 
-def get_drive_data() -> FileList:
+def get_drive_data_files() -> FileList:
     return driveService.list(
         q="'1yugfZQu3T8G9sC6WQR_YzK7bXhpdXoy4' in parents and trashed=False"
     ).execute(num_retries=MAX_RETRIES)
 
 
-def update_drive_file(file_id: str, data: MediaFileUpload) -> None:
+def update_drive_data_file(file_id: str, data: MediaFileUpload) -> None:
     driveService.update(
         fileId=file_id,
         media_body=data,

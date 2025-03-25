@@ -8,7 +8,11 @@ from discord.ext import commands, tasks
 from googleapiclient.http import MediaFileUpload
 
 from statics.consts import PING_DATA, ROLE_DATA
-from statics.helpers import create_drive_file, get_drive_data, update_drive_file
+from statics.helpers import (
+    create_drive_data_file,
+    get_drive_data_files,
+    update_drive_data_file,
+)
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -23,6 +27,7 @@ class DataSync(commands.Cog):
         self.bot = bot
 
     async def cog_load(self) -> None:
+        await self.data_sync()
         self.data_sync.start()
         await super().cog_load()
 
@@ -33,14 +38,14 @@ class DataSync(commands.Cog):
 
     @tasks.loop(time=time(hour=10))
     async def data_sync(self) -> None:
-        drive_files = get_drive_data()
+        drive_files = get_drive_data_files()
         for data in self.data:
             self.LOGGER.info(f"Uploading {data.name}...")
             updated = False
             media = MediaFileUpload(data)
             for file in drive_files["files"]:
                 if file["name"] == data.name:
-                    update_drive_file(file["id"], data=media)
+                    update_drive_data_file(file["id"], data=media)
                     updated = True
                     break
 
@@ -49,7 +54,7 @@ class DataSync(commands.Cog):
                     "name": data.name,
                     "parents": [self.data_folder],
                 }
-                create_drive_file(data=media, metadata=metadata)  # type: ignore
+                create_drive_data_file(data=media, metadata=metadata)  # type: ignore
 
     @data_sync.before_loop
     async def before_loop(self) -> None:
