@@ -45,7 +45,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         role: discord.Role,
     ) -> None:
         await itr.response.defer(ephemeral=True)
-        if not itr.user.id == OWNER_ID or not itr.user.guild_permissions.manage_roles:
+        if not itr.user.id == OWNER_ID and not itr.user.guild_permissions.manage_roles:
             raise app_commands.errors.MissingPermissions(
                 missing_permissions=["manage_roles"],
             )
@@ -61,7 +61,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         user_roles = member.roles
 
         if role.id not in ROLES[itr.guild.id]:
-            return await itr.response.send_message("This role cannot be added.")
+            return await itr.followup.send("This role cannot be added.")
         if role in user_roles:
             return await itr.followup.send("Role is already applied.")
         if role.id in stored_roles:
@@ -85,7 +85,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         role: discord.Role,
     ) -> None:
         await itr.response.defer(ephemeral=True)
-        if not itr.user.id == OWNER_ID or not itr.user.guild_permissions.manage_roles:
+        if not itr.user.id == OWNER_ID and not itr.user.guild_permissions.manage_roles:
             raise app_commands.errors.MissingPermissions(
                 missing_permissions=["manage_roles"],
             )
@@ -102,7 +102,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         removed = False
 
         if role.id not in ROLES[itr.guild.id]:
-            return await itr.response.send_message("This role cannot be removed.")
+            return await itr.followup.send("This role cannot be removed.")
         if role in user_roles:
             await member.remove_roles(role)
             removed = True
@@ -339,11 +339,15 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         interaction: discord.Interaction,
         error: app_commands.AppCommandError,
     ) -> None:
-        if isinstance(error, app_commands.errors.MissingAnyRole) or isinstance(
-            error, app_commands.errors.MissingPermissions
-        ):
+        if isinstance(error, app_commands.errors.MissingAnyRole):
             return await interaction.response.send_message(
                 "You do not have permission to use this command.",
+            )
+
+        if isinstance(error, app_commands.errors.MissingPermissions):
+            return await interaction.followup.send(
+                "You do not have permission to use this command.",
+                ephemeral=True,
             )
 
         if isinstance(error, app_commands.errors.CheckFailure):
