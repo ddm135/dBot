@@ -62,9 +62,11 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         if role.id in stored_roles:
             return await itr.followup.send("Role is already in inventory.")
 
-        await member.add_roles(role)
+        stored_roles.add(role.id)
+        update_role_data(user_id, stored_roles)
+        self.LOCKED.touch()
         await itr.followup.send(
-            f"Added {role.mention} to {member.mention}!",
+            f"Added {role.mention} to {member.mention}'s inventory!",
             allowed_mentions=discord.AllowedMentions.none(),
             silent=True,
         )
