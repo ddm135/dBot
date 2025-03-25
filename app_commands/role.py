@@ -72,8 +72,6 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
             if target_role.id not in self.bot.roles[user_id]:
                 return await itr.followup.send("You do not own this role.")
             self.bot.roles[user_id].remove(target_role.id)
-            if not self.bot.roles[user_id]:
-                self.bot.roles.pop(user_id)
             self.update_role_data()
             self.LOCKED.touch()
             await itr.user.add_roles(target_role)
@@ -194,8 +192,6 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
             for r in remove_roles:
                 if r.id not in self.bot.roles[user_id]:
                     self.bot.roles[user_id].append(r.id)
-            if not self.bot.roles[user_id]:
-                self.bot.roles.pop(user_id)
             self.update_role_data()
             self.LOCKED.touch()
             await itr.user.add_roles(*add_roles)
