@@ -5,7 +5,6 @@ from collections import defaultdict
 from datetime import datetime
 from functools import partial
 from typing import Any
-from xml.dom.minidom import Attr
 
 import discord
 from discord.ext import commands
