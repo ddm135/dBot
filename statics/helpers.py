@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING
 
 from Cryptodome.Cipher import AES
 from Cryptodome.Util.Padding import unpad
-from googleapiclient.http import MediaFileUpload
 
 from statics.consts import AES_IV, AES_KEY, MAX_RETRIES
 from statics.services import driveService, sheetService, sheetServiceKR  # noqa: F401
@@ -11,6 +10,7 @@ from statics.services import driveService, sheetService, sheetServiceKR  # noqa:
 if TYPE_CHECKING:
     from googleapiclient._apis.drive.v3 import File, FileList  # type: ignore
     from googleapiclient._apis.sheets.v4 import SheetsResource  # type: ignore
+    from googleapiclient.http import MediaFileUpload
 
 
 def get_sheet_data(
@@ -63,20 +63,20 @@ def clear_sheet_data(
     ).execute(num_retries=MAX_RETRIES)
 
 
-def create_drive_data_file(data: MediaFileUpload, metadata: File) -> None:
+def create_drive_data_file(data: "MediaFileUpload", metadata: "File") -> None:
     driveService.create(
         body=metadata,
         media_body=data,
     ).execute(num_retries=MAX_RETRIES)
 
 
-def get_drive_data_files() -> FileList:
+def get_drive_data_files() -> "FileList":
     return driveService.list(
         q="'1yugfZQu3T8G9sC6WQR_YzK7bXhpdXoy4' in parents and trashed=False"
     ).execute(num_retries=MAX_RETRIES)
 
 
-def update_drive_data_file(file_id: str, data: MediaFileUpload) -> None:
+def update_drive_data_file(file_id: str, data: "MediaFileUpload") -> None:
     driveService.update(
         fileId=file_id,
         media_body=data,
