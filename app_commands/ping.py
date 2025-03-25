@@ -68,10 +68,6 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
                 f"You are not pinged for `{word}` in this server."
             )
         self.bot.pings[guild_id][word].pop(user_id)
-        if not self.bot.pings[guild_id][word]:
-            self.bot.pings[guild_id].pop(word)
-        if not self.bot.pings[guild_id]:
-            self.bot.pings.pop(guild_id)
         self.update_ping_data()
         return await itr.followup.send(
             f"Removed from the ping list for `{word}` in this server!"
