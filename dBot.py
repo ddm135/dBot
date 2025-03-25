@@ -5,6 +5,7 @@ from collections import defaultdict
 from datetime import datetime
 from functools import partial
 from typing import Any
+from xml.dom.minidom import Attr
 
 import discord
 from discord.ext import commands
@@ -102,11 +103,14 @@ class dBot(commands.Bot):
         return await super().on_message(message)
 
     async def close(self) -> None:
-        if self is not None:
+        try:
             await self.get_channel(STATUS_CHANNEL).send(  # type: ignore[union-attr]
                 "Shutting down..."
             )
-        await super().close()
+        except AttributeError:
+            pass
+        finally:
+            await super().close()
 
 
 intents = discord.Intents.default()
