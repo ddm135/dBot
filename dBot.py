@@ -11,6 +11,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 
 from statics.consts import EXTENSIONS, PING_DATA, ROLE_DATA, STATUS_CHANNEL
+from statics.types import PingDetails
 
 load_dotenv()
 
@@ -28,24 +29,38 @@ class dBot(commands.Bot):
     info_data_ready = False
     role_data_ready = False
 
-    pings: defaultdict[
-        str, defaultdict[str, defaultdict[str, defaultdict[str, list[int]]]]
-    ]
+    pings: defaultdict[str, defaultdict[str, defaultdict[str, PingDetails]]]
+
     roles: defaultdict[str, list[int]]
 
     async def setup_hook(self) -> None:
         if PING_DATA.exists():
             with open(PING_DATA, "r") as f:
-                self.pings = json.load(
-                    f,
-                    object_pairs_hook=partial(
-                        defaultdict,
-                        lambda: defaultdict(dict),
-                    ),
+                self.pings = json.load(f)
+
+            self.pings = defaultdict(
+                lambda: defaultdict(
+                    lambda: defaultdict(dict),  # type: ignore[arg-type]
+                ),
+                self.pings,
+            )
+            for key in self.pings:
+                self.pings[key] = defaultdict(  # pyright: ignore[reportArgumentType]
+                    lambda: defaultdict(dict),  # type: ignore[arg-type]
+                    self.pings[key],
                 )
+                for subkey in self.pings[key]:
+                    self.pings[key][subkey] = (  # pyright: ignore[reportArgumentType]
+                        defaultdict(
+                            dict,  # type: ignore[arg-type]
+                            self.pings[key][subkey],
+                        )
+                    )
         else:
             self.pings = defaultdict(
-                lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(list[int])))
+                lambda: defaultdict(
+                    lambda: defaultdict(dict)  # type: ignore[arg-type]
+                ),
             )
             with open(PING_DATA, "w") as f:
                 json.dump(self.pings, f, indent=4)
@@ -96,6 +111,8 @@ class dBot(commands.Bot):
                     user = await self.fetch_user(_owner)
                     if user is None:
                         continue
+
+                    self.pings[guild_id][word][owner]["count"] += 1
 
                     embed = discord.Embed(
                         description=(

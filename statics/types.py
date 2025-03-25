@@ -23,3 +23,9 @@ class GameDetails(TypedDict):
     resetOffset: timedelta
     api: str
     legacyUrlScheme: bool
+
+
+class PingDetails(TypedDict):
+    users: list[int]
+    channels: list[int]
+    count: int

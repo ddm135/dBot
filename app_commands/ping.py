@@ -7,6 +7,7 @@ from discord.ext import commands
 
 from app_commands.autocomplete.ping import word_autocomplete
 from statics.consts import PING_DATA
+from statics.types import PingDetails
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -33,12 +34,13 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
         await itr.response.defer(ephemeral=True)
         guild_id = str(itr.guild_id)
         user_id = str(itr.user.id)
-        if user_id in self.bot.pings[guild_id][word]:
+        if self.bot.pings[guild_id][word][user_id]:
             return await itr.followup.send(
                 f"You are already pinged for `{word}` in this server."
             )
-        self.bot.pings[guild_id][word][user_id]["users"] = []
-        self.bot.pings[guild_id][word][user_id]["channels"] = []
+        self.bot.pings[guild_id][word][user_id] = PingDetails(
+            users=[], channels=[], count=0
+        )
         self.update_ping_data()
         return await itr.followup.send(
             f"Added to the ping list for `{word}` in this server!"
@@ -61,7 +63,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
         await itr.response.defer(ephemeral=True)
         guild_id = str(itr.guild_id)
         user_id = str(itr.user.id)
-        if user_id not in self.bot.pings[guild_id][word]:
+        if not self.bot.pings[guild_id][word][user_id]:
             return await itr.followup.send(
                 f"You are not pinged for `{word}` in this server."
             )
@@ -104,7 +106,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
         if word:
             if user.id == itr.user.id:
                 return await itr.followup.send("You cannot ignore yourself.")
-            if user_id not in self.bot.pings[guild_id][word]:
+            if not self.bot.pings[guild_id][word][user_id]:
                 return await itr.followup.send(
                     f"You are not pinged for `{word}` in this server."
                 )
@@ -121,7 +123,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
             )
         else:
             for word in self.bot.pings[guild_id]:
-                if user_id not in self.bot.pings[guild_id][word]:
+                if not self.bot.pings[guild_id][word][user_id]:
                     continue
 
                 if user.id in self.bot.pings[guild_id][word][user_id]["users"]:
@@ -157,7 +159,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
         guild_id = str(itr.guild_id)
         user_id = str(itr.user.id)
         if word:
-            if user_id not in self.bot.pings[guild_id][word]:
+            if not self.bot.pings[guild_id][word][user_id]:
                 return await itr.followup.send(
                     f"You are not pinged for `{word}` in this server."
                 )
@@ -174,7 +176,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
             )
         else:
             for word in self.bot.pings[guild_id]:
-                if user_id not in self.bot.pings[guild_id][word]:
+                if not self.bot.pings[guild_id][word][user_id]:
                     continue
 
                 if channel.id in self.bot.pings[guild_id][word][user_id]["channels"]:
@@ -217,7 +219,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
         if word:
             if user.id == itr.user.id:
                 return await itr.followup.send("You cannot unignore yourself.")
-            if user_id not in self.bot.pings[guild_id][word]:
+            if not self.bot.pings[guild_id][word][user_id]:
                 return await itr.followup.send(
                     f"You are not pinged for `{word}` in this server."
                 )
@@ -234,7 +236,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
             )
         else:
             for word in self.bot.pings[guild_id]:
-                if user_id not in self.bot.pings[guild_id][word]:
+                if not self.bot.pings[guild_id][word][user_id]:
                     continue
 
                 if user.id not in self.bot.pings[guild_id][word][user_id]["users"]:
@@ -270,7 +272,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
         guild_id = str(itr.guild_id)
         user_id = str(itr.user.id)
         if word:
-            if user_id not in self.bot.pings[guild_id][word]:
+            if not self.bot.pings[guild_id][word][user_id]:
                 return await itr.followup.send(
                     f"You are not pinged for `{word}` in this server."
                 )
@@ -287,7 +289,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
             )
         else:
             for word in self.bot.pings[guild_id]:
-                if user_id not in self.bot.pings[guild_id][word]:
+                if not self.bot.pings[guild_id][word][user_id]:
                     continue
 
                 if (
