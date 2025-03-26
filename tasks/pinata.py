@@ -14,12 +14,14 @@ if TYPE_CHECKING:
 class PinataView(discord.ui.View):
     def __init__(self, **kwargs) -> None:
         self.joined: list[discord.User | discord.Member] = []
+        self.message: discord.Message
         super().__init__(**kwargs)
 
     async def on_timeout(self) -> None:
         for item in self.children:
             if isinstance(item, discord.ui.Button):
                 item.disabled = True
+        await self.message.edit(view=self)
         await super().on_timeout()
 
     @discord.ui.button(label="Join", style=discord.ButtonStyle.success)
@@ -63,8 +65,8 @@ class Pinata(commands.Cog):
         ).send(  # type: ignore[union-attr]
             view=pinata_view,
         )
+        pinata_view.message = message
         await pinata_view.wait()
-        await message.edit(view=pinata_view)
         self.LOGGER.info(pinata_view.joined)
 
     @pinata.before_loop
