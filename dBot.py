@@ -97,6 +97,7 @@ class dBot(commands.Bot):
                     _owner = int(owner)
                     if (
                         message.author.id == _owner
+                        or not self.pings[guild_id][word][owner]
                         or message.author.id
                         in self.pings[guild_id][word][owner]["users"]
                         or message.channel.id

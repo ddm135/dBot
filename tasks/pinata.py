@@ -81,7 +81,7 @@ def generate_embed(
     rewards: list, attendees: list[discord.User | discord.Member]
 ) -> discord.Embed:
     description = (
-        "Inside this piñata:\n**Absolutely nothing**\n\n**Party Attendees:**\n"
+        "Inside this piñata:\n**Absolutely nothing**\n\n**Party Attendees**\n"
     )
     for index, attendee in enumerate(attendees, start=1):
         description += f"{index}. {attendee.mention}\n"

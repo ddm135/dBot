@@ -57,13 +57,14 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         user_id = str(itr.user.id)
         assert itr.guild
         assert isinstance(itr.user, discord.Member)
-        role_name, _, role_id = role.rpartition(" | ")
         user_roles = itr.user.roles
+        group_roles = ROLES[itr.guild.id]
         guild_roles = itr.guild.roles
 
         try:
-            target_role = discord.utils.get(
-                guild_roles, name=role_name, id=int(role_id)
+            target_role = discord.utils.find(
+                lambda r: role.lower() == r.name.lower() and r.id in group_roles,
+                guild_roles,
             )
             if not target_role:
                 return await itr.followup.send("Role not found.")
@@ -105,14 +106,14 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         user_id = str(itr.user.id)
         assert itr.guild
         assert isinstance(itr.user, discord.Member)
-        role_name, _, role_id = role.rpartition(" | ")
         user_roles = itr.user.roles
         group_roles = ROLES[itr.guild.id]
         guild_roles = itr.guild.roles
 
         try:
-            target_role = discord.utils.get(
-                guild_roles, name=role_name, id=int(role_id)
+            target_role = discord.utils.find(
+                lambda r: role.lower() == r.name.lower() and r.id in group_roles,
+                guild_roles,
             )
             if not target_role:
                 return await itr.followup.send("Role not found.")
@@ -155,14 +156,14 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
         user_id = str(itr.user.id)
         assert itr.guild
         assert isinstance(itr.user, discord.Member)
-        role_name, _, role_id = role.rpartition(" | ")
         user_roles = itr.user.roles
         group_roles = ROLES[itr.guild.id]
         guild_roles = itr.guild.roles
 
         try:
-            target_role = discord.utils.get(
-                guild_roles, name=role_name, id=int(role_id)
+            target_role = discord.utils.find(
+                lambda r: role.lower() == r.name.lower() and r.id in group_roles,
+                guild_roles,
             )
             if not target_role:
                 return await itr.followup.send("Role not found.")
