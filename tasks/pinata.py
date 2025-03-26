@@ -30,7 +30,6 @@ class PinataView(discord.ui.View):
         if itr.user in self.joined:
             return
         self.joined.append(itr.user)
-        await itr.followup.edit()
 
     @discord.ui.button(label="Leave", style=discord.ButtonStyle.danger)
     async def leave_pinata(
@@ -40,7 +39,6 @@ class PinataView(discord.ui.View):
         if itr.user not in self.joined:
             return
         self.joined.remove(itr.user)
-        await itr.followup.edit()
 
 
 class Pinata(commands.Cog):
@@ -60,10 +58,13 @@ class Pinata(commands.Cog):
     @tasks.loop(time=[time(hour=h, minute=m) for h in range(24) for m in range(60)])
     async def pinata(self) -> None:
         pinata_view = PinataView(timeout=30)
-        await self.bot.get_channel(PINATA_TEST_CHANNEL).send(  # type: ignore[union-attr]
+        message = await self.bot.get_channel(
+            PINATA_TEST_CHANNEL,
+        ).send(  # type: ignore[union-attr]
             view=pinata_view,
         )
         await pinata_view.wait()
+        await message.edit(view=pinata_view)
         self.LOGGER.info(pinata_view.joined)
 
     @pinata.before_loop
