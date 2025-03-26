@@ -1,3 +1,4 @@
+import logging
 from datetime import time
 from typing import TYPE_CHECKING
 
@@ -43,6 +44,8 @@ class PinataView(discord.ui.View):
 
 
 class Pinata(commands.Cog):
+    LOGGER = logging.getLogger(__name__)
+
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
 
@@ -57,11 +60,11 @@ class Pinata(commands.Cog):
     @tasks.loop(time=[time(hour=h, minute=m) for h in range(24) for m in range(60)])
     async def pinata(self) -> None:
         pinata_view = PinataView(timeout=30)
-        self.bot.get_channel(PINATA_TEST_CHANNEL).send(  # type: ignore[union-attr]
+        await self.bot.get_channel(PINATA_TEST_CHANNEL).send(  # type: ignore[union-attr]
             view=pinata_view,
         )
         await pinata_view.wait()
-        print(pinata_view.joined)
+        self.LOGGER.info(pinata_view.joined)
 
     @pinata.before_loop
     async def before_loop(self) -> None:
