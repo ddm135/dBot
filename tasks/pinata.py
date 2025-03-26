@@ -32,6 +32,7 @@ class PinataView(discord.ui.View):
         if itr.user in self.joined:
             return
         self.joined.append(itr.user)
+        await self.message.edit(embed=generate_embed([], self.joined))
 
     @discord.ui.button(label="Leave", style=discord.ButtonStyle.danger)
     async def leave_pinata(
@@ -41,6 +42,7 @@ class PinataView(discord.ui.View):
         if itr.user not in self.joined:
             return
         self.joined.remove(itr.user)
+        await self.message.edit(embed=generate_embed([], self.joined))
 
 
 class Pinata(commands.Cog):
@@ -63,6 +65,7 @@ class Pinata(commands.Cog):
         message = await self.bot.get_channel(
             PINATA_TEST_CHANNEL,
         ).send(  # type: ignore[union-attr]
+            embed=generate_embed([], []),
             view=pinata_view,
         )
         pinata_view.message = message
@@ -72,6 +75,20 @@ class Pinata(commands.Cog):
     @pinata.before_loop
     async def before_loop(self) -> None:
         await self.bot.wait_until_ready()
+
+
+def generate_embed(
+    rewards: list, attendees: list[discord.User | discord.Member]
+) -> discord.Embed:
+    description = "Inside this piñata:\n**Absolutely nothing**\n\nParty Attendees:\n"
+    for index, attendee in enumerate(attendees, start=1):
+        description += f"{index}. {attendee.mention}\n"
+
+    embed = discord.Embed(
+        title="Piñata",
+        description="Inside this piñata:\n**Absolutely nothing**\n\nParty Attendees:\n",
+    )
+    return embed
 
 
 async def setup(bot: "dBot") -> None:
