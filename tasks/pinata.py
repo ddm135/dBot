@@ -51,13 +51,13 @@ class Pinata(commands.Cog):
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
 
-    async def cog_load(self) -> None:
-        self.pinata.start()
-        await super().cog_load()
+    # async def cog_load(self) -> None:
+    #     self.pinata.start()
+    #     await super().cog_load()
 
-    async def cog_unload(self) -> None:
-        self.pinata.cancel()
-        await super().cog_unload()
+    # async def cog_unload(self) -> None:
+    #     self.pinata.cancel()
+    #     await super().cog_unload()
 
     @tasks.loop(time=[time(hour=h, minute=m) for h in range(24) for m in range(60)])
     async def pinata(self) -> None:
@@ -80,13 +80,15 @@ class Pinata(commands.Cog):
 def generate_embed(
     rewards: list, attendees: list[discord.User | discord.Member]
 ) -> discord.Embed:
-    description = "Inside this piñata:\n**Absolutely nothing**\n\nParty Attendees:\n"
+    description = (
+        "Inside this piñata:\n**Absolutely nothing**\n\n**Party Attendees:**\n"
+    )
     for index, attendee in enumerate(attendees, start=1):
         description += f"{index}. {attendee.mention}\n"
 
     embed = discord.Embed(
-        title="Piñata",
-        description="Inside this piñata:\n**Absolutely nothing**\n\nParty Attendees:\n",
+        title="Piñata Drop",
+        description=description,
     )
     return embed
 
