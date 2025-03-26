@@ -8,6 +8,7 @@ if TYPE_CHECKING:
 
 TEST_GUILD = 540849436868214784
 SSRG_GUILD = 360109303199432704
+PINATA_TEST_CHANNEL = 1354222667384885329
 STATUS_CHANNEL = 1335315390732963952
 MAX_AUTOCOMPLETE = 25
 
@@ -54,6 +55,7 @@ EXTENSIONS = (
     "tasks.info_sync",
     "tasks.notify_p8",
     "tasks.notify_p9",
+    "tasks.pinata",
 )
 
 PING_DATA = Path("data/pings.json")

@@ -67,13 +67,9 @@ class dBot(commands.Bot):
 
         if ROLE_DATA.exists():
             with open(ROLE_DATA, "r") as f:
-                self.roles = json.load(
-                    f,
-                    object_pairs_hook=partial(
-                        defaultdict,
-                        lambda: defaultdict(list[int]),
-                    ),
-                )
+                self.roles = json.load(f)
+
+            self.roles = defaultdict(list[int], self.roles)
         else:
             self.roles = defaultdict(list[int])
             with open(ROLE_DATA, "w") as f:
