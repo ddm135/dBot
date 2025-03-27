@@ -45,16 +45,18 @@ TIMEZONES = {
 
 EXTENSIONS = (
     "commands.administrative",
-    "commands.memes",
+    "events.on_message",
+    "events.on_ready",
+    "tasks.data_sync",
     "app_commands.bonus",
     "app_commands.ping",
     "app_commands.role",
     "app_commands.ssleague",
-    "tasks.clock",
-    "tasks.data_sync",
-    "tasks.info_sync",
     "tasks.notify_p8",
     "tasks.notify_p9",
+    "tasks.clock",
+    "commands.memes",
+    "tasks.info_sync",
     "tasks.pinata",
 )
 

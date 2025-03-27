@@ -1,8 +1,6 @@
 import json
 import os
-import re
 from collections import defaultdict
-from datetime import datetime
 from typing import Any
 
 import discord
@@ -26,10 +24,8 @@ class dBot(commands.Bot):
         lambda: defaultdict(list[str])
     )
     info_data_ready = False
-    role_data_ready = False
 
     pings: defaultdict[str, defaultdict[str, defaultdict[str, PingDetails]]]
-
     roles: defaultdict[str, list[int]]
 
     async def setup_hook(self) -> None:
@@ -78,66 +74,6 @@ class dBot(commands.Bot):
             await self.load_extension(ext)
 
         await super().setup_hook()
-
-    async def on_ready(self) -> None:
-        await self.get_channel(STATUS_CHANNEL).send(  # type: ignore[union-attr]
-            f"Successful start at {datetime.now()}"
-        )
-
-    async def on_message(self, message: discord.Message) -> None:
-        if message.content.startswith(("h!", "H!")) and message.channel.id in (
-            401412343629742090,
-            936397358852358164,
-            936395886186098708,
-            931718347190591498,
-            953812391089537064,
-        ):
-            await message.channel.send("bonusBot has shut down on <t:1742765700:f>.")
-
-        if message.guild is not None and not message.author.bot:
-            guild_id = str(message.guild.id)
-            for word in self.pings[guild_id]:
-                regexp = rf"(?:\s+|^){re.escape(word)}(?:\s+|$)"
-                if not re.search(regexp, message.content):
-                    continue
-
-                for owner in self.pings[guild_id][word]:
-                    _owner = int(owner)
-                    if (
-                        message.author.id == _owner
-                        or not self.pings[guild_id][word][owner]
-                        or message.author.id
-                        in self.pings[guild_id][word][owner]["users"]
-                        or message.channel.id
-                        in self.pings[guild_id][word][owner]["channels"]
-                    ):
-                        continue
-
-                    user = await self.fetch_user(_owner)
-                    if user is None:
-                        continue
-
-                    self.pings[guild_id][word][owner]["count"] += 1
-
-                    embed = discord.Embed(
-                        description=(
-                            f"`{message.author.name}` mentioned `{word}` in "
-                            f"<#{message.channel.id}> on "
-                            f"<t:{int(message.created_at.timestamp())}:f>\n\n"
-                            f"{message.content}"
-                        ),
-                        color=message.author.color,
-                    )
-                    embed.set_author(
-                        name=f"Word Ping in {message.guild.name}",
-                        url=message.jump_url,
-                        icon_url=message.guild.icon.url if message.guild.icon else None,
-                    )
-                    embed.set_thumbnail(url=message.author.display_avatar.url)
-
-                    await user.send(embed=embed)
-
-        return await super().on_message(message)
 
     async def close(self) -> None:
         try:

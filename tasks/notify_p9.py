@@ -12,6 +12,7 @@ if TYPE_CHECKING:
 
 
 class NotifyP9(commands.Cog):
+
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
 
