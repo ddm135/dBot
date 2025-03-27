@@ -3,7 +3,6 @@ import os
 import re
 from collections import defaultdict
 from datetime import datetime
-from functools import partial
 from typing import Any
 
 import discord
@@ -86,6 +85,15 @@ class dBot(commands.Bot):
         )
 
     async def on_message(self, message: discord.Message) -> None:
+        if message.content.startswith(("h!", "H!")) and message.channel.id in (
+            401412343629742090,
+            936397358852358164,
+            936395886186098708,
+            931718347190591498,
+            953812391089537064,
+        ):
+            await message.channel.send("bonusBot has shut down on <t:1742765700:f>.")
+
         if message.guild is not None and not message.author.bot:
             guild_id = str(message.guild.id)
             for word in self.pings[guild_id]:
