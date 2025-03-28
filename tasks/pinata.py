@@ -266,6 +266,9 @@ def generate_embed(
         description=description,
         color=color,
     )
+    embed.set_footer(
+        text="Please refrain from joining piñata of roles you already have."
+    )
     return embed
 
 
