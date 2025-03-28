@@ -270,7 +270,7 @@ def generate_embed(
         color=color,
     )
     embed.set_footer(
-        text="Please refrain from joining if you already have the role(s)."
+        text="Please refrain from joining if you already have the role(s)"
     )
     return embed
 
