@@ -148,6 +148,10 @@ class Pinata(commands.Cog):
                 isinstance(reward["role"], discord.Role)
                 and reward["role"].id in ROLES[channel.guild.id]
             )
+            is_member = (
+                isinstance(reward["role"], discord.Role)
+                and reward["role"].id not in ROLES[channel.guild.id]
+            )
             if is_superstar:
                 min_roll = 99.5
             else:
@@ -194,6 +198,11 @@ class Pinata(commands.Cog):
             embed = discord.Embed(
                 title="Piñata Drop",
                 description=final_desc,
+                color=(
+                    reward["role"].color
+                    if isinstance(reward["role"], discord.Role)
+                    else None
+                ),
             )
             embed.set_footer(text=f"Need to get {min_roll} or higher to win")
             await channel.send(embed=embed)
@@ -205,15 +214,21 @@ class Pinata(commands.Cog):
 
                     with open(ROLE_DATA, "w") as f:
                         json.dump(self.bot.roles, f, indent=4)
-                elif not is_superstar and isinstance(reward["role"], discord.Role):
+                elif is_member:
                     assert isinstance(winner, discord.Member)
+                    assert isinstance(reward["role"], discord.Role)
                     await winner.add_roles(reward["role"])
 
+                _message = (
+                    f":tada:Congratulations {winner.mention}, "
+                    f"you got **{reward["mention"]}**\n!"
+                )
+                if is_superstar:
+                    _message += "The role has been added to your inventory."
+                elif is_member:
+                    _message += "The role has been added to your profile."
                 await channel.send(
-                    (
-                        f":tada:Congratulations {winner.mention}, "
-                        f"you got **{reward["mention"]}**!"
-                    ),
+                    _message,
                     allowed_mentions=discord.AllowedMentions(
                         everyone=False, users=True, roles=False, replied_user=False
                     ),
@@ -228,8 +243,12 @@ def generate_embed(
     rewards: list, attendees: dict[discord.User | discord.Member, list[bool]]
 ) -> discord.Embed:
     description = "Inside this piñata:\n**"
+    color = None
     for reward in rewards:
         description += f"{reward["mention"]}\n"
+        if isinstance(reward["role"], discord.Role) and color is None:
+            color = reward["role"].color
+
     description += "**\nLining Up:\n"
     if not attendees:
         description += "None"
@@ -245,6 +264,7 @@ def generate_embed(
     embed = discord.Embed(
         title="Piñata Drop",
         description=description,
+        color=color,
     )
     return embed
 
