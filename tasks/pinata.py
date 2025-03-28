@@ -112,9 +112,13 @@ class Pinata(commands.Cog):
             for reward in rewards
         ]
         for reward in real_rewards:
-            reward["label"] = (
+            reward["mention"] = (
                 f"{f"{reward["from"]} " if reward["from"] else ""}"
                 f"{reward["role"].mention if isinstance(reward["role"], discord.Role) else reward["role"]}"
+            )
+            reward["label"] = (
+                f"{f"{reward["from"]} " if reward["from"] else ""}"
+                f"{reward["role"].name if isinstance(reward["role"], discord.Role) else reward["role"]}"
             )
         message = await channel.send(  # type: ignore[union-attr]
             embed=generate_embed(real_rewards, {})
