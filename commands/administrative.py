@@ -51,6 +51,11 @@ class Administrative(commands.Cog):
                     )
             await msg.edit(content="Reloaded!")
 
+    @commands.command()
+    @commands.is_owner()
+    async def echo(self, ctx: commands.Context, *, message: str) -> None:
+        await ctx.send(message)
+
 
 async def setup(bot: "dBot") -> None:
     await bot.add_cog(Administrative(bot))
