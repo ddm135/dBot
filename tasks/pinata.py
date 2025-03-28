@@ -1,5 +1,7 @@
 import logging
+import random
 from datetime import date, time
+from decimal import Decimal
 from typing import TYPE_CHECKING
 
 import discord
@@ -38,13 +40,12 @@ class PinataView(discord.ui.View):
         self,
         rewards: list[dict[str, discord.Role | str]],
         message: discord.Message,
-        **kwargs,
     ) -> None:
         self.rewards = rewards
         self.length = len(rewards)
         self.joined: dict[discord.User | discord.Member, list[bool]] = {}
         self.message = message
-        super().__init__(**kwargs)
+        super().__init__(timeout=30)
         for index, reward in enumerate(rewards):
             if reward["from"]:
                 label = f"{reward['from']} "
@@ -123,9 +124,19 @@ class Pinata(commands.Cog):
         message = await channel.send(  # type: ignore[union-attr]
             embed=generate_embed(real_rewards, {})
         )
-        pinata_view = PinataView(rewards=real_rewards, message=message, timeout=30)
+        pinata_view = PinataView(
+            rewards=real_rewards,  # type: ignore[arg-type]
+            message=message,
+        )
         await message.edit(view=pinata_view)
         await pinata_view.wait()
+
+        for index, reward in enumerate(real_rewards):
+            for user, joined in pinata_view.joined.items():
+                if joined[index]:
+                    roll = Decimal(random.randint(0, 10_000) / 100)
+                    print(reward, user.name, roll)
+
         self.LOGGER.info(pinata_view.joined)
 
     @pinata.before_loop
