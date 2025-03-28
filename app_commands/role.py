@@ -1,5 +1,4 @@
 import json
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 import discord
@@ -26,7 +25,6 @@ if TYPE_CHECKING:
 
 @app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)
 class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles"):
-    LOCKED = Path("data/role/locked")
 
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
@@ -74,7 +72,6 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
                 return await itr.followup.send("You do not own this role.")
             self.bot.roles[user_id].remove(target_role.id)
             self.update_role_data()
-            self.LOCKED.touch()
             await itr.user.add_roles(target_role)
             await itr.followup.send(
                 f"Added {target_role.mention}!",
@@ -123,7 +120,6 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
                 return await itr.followup.send("You do not own this role.")
             self.bot.roles[user_id].append(target_role.id)
             self.update_role_data()
-            self.LOCKED.touch()
             await itr.user.remove_roles(target_role)
             await itr.followup.send(
                 f"Removed {target_role.mention}!",
@@ -194,7 +190,6 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
                 if r.id not in self.bot.roles[user_id]:
                     self.bot.roles[user_id].append(r.id)
             self.update_role_data()
-            self.LOCKED.touch()
             await itr.user.add_roles(*add_roles)
             await itr.user.remove_roles(*remove_roles)
 

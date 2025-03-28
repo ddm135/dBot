@@ -1,15 +1,46 @@
+import json
 import logging
 import random
 from datetime import date, time
-from typing import TYPE_CHECKING, final
+from typing import TYPE_CHECKING
 
 import discord
 from discord.ext import commands, tasks
 
-from statics.consts import PINATA, PINATA_TEST_CHANNEL, ROLES
+from statics.consts import PINATA, PINATA_TEST_CHANNEL, ROLE_DATA, ROLES
 
 if TYPE_CHECKING:
     from dBot import dBot
+
+
+class JoinAll(discord.ui.Button["PinataView"]):
+
+    def __init__(self) -> None:
+        super().__init__(label="Join All", style=discord.ButtonStyle.success)
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        assert self.view is not None
+        await interaction.response.defer()
+        self.view.joined[interaction.user] = [True] * self.view.length
+        await self.view.message.edit(
+            embed=generate_embed(self.view.rewards, self.view.joined)
+        )
+
+
+class LeaveAll(discord.ui.Button["PinataView"]):
+
+    def __init__(self) -> None:
+        super().__init__(label="Leave All", style=discord.ButtonStyle.danger)
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        assert self.view is not None
+        await interaction.response.defer()
+        if interaction.user not in self.view.joined:
+            return
+        self.view.joined.pop(interaction.user)
+        await self.view.message.edit(
+            embed=generate_embed(self.view.rewards, self.view.joined)
+        )
 
 
 class ToggleSpecific(discord.ui.Button["PinataView"]):
@@ -30,7 +61,6 @@ class ToggleSpecific(discord.ui.Button["PinataView"]):
         await self.view.message.edit(
             embed=generate_embed(self.view.rewards, self.view.joined)
         )
-        await self.view.message.edit(view=self.view)
 
 
 class PinataView(discord.ui.View):
@@ -45,8 +75,10 @@ class PinataView(discord.ui.View):
         self.joined: dict[discord.User | discord.Member, list[bool]] = {}
         self.message = message
         super().__init__(timeout=30)
+        self.add_item(JoinAll())
         for index, reward in enumerate(rewards):
             self.add_item(ToggleSpecific(label=reward["label"], index=index))
+        self.add_item(LeaveAll())
 
     async def on_timeout(self) -> None:
         for item in self.children:
@@ -54,24 +86,6 @@ class PinataView(discord.ui.View):
                 item.disabled = True
         await self.message.edit(view=self)
         await super().on_timeout()
-
-    @discord.ui.button(label="Join", style=discord.ButtonStyle.success)
-    async def join_pinata(
-        self, itr: discord.Interaction["dBot"], button: discord.ui.Button
-    ) -> None:
-        await itr.response.defer()
-        self.joined[itr.user] = [True] * self.length
-        await self.message.edit(embed=generate_embed(self.rewards, self.joined))
-
-    @discord.ui.button(label="Leave", style=discord.ButtonStyle.danger)
-    async def leave_pinata(
-        self, itr: discord.Interaction["dBot"], button: discord.ui.Button
-    ) -> None:
-        await itr.response.defer()
-        if itr.user not in self.joined:
-            return
-        self.joined.pop(itr.user)
-        await self.message.edit(embed=generate_embed(self.rewards, self.joined))
 
 
 class Pinata(commands.Cog):
@@ -95,12 +109,13 @@ class Pinata(commands.Cog):
         if not rewards:
             return
         channel = self.bot.get_channel(PINATA_TEST_CHANNEL)
+        assert isinstance(channel, discord.TextChannel)
         real_rewards = [
             (
                 {
                     "role": (
                         discord.utils.get(
-                            channel.guild.roles,  # type: ignore[union-attr]
+                            channel.guild.roles,
                             id=reward["role"],
                         )
                         if isinstance(reward["role"], int)
@@ -120,9 +135,7 @@ class Pinata(commands.Cog):
                 f"{f"{reward["from"]} " if reward["from"] else ""}"
                 f"{reward["role"].name if isinstance(reward["role"], discord.Role) else reward["role"]}"
             )
-        message = await channel.send(  # type: ignore[union-attr]
-            embed=generate_embed(real_rewards, {})
-        )
+        message = await channel.send(embed=generate_embed(real_rewards, {}))
         pinata_view = PinataView(
             rewards=real_rewards,  # type: ignore[arg-type]
             message=message,
@@ -139,9 +152,11 @@ class Pinata(commands.Cog):
                 min_roll = 99.5
             else:
                 min_roll = 99.0
+
             winner: discord.User | discord.Member | None = None
             yoink_list: list[discord.User | discord.Member] = []
             attendees_str = "Attendees:\n"
+
             for user, joined in pinata_view.joined.items():
                 if joined[index]:
                     roll = random.randint(0, 10_000) / 100
@@ -154,22 +169,55 @@ class Pinata(commands.Cog):
                             attendees_str += f"**`{roll}` {user.mention}**\n"
                     else:
                         attendees_str += f"`{roll}` {user.mention}\n"
+
             if winner is not None:
                 attendees_str += "~~"
 
                 final_desc = (
-                    f"Winner: {winner.mention}\nReward: **{reward['mention']}**\n\n"
+                    f"{winner.mention} broke the piñata "
+                    f"and got **{reward["mention"]}**\n\n"
                 )
                 final_desc += attendees_str
             else:
-                final_desc = f"Winner: None\nReward: **{reward['mention']}**\n\n"
+                rolls = 1
+                while True:
+                    roll = random.randint(0, 10_000) / 100
+                    if roll > min_roll:
+                        break
+                    rolls += 1
+                final_desc = (
+                    f"**{rolls}** more rolls were needed "
+                    f"to get a winner for **{reward["mention"]}**\n\n"
+                )
                 final_desc += attendees_str
+
             embed = discord.Embed(
                 title="Piñata Drop",
                 description=final_desc,
             )
             embed.set_footer(text=f"Need to get {min_roll} or higher to win")
-            await channel.send(embed=embed)  # type: ignore[union-attr]
+            await channel.send(embed=embed)
+
+            if winner is not None:
+                if is_superstar:
+                    assert isinstance(reward["role"], discord.Role)
+                    self.bot.roles[str(winner.id)].append(reward["role"].id)
+
+                    with open(ROLE_DATA, "w") as f:
+                        json.dump(self.bot.roles, f, indent=4)
+                elif not is_superstar and isinstance(reward["role"], discord.Role):
+                    assert isinstance(winner, discord.Member)
+                    await winner.add_roles(reward["role"])
+
+                await channel.send(
+                    (
+                        f":tada:Congratulations {winner.mention}, "
+                        f"you got **{reward["mention"]}**!"
+                    ),
+                    allowed_mentions=discord.AllowedMentions(
+                        everyone=False, users=True, roles=False, replied_user=False
+                    ),
+                )
 
     @pinata.before_loop
     async def before_loop(self) -> None:
