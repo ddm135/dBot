@@ -1,13 +1,12 @@
 import logging
 import random
 from datetime import date, time
-from decimal import Decimal
 from typing import TYPE_CHECKING
 
 import discord
 from discord.ext import commands, tasks
 
-from statics.consts import PINATA, PINATA_TEST_CHANNEL
+from statics.consts import PINATA, PINATA_TEST_CHANNEL, ROLES
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -47,16 +46,7 @@ class PinataView(discord.ui.View):
         self.message = message
         super().__init__(timeout=30)
         for index, reward in enumerate(rewards):
-            if reward["from"]:
-                label = f"{reward['from']} "
-            else:
-                label = ""
-
-            if isinstance(reward["role"], discord.Role):
-                label += reward["role"].name
-            else:
-                label += reward["role"]
-            self.add_item(ToggleSpecific(label=label, index=index))
+            self.add_item(ToggleSpecific(label=reward["label"], index=index))
 
     async def on_timeout(self) -> None:
         for item in self.children:
@@ -114,13 +104,17 @@ class Pinata(commands.Cog):
                             id=reward["role"],
                         )
                         if isinstance(reward["role"], int)
-                        else reward["role"] if isinstance(reward["role"], str) else None
+                        else reward["role"]
                     ),
-                    "from": reward["from"],
                 }
             )
             for reward in rewards
         ]
+        for reward in real_rewards:
+            reward["label"] = (
+                f"{f"{reward["from"]} " if reward["from"] else ""}"
+                f"{reward["role"].name if isinstance(reward["role"], discord.Role) else reward["role"]}"
+            )
         message = await channel.send(  # type: ignore[union-attr]
             embed=generate_embed(real_rewards, {})
         )
@@ -132,12 +126,32 @@ class Pinata(commands.Cog):
         await pinata_view.wait()
 
         for index, reward in enumerate(real_rewards):
+            is_superstar = (
+                isinstance(reward["role"], discord.Role)
+                and reward["role"].id in ROLES[channel.guild.id]
+            )
+            if is_superstar:
+                min_roll = 50
+            else:
+                min_roll = 50
+            winner: discord.User | discord.Member | None = None
+            yoink_list: list[discord.User | discord.Member] = []
+            attendees_str = "Attendees:\n"
             for user, joined in pinata_view.joined.items():
                 if joined[index]:
-                    roll = Decimal(random.randint(0, 10_000) / 100)
-                    print(reward, user.name, roll)
-
-        self.LOGGER.info(pinata_view.joined)
+                    roll = random.randint(0, 10_000) / 100
+                    if roll > min_roll:
+                        if winner is None:
+                            winner = user
+                            attendees_str += f"`**{roll}` {user.name}**~~\n"
+                        else:
+                            yoink_list.append(user)
+                            attendees_str += f"`**{roll}` {user.name}**\n"
+                    else:
+                        attendees_str += f"`{roll}` {user.name}\n"
+            if winner is not None:
+                attendees_str += "~~"
+                await channel.send(attendees_str)  # type: ignore[union-attr]
 
     @pinata.before_loop
     async def before_loop(self) -> None:
@@ -149,12 +163,7 @@ def generate_embed(
 ) -> discord.Embed:
     description = "Inside this piñata:\n**"
     for reward in rewards:
-        if reward["from"]:
-            description += f"{reward["from"]} "
-        if isinstance(reward["role"], discord.Role):
-            description += f"{reward["role"].mention}\n"
-        else:
-            description += f"{reward["role"]}\n"
+        description += f"{reward["label"]}\n"
     description += "**\nLining Up:\n"
     if not attendees:
         description += "None"
