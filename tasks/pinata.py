@@ -136,7 +136,7 @@ class Pinata(commands.Cog):
 def generate_embed(
     rewards: list, attendees: dict[discord.User | discord.Member, list[bool]]
 ) -> discord.Embed:
-    description = "Inside this piñata:\n"
+    description = "Inside this piñata:\n**"
     for reward in rewards:
         if reward["from"]:
             description += f"{reward["from"]} "
@@ -144,16 +144,16 @@ def generate_embed(
             description += f"{reward["role"].mention}\n"
         else:
             description += f"{reward["role"]}\n"
-    description += "\n\n**Party Attendees**\n"
+    description += "**\nLining Up:\n"
     if not attendees:
         description += "None"
     else:
         for index, (attendee, joined) in enumerate(attendees.items(), start=1):
             for j in joined:
                 if j:
-                    description += "■"
+                    description += "◼"
                 else:
-                    description += "□"
+                    description += "◻"
             description += f" {index}. {attendee.mention}\n"
 
     embed = discord.Embed(
