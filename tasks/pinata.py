@@ -24,6 +24,8 @@ class ToggleSpecific(discord.ui.Button["PinataView"]):
             interaction.user, [False] * self.view.length
         )
         joined[self.index] = not joined[self.index]
+        if not any(joined):
+            self.view.joined.pop(interaction.user)
         await self.view.message.edit(
             embed=generate_embed(self.view.rewards, self.view.joined)
         )
@@ -122,6 +124,7 @@ class Pinata(commands.Cog):
             embed=generate_embed(real_rewards, {})
         )
         pinata_view = PinataView(rewards=real_rewards, message=message, timeout=30)
+        await message.edit(view=pinata_view)
         await pinata_view.wait()
         self.LOGGER.info(pinata_view.joined)
 
