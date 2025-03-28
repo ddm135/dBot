@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 
 
 @app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)
-class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
+class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles"):
     LOCKED = Path("data/role/locked")
 
     def __init__(self, bot: "dBot") -> None:
@@ -40,7 +40,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
     @app_commands.check(in_channels)
     @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     async def role_add(self, itr: discord.Interaction["dBot"], role: str) -> None:
-        """Apply a Group Role you own in inventory (Requires SUPERSTAR Role)
+        """Apply a SuperStar Role you own in inventory (Requires SUPERSTAR Role)
 
         Parameters
         -----------
@@ -89,7 +89,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
     @app_commands.check(in_channels)
     @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     async def role_remove(self, itr: discord.Interaction["dBot"], role: str) -> None:
-        """Store a Group Role you own in inventory (Requires SUPERSTAR Role)
+        """Store a SuperStar Role you own in inventory (Requires SUPERSTAR Role)
 
         Parameters
         -----------
@@ -138,7 +138,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
     @app_commands.check(in_channels)
     @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     async def role_set(self, itr: discord.Interaction["dBot"], role: str) -> None:
-        """Store higher Group Roles then apply chosen and lower Group Roles
+        """Store higher SuperStar Roles then apply chosen and lower SuperStar Roles
         (Requires SUPERSTAR Role)
 
         Parameters
@@ -168,7 +168,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
             if not target_role:
                 return await itr.followup.send("Role not found.")
             if target_role.id not in group_roles:
-                return await itr.followup.send("This role is not a Group Role.")
+                return await itr.followup.send("This role is not a SuperStar Role.")
             if (
                 target_role.id not in self.bot.roles[user_id]
                 and target_role not in user_roles
@@ -229,7 +229,7 @@ class Role(commands.GroupCog, name="role", description="Manage Group Roles"):
     @app_commands.command(name="inventory")
     @app_commands.check(in_channels)
     async def role_inventory(self, itr: discord.Interaction["dBot"]) -> None:
-        """View your Group Role inventory"""
+        """View your SuperStar Role inventory"""
 
         await itr.response.defer()
         user_id = str(itr.user.id)
