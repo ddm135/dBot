@@ -1,7 +1,7 @@
 import logging
 import random
 from datetime import date, time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, final
 
 import discord
 from discord.ext import commands, tasks
@@ -148,15 +148,23 @@ class Pinata(commands.Cog):
                     if roll > min_roll:
                         if winner is None:
                             winner = user
-                            attendees_str += f"**`{roll}` {user.name}**~~\n"
+                            attendees_str += f"**`{roll}` {user.mention}**~~\n"
                         else:
                             yoink_list.append(user)
-                            attendees_str += f"**`{roll}` {user.name}**\n"
+                            attendees_str += f"**`{roll}` {user.mention}**\n"
                     else:
-                        attendees_str += f"`{roll}` {user.name}\n"
+                        attendees_str += f"`{roll}` {user.mention}\n"
             if winner is not None:
                 attendees_str += "~~"
-            await channel.send(attendees_str)  # type: ignore[union-attr]
+
+                final_desc = (
+                    f"Winner: {winner.mention}\nReward: **{reward['mention']}**\n"
+                )
+                final_desc += attendees_str
+            else:
+                final_desc = f"Winner: None\nReward: **{reward['mention']}**\n"
+                final_desc += attendees_str
+            await channel.send(final_desc)  # type: ignore[union-attr]
 
     @pinata.before_loop
     async def before_loop(self) -> None:
@@ -168,7 +176,7 @@ def generate_embed(
 ) -> discord.Embed:
     description = "Inside this piñata:\n**"
     for reward in rewards:
-        description += f"{reward["label"]}\n"
+        description += f"{reward["mention"]}\n"
     description += "**\nLining Up:\n"
     if not attendees:
         description += "None"
