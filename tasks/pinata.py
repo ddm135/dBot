@@ -106,6 +106,7 @@ class Pinata(commands.Cog):
                         if isinstance(reward["role"], int)
                         else reward["role"]
                     ),
+                    "from": reward["from"],
                 }
             )
             for reward in rewards
