@@ -114,7 +114,7 @@ class Pinata(commands.Cog):
         for reward in real_rewards:
             reward["label"] = (
                 f"{f"{reward["from"]} " if reward["from"] else ""}"
-                f"{reward["role"].name if isinstance(reward["role"], discord.Role) else reward["role"]}"
+                f"{reward["role"].mention if isinstance(reward["role"], discord.Role) else reward["role"]}"
             )
         message = await channel.send(  # type: ignore[union-attr]
             embed=generate_embed(real_rewards, {})
@@ -144,15 +144,15 @@ class Pinata(commands.Cog):
                     if roll > min_roll:
                         if winner is None:
                             winner = user
-                            attendees_str += f"`**{roll}` {user.name}**~~\n"
+                            attendees_str += f"**`{roll}` {user.name}**~~\n"
                         else:
                             yoink_list.append(user)
-                            attendees_str += f"`**{roll}` {user.name}**\n"
+                            attendees_str += f"**`{roll}` {user.name}**\n"
                     else:
                         attendees_str += f"`{roll}` {user.name}\n"
             if winner is not None:
                 attendees_str += "~~"
-                await channel.send(attendees_str)  # type: ignore[union-attr]
+            await channel.send(attendees_str)  # type: ignore[union-attr]
 
     @pinata.before_loop
     async def before_loop(self) -> None:
