@@ -1,7 +1,7 @@
 import json
 import logging
 import random
-from datetime import date, time
+from datetime import date, datetime, time
 from typing import TYPE_CHECKING
 
 import discord
@@ -143,6 +143,7 @@ class Pinata(commands.Cog):
         await message.edit(view=pinata_view)
         await pinata_view.wait()
 
+        random.seed(datetime.now().timestamp())
         for index, reward in enumerate(real_rewards):
             is_superstar = (
                 isinstance(reward["role"], discord.Role)
@@ -208,25 +209,27 @@ class Pinata(commands.Cog):
             await channel.send(embed=embed)
 
             if winner is not None:
+                _message = (
+                    f":tada:Congratulations {winner.mention}, "
+                    f"you got **{reward["mention"]}**\n!"
+                )
+
                 if is_superstar:
                     assert isinstance(reward["role"], discord.Role)
-                    self.bot.roles[str(winner.id)].append(reward["role"].id)
+                    if reward["role"].id not in self.bot.roles[str(winner.id)]:
+                        self.bot.roles[str(winner.id)].append(reward["role"].id)
 
                     with open(ROLE_DATA, "w") as f:
                         json.dump(self.bot.roles, f, indent=4)
+
+                    _message += "The role has been added to your inventory."
                 elif is_member:
                     assert isinstance(winner, discord.Member)
                     assert isinstance(reward["role"], discord.Role)
                     await winner.add_roles(reward["role"])
 
-                _message = (
-                    f":tada:Congratulations {winner.mention}, "
-                    f"you got **{reward["mention"]}**\n!"
-                )
-                if is_superstar:
-                    _message += "The role has been added to your inventory."
-                elif is_member:
                     _message += "The role has been added to your profile."
+
                 await channel.send(
                     _message,
                     allowed_mentions=discord.AllowedMentions(
