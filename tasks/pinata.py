@@ -169,7 +169,7 @@ class Pinata(commands.Cog):
                 description=final_desc,
             )
             embed.set_footer(text=f"Need to get {min_roll} or higher to win")
-            await channel.send(final_desc)  # type: ignore[union-attr]
+            await channel.send(embed=embed)  # type: ignore[union-attr]
 
     @pinata.before_loop
     async def before_loop(self) -> None:
