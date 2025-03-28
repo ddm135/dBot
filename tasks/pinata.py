@@ -136,9 +136,9 @@ class Pinata(commands.Cog):
                 and reward["role"].id in ROLES[channel.guild.id]
             )
             if is_superstar:
-                min_roll = 50
+                min_roll = 99.5
             else:
-                min_roll = 50
+                min_roll = 99.0
             winner: discord.User | discord.Member | None = None
             yoink_list: list[discord.User | discord.Member] = []
             attendees_str = "Attendees:\n"
@@ -158,12 +158,17 @@ class Pinata(commands.Cog):
                 attendees_str += "~~"
 
                 final_desc = (
-                    f"Winner: {winner.mention}\nReward: **{reward['mention']}**\n"
+                    f"Winner: {winner.mention}\nReward: **{reward['mention']}**\n\n"
                 )
                 final_desc += attendees_str
             else:
-                final_desc = f"Winner: None\nReward: **{reward['mention']}**\n"
+                final_desc = f"Winner: None\nReward: **{reward['mention']}**\n\n"
                 final_desc += attendees_str
+            embed = discord.Embed(
+                title="Piñata Drop",
+                description=final_desc,
+            )
+            embed.set_footer(text=f"Need to get {min_roll} or higher to win")
             await channel.send(final_desc)  # type: ignore[union-attr]
 
     @pinata.before_loop
