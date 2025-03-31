@@ -1,8 +1,11 @@
+import json
 import re
 from typing import TYPE_CHECKING
 
 import discord
 from discord.ext import commands
+
+from statics.consts import PING_DATA
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -55,6 +58,8 @@ class OnMessage(commands.Cog):
                     continue
 
                 self.bot.pings[guild_id][word][owner]["count"] += 1
+                with open(PING_DATA, "w") as f:
+                    json.dump(self.bot.pings, f, indent=4)
 
                 embed = discord.Embed(
                     description=(
