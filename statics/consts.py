@@ -438,11 +438,15 @@ ROLES: dict[int, tuple[int, ...]] = {
 }
 
 PINATA: dict[str, list[dict[str, int | str]]] = {
-    "0328": [
-        # {"role": 427282007131947008, "from": "TWICE"},
-        # {"role": 492037142718185473, "from": None},
-        # {"role": 431680345184665600, "from": "EXO"},
-        {"role": 1341036401483055147, "from": "ym"},
-        {"role": 1341634094269988946, "from": ""},
+    # "0328": [
+    #     # {"role": 427282007131947008, "from": "TWICE"},
+    #     # {"role": 492037142718185473, "from": None},
+    #     # {"role": 431680345184665600, "from": "EXO"},
+    #     {"role": 1341036401483055147, "from": "ym"},
+    #     {"role": 1341634094269988946, "from": ""},
+    # ]
+    "0401": [
+        {"role": "End of Service", "from": ""},
+        {"role": "Notice", "from": "Refund"},
     ]
 }

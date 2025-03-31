@@ -8,6 +8,7 @@ import discord
 from discord.ext import commands, tasks
 
 from statics.consts import PINATA, PINATA_TEST_CHANNEL, ROLE_DATA, ROLES
+from statics.types import PinataDetails
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -67,7 +68,7 @@ class PinataView(discord.ui.View):
 
     def __init__(
         self,
-        rewards: list[dict[str, discord.Role | str]],
+        rewards: list[PinataDetails],
         message: discord.Message,
     ) -> None:
         self.rewards = rewards
@@ -108,8 +109,10 @@ class Pinata(commands.Cog):
         rewards = PINATA.get(current_date, [])
         if not rewards:
             return
+
         channel = self.bot.get_channel(PINATA_TEST_CHANNEL)
         assert isinstance(channel, discord.TextChannel)
+
         real_rewards = [
             (
                 {
@@ -126,15 +129,21 @@ class Pinata(commands.Cog):
             )
             for reward in rewards
         ]
+
         for reward in real_rewards:
             reward["mention"] = (
                 f"{f"{reward["from"]} " if reward["from"] else ""}"
-                f"{reward["role"].mention if isinstance(reward["role"], discord.Role) else reward["role"]}"
+                f"{(reward["role"].mention
+                    if isinstance(reward["role"], discord.Role)
+                    else reward["role"])}"
             )
             reward["label"] = (
                 f"{f"{reward["from"]} " if reward["from"] else ""}"
-                f"{reward["role"].name if isinstance(reward["role"], discord.Role) else reward["role"]}"
+                f"{(reward["role"].name
+                    if isinstance(reward["role"], discord.Role)
+                    else reward["role"])}"
             )
+
         message = await channel.send(embed=generate_embed(real_rewards, {}))
         pinata_view = PinataView(
             rewards=real_rewards,  # type: ignore[arg-type]
@@ -156,7 +165,7 @@ class Pinata(commands.Cog):
             if is_superstar:
                 min_roll = 99.5
             else:
-                min_roll = 99.0
+                min_roll = 99.99
 
             winner: discord.User | discord.Member | None = None
             yoink_list: list[discord.User | discord.Member] = []
@@ -269,9 +278,7 @@ def generate_embed(
         description=description,
         color=color,
     )
-    embed.set_footer(
-        text="Please refrain from joining if you already have the role(s)"
-    )
+    embed.set_footer(text="Please refrain from joining if you already have the role(s)")
     return embed
 
 

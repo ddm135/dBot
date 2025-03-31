@@ -2,6 +2,8 @@ from datetime import timedelta
 from typing import TypedDict
 from zoneinfo import ZoneInfo
 
+import discord
+
 
 class GameDetails(TypedDict):
     name: str
@@ -29,3 +31,9 @@ class PingDetails(TypedDict):
     users: list[int]
     channels: list[int]
     count: int
+
+
+PinataDetails = TypedDict(
+    "PinataDetails",
+    {"role": discord.Role | str, "from": str, "mention": str, "label": str},
+)
