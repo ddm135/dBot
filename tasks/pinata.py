@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 import random
@@ -81,13 +82,6 @@ class PinataView(discord.ui.View):
             self.add_item(ToggleSpecific(label=reward["label"], index=index))
         self.add_item(LeaveAll())
 
-    async def on_timeout(self) -> None:
-        for item in self.children:
-            if isinstance(item, discord.ui.Button):
-                item.disabled = True
-        await self.message.edit(view=self)
-        await super().on_timeout()
-
 
 class Pinata(commands.Cog):
     LOGGER = logging.getLogger(__name__)
@@ -150,7 +144,12 @@ class Pinata(commands.Cog):
             message=message,
         )
         await message.edit(view=pinata_view)
-        await pinata_view.wait()
+        await asyncio.sleep(30)
+        for item in pinata_view.children:
+            if isinstance(item, discord.ui.Button):
+                item.disabled = True
+        await message.edit(view=pinata_view)
+        pinata_view.stop()
 
         random.seed(datetime.now().timestamp())
         for index, reward in enumerate(real_rewards):
@@ -165,7 +164,7 @@ class Pinata(commands.Cog):
             if is_superstar:
                 min_roll = 99.5
             else:
-                min_roll = 99.99
+                min_roll = 99.0
 
             winner: discord.User | discord.Member | None = None
             yoink_list: list[discord.User | discord.Member] = []
