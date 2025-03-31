@@ -453,7 +453,7 @@ PINATA: dict[str, list[dict[str, int | str]]] = {
         {"role": "Notice", "from": "Refund"},
     ],
     "0401": [
-        {"role": "End of Service", "from": ""},
-        {"role": "notice", "from": "Refund"},
+        {"role": "End of service notice", "from": ""},
+        {"role": "Notice", "from": "Refund"},
     ],
 }
