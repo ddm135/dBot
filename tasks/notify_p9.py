@@ -302,6 +302,12 @@ class NotifyP9(commands.Cog):
                         #     text="Today's bonuses are sent early as the bot "
                         #     "won't be available 20:00 4/3 - 8:00 5/3 KST/JST"
                         # )
+                        embed.set_footer(
+                            text=(
+                                "dBot will be disabled after 24:59 April 1rd 2025 KST. "
+                                "Thank you for using dBot."
+                            )
+                        )
                         await user.send(embed=embed, silent=True)
 
     @notify_p9.before_loop

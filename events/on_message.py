@@ -25,7 +25,9 @@ class OnMessage(commands.Cog):
             931718347190591498,
             953812391089537064,
         ):
-            await message.reply("bonusBot was shut down on <t:1742765700:f>.")
+            await message.reply(
+                "bonusBot was shut down on <t:1742765700:f>.\ndBot will soon follow."
+            )
 
     @commands.Cog.listener("on_message")
     async def word_ping(self, message: discord.Message) -> None:

@@ -75,7 +75,7 @@ class PinataView(discord.ui.View):
         self.length = len(rewards)
         self.joined: dict[discord.User | discord.Member, list[bool]] = {}
         self.message = message
-        super().__init__(timeout=30)
+        super().__init__(timeout=random.randint(200, 400))
         self.add_item(JoinAll())
         for index, reward in enumerate(rewards):
             self.add_item(ToggleSpecific(label=reward["label"], index=index))
@@ -103,14 +103,44 @@ class Pinata(commands.Cog):
         self.pinata.cancel()
         await super().cog_unload()
 
-    @tasks.loop(time=[time(hour=h, minute=m) for h in range(24) for m in range(60)])
+    @tasks.loop(
+        time=[
+            time(hour=h, minute=m)
+            for (h, m) in (
+                (0, 0),
+                (1, 2),
+                (2, 14),
+                (3, 38),
+                (4, 20),
+                (5, 54),
+                (6, 23),
+                (7, 11),
+                (8, 24),
+                (9, 37),
+                (10, 46),
+                (11, 0),
+                (12, 40),
+                (13, 49),
+                (14, 16),
+                (15, 4),
+                (16, 26),
+                (17, 51),
+                (18, 0),
+                (19, 16),
+                (20, 1),
+                (21, 32),
+                (22, 30),
+                (23, 43),
+            )
+        ]
+    )
     async def pinata(self) -> None:
         current_date = date.today().strftime("%m%d")
         rewards = PINATA.get(current_date, [])
         if not rewards:
             return
 
-        channel = self.bot.get_channel(PINATA_TEST_CHANNEL)
+        channel = self.bot.get_channel(402632825834307584)
         assert isinstance(channel, discord.TextChannel)
 
         real_rewards = [
@@ -188,7 +218,7 @@ class Pinata(commands.Cog):
                 attendees_str += "~~"
 
                 final_desc = (
-                    f"{winner.mention} broke the piñata "
+                    f"{winner.mention} broke the guitar "
                     f"and got **{reward["mention"]}**\n\n"
                 )
                 final_desc += attendees_str
@@ -200,13 +230,13 @@ class Pinata(commands.Cog):
                         break
                     rolls += 1
                 final_desc = (
-                    f"**{rolls}** more rolls were needed "
+                    f"**{rolls}** more guitars were needed "
                     f"to get a winner for **{reward["mention"]}**\n\n"
                 )
                 final_desc += attendees_str
 
             embed = discord.Embed(
-                title="Piñata Drop",
+                title="Guitar Collecting",
                 description=final_desc,
                 color=(
                     reward["role"].color
@@ -254,7 +284,7 @@ class Pinata(commands.Cog):
 def generate_embed(
     rewards: list, attendees: dict[discord.User | discord.Member, list[bool]]
 ) -> discord.Embed:
-    description = "Inside this piñata:\n**"
+    description = "Inside this box:\n**"
     color = None
     for reward in rewards:
         description += f"{reward["mention"]}\n"
@@ -274,11 +304,21 @@ def generate_embed(
             description += f" {index}. {attendee.mention}\n"
 
     embed = discord.Embed(
-        title="Piñata Drop",
+        title="Guitar Collecting",
         description=description,
         color=color,
     )
-    embed.set_footer(text="Please refrain from joining if you already have the role(s)")
+    embed.set_footer(
+        text="Thank you for all the love towards dBot so far.",
+        icon_url=random.choice(
+            [
+                "https://play-lh.googleusercontent.com/rIXS52p6GQdcbGBVt-Dx9YPn1Ugw_rBKpGa_RPSdXZTlmn2RNgfaUcadCtMkk_FFXw=w240-h480-rw",
+                "https://play-lh.googleusercontent.com/4qD5l7VYcXU5qekefQWJpQvQJhP0GFTWGNseLFJLBhpcZigivkn7VtL_NTNJiKjxvQ=w240-h480-rw",
+                "https://play-lh.googleusercontent.com/yNCP_M08pT4Altfzmi6IMWnuTRtyvrmNniK-gYhLgEqRaN309ei0lfbkbNOOwWqtZw=w240-h480-rw",
+                "https://play-lh.googleusercontent.com/W4-nuXmFzL7D-tLQW3wXKvQccNoVr_Umzt-0A0eSWUVGm5Crm6TZr75-8qjfBi7wUZ8=w240-h480-rw",
+            ]
+        ),
+    )
     return embed
 
 
