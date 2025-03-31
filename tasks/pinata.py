@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 import discord
 from discord.ext import commands, tasks
 
-from statics.consts import PINATA, PINATA_TEST_CHANNEL, ROLE_DATA, ROLES
+from statics.consts import PINATA, PINATA_TEST_CHANNEL, ROLE_DATA, ROLES, TIMEZONES
 from statics.types import PinataDetails
 
 if TYPE_CHECKING:
@@ -76,18 +76,11 @@ class PinataView(discord.ui.View):
         self.length = len(rewards)
         self.joined: dict[discord.User | discord.Member, list[bool]] = {}
         self.message = message
-        super().__init__(timeout=random.randint(200, 400))
+        super().__init__(timeout=400)
         self.add_item(JoinAll())
         for index, reward in enumerate(rewards):
             self.add_item(ToggleSpecific(label=reward["label"], index=index))
         self.add_item(LeaveAll())
-
-    async def on_timeout(self) -> None:
-        for item in self.children:
-            if isinstance(item, discord.ui.Button):
-                item.disabled = True
-        await self.message.edit(view=self)
-        await super().on_timeout()
 
 
 class Pinata(commands.Cog):
@@ -106,9 +99,9 @@ class Pinata(commands.Cog):
 
     @tasks.loop(
         time=[
-            time(hour=h, minute=m)
+            time(hour=h, minute=m, tzinfo=TIMEZONES["KST"])
             for (h, m) in (
-                (0, 0),
+                (0, 42),
                 (1, 2),
                 (2, 14),
                 (3, 38),

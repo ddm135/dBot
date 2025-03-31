@@ -1,8 +1,11 @@
+import json
 import re
 from typing import TYPE_CHECKING
 
 import discord
 from discord.ext import commands
+
+from statics.consts import PING_DATA
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -36,7 +39,11 @@ class OnMessage(commands.Cog):
 
         guild_id = str(message.guild.id)
         for word in self.bot.pings[guild_id]:
-            regexp = rf"(?:\s+|^){re.escape(word)}(?:\s+|$)"
+            regexp = (
+                rf"(?:(?:\s!@#\$%\^&\*\(\)-_=\+\[{{]}}\\\\\|;:'\",<\.>\/\?)+|^)"
+                rf"{re.escape(word)}"
+                rf"(?:(?:\s!@#\$%\^&\*\(\)-_=\+\[{{]}}\\\\\|;:'\",<\.>\/\?)+|$)"
+            )
             if not re.search(regexp, message.content, flags=re.IGNORECASE):
                 continue
 
@@ -57,6 +64,8 @@ class OnMessage(commands.Cog):
                     continue
 
                 self.bot.pings[guild_id][word][owner]["count"] += 1
+                with open(PING_DATA, "w") as f:
+                    json.dump(self.bot.pings, f, indent=4)
 
                 embed = discord.Embed(
                     description=(
