@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 import random
@@ -180,7 +181,12 @@ class Pinata(commands.Cog):
             message=message,
         )
         await message.edit(view=pinata_view)
-        await pinata_view.wait()
+        await asyncio.sleep(random.randint(200, 400))
+        for item in pinata_view.children:
+            if isinstance(item, discord.ui.Button):
+                item.disabled = True
+        await message.edit(view=pinata_view)
+        pinata_view.stop()
 
         random.seed(datetime.now().timestamp())
         for index, reward in enumerate(real_rewards):
