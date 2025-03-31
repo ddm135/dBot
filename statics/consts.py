@@ -40,12 +40,9 @@ TIMEZONES = {
     "KST": ZoneInfo("Asia/Seoul"),
     "JST": ZoneInfo("Asia/Tokyo"),
     "CST": ZoneInfo("Asia/Taipei"),
-    "PHT": ZoneInfo("Asia/Manila"),
-}
-
-_TIMEZONES = {
     "EST": ZoneInfo("Etc/GMT-5"),
     "EDT": ZoneInfo("Etc/GMT-4"),
+    "PHT": ZoneInfo("Asia/Manila"),
     "ICT": ZoneInfo("Asia/Bangkok"),
 }
 
