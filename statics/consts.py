@@ -43,6 +43,12 @@ TIMEZONES = {
     "PHT": ZoneInfo("Asia/Manila"),
 }
 
+_TIMEZONES = {
+    "EST": ZoneInfo("Etc/GMT-5"),
+    "EDT": ZoneInfo("Etc/GMT-4"),
+    "ICT": ZoneInfo("Asia/Bangkok"),
+}
+
 EXTENSIONS = (
     "commands.administrative",
     "events.on_message",
@@ -445,8 +451,12 @@ PINATA: dict[str, list[dict[str, int | str]]] = {
     #     {"role": 1341036401483055147, "from": "ym"},
     #     {"role": 1341634094269988946, "from": ""},
     # ]
+    "0331": [
+        {"role": "End of Service", "from": ""},
+        {"role": "Notice", "from": "Refund"},
+    ],
     "0401": [
         {"role": "End of Service", "from": ""},
         {"role": "Notice", "from": "Refund"},
-    ]
+    ],
 }
