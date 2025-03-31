@@ -2,13 +2,13 @@ import asyncio
 import json
 import logging
 import random
-from datetime import date, datetime, time
+from datetime import datetime, time
 from typing import TYPE_CHECKING
 
 import discord
 from discord.ext import commands, tasks
 
-from statics.consts import PINATA, PINATA_TEST_CHANNEL, ROLE_DATA, ROLES
+from statics.consts import PINATA, PINATA_TEST_CHANNEL, ROLE_DATA, ROLES, TIMEZONES
 from statics.types import PinataDetails
 
 if TYPE_CHECKING:
@@ -99,7 +99,7 @@ class Pinata(commands.Cog):
 
     @tasks.loop(time=[time(hour=h, minute=m) for h in range(24) for m in range(60)])
     async def pinata(self) -> None:
-        current_date = date.today().strftime("%m%d")
+        current_date = datetime.now(tz=TIMEZONES["KST"]).strftime("%m%d")
         rewards = PINATA.get(current_date, [])
         if not rewards:
             return
