@@ -16,19 +16,19 @@ class OnMessage(commands.Cog):
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
 
-    @commands.Cog.listener("on_message")
-    async def bonusBot(self, message: discord.Message) -> None:
-        if message.author.bot:
-            return
+    # @commands.Cog.listener("on_message")
+    # async def bonusBot(self, message: discord.Message) -> None:
+    #     if message.author.bot:
+    #         return
 
-        if message.content.startswith(("h!", "H!")) and message.channel.id in (
-            401412343629742090,
-            936397358852358164,
-            936395886186098708,
-            931718347190591498,
-            953812391089537064,
-        ):
-            await message.reply("bonusBot was shut down on <t:1742765700:f>.")
+    #     if message.content.startswith(("h!", "H!")) and message.channel.id in (
+    #         401412343629742090,
+    #         936397358852358164,
+    #         936395886186098708,
+    #         931718347190591498,
+    #         953812391089537064,
+    #     ):
+    #         await message.reply("bonusBot was shut down on <t:1742765700:f>.")
 
     @commands.Cog.listener("on_message")
     async def word_ping(self, message: discord.Message) -> None:
