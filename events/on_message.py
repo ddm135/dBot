@@ -38,9 +38,9 @@ class OnMessage(commands.Cog):
         guild_id = str(message.guild.id)
         for word in self.bot.pings[guild_id]:
             regexp = (
-                rf"(?:(?:[\s!@#\$%\^&\*\(\)-_=\+\[{{\]}}\\\\\|;:'\",<\.>\/\?])+|^)"
+                rf"(?:(?:[\s!@#\$%\^&\*\(\)\-_=\+\[{{\]}}\\\\\|;:'\",<\.>\/\?])+|^)"
                 rf"{re.escape(word)}"
-                rf"(?:(?:[\s!@#\$%\^&\*\(\)-_=\+\[{{\]}}\\\\\|;:'\",<\.>\/\?])+|$)"
+                rf"(?:(?:[\s!@#\$%\^&\*\(\)\-_=\+\[{{\]}}\\\\\|;:'\",<\.>\/\?])+|$)"
             )
             if not re.search(regexp, message.content, flags=re.IGNORECASE):
                 continue
