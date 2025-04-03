@@ -222,6 +222,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         user_name: str,
     ) -> tuple[discord.Embed, str]:
         embed_title = f"SSL #{current_time.strftime("%w").replace("0", "7")}"
+        embed_title = embed_title.replace(r"*", r"\*").replace(r"_", r"\_")
 
         embed = discord.Embed(
             color=color,

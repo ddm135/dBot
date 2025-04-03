@@ -218,6 +218,7 @@ class NotifyP8(commands.Cog):
                             f" | {birthday_start.strftime("%B %d").replace(" 0", " ")} "
                             f"- {birthday_end.strftime("%B %d").replace(" 0", " ")}\n"
                         )
+                        msg = msg.replace(r"*", r"\*").replace(r"_", r"\_")
                         notify_end.append(msg)
                     elif birthday_start == current_date and start_check:
                         msg = (
@@ -225,6 +226,7 @@ class NotifyP8(commands.Cog):
                             f" | {birthday_start.strftime("%B %d").replace(" 0", " ")} "
                             f"- {birthday_end.strftime("%B %d").replace(" 0", " ")}\n"
                         )
+                        msg = msg.replace(r"*", r"\*").replace(r"_", r"\_")
                         notify_start.append(msg)
 
                 for bonus in album_bonuses:
@@ -255,6 +257,7 @@ class NotifyP8(commands.Cog):
                                 f"{song_start.strftime("%B %d").replace(" 0", " ")} "
                                 f"- {song_end.strftime("%B %d").replace(" 0", " ")}\n"
                             )
+                            msg = msg.replace(r"*", r"\*").replace(r"_", r"\_")
                             notify_end.append(msg)
                         elif song_start == current_date and start_check:
                             msg = (
@@ -263,6 +266,7 @@ class NotifyP8(commands.Cog):
                                 f"{song_start.strftime("%B %d").replace(" 0", " ")} "
                                 f"- {song_end.strftime("%B %d").replace(" 0", " ")}\n"
                             )
+                            msg = msg.replace(r"*", r"\*").replace(r"_", r"\_")
                             notify_start.append(msg)
 
                 if notify_start or notify_end:
