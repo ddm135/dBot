@@ -75,11 +75,9 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
         )
 
     @app_commands.command(name="list")
-    @app_commands.autocomplete(word=word_autocomplete)
     async def word_list(
         self,
         itr: discord.Interaction["dBot"],
-        word: str,
     ) -> None:
         """List all ping words and their ping count"""
         await itr.response.defer(ephemeral=True)
