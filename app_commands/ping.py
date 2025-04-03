@@ -74,6 +74,49 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
             f"Removed from the ping list for `{word}` in this server!"
         )
 
+    @app_commands.command(name="list")
+    @app_commands.autocomplete(word=word_autocomplete)
+    async def word_list(
+        self,
+        itr: discord.Interaction["dBot"],
+        word: str,
+    ) -> None:
+        """List all ping words and their ping count"""
+        await itr.response.defer(ephemeral=True)
+        guild_id = str(itr.guild_id)
+        user_id = str(itr.user.id)
+        description = ""
+        for word in self.bot.pings[guild_id]:
+            if not self.bot.pings[guild_id][word][user_id]:
+                continue
+
+            description += (
+                f"`{word}` - {self.bot.pings[guild_id][word][user_id]["count"]}"
+                f"{("times"
+                    if self.bot.pings[guild_id][word][user_id]["count"] > 1
+                    else "time")}\n"
+            )
+
+        if not description:
+            return await itr.followup.send(
+                "You are not pinged for any word in this server."
+            )
+
+        assert itr.guild
+        embed = discord.Embed(
+            description=description[:-1],
+            color=itr.user.color,
+        )
+        embed.set_author(
+            name=f"Word Pings in {itr.guild.name}",
+            icon_url=itr.guild.icon.url if itr.guild.icon else None,
+        )
+
+        await itr.user.send(embed=embed)
+        return await itr.followup.send(
+            "Check your DMs for the list of words you are pinged for!"
+        )
+
     word_ignore = app_commands.Group(
         name="ignore",
         description="Ignore an user or channel for one or all current word pings",

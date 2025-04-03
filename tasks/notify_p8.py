@@ -248,7 +248,10 @@ class NotifyP8(commands.Cog):
                         )
                         album_name = bonus[bonus_columns.index("album_name")]
                         song_name = bonus[bonus_columns.index("song_name")]
-                        song_duration = bonus[bonus_columns.index("duration")]
+                        _song_duration = int(bonus[bonus_columns.index("duration")])
+                        song_duration = (
+                            f"{_song_duration // 60}:{_song_duration % 60:02d}"
+                        )
 
                         if song_end == current_date and end_check:
                             msg = (

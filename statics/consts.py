@@ -82,8 +82,8 @@ GAMES: dict[str, "GameDetails"] = {
         "pingRange": "SM!A1:D",
         "pingWrite": "SM!C",
         "pingColumns": ("artist_name", "emblem", "users"),
-        "bonusId": "1kC38CLFd6xkDXD9qLHgnnv3s3jmM_4vf4RLsWuXs9NU",
-        "bonusRange": "Bonuses!A2:J",
+        "bonusId": "1dX_5lWxenT7CDVXpgyScTHDiwazUZIO3441RaNpN55g",
+        "bonusRange": "dBonuses!A2:J",
         "bonusColumns": (
             "song_id",
             "bonus_amount",

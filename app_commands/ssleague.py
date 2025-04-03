@@ -243,7 +243,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         embed.set_thumbnail(url=image_url)
         embed.set_footer(
             text=(
-                f"{current_time.strftime('%A, %B %d, %Y').replace(' 0', ' ')}"
+                f"{current_time.strftime("%A, %B %d, %Y").replace(" 0", " ")}"
                 f" · Pinned by {user_name}"
             )
         )

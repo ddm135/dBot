@@ -23,11 +23,16 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
 
-    @app_commands.command(name="add")
+    bonus_ping = app_commands.Group(
+        name="ping",
+        description="Get notified when bonuses start or end",
+    )
+
+    @bonus_ping.command(name="add")
     @app_commands.autocomplete(artist_name=artist_autocomplete)
     @app_commands.choices(game=GAME_CHOICES)
     @app_commands.rename(artist_name="artist")
-    async def bonus_add(
+    async def bonus_ping_add(
         self,
         itr: discord.Interaction["dBot"],
         game: app_commands.Choice[str],
@@ -48,11 +53,11 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         assert itr.command
         await self._handle_bonus_command(itr, game.value, artist_name, itr.command.name)
 
-    @app_commands.command(name="remove")
+    @bonus_ping.command(name="remove")
     @app_commands.autocomplete(artist_name=artist_autocomplete)
     @app_commands.choices(game=GAME_CHOICES)
     @app_commands.rename(artist_name="artist")
-    async def bonus_remove(
+    async def bonus_ping_remove(
         self,
         itr: discord.Interaction["dBot"],
         game: app_commands.Choice[str],
