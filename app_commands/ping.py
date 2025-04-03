@@ -97,13 +97,13 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
             )
 
         if not description:
-            return await itr.followup.send(
-                "You are not pinged for any word in this server."
-            )
+            description = "None"
+        else:
+            description = description[:-1]
 
         assert itr.guild
         embed = discord.Embed(
-            description=description[:-1],
+            description=description,
             color=itr.user.color,
         )
         embed.set_author(
