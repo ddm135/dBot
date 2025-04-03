@@ -89,8 +89,8 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
                 continue
 
             description += (
-                f"`{word}` - "
-                f"{self.bot.pings[guild_id][word][user_id].setdefault("count", 0)}"
+                f"`{word}` - pinged "
+                f"`{self.bot.pings[guild_id][word][user_id].setdefault("count", 0)}`"
                 f"{(" times"
                     if self.bot.pings[guild_id][word][user_id]["count"] > 1
                     else " time")}\n"
