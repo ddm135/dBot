@@ -76,6 +76,63 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         assert itr.command
         await self._handle_bonus_command(itr, game.value, artist_name, itr.command.name)
 
+    @bonus_ping.command(name="list")
+    @app_commands.choices(game=GAME_CHOICES)
+    async def bonus_ping_list(
+        self,
+        itr: discord.Interaction["dBot"],
+        game: app_commands.Choice[str] | None = None,
+    ) -> None:
+        """List your bonus ping list
+
+        Parameters
+        -----------
+        game: Optional[Choice[:class:`str`]]
+            Game. If left empty, will list all games.
+        """
+
+        await itr.response.defer(ephemeral=True)
+        user_id = str(itr.user.id)
+
+        if game is None:
+            games = self.GAME_CHOICES
+        else:
+            games = [game]
+
+        await itr.user.send("## Bonus Ping List")
+        for game in games:
+            (
+                game_details,
+                ping_data,
+                artist_name_index,
+                users_index,
+            ) = _ping_preprocess(game.value)
+
+            description = ""
+            for row in ping_data:
+                _artist_name = row[artist_name_index]
+                users = row[users_index].split(",")
+                users.remove("") if "" in users else None
+
+                if user_id in users:
+                    description += f"- {_artist_name}\n"
+
+            if not description:
+                description = "None"
+            else:
+                description = description[:-1]
+
+            embed = discord.Embed(
+                title=f"{game_details['name']}",
+                description=description,
+                color=game_details["color"],
+            )
+            await itr.user.send(embed=embed, silent=True)
+
+        return await itr.followup.send(
+            "Check your DMs for the list of artists you are pinged for!"
+        )
+
     async def _handle_bonus_command(
         self,
         itr: discord.Interaction["dBot"],
