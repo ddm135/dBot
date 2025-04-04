@@ -172,7 +172,11 @@ class NotifyP9(commands.Cog):
                     birthday_zip: tuple[tuple[str, ...], ...] = tuple(
                         zip(*birthday_bonuses)
                     )
-                    birthday_members = " + ".join(birthday_zip[member_name_index])
+                    birthday_members = (
+                        " + ".join(birthday_zip[member_name_index])
+                        .replace(r"*", r"\*")
+                        .replace(r"_", r"\_")
+                    )
                     birthday_amounts = birthday_zip[bonus_amount_index]
                     for amt in birthday_amounts:
                         birthday_total += int(amt.replace("%", ""))
@@ -221,7 +225,6 @@ class NotifyP9(commands.Cog):
                             f" | {birthday_start.strftime("%B %d").replace(" 0", " ")} "
                             f"- {birthday_end.strftime("%B %d").replace(" 0", " ")}\n"
                         )
-                        msg = msg.replace(r"*", r"\*").replace(r"_", r"\_")
                         notify_end.append(msg)
                     elif birthday_start == current_date and start_check:
                         msg = (
@@ -229,7 +232,6 @@ class NotifyP9(commands.Cog):
                             f" | {birthday_start.strftime("%B %d").replace(" 0", " ")} "
                             f"- {birthday_end.strftime("%B %d").replace(" 0", " ")}\n"
                         )
-                        msg = msg.replace(r"*", r"\*").replace(r"_", r"\_")
                         notify_start.append(msg)
 
                 for bonus in album_bonuses:
@@ -249,8 +251,16 @@ class NotifyP9(commands.Cog):
                         song_total = birthday_total + int(
                             bonus[bonus_amount_index].replace("%", "")
                         )
-                        album_name = bonus[bonus_columns.index("album_name")]
-                        song_name = bonus[bonus_columns.index("song_name")]
+                        album_name = (
+                            bonus[bonus_columns.index("album_name")]
+                            .replace(r"*", r"\*")
+                            .replace(r"_", r"\_")
+                        )
+                        song_name = (
+                            bonus[bonus_columns.index("song_name")]
+                            .replace(r"*", r"\*")
+                            .replace(r"_", r"\_")
+                        )
                         _song_duration = int(bonus[bonus_columns.index("duration")])
                         song_duration = (
                             f"{_song_duration // 60}:{_song_duration % 60:02d}"
@@ -263,7 +273,6 @@ class NotifyP9(commands.Cog):
                                 f"{song_start.strftime("%B %d").replace(" 0", " ")} "
                                 f"- {song_end.strftime("%B %d").replace(" 0", " ")}\n"
                             )
-                            msg = msg.replace(r"*", r"\*").replace(r"_", r"\_")
                             notify_end.append(msg)
                         elif song_start == current_date and start_check:
                             msg = (
@@ -272,7 +281,6 @@ class NotifyP9(commands.Cog):
                                 f"{song_start.strftime("%B %d").replace(" 0", " ")} "
                                 f"- {song_end.strftime("%B %d").replace(" 0", " ")}\n"
                             )
-                            msg = msg.replace(r"*", r"\*").replace(r"_", r"\_")
                             notify_start.append(msg)
 
                 if notify_start or notify_end:
