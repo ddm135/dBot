@@ -29,6 +29,9 @@ class dBot(commands.Bot):
     roles: defaultdict[str, list[int]]
 
     async def setup_hook(self) -> None:
+        for ext in EXTENSIONS:
+            await self.load_extension(ext)
+
         if PING_DATA.exists():
             with open(PING_DATA, "r") as f:
                 self.pings = json.load(f)
@@ -69,9 +72,6 @@ class dBot(commands.Bot):
             self.roles = defaultdict(list[int])
             with open(ROLE_DATA, "w") as f:
                 json.dump(self.roles, f, indent=4)
-
-        for ext in EXTENSIONS:
-            await self.load_extension(ext)
 
         await super().setup_hook()
 

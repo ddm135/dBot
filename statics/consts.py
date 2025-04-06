@@ -40,10 +40,10 @@ TIMEZONES = {
     "KST": ZoneInfo("Asia/Seoul"),
     "JST": ZoneInfo("Asia/Tokyo"),
     "CST": ZoneInfo("Asia/Taipei"),
-    "EST": ZoneInfo("Etc/GMT-5"),
-    "EDT": ZoneInfo("Etc/GMT-4"),
+    # "EST": ZoneInfo("Etc/GMT-5"),
+    # "EDT": ZoneInfo("Etc/GMT-4"),
     "PHT": ZoneInfo("Asia/Manila"),
-    "ICT": ZoneInfo("Asia/Bangkok"),
+    # "ICT": ZoneInfo("Asia/Bangkok"),
 }
 
 EXTENSIONS = (
@@ -54,6 +54,7 @@ EXTENSIONS = (
     "app_commands.bonus",
     "app_commands.ping",
     "app_commands.role",
+    "app_commands.info",
     "app_commands.ssleague",
     "tasks.notify_p8",
     "tasks.notify_p9",

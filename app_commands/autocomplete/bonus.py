@@ -15,17 +15,17 @@ if TYPE_CHECKING:
 async def artist_autocomplete(
     itr: discord.Interaction["dBot"], current: str
 ) -> list[app_commands.Choice[str]]:
-    if not (game := itr.namespace.game):
+    if not (game := itr.namespace.game) or not itr.client.info_data_ready:
         return []
-    _, ping_data, artist_name_index, _ = _ping_preprocess(game)
 
-    artists = (
+    artists = itr.client.info_by_name[game].keys()
+    artist_choices = (
         app_commands.Choice(name=artist, value=artist)
-        for artist in dict.fromkeys(tuple(zip(*ping_data))[artist_name_index])
+        for artist in artists
         if current.lower() in artist.lower()
     )
 
-    return list(islice(artists, MAX_AUTOCOMPLETE))
+    return list(islice(artist_choices, MAX_AUTOCOMPLETE))
 
 
 def get_ping_data(

@@ -173,7 +173,7 @@ class Pinata(commands.Cog):
             for user, joined in pinata_view.joined.items():
                 if joined[index]:
                     roll = random.randint(0, 10_000) / 100
-                    if roll > min_roll:
+                    if roll >= min_roll:
                         if winner is None:
                             winner = user
                             attendees_str += f"**`{roll}` {user.mention}**~~\n"
@@ -192,11 +192,9 @@ class Pinata(commands.Cog):
                 )
                 final_desc += attendees_str
             else:
-                rolls = 1
-                while True:
+                roll = rolls = 0
+                while roll < min_roll:
                     roll = random.randint(0, 10_000) / 100
-                    if roll > min_roll:
-                        break
                     rolls += 1
                 final_desc = (
                     f"**{rolls}** more rolls were needed "

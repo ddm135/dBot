@@ -1,8 +1,11 @@
 from base64 import b64decode
+from io import BytesIO
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from Cryptodome.Cipher import AES
 from Cryptodome.Util.Padding import unpad
+from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 
 from statics.consts import AES_IV, AES_KEY, MAX_RETRIES
 from statics.services import driveService, sheetService, sheetServiceKR  # noqa: F401
@@ -10,7 +13,6 @@ from statics.services import driveService, sheetService, sheetServiceKR  # noqa:
 if TYPE_CHECKING:
     from googleapiclient._apis.drive.v3 import File, FileList  # type: ignore
     from googleapiclient._apis.sheets.v4 import SheetsResource  # type: ignore
-    from googleapiclient.http import MediaFileUpload
 
 
 def get_sheet_data(
@@ -74,6 +76,19 @@ def get_drive_data_files() -> "FileList":
     return driveService.list(
         q="'1yugfZQu3T8G9sC6WQR_YzK7bXhpdXoy4' in parents and trashed=False"
     ).execute(num_retries=MAX_RETRIES)
+
+
+def get_drive_data_file(file_id: str, path: Path) -> None:
+    request = driveService.get_media(fileId=file_id)
+    file = BytesIO()
+    downloader = MediaIoBaseDownload(file, request)
+    done = False
+    while done is False:
+        _, done = downloader.next_chunk(num_retries=MAX_RETRIES)
+
+    with open(path, "wb") as f:
+        f.write(file.getbuffer())
+    file.close()
 
 
 def update_drive_data_file(file_id: str, data: "MediaFileUpload") -> None:

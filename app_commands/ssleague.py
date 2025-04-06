@@ -70,10 +70,12 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
                 f"Pin channel for {game_choice.name} is not set for this server.",
             )
 
-        ssl_columns = game_details["infoColumns"]
-        song_id_index = ssl_columns.index("song_id")
-        duration_index = ssl_columns.index("duration")
-        skills_index = ssl_columns.index("skills") if "skills" in ssl_columns else None
+        info_columns = game_details["infoColumns"]
+        song_id_index = info_columns.index("song_id")
+        duration_index = info_columns.index("duration")
+        skills_index = (
+            info_columns.index("skills") if "skills" in info_columns else None
+        )
 
         ssl_song = self.bot.info_by_name[game][artist_name][song_name]
         if not ssl_song:
@@ -127,11 +129,13 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
                 f"Pin channel for {game_choice.name} is not set for this server.",
             )
 
-        ssl_columns = game_details["infoColumns"]
-        artist_name_index = ssl_columns.index("artist_name")
-        song_name_index = ssl_columns.index("song_name")
-        duration_index = ssl_columns.index("duration")
-        skills_index = ssl_columns.index("skills") if "skills" in ssl_columns else None
+        info_columns = game_details["infoColumns"]
+        artist_name_index = info_columns.index("artist_name")
+        song_name_index = info_columns.index("song_name")
+        duration_index = info_columns.index("duration")
+        skills_index = (
+            info_columns.index("skills") if "skills" in info_columns else None
+        )
 
         ssl_song = self.bot.info_by_id[game][song_id]
         if not ssl_song:

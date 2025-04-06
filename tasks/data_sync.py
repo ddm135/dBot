@@ -10,6 +10,7 @@ from googleapiclient.http import MediaFileUpload
 from statics.consts import PING_DATA, ROLE_DATA
 from statics.helpers import (
     create_drive_data_file,
+    get_drive_data_file,
     get_drive_data_files,
     update_drive_data_file,
 )
@@ -27,35 +28,45 @@ class DataSync(commands.Cog):
         self.bot = bot
 
     async def cog_load(self) -> None:
-        self.data_sync.start()
+        self.data_download()
+        self.data_upload.start()
         await super().cog_load()
 
     async def cog_unload(self) -> None:
-        self.data_sync.cancel()
-        await self.data_sync()
+        self.data_upload.cancel()
+        await self.data_upload()
         await super().cog_unload()
 
+    def data_download(self) -> None:
+        drive_files = get_drive_data_files()
+        for data in self.data:
+            if data.exists():
+                continue
+
+            self.LOGGER.info(f"Downloading {data.name}...")
+            for file in drive_files["files"]:
+                if file["name"] == data.name:
+                    get_drive_data_file(file["id"], data)
+                    break
+
     @tasks.loop(time=time(hour=10))
-    async def data_sync(self) -> None:
+    async def data_upload(self) -> None:
         drive_files = get_drive_data_files()
         for data in self.data:
             self.LOGGER.info(f"Uploading {data.name}...")
-            updated = False
             media = MediaFileUpload(data)
             for file in drive_files["files"]:
                 if file["name"] == data.name:
                     update_drive_data_file(file["id"], data=media)
-                    updated = True
                     break
-
-            if not updated:
+            else:
                 metadata = {
                     "name": data.name,
                     "parents": [self.data_folder],
                 }
                 create_drive_data_file(data=media, metadata=metadata)  # type: ignore
 
-    @data_sync.before_loop
+    @data_upload.before_loop
     async def before_loop(self) -> None:
         await self.bot.wait_until_ready()
 

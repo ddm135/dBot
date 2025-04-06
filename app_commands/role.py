@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 @app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)
 class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles"):
     NOTICE = (
-        "-# bonusBot and dBot do not share databases and as such, "
+        "bonusBot and dBot do not share databases and as such, "
         "storing roles on dBot will affect bonusBot's functionalities."
     )
 
@@ -78,7 +78,7 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
             self.update_role_data()
             await itr.user.add_roles(target_role)
             await itr.followup.send(
-                f"Added {target_role.mention}!\n{self.NOTICE}",
+                f"Added {target_role.mention}!\n-# {self.NOTICE}",
                 allowed_mentions=discord.AllowedMentions.none(),
                 silent=True,
             )
@@ -126,7 +126,7 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
             self.update_role_data()
             await itr.user.remove_roles(target_role)
             await itr.followup.send(
-                f"Removed {target_role.mention}!\n{self.NOTICE}",
+                f"Removed {target_role.mention}!\n-# {self.NOTICE}",
                 allowed_mentions=discord.AllowedMentions.none(),
                 silent=True,
             )
