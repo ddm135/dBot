@@ -106,6 +106,12 @@ class InfoView(discord.ui.View):
         self.max = math.ceil(len(songs) / STEP)
         super().__init__(timeout=60)
 
+    async def on_timeout(self) -> None:
+        for child in self.children:
+            if isinstance(child, discord.ui.Button):
+                child.disabled = True
+        await self.message.edit(view=self)
+
     async def update_message(self) -> None:
         await self.message.edit(
             embed=create_embed(
