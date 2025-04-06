@@ -106,9 +106,8 @@ class InfoView(discord.ui.View):
         self.max = math.ceil(len(songs) / STEP)
         super().__init__(timeout=60)
 
-    async def update_message(self, itr: discord.Interaction["dBot"]) -> None:
-        await itr.followup.edit_message(
-            message_id=self.message.id,
+    async def update_message(self) -> None:
+        await self.message.edit(
             embed=create_embed(
                 self.game_details, self.artist, self.songs, self.current, self.max
             ),
@@ -119,19 +118,21 @@ class InfoView(discord.ui.View):
     async def previous_page(
         self, itr: discord.Interaction["dBot"], button: discord.ui.Button
     ) -> None:
+        await itr.response.defer()
         self.current -= 1
         if self.current < 1:
             self.current = self.max
-        await self.update_message(itr)
+        await self.update_message()
 
     @discord.ui.button(label="Next Page", style=discord.ButtonStyle.primary)
     async def next_page(
         self, itr: discord.Interaction["dBot"], button: discord.ui.Button
     ) -> None:
+        await itr.response.defer()
         self.current += 1
         if self.current > self.max:
             self.current = 1
-        await self.update_message(itr)
+        await self.update_message()
 
 
 async def setup(bot: "dBot") -> None:
