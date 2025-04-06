@@ -5,6 +5,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+from app_commands.autocomplete.info import artist_autocomplete
 from statics.consts import GAMES
 
 if TYPE_CHECKING:
@@ -24,6 +25,10 @@ class Info(commands.Cog):
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
 
+    @app_commands.command()
+    @app_commands.choices(game=GAME_CHOICES)
+    @app_commands.autocomplete(artist_name=artist_autocomplete)
+    @app_commands.rename(game_choice="game", artist_name="artist")
     async def info(
         self,
         itr: discord.Interaction["dBot"],
@@ -35,8 +40,7 @@ class Info(commands.Cog):
         await itr.response.defer()
         if not self.bot.info_data_ready:
             return await itr.followup.send(
-                "Song data synchronization in progress, feature unavailable.",
-                ephemeral=True,
+                "Song data synchronization in progress, feature unavailable."
             )
 
         game_details = GAMES[game_choice.value]
@@ -45,7 +49,11 @@ class Info(commands.Cog):
         if not artist_name:
             _songs = self.bot.info_by_id[game_choice.value].values()
         else:
+            if artist_name not in self.bot.info_by_name[game_choice.value]:
+                return await itr.followup.send("Artist not found.")
+
             _songs = self.bot.info_by_name[game_choice.value][artist_name].values()
+
         songs = sorted(_songs, key=lambda x: int(x[duration_column]))
         msg = await itr.followup.send(
             embed=create_embed(game_details, artist_name, songs), wait=True
