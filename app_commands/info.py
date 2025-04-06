@@ -26,7 +26,7 @@ class Info(commands.Cog):
         self.bot = bot
 
     @app_commands.command()
-    @app_commands.choices(game=GAME_CHOICES)
+    @app_commands.choices(game_choice=GAME_CHOICES)
     @app_commands.autocomplete(artist_name=artist_autocomplete)
     @app_commands.rename(game_choice="game", artist_name="artist")
     async def info(
