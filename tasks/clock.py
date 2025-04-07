@@ -31,7 +31,7 @@ class Clock(commands.Cog):
     async def clock(self) -> None:
         short_name, timezone = self.TIMEZONE_ITEMS[self.counter]
         current_time = (
-            datetime.now(timezone)
+            datetime.now(tz=timezone)
             .strftime(f"%B %d %Y, %H:%M {short_name}")
             .replace(" 0", " ")
         )

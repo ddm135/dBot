@@ -45,12 +45,11 @@ class NotifyP8(commands.Cog):
             bonus_columns = game_details["bonusColumns"]
 
             current_date = (
-                datetime.now().replace(
+                datetime.now(tz=timezone).replace(
                     hour=0,
                     minute=0,
                     second=0,
                     microsecond=0,
-                    tzinfo=timezone,
                 )
                 + ONE_DAY
             )

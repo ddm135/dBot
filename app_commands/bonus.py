@@ -1,3 +1,5 @@
+import math
+from datetime import datetime, timedelta
 from typing import TYPE_CHECKING
 
 import discord
@@ -5,12 +7,14 @@ from discord import app_commands
 from discord.ext import commands
 
 from app_commands.autocomplete.bonus import _ping_preprocess, artist_autocomplete
-from statics.consts import GAMES
-from statics.helpers import update_sheet_data
+from statics.consts import GAMES, ONE_DAY, TIMEZONES
+from statics.helpers import get_sheet_data, update_sheet_data
 
 if TYPE_CHECKING:
     from dBot import dBot
     from statics.types import GameDetails
+
+STEP = 5
 
 
 class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings"):
@@ -22,6 +26,217 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
 
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
+
+    @app_commands.command()
+    @app_commands.choices(game=GAME_CHOICES)
+    async def week(
+        self,
+        itr: discord.Interaction["dBot"],
+        game: app_commands.Choice[str],
+    ) -> None:
+        await itr.response.defer()
+        game_details = GAMES[game.value]
+        date_format = game_details["dateFormat"]
+        timezone = game_details["timezone"]
+        bonus_columns = game_details["bonusColumns"]
+
+        current_date = datetime.now(tz=timezone).replace(
+            hour=0,
+            minute=0,
+            second=0,
+            microsecond=0,
+        )
+
+        first_date = current_date - timedelta(days=current_date.weekday())
+        tracking_date = first_date
+        last_date = tracking_date + timedelta(days=7)
+
+        artist_name_index = bonus_columns.index("artist_name")
+        member_name_index = bonus_columns.index("member_name")
+        bonus_start_index = bonus_columns.index("bonus_start")
+        bonus_end_index = bonus_columns.index("bonus_end")
+        bonus_amount_index = bonus_columns.index("bonus_amount")
+
+        bonus_data = get_sheet_data(
+            game_details["bonusId"],
+            game_details["bonusRange"],
+            "KR" if timezone == TIMEZONES["KST"] else None,
+        )
+        artists = self.bot.info_by_id[game.value].keys()
+        full_bonuses = []
+
+        while tracking_date <= last_date:
+            for artist in artists:
+                birthday_bonuses: list[list[str]] = []
+                album_bonuses: list[list[str]] = []
+                last_birthday_start = None
+                last_birthday_end = None
+                next_birthday_start = None
+                next_birthday_end = None
+                for bonus in bonus_data:
+                    start_date = datetime.strptime(
+                        bonus[bonus_start_index], date_format
+                    ).replace(tzinfo=timezone)
+                    end_date = datetime.strptime(
+                        bonus[bonus_end_index], date_format
+                    ).replace(tzinfo=timezone)
+
+                    if (
+                        start_date < tracking_date
+                        and artist == bonus[artist_name_index]
+                        and bonus[member_name_index]
+                    ):
+                        last_birthday_start = start_date
+
+                    if (
+                        end_date < tracking_date
+                        and artist == bonus[artist_name_index]
+                        and bonus[member_name_index]
+                    ):
+                        last_birthday_end = end_date + ONE_DAY
+
+                    if (
+                        not next_birthday_start
+                        and tracking_date < start_date
+                        and artist == bonus[artist_name_index]
+                        and bonus[member_name_index]
+                    ):
+                        next_birthday_start = start_date - ONE_DAY
+
+                    if (
+                        not next_birthday_end
+                        and tracking_date < end_date
+                        and artist == bonus[artist_name_index]
+                        and bonus[member_name_index]
+                    ):
+                        next_birthday_end = end_date
+
+                    if (
+                        start_date <= tracking_date <= end_date
+                        and artist == bonus[artist_name_index]
+                    ):
+                        if bonus[member_name_index]:
+                            birthday_bonuses.append(bonus)
+                        else:
+                            album_bonuses.append(bonus)
+
+                birthday_members = ""
+                birthday_total = 0
+                birthday_starts = []
+                birthday_ends = []
+                if birthday_bonuses:
+                    birthday_zip: tuple[tuple[str, ...], ...] = tuple(
+                        zip(*birthday_bonuses)
+                    )
+                    birthday_members = (
+                        " + ".join(birthday_zip[member_name_index])
+                        .replace(r"*", r"\*")
+                        .replace(r"_", r"\_")
+                    )
+                    birthday_amounts = birthday_zip[bonus_amount_index]
+                    for amt in birthday_amounts:
+                        birthday_total += int(amt.replace("%", ""))
+
+                    for dt in birthday_zip[bonus_start_index]:
+                        bs = datetime.strptime(dt, date_format).replace(tzinfo=timezone)
+                        birthday_starts.append(bs)
+
+                    for dt in birthday_zip[bonus_end_index]:
+                        be = datetime.strptime(dt, date_format).replace(tzinfo=timezone)
+                        birthday_ends.append(be)
+
+                birthday_start = max(
+                    (
+                        x
+                        for x in (
+                            *birthday_starts,
+                            last_birthday_end,
+                            last_birthday_start,
+                        )
+                        if x is not None
+                    ),
+                    default=None,
+                )
+
+                birthday_end = min(
+                    (
+                        x
+                        for x in (
+                            *birthday_ends,
+                            next_birthday_end,
+                            next_birthday_start,
+                        )
+                        if x is not None
+                    ),
+                    default=None,
+                )
+
+                start_check = last_birthday_end != tracking_date
+                end_check = next_birthday_start != tracking_date
+
+                if (
+                    birthday_bonuses
+                    and birthday_start
+                    and birthday_end
+                    and (
+                        (birthday_end == tracking_date and end_check)
+                        or (birthday_start == tracking_date and start_check)
+                    )
+                ):
+                    bonus_dict = {
+                        "artist": artist,
+                        "members": birthday_members,
+                        "song": None,
+                        "bonus_start": birthday_start,
+                        "bonus_end": birthday_end,
+                        "bonus_amount": f"{birthday_total}%",
+                    }
+                    if bonus_dict not in full_bonuses:
+                        full_bonuses.append(bonus_dict)
+
+                for bonus in album_bonuses:
+                    start_date = datetime.strptime(
+                        bonus[bonus_start_index], date_format
+                    ).replace(tzinfo=timezone)
+                    end_date = datetime.strptime(
+                        bonus[bonus_end_index], date_format
+                    ).replace(tzinfo=timezone)
+
+                    song_start = max(
+                        x for x in (start_date, birthday_start) if x is not None
+                    )
+                    song_end = min(x for x in (end_date, birthday_end) if x is not None)
+
+                    if (song_start == tracking_date and start_check) or (
+                        song_end == tracking_date and end_check
+                    ):
+                        song_total = birthday_total + int(
+                            bonus[bonus_amount_index].replace("%", "")
+                        )
+                        song_name = (
+                            bonus[bonus_columns.index("song_name")]
+                            .replace(r"*", r"\*")
+                            .replace(r"_", r"\_")
+                        )
+                        bonus_dict = {
+                            "artist": artist,
+                            "members": None,
+                            "song": song_name,
+                            "bonus_start": song_start,
+                            "bonus_end": song_end,
+                            "bonus_amount": f"{song_total}%",
+                        }
+                        if bonus_dict not in full_bonuses:
+                            full_bonuses.append(bonus_dict)
+            tracking_date += ONE_DAY
+
+        full_bonuses.sort(key=lambda x: (x["bonus_start"], x["bonus_end"]))
+        msg = await itr.followup.send(
+            embed=create_embed(game_details, full_bonuses, first_date, last_date),
+            wait=True,
+        )
+        view = BonusView(msg, game_details, first_date, last_date, full_bonuses)
+        await msg.edit(view=view)
 
     bonus_ping = app_commands.Group(
         name="ping",
@@ -208,6 +423,98 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
             parse_input=False,
             data=[[",".join(users)]],
         )
+
+
+class BonusView(discord.ui.View):
+    current = 1
+    max = 1
+
+    def __init__(
+        self,
+        message: discord.Message,
+        game_details: "GameDetails",
+        first_date: datetime,
+        last_date: datetime,
+        bonuses: list[dict],
+    ) -> None:
+        self.message = message
+        self.game_details = game_details
+        self.bonuses = bonuses
+        self.first_date = first_date
+        self.last_date = last_date
+        self.max = math.ceil(len(bonuses) / STEP)
+        super().__init__(timeout=60)
+
+    async def on_timeout(self) -> None:
+        for child in self.children:
+            if isinstance(child, discord.ui.Button):
+                child.disabled = True
+        await self.message.edit(view=self)
+
+    async def update_message(self) -> None:
+        await self.message.edit(
+            embed=create_embed(
+                self.game_details,
+                self.bonuses,
+                self.first_date,
+                self.last_date,
+                self.current,
+                self.max,
+            ),
+            view=self,
+        )
+
+    @discord.ui.button(label="Previous Page", style=discord.ButtonStyle.secondary)
+    async def previous_page(
+        self, itr: discord.Interaction["dBot"], button: discord.ui.Button
+    ) -> None:
+        await itr.response.defer()
+        self.current -= 1
+        if self.current < 1:
+            self.current = self.max
+        await self.update_message()
+
+    @discord.ui.button(label="Next Page", style=discord.ButtonStyle.primary)
+    async def next_page(
+        self, itr: discord.Interaction["dBot"], button: discord.ui.Button
+    ) -> None:
+        await itr.response.defer()
+        self.current += 1
+        if self.current > self.max:
+            self.current = 1
+        await self.update_message()
+
+
+def create_embed(
+    game_details: "GameDetails",
+    bonuses: list[dict],
+    first_date: datetime,
+    last_date: datetime,
+    current: int = 1,
+    max: int | None = None,
+) -> discord.Embed:
+    end = current * STEP
+    start = end - STEP
+    filtered_bonuses = bonuses[start:end]
+    description = "\n".join(
+        f"{bonus["artist"]}"
+        f"{f" {bonus["members"]}" if bonus["artist"] != bonus["members"] else ""}: "
+        f"{bonus["song"] if bonus["song"] else "All Songs"}\n"
+        f"{bonus["bonus_amount"]} | "
+        f"{bonus["bonus_start"].strftime("%B %d").replace(" 0", " ")} "
+        f"- {bonus["bonus_end"].strftime("%B %d").replace(" 0", " ")}"
+        for bonus in filtered_bonuses
+    )
+    embed = discord.Embed(
+        title=(
+            f"{game_details["name"]} "
+            f"({first_date.strftime('%B %d')} - {last_date.strftime('%B %d')})"
+        ),
+        description=description,
+        color=game_details["color"],
+    )
+    embed.set_footer(text=f"Page {current}/{max or math.ceil(len(bonuses) / STEP)}")
+    return embed
 
 
 async def setup(bot: "dBot") -> None:

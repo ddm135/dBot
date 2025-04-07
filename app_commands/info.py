@@ -62,35 +62,6 @@ class Info(commands.Cog):
         await msg.edit(view=view)
 
 
-def create_embed(
-    game_details: "GameDetails",
-    artist: str | None,
-    songs: list[list[str]],
-    current: int = 1,
-    max: int | None = None,
-) -> discord.Embed:
-    end = current * STEP
-    start = end - STEP
-    filtered_songs = songs[start:end]
-    duration_index = game_details["infoColumns"].index("duration")
-    artist_name_index = game_details["infoColumns"].index("artist_name")
-    song_name_index = game_details["infoColumns"].index("song_name")
-    description = "\n".join(
-        f"({int(song[duration_index]) // 60}:{int(song[duration_index]) % 60:02d}) "
-        f"{(f"{song[artist_name_index].replace(r"*", r"\*").replace(r"_", r"\_")} - "
-            if not artist else "")}"
-        f"**{song[song_name_index].replace(r"*", r"\*").replace(r"_", r"\_")}**"
-        for song in filtered_songs
-    )
-    embed = discord.Embed(
-        title=f"{game_details["name"]}{f" - {artist}" if artist else ""}",
-        description=description,
-        color=game_details["color"],
-    )
-    embed.set_footer(text=f"Page {current}/{max or math.ceil(len(songs) / STEP)}")
-    return embed
-
-
 class InfoView(discord.ui.View):
     current = 1
     max = 1
@@ -142,6 +113,35 @@ class InfoView(discord.ui.View):
         if self.current > self.max:
             self.current = 1
         await self.update_message()
+
+
+def create_embed(
+    game_details: "GameDetails",
+    artist: str | None,
+    songs: list[list[str]],
+    current: int = 1,
+    max: int | None = None,
+) -> discord.Embed:
+    end = current * STEP
+    start = end - STEP
+    filtered_songs = songs[start:end]
+    duration_index = game_details["infoColumns"].index("duration")
+    artist_name_index = game_details["infoColumns"].index("artist_name")
+    song_name_index = game_details["infoColumns"].index("song_name")
+    description = "\n".join(
+        f"({int(song[duration_index]) // 60}:{int(song[duration_index]) % 60:02d}) "
+        f"{(f"{song[artist_name_index].replace(r"*", r"\*").replace(r"_", r"\_")} - "
+            if not artist else "")}"
+        f"**{song[song_name_index].replace(r"*", r"\*").replace(r"_", r"\_")}**"
+        for song in filtered_songs
+    )
+    embed = discord.Embed(
+        title=f"{game_details["name"]}{f" - {artist}" if artist else ""}",
+        description=description,
+        color=game_details["color"],
+    )
+    embed.set_footer(text=f"Page {current}/{max or math.ceil(len(songs) / STEP)}")
+    return embed
 
 
 async def setup(bot: "dBot") -> None:

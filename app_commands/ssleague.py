@@ -189,7 +189,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
                     image_url = url["url"]
                     break
 
-        current_time = datetime.now(timezone) - offset
+        current_time = datetime.now(tz=timezone) - offset
         embed, embed_title = self.generate_embed(
             artist_name,
             song_name,
