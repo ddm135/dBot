@@ -515,7 +515,7 @@ def create_embed(
         f"{bonus["bonus_amount"]} | "
         f"{bonus["bonus_start"].strftime("%B %d").replace(" 0", " ")} "
         f"- {bonus["bonus_end"].strftime("%B %d").replace(" 0", " ")} | "
-        f"{("Expired" if bonus["bonus_end"] > current_date
+        f"{("Expired" if bonus["bonus_end"] < current_date
             else f"Available <t:{int(bonus["bonus_start"].timestamp())}:R>"
             if bonus["bonus_start"] > current_date
             else f"Ends <t:{int(bonus["bonus_end"].timestamp())}:R>"
