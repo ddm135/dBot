@@ -184,8 +184,10 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                     )
                 ):
                     bonus_dict = {
-                        "artist": artist,
-                        "members": birthday_members,
+                        "artist": artist.replace(r"*", r"\*").replace(r"_", r"\_"),
+                        "members": birthday_members.replace(r"*", r"\*").replace(
+                            r"_", r"\_"
+                        ),
                         "song": None,
                         "bonus_start": birthday_start,
                         "bonus_end": birthday_end,
@@ -219,9 +221,9 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                             .replace(r"_", r"\_")
                         )
                         bonus_dict = {
-                            "artist": artist,
+                            "artist": artist.replace(r"*", r"\*").replace(r"_", r"\_"),
                             "members": None,
-                            "song": song_name,
+                            "song": song_name.replace(r"*", r"\*").replace(r"_", r"\_"),
                             "bonus_start": song_start,
                             "bonus_end": song_end,
                             "bonus_amount": f"{song_total}%",
@@ -497,9 +499,11 @@ def create_embed(
     start = end - STEP
     filtered_bonuses = bonuses[start:end]
     description = "\n".join(
-        f"{bonus["artist"]}"
-        f"{f" {bonus["members"]}" if bonus["artist"] != bonus["members"] else ""}: "
-        f"{bonus["song"] if bonus["song"] else "All Songs"}\n"
+        f"**{bonus["artist"]}"
+        f"{(f" {bonus["members"]}"
+            if bonus["members"] and bonus["artist"] != bonus["members"]
+            else "")}: "
+        f"{bonus["song"] if bonus["song"] else "All Songs"}**\n"
         f"{bonus["bonus_amount"]} | "
         f"{bonus["bonus_start"].strftime("%B %d").replace(" 0", " ")} "
         f"- {bonus["bonus_end"].strftime("%B %d").replace(" 0", " ")}"
