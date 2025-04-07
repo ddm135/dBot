@@ -518,7 +518,7 @@ def create_embed(
         f"{("Expired" if bonus["bonus_end"] < current_date
             else f"Available <t:{int(bonus["bonus_start"].timestamp())}:R>"
             if bonus["bonus_start"] > current_date
-            else f"Ends <t:{int(bonus["bonus_end"].timestamp())}:R>"
+            else f"Ends <t:{int((bonus["bonus_end"] + ONE_DAY).timestamp())}:R>"
             )}"
         for bonus in filtered_bonuses
     )
