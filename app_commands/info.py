@@ -73,10 +73,13 @@ def create_embed(
     start = end - STEP
     filtered_songs = songs[start:end]
     duration_index = game_details["infoColumns"].index("duration")
+    artist_name_index = game_details["infoColumns"].index("artist_name")
     song_name_index = game_details["infoColumns"].index("song_name")
     description = "\n".join(
-        f"({int(song[duration_index]) // 60}:{int(song[duration_index]) % 60:02d}) **"
-        f"{song[song_name_index].replace(r"*", r"\*").replace(r"_", r"\_")}**"
+        f"({int(song[duration_index]) // 60}:{int(song[duration_index]) % 60:02d}) "
+        f"{(f"{song[artist_name_index].replace(r"*", r"\*").replace(r"_", r"\_")} - "
+            if not artist else "")}"
+        f"**{song[song_name_index].replace(r"*", r"\*").replace(r"_", r"\_")}**"
         for song in filtered_songs
     )
     embed = discord.Embed(
@@ -84,7 +87,7 @@ def create_embed(
         description=description,
         color=game_details["color"],
     )
-    embed.set_footer(text=f"Page {current} of {max or math.ceil(len(songs) / STEP)}")
+    embed.set_footer(text=f"Page {current}/{max or math.ceil(len(songs) / STEP)}")
     return embed
 
 
@@ -98,7 +101,7 @@ class InfoView(discord.ui.View):
         game_details: "GameDetails",
         artist: str | None,
         songs: list[list[str]],
-    ):
+    ) -> None:
         self.message = message
         self.game_details = game_details
         self.artist = artist
