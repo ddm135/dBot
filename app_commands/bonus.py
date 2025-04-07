@@ -232,12 +232,16 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                             full_bonuses.append(bonus_dict)
             tracking_date += ONE_DAY
 
-        full_bonuses.sort(key=lambda x: (x["bonus_start"], x["bonus_end"]))
+        full_bonuses.sort(key=lambda x: (x["bonus_end"], x["bonus_start"]))
         msg = await itr.followup.send(
-            embed=create_embed(game_details, full_bonuses, first_date, last_date),
+            embed=create_embed(
+                game_details, full_bonuses, first_date, last_date, current_date
+            ),
             wait=True,
         )
-        view = BonusView(msg, game_details, first_date, last_date, full_bonuses)
+        view = BonusView(
+            msg, game_details, first_date, last_date, current_date, full_bonuses
+        )
         await msg.edit(view=view)
 
     bonus_ping = app_commands.Group(
@@ -437,6 +441,7 @@ class BonusView(discord.ui.View):
         game_details: "GameDetails",
         first_date: datetime,
         last_date: datetime,
+        current_date: datetime,
         bonuses: list[dict],
     ) -> None:
         self.message = message
@@ -444,6 +449,7 @@ class BonusView(discord.ui.View):
         self.bonuses = bonuses
         self.first_date = first_date
         self.last_date = last_date
+        self.current_date = current_date
         self.max = math.ceil(len(bonuses) / STEP)
         super().__init__(timeout=60)
 
@@ -460,6 +466,7 @@ class BonusView(discord.ui.View):
                 self.bonuses,
                 self.first_date,
                 self.last_date,
+                self.current_date,
                 self.current,
                 self.max,
             ),
@@ -492,6 +499,7 @@ def create_embed(
     bonuses: list[dict],
     first_date: datetime,
     last_date: datetime,
+    current_date: datetime,
     current: int = 1,
     max: int | None = None,
 ) -> discord.Embed:
@@ -506,7 +514,12 @@ def create_embed(
         f"{bonus["song"] if bonus["song"] else "All Songs"}**\n"
         f"{bonus["bonus_amount"]} | "
         f"{bonus["bonus_start"].strftime("%B %d").replace(" 0", " ")} "
-        f"- {bonus["bonus_end"].strftime("%B %d").replace(" 0", " ")}"
+        f"- {bonus["bonus_end"].strftime("%B %d").replace(" 0", " ")} | "
+        f"{("Expired" if bonus["bonus_end"] > current_date
+            else f"Available <t:{int(bonus["bonus_start"].timestamp())}:R>"
+            if bonus["bonus_start"] > current_date
+            else f"Ends <t:{int(bonus["bonus_end"].timestamp())}:R>"
+            )}"
         for bonus in filtered_bonuses
     )
     embed = discord.Embed(
