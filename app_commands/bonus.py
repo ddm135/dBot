@@ -62,7 +62,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
             game_details["bonusRange"],
             "KR" if timezone == TIMEZONES["KST"] else None,
         )
-        artists = self.bot.info_by_id[game.value].keys()
+        artists = tuple(dict.fromkeys(tuple(zip(*bonus_data))[artist_name_index]))
         full_bonuses = []
 
         while tracking_date <= last_date:
