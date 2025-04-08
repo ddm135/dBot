@@ -515,9 +515,9 @@ def create_embed(
             if bonus["members"] and bonus["artist"] != bonus["members"]
             else "")}: "
         f"{bonus["song"] if bonus["song"] else "All Songs :birthday:"}**"
-        f"{(":cd:" if bonus["song"] and bonus["bonus_amount"] == 3
-            else ":birthday :dvd:" if bonus["song"] and bonus["bonus_amount"] > 3
-            else "")}"
+        f"{(" :cd:" if bonus["song"] and bonus["bonus_amount"] == 3
+            else " :birthday: :dvd:" if bonus["song"] and bonus["bonus_amount"] > 3
+            else "")}\n"
         f"{bonus["bonus_amount"]}% | "
         f"{bonus["bonus_start"].strftime("%B %d").replace(" 0", " ")} "
         f"- {bonus["bonus_end"].strftime("%B %d").replace(" 0", " ")} | "
