@@ -191,7 +191,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                         "song": None,
                         "bonus_start": birthday_start,
                         "bonus_end": birthday_end,
-                        "bonus_amount": f"{birthday_total}%",
+                        "bonus_amount": birthday_total,
                     }
                     if bonus_dict not in full_bonuses:
                         full_bonuses.append(bonus_dict)
@@ -226,7 +226,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                             "song": song_name.replace(r"*", r"\*").replace(r"_", r"\_"),
                             "bonus_start": song_start,
                             "bonus_end": song_end,
-                            "bonus_amount": f"{song_total}%",
+                            "bonus_amount": song_total,
                         }
                         if bonus_dict not in full_bonuses:
                             full_bonuses.append(bonus_dict)
@@ -507,19 +507,26 @@ def create_embed(
     start = end - STEP
     filtered_bonuses = bonuses[start:end]
     description = "\n".join(
+        f"{("~~" if bonus["bonus_end"] < current_date
+            else "" if bonus["bonus_start"] > current_date
+            else ":white_check_mark: ")}"
         f"**{bonus["artist"]}"
         f"{(f" {bonus["members"]}"
             if bonus["members"] and bonus["artist"] != bonus["members"]
             else "")}: "
-        f"{bonus["song"] if bonus["song"] else "All Songs"}**\n"
-        f"{bonus["bonus_amount"]} | "
+        f"{bonus["song"] if bonus["song"] else "All Songs :birthday:"}**"
+        f"{(":cd:" if bonus["song"] and bonus["bonus_amount"] == 3
+            else ":birthday :dvd:" if bonus["song"] and bonus["bonus_amount"] > 3
+            else "")}"
+        f"{bonus["bonus_amount"]}% | "
         f"{bonus["bonus_start"].strftime("%B %d").replace(" 0", " ")} "
         f"- {bonus["bonus_end"].strftime("%B %d").replace(" 0", " ")} | "
         f"{("Expired" if bonus["bonus_end"] < current_date
             else f"Available <t:{int(bonus["bonus_start"].timestamp())}:R>"
             if bonus["bonus_start"] > current_date
-            else f"Ends <t:{int((bonus["bonus_end"] + ONE_DAY).timestamp())}:R>"
-            )}"
+            else f"Ends <t:{int((bonus["bonus_end"] + ONE_DAY).timestamp())}:R>")}"
+        f"{" :bangbang:" if bonus["bonus_start"] == last_date else ""}"
+        f"{"~~" if bonus["bonus_end"] < current_date else ""}"
         for bonus in filtered_bonuses
     )
     embed = discord.Embed(
