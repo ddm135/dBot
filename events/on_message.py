@@ -31,6 +31,17 @@ class OnMessage(commands.Cog):
     #         await message.reply("bonusBot was shut down on <t:1742765700:f>.")
 
     @commands.Cog.listener("on_message")
+    async def bonusBot_info(self, message: discord.Message) -> None:
+        if message.author.bot:
+            return
+
+        if (
+            message.content.lower() == "h!info wakeone"
+            and message.channel.id == 401412343629742090
+        ):
+            await message.reply("Use dBot's `/info` instead.")
+
+    @commands.Cog.listener("on_message")
     async def word_ping(self, message: discord.Message) -> None:
         if message.guild is None or message.author.bot:
             return
