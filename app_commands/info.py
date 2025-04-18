@@ -28,14 +28,22 @@ class Info(commands.Cog):
     @app_commands.command()
     @app_commands.choices(game_choice=GAME_CHOICES)
     @app_commands.autocomplete(artist_name=artist_autocomplete)
-    @app_commands.rename(game_choice="game", artist_name="artist")
+    @app_commands.rename(game_choice="game", artist_name="artist/album")
     async def info(
         self,
         itr: discord.Interaction["dBot"],
         game_choice: app_commands.Choice[str],
         artist_name: str | None = None,
     ) -> None:
-        pass
+        """View song information.
+
+        Parameters
+        -----------
+        game_choice: Choice[:class:`str`]
+            Game
+        artist_name: Optional[:class:`str`]
+            Artist Name
+        """
 
         await itr.response.defer()
         if not self.bot.info_data_ready:
@@ -54,7 +62,7 @@ class Info(commands.Cog):
 
             _songs = self.bot.info_by_name[game_choice.value][artist_name].values()
 
-        songs = sorted(_songs, key=lambda x: int(x[duration_column]))
+        songs = sorted(_songs, key=lambda x: x[duration_column])
         msg = await itr.followup.send(
             embed=create_embed(game_details, artist_name, songs), wait=True
         )
@@ -128,8 +136,11 @@ def create_embed(
     duration_index = game_details["infoColumns"].index("duration")
     artist_name_index = game_details["infoColumns"].index("artist_name")
     song_name_index = game_details["infoColumns"].index("song_name")
+
     description = "\n".join(
-        f"({int(song[duration_index]) // 60}:{int(song[duration_index]) % 60:02d}) "
+        f"({(f"{song[duration_index]}" if ":" in song[duration_index] else
+             f"{int(song[duration_index]) // 60}:"
+             f"{int(song[duration_index]) % 60:02d}")}) "
         f"{(f"{song[artist_name_index].replace(r"*", r"\*").replace(r"_", r"\_")} - "
             if not artist else "")}"
         f"**{song[song_name_index].replace(r"*", r"\*").replace(r"_", r"\_")}**"
