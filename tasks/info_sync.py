@@ -1,4 +1,3 @@
-import asyncio
 import gzip
 import json
 import logging
@@ -42,7 +41,6 @@ class InfoSync(commands.Cog):
             return
 
         self.bot.info_data_ready = False
-        await asyncio.sleep(5)
         self.LOGGER.info("Downloading song data...")
 
         for game, game_details in GAMES.items():
@@ -72,6 +70,9 @@ class InfoSync(commands.Cog):
                 "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
             )
             for row in info:
+                if not row:
+                    continue
+
                 self.bot.info_by_name[game][
                     row[game_details["infoColumns"].index("artist_name")]
                 ][row[game_details["infoColumns"].index("song_name")]] = row
