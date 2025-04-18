@@ -172,6 +172,7 @@ GAMES: dict[str, "GameDetails"] = {
         "bonusRange": "",
         "bonusColumns": (),
         "color": 0x4776FB,
+        "color": 0x4623CE,
         "pinChannelIds": {},
         "pinRoles": {},
         "dateFormat": "%Y-%m-%d",
