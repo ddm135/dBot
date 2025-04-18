@@ -28,7 +28,7 @@ class Info(commands.Cog):
     @app_commands.command()
     @app_commands.choices(game_choice=GAME_CHOICES)
     @app_commands.autocomplete(artist_name=artist_autocomplete)
-    @app_commands.rename(game_choice="game", artist_name="artist/album")
+    @app_commands.rename(game_choice="game", artist_name="artist")
     async def info(
         self,
         itr: discord.Interaction["dBot"],
