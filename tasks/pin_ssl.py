@@ -49,7 +49,7 @@ class PinSSL(commands.Cog):
                     headers=SUPERSTAR_HEADERS,
                     data=encrypt_cbc(
                         f'{"{"}"class":"Account","method":"login","params":[1,'
-                        f'"{credentials["username"]}","{credentials["password"]}"'
+                        f'"{credentials["email"]}","{credentials["password"]}"'
                         f',1,"{credentials["version"]}",false,-1]{"}"}'
                     ),
                 ) as r:
@@ -78,7 +78,7 @@ class PinSSL(commands.Cog):
             music_list = ssleague["result"]["musicList"]
             music = next(music for music in music_list if music["day"] == curday)
             song_id = music["music"]
-            ssl_song = self.bot.info_by_id[game][song_id]
+            ssl_song = self.bot.info_by_id[game][str(song_id)]
 
             info_columns = game_details["infoColumns"]
             artist_name_index = info_columns.index("artist_name")
@@ -94,7 +94,6 @@ class PinSSL(commands.Cog):
             song_name = (
                 ssl_song[song_name_index].replace(r"*", r"\*").replace(r"_", r"\_")
             )
-            song_id = int(song_id)
             duration = ssl_song[duration_index]
             skills = ssl_song[skills_index] if skills_index is not None else None
 
