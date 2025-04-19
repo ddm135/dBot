@@ -36,7 +36,6 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
     ) -> None:
         await itr.response.defer()
         game_details = GAMES[game.value]
-        date_format = game_details["dateFormat"]
         timezone = game_details["timezone"]
         bonus_columns = game_details["bonusColumns"]
 
@@ -62,6 +61,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
 
         while tracking_date <= last_date:
             for artist in artists:
+                artist_name = artist.replace(r"*", r"\*").replace(r"_", r"\_")
                 birthday_bonuses: list[list[Any]] = []
                 album_bonuses: list[list[Any]] = []
                 last_birthday_start = None
@@ -100,12 +100,10 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
 
                 birthday_members = ""
                 birthday_total = 0
-                birthday_starts = []
-                birthday_ends = []
+                birthday_starts = ()
+                birthday_ends = ()
                 if birthday_bonuses:
-                    birthday_zip: tuple[tuple[str, ...], ...] = tuple(
-                        zip(*birthday_bonuses)
-                    )
+                    birthday_zip = tuple(zip(*birthday_bonuses))
                     birthday_members = (
                         " + ".join(birthday_zip[member_name_index])
                         .replace(r"*", r"\*")
@@ -113,15 +111,10 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                     )
                     birthday_amounts = birthday_zip[bonus_amount_index]
                     for amt in birthday_amounts:
-                        birthday_total += int(amt.replace("%", ""))
+                        birthday_total += amt
 
-                    for dt in birthday_zip[bonus_start_index]:
-                        bs = datetime.strptime(dt, date_format).replace(tzinfo=timezone)
-                        birthday_starts.append(bs)
-
-                    for dt in birthday_zip[bonus_end_index]:
-                        be = datetime.strptime(dt, date_format).replace(tzinfo=timezone)
-                        birthday_ends.append(be)
+                    birthday_starts = birthday_zip[bonus_start_index]
+                    birthday_ends = birthday_zip[bonus_end_index]
 
                 birthday_start = max(
                     (
@@ -162,10 +155,8 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                     )
                 ):
                     bonus_dict = {
-                        "artist": artist.replace(r"*", r"\*").replace(r"_", r"\_"),
-                        "members": birthday_members.replace(r"*", r"\*").replace(
-                            r"_", r"\_"
-                        ),
+                        "artist": artist_name,
+                        "members": birthday_members,
                         "song": None,
                         "bonus_start": birthday_start,
                         "bonus_end": birthday_end,
@@ -175,12 +166,8 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                         full_bonuses.append(bonus_dict)
 
                 for bonus in album_bonuses:
-                    start_date = datetime.strptime(
-                        bonus[bonus_start_index], date_format
-                    ).replace(tzinfo=timezone)
-                    end_date = datetime.strptime(
-                        bonus[bonus_end_index], date_format
-                    ).replace(tzinfo=timezone)
+                    start_date = bonus[bonus_start_index]
+                    end_date = bonus[bonus_end_index]
 
                     song_start = max(
                         x for x in (start_date, birthday_start) if x is not None
@@ -190,18 +177,16 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                     if (song_start == tracking_date and start_check) or (
                         song_end == tracking_date and end_check
                     ):
-                        song_total = birthday_total + int(
-                            bonus[bonus_amount_index].replace("%", "")
-                        )
+                        song_total = birthday_total + bonus[bonus_amount_index]
                         song_name = (
                             bonus[bonus_columns.index("song_name")]
                             .replace(r"*", r"\*")
                             .replace(r"_", r"\_")
                         )
                         bonus_dict = {
-                            "artist": artist.replace(r"*", r"\*").replace(r"_", r"\_"),
+                            "artist": artist_name,
                             "members": None,
-                            "song": song_name.replace(r"*", r"\*").replace(r"_", r"\_"),
+                            "song": song_name,
                             "bonus_start": song_start,
                             "bonus_end": song_end,
                             "bonus_amount": song_total,
