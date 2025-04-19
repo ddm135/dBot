@@ -26,7 +26,7 @@ ONE_DAY = timedelta(days=1)
 
 AES_KEY = "WnFKN1v_gUcgmUVZnjjjGXGwk557zBSO"
 AES_IV = "PUIEOQYGNEFFFUAX"
-A_JSON_HEADERS = {
+SUPERSTAR_HEADERS = {
     "X-SuperStar-AES-IV": AES_IV,
     "X-SuperStar-Asset-Ignore": "true",
     "X-SuperStar-API-Version": "8",
@@ -67,6 +67,7 @@ EXTENSIONS = (
 
 PING_DATA = Path("data/pings.json")
 ROLE_DATA = Path("data/roles.json")
+CREDENTIALS_DATA = Path("data/credentials.json")
 
 GAMES: dict[str, "GameDetails"] = {
     "SM": {

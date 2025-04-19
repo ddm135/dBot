@@ -1,10 +1,10 @@
-from base64 import b64decode
+from base64 import b64decode, b64encode
 from io import BytesIO
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 from Cryptodome.Cipher import AES
-from Cryptodome.Util.Padding import unpad
+from Cryptodome.Util.Padding import pad, unpad
 from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 
 from statics.consts import AES_IV, AES_KEY, MAX_RETRIES
@@ -106,6 +106,18 @@ def decrypt_ecb(data: str | bytes) -> bytes:
 def decrypt_cbc(data: str | bytes) -> bytes:
     cipherCBC = AES.new(AES_KEY.encode(), AES.MODE_CBC, AES_IV.encode())
     return unpad(cipherCBC.decrypt(b64decode(data)), AES.block_size)
+
+
+def encrypt_cbc(data: bytes | str) -> str:
+    if isinstance(data, str):
+        data = data.encode()
+
+    cipherCBC = AES.new(
+        AES_KEY.encode(),
+        AES.MODE_CBC,
+        AES_IV.encode(),
+    )
+    return b64encode(cipherCBC.encrypt(pad(data, AES.block_size))).decode()
 
 
 def get_column_letter(index: int) -> str:

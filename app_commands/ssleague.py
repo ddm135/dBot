@@ -164,6 +164,8 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         game_details: "GameDetails",
     ) -> None:
         game = itr.namespace.game
+        artist_name = artist_name.replace(r"*", r"\*").replace(r"_", r"\_")
+        song_name = song_name.replace(r"*", r"\*").replace(r"_", r"\_")
         timezone = game_details["timezone"]
         offset = game_details["resetOffset"]
         assert (guild_id := itr.guild_id)
@@ -222,8 +224,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         current_time: datetime,
         user_name: str,
     ) -> tuple[discord.Embed, str]:
-        embed_title = f"SSL #{current_time.strftime("%w").replace("0", "7")}"
-        embed_title = embed_title.replace(r"*", r"\*").replace(r"_", r"\_")
+        embed_title = f"SSL #{current_time.strftime("%u")}"
 
         embed = discord.Embed(
             color=color,

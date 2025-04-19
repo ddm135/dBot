@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any
 import aiohttp
 from discord.ext import commands, tasks
 
-from statics.consts import A_JSON_BODY, A_JSON_HEADERS, GAMES, TIMEZONES
+from statics.consts import A_JSON_BODY, GAMES, SUPERSTAR_HEADERS, TIMEZONES
 from statics.helpers import decrypt_cbc, decrypt_ecb, get_sheet_data
 
 if TYPE_CHECKING:
@@ -98,7 +98,7 @@ class InfoSync(commands.Cog):
         async with aiohttp.ClientSession() as session:
             async with session.post(
                 url=api_url,
-                headers=A_JSON_HEADERS,
+                headers=SUPERSTAR_HEADERS,
                 data=A_JSON_BODY,
             ) as r:
                 try:

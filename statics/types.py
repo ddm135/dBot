@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from typing import TypedDict
 from zoneinfo import ZoneInfo
 
@@ -25,21 +25,6 @@ class GameDetails(TypedDict):
     resetOffset: timedelta
     api: str
     legacyUrlScheme: bool
-
-
-class BonusDetails(TypedDict):
-    artist: str
-    bonus_amount: int
-    bonus_start: datetime
-    bonus_end: datetime
-
-
-class AlbumBonus(BonusDetails):
-    song: str
-
-
-class BirthdayBonus(BonusDetails):
-    members: str
 
 
 class PingDetails(TypedDict):

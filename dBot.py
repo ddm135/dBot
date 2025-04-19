@@ -8,7 +8,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 
 from statics.consts import EXTENSIONS, PING_DATA, ROLE_DATA, STATUS_CHANNEL
-from statics.types import BonusDetails, PingDetails
+from statics.types import PingDetails
 
 load_dotenv()
 
@@ -28,8 +28,6 @@ class dBot(commands.Bot):
     bonus_data: defaultdict[str, defaultdict[str, list[list[Any]]]] = defaultdict(
         lambda: defaultdict(list[list[Any]])
     )
-    bonus_week: list[BonusDetails] = []
-    bonus_month: list[BonusDetails] = []
     bonus_data_ready = False
 
     pings: defaultdict[str, defaultdict[str, defaultdict[str, PingDetails]]]
