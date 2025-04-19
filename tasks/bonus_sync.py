@@ -67,7 +67,7 @@ class BonusSync(commands.Cog):
                 _row[bonus_amount_index] = int(row[bonus_amount_index].replace("%", ""))
                 self.bot.bonus_data[game][row[artist_name_index]].append(_row)
 
-        self.bonus_data_ready = True
+        self.bot.bonus_data_ready = True
 
     @bonus_sync.before_loop
     async def before_loop(self) -> None:

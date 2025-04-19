@@ -34,7 +34,21 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         itr: discord.Interaction["dBot"],
         game: app_commands.Choice[str],
     ) -> None:
+        """View bonus information for the current week,
+        sorted by end date then start date
+
+        Parameters
+        -----------
+        game_choice: Choice[:class:`str`]
+            Game
+        """
+
         await itr.response.defer()
+        if not self.bot.bonus_data_ready:
+            return await itr.followup.send(
+                "Bonus data synchronization in progress, feature unavailable."
+            )
+
         game_details = GAMES[game.value]
         timezone = game_details["timezone"]
         bonus_columns = game_details["bonusColumns"]
