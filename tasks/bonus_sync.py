@@ -66,10 +66,14 @@ class BonusSync(commands.Cog):
                     row[bonus_end_index], date_format
                 ).replace(tzinfo=timezone)
                 _row[duration_index] = (
-                    row[duration_index]
-                    if ":" in row[duration_index]
-                    else f"{int(row[duration_index]) // 60}:"
-                    f"{int(row[duration_index]) % 60:02d}"
+                    ""
+                    if not row[duration_index]
+                    else (
+                        row[duration_index]
+                        if ":" in row[duration_index]
+                        else f"{int(row[duration_index]) // 60}:"
+                        f"{int(row[duration_index]) % 60:02d}"
+                    )
                 )
                 _row[bonus_amount_index] = int(row[bonus_amount_index].replace("%", ""))
                 self.bot.bonus_data[game][row[artist_name_index]].append(_row)
