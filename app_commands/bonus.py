@@ -494,9 +494,9 @@ def create_embed(
     filtered_bonuses = bonuses[start:end]
     embed = discord.Embed(
         title=(
-            f"{game_details["name"]} {current_date.strftime("%B-W%V")} Bonuses"
+            f"{game_details["name"]} {current_date.strftime("%G-W%V")} Bonuses "
             f"({first_date.strftime('%B %d')} - {last_date.strftime('%B %d')})"
-        ),
+        ).replace(" 0", " "),
         color=game_details["color"],
     )
     for bonus in filtered_bonuses:
