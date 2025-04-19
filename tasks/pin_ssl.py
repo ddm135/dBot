@@ -33,13 +33,13 @@ class PinSSL(commands.Cog):
         with open(CREDENTIALS_DATA, "r") as f:
             all_credentials = json.load(f)
 
-        current_date = datetime.now()
-
         for game in self.ALLOWED_GAME:
             game_details = GAMES[game]
 
-            ssl_date = current_date - game_details["resetOffset"]
-            if ssl_date.hour != 0:
+            timezone = game_details["timezone"]
+            offset = game_details["resetOffset"]
+            current_time = datetime.now(tz=timezone) - offset
+            if current_time.hour != 0:
                 continue
 
             credentials = all_credentials[game]
@@ -139,7 +139,7 @@ class PinSSL(commands.Cog):
             embed.set_footer(
                 text=(
                     f"{current_time.strftime("%A, %B %d, %Y").replace(" 0", " ")}"
-                    f" · Pinned by {self.bot.user.name}"
+                    f" · Pinned by {self.bot.user.name}"  # type: ignore[union-attr]
                 )
             )
 

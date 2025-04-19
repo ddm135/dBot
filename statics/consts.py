@@ -63,7 +63,7 @@ EXTENSIONS = (
     "tasks.bonus_sync",
     "tasks.data_sync",
     "tasks.pinata",
-    "tasks.pin_ssl"
+    "tasks.pin_ssl",
 )
 
 PING_DATA = Path("data/pings.json")
