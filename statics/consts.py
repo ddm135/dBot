@@ -50,7 +50,6 @@ EXTENSIONS = (
     "commands.administrative",
     "events.on_message",
     "events.on_ready",
-    "tasks.data_sync",
     "app_commands.bonus",
     "app_commands.ping",
     "app_commands.role",
@@ -62,6 +61,7 @@ EXTENSIONS = (
     "commands.memes",
     "tasks.info_sync",
     "tasks.bonus_sync",
+    "tasks.data_sync",
     "tasks.pinata",
 )
 
