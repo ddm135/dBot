@@ -69,16 +69,28 @@ class InfoSync(commands.Cog):
                 game_details["infoRange"],
                 "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
             )
+
+            info_columns = game_details["infoColumns"]
+            artist_name_index = info_columns.index("artist_name")
+            song_name_index = info_columns.index("song_name")
+            song_id_index = info_columns.index("song_id")
+            duration_index = info_columns.index("duration")
+
             for row in info:
                 if not row:
                     continue
 
-                self.bot.info_by_name[game][
-                    row[game_details["infoColumns"].index("artist_name")]
-                ][row[game_details["infoColumns"].index("song_name")]] = row
-                self.bot.info_by_id[game][
-                    row[game_details["infoColumns"].index("song_id")]
+                row[duration_index] = (
+                    row[duration_index]
+                    if ":" in row[duration_index]
+                    else f"{int(row[duration_index]) // 60}:"
+                    f"{int(row[duration_index]) % 60:02d}"
+                )
+
+                self.bot.info_by_name[game][row[artist_name_index]][
+                    row[song_name_index]
                 ] = row
+                self.bot.info_by_id[game][row[song_id_index]] = row
 
         self.bot.info_data_ready = True
 

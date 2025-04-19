@@ -57,13 +57,17 @@ class NotifyP8(commands.Cog):
                 f"<t:{int(current_date.timestamp())}:f>"
             )
 
+            ping_users_index = ping_columns.index("users")
+            ping_artist_index = ping_columns.index("artist_name")
+            ping_emblem_index = ping_columns.index("emblem")
+
             ping_data = get_sheet_data(
                 game_details["pingId"], game_details["pingRange"]
             )
             game_ping_dict = dict.fromkeys(
                 (
                     user
-                    for users in tuple(zip(*ping_data))[ping_columns.index("users")]
+                    for users in tuple(zip(*ping_data))[ping_users_index]
                     for user in users.split(",")
                 ),
                 False,
@@ -73,6 +77,9 @@ class NotifyP8(commands.Cog):
                 continue
 
             member_name_index = bonus_columns.index("member_name")
+            album_name_index = bonus_columns.index("album_name")
+            song_name_index = bonus_columns.index("song_name")
+            duration_index = bonus_columns.index("duration")
             bonus_start_index = bonus_columns.index("bonus_start")
             bonus_end_index = bonus_columns.index("bonus_end")
             bonus_amount_index = bonus_columns.index("bonus_amount")
@@ -82,16 +89,12 @@ class NotifyP8(commands.Cog):
             for artist in artists:
                 print(artist)
                 artist_pings = next(
-                    (
-                        ping
-                        for ping in ping_data
-                        if ping[ping_columns.index("artist_name")] == artist
-                    ),
+                    (ping for ping in ping_data if ping[ping_artist_index] == artist),
                     None,
                 )
                 if not artist_pings:
                     continue
-                artist_ping_list = artist_pings[ping_columns.index("users")].split(",")
+                artist_ping_list = artist_pings[ping_users_index].split(",")
                 artist_ping_list.remove("") if "" in artist_ping_list else None
                 if not artist_ping_list:
                     continue
@@ -212,19 +215,16 @@ class NotifyP8(commands.Cog):
                     if song_start == current_date or song_end == current_date:
                         song_total = birthday_total + bonus[bonus_amount_index]
                         album_name = (
-                            bonus[bonus_columns.index("album_name")]
+                            bonus[album_name_index]
                             .replace(r"*", r"\*")
                             .replace(r"_", r"\_")
                         )
                         song_name = (
-                            bonus[bonus_columns.index("song_name")]
+                            bonus[song_name_index]
                             .replace(r"*", r"\*")
                             .replace(r"_", r"\_")
                         )
-                        _song_duration = int(bonus[bonus_columns.index("duration")])
-                        song_duration = (
-                            f"{_song_duration // 60}:{_song_duration % 60:02d}"
-                        )
+                        song_duration = bonus[duration_index]
 
                         if song_end == current_date and end_check:
                             msg = (
@@ -270,8 +270,8 @@ class NotifyP8(commands.Cog):
                                 inline=False,
                             )
                         embed.set_author(
-                            name=artist,
-                            icon_url=artist_pings[ping_columns.index("emblem")] or None,
+                            name=artist.replace(r"*", r"\*").replace(r"_", r"\_"),
+                            icon_url=artist_pings[ping_emblem_index] or None,
                         )
                         # embed.set_footer(
                         #     text="Today's bonuses are sent early as the bot "

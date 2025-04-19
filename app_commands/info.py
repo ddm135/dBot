@@ -52,7 +52,7 @@ class Info(commands.Cog):
             )
 
         game_details = GAMES[game_choice.value]
-        duration_column = game_details["infoColumns"].index("duration")
+        duration_index = game_details["infoColumns"].index("duration")
 
         if not artist_name:
             _songs = self.bot.info_by_id[game_choice.value].values()
@@ -62,7 +62,7 @@ class Info(commands.Cog):
 
             _songs = self.bot.info_by_name[game_choice.value][artist_name].values()
 
-        songs = sorted(_songs, key=lambda x: x[duration_column])
+        songs = sorted(_songs, key=lambda x: x[duration_index])
         msg = await itr.followup.send(
             embed=create_embed(game_details, artist_name, songs), wait=True
         )
@@ -138,9 +138,7 @@ def create_embed(
     song_name_index = game_details["infoColumns"].index("song_name")
 
     description = "\n".join(
-        f"({(f"{song[duration_index]}" if ":" in song[duration_index] else
-             f"{int(song[duration_index]) // 60}:"
-             f"{int(song[duration_index]) % 60:02d}")}) "
+        f"({song[duration_index]}) "
         f"{(f"{song[artist_name_index].replace(r"*", r"\*").replace(r"_", r"\_")} - "
             if not artist else "")}"
         f"**{song[song_name_index].replace(r"*", r"\*").replace(r"_", r"\_")}**"
