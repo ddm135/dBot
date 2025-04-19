@@ -28,7 +28,7 @@ class NotifyP9(commands.Cog):
         time=[
             time(
                 hour=23,
-                minute=56,
+                minute=0,
                 second=0,
                 microsecond=0,
                 tzinfo=TIMEZONES["KST"],
@@ -37,16 +37,10 @@ class NotifyP9(commands.Cog):
     )
     async def notify_p9(self) -> None:
         for game, game_details in GAMES.items():
-            if (
-                (timezone := game_details["timezone"])
-                not in (
-                    TIMEZONES["KST"],
-                    TIMEZONES["JST"],
-                )
-                or not game_details["bonusId"]
-                or game_details["name"]
-                not in ("SUPERSTAR JYPNATION (JP)", "SUPERSTAR EBiDAN")
-            ):
+            if (timezone := game_details["timezone"]) not in (
+                TIMEZONES["KST"],
+                TIMEZONES["JST"],
+            ) or not game_details["bonusId"]:
                 continue
             print(game_details["name"])
             ping_columns = game_details["pingColumns"]
