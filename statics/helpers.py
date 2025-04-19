@@ -1,8 +1,11 @@
+import asyncio
 from base64 import b64decode, b64encode
+from datetime import datetime
 from io import BytesIO
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import discord
 from Cryptodome.Cipher import AES
 from Cryptodome.Util.Padding import pad, unpad
 from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
@@ -118,6 +121,66 @@ def encrypt_cbc(data: bytes | str) -> str:
         AES_IV.encode(),
     )
     return b64encode(cipherCBC.encrypt(pad(data, AES.block_size))).decode()
+
+
+def generate_ssl_embed(
+    artist_name: str,
+    song_name: str,
+    duration: str,
+    image_url: str | None,
+    color: int,
+    skills: str | None,
+    current_time: datetime,
+    user_name: str,
+) -> discord.Embed:
+    embed = discord.Embed(
+        color=color,
+        title=f"SSL #{current_time.strftime("%u")}",
+        description=f"**{artist_name} - {song_name}**",
+    )
+
+    embed.add_field(
+        name="Duration",
+        value=duration,
+    )
+    if skills:
+        embed.add_field(
+            name="Skill Order",
+            value=skills,
+        )
+
+    embed.set_thumbnail(url=image_url)
+    embed.set_footer(
+        text=(
+            f"{current_time.strftime("%A, %B %d, %Y").replace(" 0", " ")}"
+            f" · Pinned by {user_name}"
+        )
+    )
+
+    return embed
+
+
+async def pin_new_ssl(
+    embed: discord.Embed,
+    pin_channel: discord.TextChannel,
+) -> int:
+    msg = await pin_channel.send(embed=embed)
+    await asyncio.sleep(1)
+    await msg.pin()
+    return msg.id
+
+
+async def unpin_old_ssl(
+    embed_title: str, pin_channel: discord.TextChannel, new_pin: int
+) -> None:
+    pins = await pin_channel.pins()
+    for pin in pins:
+        if pin.id == new_pin:
+            continue
+        embeds = pin.embeds
+        if embeds and embeds[0].title and embed_title in embeds[0].title:
+            await pin.unpin()
+            break
 
 
 def get_column_letter(index: int) -> str:

@@ -1,4 +1,3 @@
-import asyncio
 from datetime import datetime
 from typing import TYPE_CHECKING
 
@@ -12,6 +11,7 @@ from app_commands.autocomplete.ssleague import (
     song_id_autocomplete,
 )
 from statics.consts import GAMES, SSRG_ROLE_MOD, SSRG_ROLE_SS, TEST_ROLE_OWNER
+from statics.helpers import generate_ssl_embed, pin_new_ssl, unpin_old_ssl
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -189,11 +189,11 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
                     break
 
         current_time = datetime.now(tz=timezone) - offset
-        embed, embed_title = self.generate_embed(
+        embed = generate_ssl_embed(
             artist_name,
             song_name,
             duration,
-            image_url,  # pyright: ignore[reportArgumentType]
+            image_url,
             color,
             skills,
             current_time,
@@ -203,7 +203,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         pin_channel = self.bot.get_channel(pin_channel_id)
 
         assert isinstance(pin_channel, discord.TextChannel)
-        new_pin = await self.pin_new_ssl(embed, pin_channel)
+        new_pin = await pin_new_ssl(embed, pin_channel)
         topic = f"[{current_time.strftime("%m.%d.%y")}] {artist_name} - {song_name}"
         if pin_role:
             await pin_channel.send(f"<@&{pin_role}> {topic}")
@@ -211,74 +211,11 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             await pin_channel.send(topic)
         await pin_channel.edit(topic=topic)
         await itr.followup.send("Pinned!")
-        await self.unpin_old_ssl(embed_title, pin_channel, new_pin)
-
-    def generate_embed(
-        self,
-        artist_name: str,
-        song_name: str,
-        duration: str,
-        image_url: str | None,
-        color: int,
-        skills: str | None,
-        current_time: datetime,
-        user_name: str,
-    ) -> tuple[discord.Embed, str]:
-        embed_title = f"SSL #{current_time.strftime("%u")}"
-
-        embed = discord.Embed(
-            color=color,
-            title=embed_title,
-            description=f"**{artist_name} - {song_name}**",
+        await unpin_old_ssl(
+            embed.title,  # type: ignore[arg-type]
+            pin_channel,
+            new_pin,
         )
-
-        embed.add_field(
-            name="Duration",
-            value=duration,
-        )
-        if skills:
-            embed.add_field(
-                name="Skill Order",
-                value=skills,
-            )
-
-        embed.set_thumbnail(url=image_url)
-        embed.set_footer(
-            text=(
-                f"{current_time.strftime("%A, %B %d, %Y").replace(" 0", " ")}"
-                f" · Pinned by {user_name}"
-            )
-        )
-
-        return embed, embed_title
-
-    async def unpin_old_ssl(
-        self, embed_title: str, pin_channel: discord.TextChannel, new_pin: int
-    ) -> None:
-        pins = await pin_channel.pins()
-        for pin in pins:
-            if pin.id == new_pin:
-                continue
-            embeds = pin.embeds
-            if embeds and embeds[0].title and embed_title in embeds[0].title:
-                await pin.unpin()
-                break
-
-    async def pin_new_ssl(
-        self,
-        embed: discord.Embed,
-        pin_channel: discord.TextChannel,
-    ) -> int:
-        msg = await pin_channel.send(embed=embed)
-        await asyncio.sleep(1)
-        await msg.pin()
-        return msg.id
-        # await asyncio.sleep(1)
-
-        # async for m in pin_channel.history(limit=10):
-        #     if m.type == discord.MessageType.pins_add:
-        #         await m.delete()
-        #         break
 
     async def cog_app_command_error(
         self,

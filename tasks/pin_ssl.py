@@ -1,4 +1,3 @@
-import asyncio
 import json
 from datetime import datetime, time
 from typing import TYPE_CHECKING
@@ -8,7 +7,13 @@ import discord
 from discord.ext import commands, tasks
 
 from statics.consts import CREDENTIALS_DATA, GAMES, SUPERSTAR_HEADERS
-from statics.helpers import decrypt_cbc, encrypt_cbc
+from statics.helpers import (
+    decrypt_cbc,
+    encrypt_cbc,
+    generate_ssl_embed,
+    pin_new_ssl,
+    unpin_old_ssl,
+)
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -114,33 +119,15 @@ class PinSSL(commands.Cog):
                         image_url = url["url"]
                         break
 
-            timezone = game_details["timezone"]
-            offset = game_details["resetOffset"]
-            current_time = datetime.now(tz=timezone) - offset
-
-            embed_title = f"SSL #{curday}"
-            embed = discord.Embed(
-                color=color,
-                title=embed_title,
-                description=f"**{artist_name} - {song_name}**",
-            )
-
-            embed.add_field(
-                name="Duration",
-                value=duration,
-            )
-            if skills:
-                embed.add_field(
-                    name="Skill Order",
-                    value=skills,
-                )
-
-            embed.set_thumbnail(url=image_url)
-            embed.set_footer(
-                text=(
-                    f"{current_time.strftime("%A, %B %d, %Y").replace(" 0", " ")}"
-                    f" · Pinned by {self.bot.user.name}"  # type: ignore[union-attr]
-                )
+            embed = generate_ssl_embed(
+                artist_name,
+                song_name,
+                duration,
+                image_url,
+                color,
+                skills,
+                current_time,
+                self.bot.user.name,  # type: ignore[union-attr]
             )
 
             pin_channels = game_details["pinChannelIds"]
@@ -151,7 +138,7 @@ class PinSSL(commands.Cog):
 
                 pin_channel = self.bot.get_channel(channel_id)
                 assert isinstance(pin_channel, discord.TextChannel)
-                new_pin = await self.pin_new_ssl(embed, pin_channel)
+                new_pin = await pin_new_ssl(embed, pin_channel)
                 topic = (
                     f"[{current_time.strftime("%m.%d.%y")}] {artist_name} - {song_name}"
                 )
@@ -160,29 +147,11 @@ class PinSSL(commands.Cog):
                 else:
                     await pin_channel.send(topic)
                 await pin_channel.edit(topic=topic)
-                await self.unpin_old_ssl(embed_title, pin_channel, new_pin)
-
-    async def unpin_old_ssl(
-        self, embed_title: str, pin_channel: discord.TextChannel, new_pin: int
-    ) -> None:
-        pins = await pin_channel.pins()
-        for pin in pins:
-            if pin.id == new_pin:
-                continue
-            embeds = pin.embeds
-            if embeds and embeds[0].title and embed_title in embeds[0].title:
-                await pin.unpin()
-                break
-
-    async def pin_new_ssl(
-        self,
-        embed: discord.Embed,
-        pin_channel: discord.TextChannel,
-    ) -> int:
-        msg = await pin_channel.send(embed=embed)
-        await asyncio.sleep(1)
-        await msg.pin()
-        return msg.id
+                await unpin_old_ssl(
+                    embed.title,  # type: ignore[arg-type]
+                    pin_channel,
+                    new_pin,
+                )
 
     @pin_ssl.before_loop
     async def before_loop(self) -> None:
