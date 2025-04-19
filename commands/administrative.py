@@ -56,6 +56,11 @@ class Administrative(commands.Cog):
     async def echo(self, ctx: commands.Context, *, message: str) -> None:
         await ctx.send(message)
 
+    @commands.command()
+    @commands.is_owner()
+    async def print(self, ctx: commands.Context, *, message: str) -> None:
+        print(eval(message))
+
 
 async def setup(bot: "dBot") -> None:
     await bot.add_cog(Administrative(bot))
