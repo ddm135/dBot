@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 class Clock(commands.Cog):
     STEP = 1
-    TIMEZONE_ITEMS = tuple(TIMEZONES.values())
+    TIMEZONE_ITEMS = tuple(TIMEZONES.items())
     TIMEZONE_COUNT = len(TIMEZONES)
     counter = 0
 
@@ -29,9 +29,11 @@ class Clock(commands.Cog):
 
     @tasks.loop(time=[time(hour=h, minute=m) for h in range(24) for m in range(60)])
     async def clock(self) -> None:
-        timezone = self.TIMEZONE_ITEMS[self.counter]
+        short_name, timezone = self.TIMEZONE_ITEMS[self.counter]
         current_time = (
-            datetime.now(tz=timezone).strftime("%B %d %Y, %H:%M %Z").replace(" 0", " ")
+            datetime.now(tz=timezone)
+            .strftime(f"%B %d %Y, %H:%M {short_name}")
+            .replace(" 0", " ")
         )
 
         await self.bot.change_presence(
