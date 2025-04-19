@@ -41,6 +41,7 @@ class NotifyP9(commands.Cog):
                 TIMEZONES["KST"],
                 TIMEZONES["JST"],
             ) or game_details["name"] == "SUPERSTAR JYP":
+            ) or not game_details["bonusId"]:
                 continue
             print(game_details["name"])
             date_format = game_details["dateFormat"]
