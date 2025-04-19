@@ -29,11 +29,17 @@ class GameDetails(TypedDict):
 
 class BonusDetails(TypedDict):
     artist: str
-    members: str
-    song: str
     bonus_amount: int
     bonus_start: datetime
     bonus_end: datetime
+
+
+class AlbumBonus(BonusDetails):
+    song: str
+
+
+class BirthdayBonus(BonusDetails):
+    members: str
 
 
 class PingDetails(TypedDict):

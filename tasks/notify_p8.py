@@ -1,5 +1,5 @@
 from datetime import datetime, time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import discord
 from discord.ext import commands, tasks
@@ -36,11 +36,10 @@ class NotifyP8(commands.Cog):
         ]
     )
     async def notify_p8(self) -> None:
-        for game_details in GAMES.values():
+        for game, game_details in GAMES.items():
             if (timezone := game_details["timezone"]) not in (TIMEZONES["PHT"],):
                 continue
             print(game_details["name"])
-            date_format = game_details["dateFormat"]
             ping_columns = game_details["pingColumns"]
             bonus_columns = game_details["bonusColumns"]
 
@@ -73,18 +72,13 @@ class NotifyP8(commands.Cog):
             if not game_ping_dict:
                 continue
 
-            artist_name_index = bonus_columns.index("artist_name")
             member_name_index = bonus_columns.index("member_name")
             bonus_start_index = bonus_columns.index("bonus_start")
             bonus_end_index = bonus_columns.index("bonus_end")
             bonus_amount_index = bonus_columns.index("bonus_amount")
 
-            bonus_data = get_sheet_data(
-                game_details["bonusId"],
-                game_details["bonusRange"],
-                "KR" if timezone == TIMEZONES["KST"] else None,
-            )
-            artists = tuple(dict.fromkeys(tuple(zip(*bonus_data))[artist_name_index]))
+            bonus_data = self.bot.bonus_data[game]
+            artists = bonus_data.keys()
             for artist in artists:
                 print(artist)
                 artist_pings = next(
@@ -102,40 +96,27 @@ class NotifyP8(commands.Cog):
                 if not artist_ping_list:
                     continue
 
-                birthday_bonuses: list[list[str]] = []
-                album_bonuses: list[list[str]] = []
+                birthday_bonuses: list[list[Any]] = []
+                album_bonuses: list[list[Any]] = []
                 notify_start = []
                 notify_end = []
                 last_birthday_start = None
                 last_birthday_end = None
                 next_birthday_start = None
                 next_birthday_end = None
-                for bonus in bonus_data:
-                    start_date = datetime.strptime(
-                        bonus[bonus_start_index], date_format
-                    ).replace(tzinfo=timezone)
-                    end_date = datetime.strptime(
-                        bonus[bonus_end_index], date_format
-                    ).replace(tzinfo=timezone)
+                for bonus in bonus_data[artist]:
+                    start_date = bonus[bonus_start_index]
+                    end_date = bonus[bonus_end_index]
 
-                    if (
-                        start_date < current_date
-                        and artist == bonus[artist_name_index]
-                        and bonus[member_name_index]
-                    ):
+                    if start_date < current_date and bonus[member_name_index]:
                         last_birthday_start = start_date
 
-                    if (
-                        end_date < current_date
-                        and artist == bonus[artist_name_index]
-                        and bonus[member_name_index]
-                    ):
+                    if end_date < current_date and bonus[member_name_index]:
                         last_birthday_end = end_date + ONE_DAY
 
                     if (
                         not next_birthday_start
                         and current_date < start_date
-                        and artist == bonus[artist_name_index]
                         and bonus[member_name_index]
                     ):
                         next_birthday_start = start_date - ONE_DAY
@@ -143,15 +124,11 @@ class NotifyP8(commands.Cog):
                     if (
                         not next_birthday_end
                         and current_date < end_date
-                        and artist == bonus[artist_name_index]
                         and bonus[member_name_index]
                     ):
                         next_birthday_end = end_date
 
-                    if (
-                        start_date <= current_date <= end_date
-                        and artist == bonus[artist_name_index]
-                    ):
+                    if start_date <= current_date <= end_date:
                         if bonus[member_name_index]:
                             birthday_bonuses.append(bonus)
                         else:
@@ -162,12 +139,10 @@ class NotifyP8(commands.Cog):
 
                 birthday_members = ""
                 birthday_total = 0
-                birthday_starts = []
-                birthday_ends = []
+                birthday_starts = ()
+                birthday_ends = ()
                 if birthday_bonuses:
-                    birthday_zip: tuple[tuple[str, ...], ...] = tuple(
-                        zip(*birthday_bonuses)
-                    )
+                    birthday_zip = tuple(zip(*birthday_bonuses))
                     birthday_members = (
                         " + ".join(birthday_zip[member_name_index])
                         .replace(r"*", r"\*")
@@ -175,15 +150,10 @@ class NotifyP8(commands.Cog):
                     )
                     birthday_amounts = birthday_zip[bonus_amount_index]
                     for amt in birthday_amounts:
-                        birthday_total += int(amt.replace("%", ""))
+                        birthday_total += amt
 
-                    for dt in birthday_zip[bonus_start_index]:
-                        bs = datetime.strptime(dt, date_format).replace(tzinfo=timezone)
-                        birthday_starts.append(bs)
-
-                    for dt in birthday_zip[bonus_end_index]:
-                        be = datetime.strptime(dt, date_format).replace(tzinfo=timezone)
-                        birthday_ends.append(be)
+                    birthday_starts = birthday_zip[bonus_start_index]
+                    birthday_ends = birthday_zip[bonus_end_index]
 
                 birthday_start = max(
                     (
@@ -231,12 +201,8 @@ class NotifyP8(commands.Cog):
                         notify_start.append(msg)
 
                 for bonus in album_bonuses:
-                    start_date = datetime.strptime(
-                        bonus[bonus_start_index], date_format
-                    ).replace(tzinfo=timezone)
-                    end_date = datetime.strptime(
-                        bonus[bonus_end_index], date_format
-                    ).replace(tzinfo=timezone)
+                    start_date = bonus[bonus_start_index]
+                    end_date = bonus[bonus_end_index]
 
                     song_start = max(
                         x for x in (start_date, birthday_start) if x is not None
@@ -244,9 +210,7 @@ class NotifyP8(commands.Cog):
                     song_end = min(x for x in (end_date, birthday_end) if x is not None)
 
                     if song_start == current_date or song_end == current_date:
-                        song_total = birthday_total + int(
-                            bonus[bonus_amount_index].replace("%", "")
-                        )
+                        song_total = birthday_total + bonus[bonus_amount_index]
                         album_name = (
                             bonus[bonus_columns.index("album_name")]
                             .replace(r"*", r"\*")

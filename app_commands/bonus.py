@@ -1,14 +1,14 @@
 import math
 from datetime import datetime, timedelta
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import discord
 from discord import app_commands
 from discord.ext import commands
 
 from app_commands.autocomplete.bonus import _ping_preprocess, artist_autocomplete
-from statics.consts import GAMES, ONE_DAY, TIMEZONES
-from statics.helpers import get_sheet_data, update_sheet_data
+from statics.consts import GAMES, ONE_DAY
+from statics.helpers import update_sheet_data
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -51,54 +51,36 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         tracking_date = first_date
         last_date = tracking_date + timedelta(days=7)
 
-        artist_name_index = bonus_columns.index("artist_name")
         member_name_index = bonus_columns.index("member_name")
         bonus_start_index = bonus_columns.index("bonus_start")
         bonus_end_index = bonus_columns.index("bonus_end")
         bonus_amount_index = bonus_columns.index("bonus_amount")
 
-        bonus_data = get_sheet_data(
-            game_details["bonusId"],
-            game_details["bonusRange"],
-            "KR" if timezone == TIMEZONES["KST"] else None,
-        )
-        artists = tuple(dict.fromkeys(tuple(zip(*bonus_data))[artist_name_index]))
+        bonus_data = self.bot.bonus_data[game.value]
+        artists = bonus_data.keys()
         full_bonuses = []
 
         while tracking_date <= last_date:
             for artist in artists:
-                birthday_bonuses: list[list[str]] = []
-                album_bonuses: list[list[str]] = []
+                birthday_bonuses: list[list[Any]] = []
+                album_bonuses: list[list[Any]] = []
                 last_birthday_start = None
                 last_birthday_end = None
                 next_birthday_start = None
                 next_birthday_end = None
-                for bonus in bonus_data:
-                    start_date = datetime.strptime(
-                        bonus[bonus_start_index], date_format
-                    ).replace(tzinfo=timezone)
-                    end_date = datetime.strptime(
-                        bonus[bonus_end_index], date_format
-                    ).replace(tzinfo=timezone)
+                for bonus in bonus_data[artist]:
+                    start_date = bonus[bonus_start_index]
+                    end_date = bonus[bonus_end_index]
 
-                    if (
-                        start_date < tracking_date
-                        and artist == bonus[artist_name_index]
-                        and bonus[member_name_index]
-                    ):
+                    if start_date < tracking_date and bonus[member_name_index]:
                         last_birthday_start = start_date
 
-                    if (
-                        end_date < tracking_date
-                        and artist == bonus[artist_name_index]
-                        and bonus[member_name_index]
-                    ):
+                    if end_date < tracking_date and bonus[member_name_index]:
                         last_birthday_end = end_date + ONE_DAY
 
                     if (
                         not next_birthday_start
                         and tracking_date < start_date
-                        and artist == bonus[artist_name_index]
                         and bonus[member_name_index]
                     ):
                         next_birthday_start = start_date - ONE_DAY
@@ -106,15 +88,11 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                     if (
                         not next_birthday_end
                         and tracking_date < end_date
-                        and artist == bonus[artist_name_index]
                         and bonus[member_name_index]
                     ):
                         next_birthday_end = end_date
 
-                    if (
-                        start_date <= tracking_date <= end_date
-                        and artist == bonus[artist_name_index]
-                    ):
+                    if start_date <= tracking_date <= end_date:
                         if bonus[member_name_index]:
                             birthday_bonuses.append(bonus)
                         else:
