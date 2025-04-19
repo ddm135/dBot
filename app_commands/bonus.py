@@ -196,14 +196,36 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
             tracking_date += ONE_DAY
 
         full_bonuses.sort(key=lambda x: (x["bonus_end"], x["bonus_start"]))
+        first_available_index = 0
+        for i, _bonus in enumerate(full_bonuses):
+            if _bonus["bonus_end"] >= current_date:
+                first_available_index = i
+                break
+
+        default_page = first_available_index // STEP + 1
+        max_page = math.ceil(len(full_bonuses) / STEP) or 1
+
         msg = await itr.followup.send(
             embed=create_embed(
-                game_details, full_bonuses, first_date, last_date, current_date
+                game_details,
+                full_bonuses,
+                first_date,
+                last_date,
+                current_date,
+                default_page,
+                max_page,
             ),
             wait=True,
         )
         view = BonusView(
-            msg, game_details, first_date, last_date, current_date, full_bonuses
+            msg,
+            game_details,
+            first_date,
+            last_date,
+            current_date,
+            full_bonuses,
+            default_page,
+            max_page,
         )
         await msg.edit(view=view)
 
@@ -395,8 +417,6 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
 
 
 class BonusView(discord.ui.View):
-    current = 1
-    max = 1
 
     def __init__(
         self,
@@ -406,6 +426,8 @@ class BonusView(discord.ui.View):
         last_date: datetime,
         current_date: datetime,
         bonuses: list[dict],
+        current_page: int,
+        max_page: int,
     ) -> None:
         self.message = message
         self.game_details = game_details
@@ -413,7 +435,8 @@ class BonusView(discord.ui.View):
         self.first_date = first_date
         self.last_date = last_date
         self.current_date = current_date
-        self.max = math.ceil(len(bonuses) / STEP)
+        self.current_page = current_page
+        self.max_page = max_page
         super().__init__(timeout=60)
 
     async def on_timeout(self) -> None:
@@ -430,8 +453,8 @@ class BonusView(discord.ui.View):
                 self.first_date,
                 self.last_date,
                 self.current_date,
-                self.current,
-                self.max,
+                self.current_page,
+                self.max_page,
             ),
             view=self,
         )
@@ -441,9 +464,9 @@ class BonusView(discord.ui.View):
         self, itr: discord.Interaction["dBot"], button: discord.ui.Button
     ) -> None:
         await itr.response.defer()
-        self.current -= 1
-        if self.current < 1:
-            self.current = self.max
+        self.current_page -= 1
+        if self.current_page < 1:
+            self.current_page = self.max_page
         await self.update_message()
 
     @discord.ui.button(label="Next Page", style=discord.ButtonStyle.primary)
@@ -451,9 +474,9 @@ class BonusView(discord.ui.View):
         self, itr: discord.Interaction["dBot"], button: discord.ui.Button
     ) -> None:
         await itr.response.defer()
-        self.current += 1
-        if self.current > self.max:
-            self.current = 1
+        self.current_page += 1
+        if self.current_page > self.max_page:
+            self.current_page = 1
         await self.update_message()
 
 
@@ -463,10 +486,10 @@ def create_embed(
     first_date: datetime,
     last_date: datetime,
     current_date: datetime,
-    current: int = 1,
-    max: int | None = None,
+    current_page: int,
+    max_page: int,
 ) -> discord.Embed:
-    end = current * STEP
+    end = current_page * STEP
     start = end - STEP
     filtered_bonuses = bonuses[start:end]
     embed = discord.Embed(
@@ -507,7 +530,7 @@ def create_embed(
             ),
             inline=False,
         )
-    embed.set_footer(text=f"Page {current}/{max or math.ceil(len(bonuses) / STEP)}")
+    embed.set_footer(text=f"Page {current_page}/{max_page}")
     return embed
 
 
