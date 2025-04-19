@@ -35,7 +35,7 @@ class Info(commands.Cog):
         game_choice: app_commands.Choice[str],
         artist_name: str | None = None,
     ) -> None:
-        """View song information.
+        """View song information, sorted by duration
 
         Parameters
         -----------
