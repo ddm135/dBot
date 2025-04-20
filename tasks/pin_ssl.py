@@ -34,7 +34,7 @@ class PinSSL(commands.Cog):
         self.pin_ssl.cancel()
         await super().cog_unload()
 
-    @tasks.loop(time=[time(hour=h, second=1) for h in range(24)])
+    @tasks.loop(minutes=1)
     async def pin_ssl(self) -> None:
         with open(CREDENTIALS_DATA, "r") as f:
             all_credentials = json.load(f)
@@ -46,49 +46,17 @@ class PinSSL(commands.Cog):
             timezone = game_details["timezone"]
             offset = game_details["resetOffset"]
             current_time = datetime.now(tz=timezone) - offset
-            if current_time.hour != 0:
-                continue
+            # if current_time.hour != 0:
+            #     continue
 
             apiUrl = game_details["api"]
-
             credentials = all_credentials[game]
-            async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    url=credentials["manifest"].format(**credentials),
-                ) as r:
-                    manifest = await r.json(content_type=None)
-                    credentials["version"] = str(
-                        max(
-                            Version(credentials["version"]),
-                            Version(manifest["ActiveVersion_Android"]),
-                            Version(manifest["ActiveVersion_IOS"]),
-                        )
-                    )
-
-                async with session.post(
-                    url=apiUrl,
-                    headers=SUPERSTAR_HEADERS,
-                    data=encrypt_cbc(credentials["account"].format(**credentials)),
-                ) as r:
-                    try:
-                        account = await r.json(content_type=None)
-                    except json.JSONDecodeError:
-                        account = json.loads(decrypt_cbc(await r.text()))
-                oid = account["result"]["user"]["objectID"]
-                key = account["invoke"][0]["params"][0]
-
-                async with session.post(
-                    url=apiUrl,
-                    headers=SUPERSTAR_HEADERS,
-                    data=encrypt_cbc(
-                        f'{"{"}"class":"StarLeague","method":"getWeekPlayMusic",'
-                        f'"params":[{oid},"{key}"]{"}"}'
-                    ),
-                ) as r:
-                    try:
-                        ssleague = await r.json(content_type=None)
-                    except json.JSONDecodeError:
-                        ssleague = json.loads(decrypt_cbc(await r.text()))
+            credentials["version"] = await self.get_active_version(credentials)
+            if credentials["type"] in (0, 1):
+                oid, key = await self.login(apiUrl, credentials)
+            else:
+                oid, key = await self.login_dalcom_id(apiUrl, credentials)
+            ssleague = await self.get_ssleague(apiUrl, oid, key)
 
             curday = ssleague["result"]["curday"]
             music_list = ssleague["result"]["musicList"]
@@ -141,7 +109,7 @@ class PinSSL(commands.Cog):
                 self.bot.user.name,  # type: ignore[union-attr]
             )
 
-            pin_channels = game_details["pinChannelIds"]
+            pin_channels = {540849436868214784: 1343840449357418516}
             pin_roles = game_details["pinRoles"]
             for guild_id, channel_id in pin_channels.items():
                 if not channel_id:
@@ -166,6 +134,81 @@ class PinSSL(commands.Cog):
 
         with open(CREDENTIALS_DATA, "w") as f:
             json.dump(all_credentials, f, indent=4)
+
+    async def get_active_version(self, credentials: dict) -> str:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                url=credentials["manifest"].format(**credentials),
+            ) as r:
+                manifest = await r.json(content_type=None)
+                return str(
+                    max(
+                        Version(credentials["version"]),
+                        Version(manifest["ActiveVersion_Android"]),
+                        Version(manifest["ActiveVersion_IOS"]),
+                    )
+                )
+
+    async def get_ssleague(self, apiUrl: str, oid: int, key: str) -> dict:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                url=apiUrl,
+                headers=SUPERSTAR_HEADERS,
+                data=encrypt_cbc(
+                    f'{"{"}"class":"StarLeague","method":"getWeekPlayMusic",'
+                    f'"params":[{oid},"{key}"]{"}"}'
+                ),
+            ) as r:
+                try:
+                    ssleague = await r.json(content_type=None)
+                except json.JSONDecodeError:
+                    ssleague = json.loads(decrypt_cbc(await r.text()))
+        return ssleague
+
+    async def login(self, apiUrl: str, credentials: dict) -> tuple[int, str]:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                url=apiUrl,
+                headers=SUPERSTAR_HEADERS,
+                data=encrypt_cbc(credentials["account"].format(**credentials)),
+            ) as r:
+                try:
+                    account = await r.json(content_type=None)
+                except json.JSONDecodeError:
+                    account = json.loads(decrypt_cbc(await r.text()))
+
+        oid = account["result"]["user"]["objectID"]
+        key = account["invoke"][0]["params"][0]
+        return oid, key
+
+    async def login_dalcom_id(self, apiUrl: str, credentials: dict) -> tuple[int, str]:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                url="https://oauth.dalcomsoft.net/v1/token",
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": "Basic bnZQb1RweVg4WVlyUlZERE85Zkc6WVBrQklrNFdhcQ==",
+                },
+                data=f'{{"id":"{credentials["id"]}","pass":"{credentials["pass"]}","grant_type":"password"}}',
+            ) as r:
+                dalcom_id = await r.json(content_type=None)
+                access_token = dalcom_id["data"]["access_token"]
+
+            async with session.post(
+                url=apiUrl,
+                headers=SUPERSTAR_HEADERS,
+                data=encrypt_cbc(
+                    credentials["account"].format(access_token, **credentials)
+                ),
+            ) as r:
+                try:
+                    account = await r.json(content_type=None)
+                except json.JSONDecodeError:
+                    account = json.loads(decrypt_cbc(await r.text()))
+
+        oid = account["result"]["user"]["objectID"]
+        key = account["invoke"][0]["params"][0]
+        return oid, key
 
     @pin_ssl.before_loop
     async def before_loop(self) -> None:
