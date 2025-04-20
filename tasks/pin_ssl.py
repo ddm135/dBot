@@ -192,7 +192,7 @@ class PinSSL(commands.Cog):
                 data=(
                     f'{{"id":"{credentials["id"]}",'
                     f'"pass":"{credentials["pass"]}",'
-                    f'"grant_type":"password"}}',
+                    f'"grant_type":"password"}}'
                 ),
             ) as r:
                 dalcom_id = await r.json(content_type=None)
