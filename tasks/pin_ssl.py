@@ -1,6 +1,7 @@
 import json
 from datetime import datetime, time
 from typing import TYPE_CHECKING
+from urllib.parse import quote_plus
 
 import aiohttp
 import discord
@@ -191,8 +192,18 @@ class PinSSL(commands.Cog):
                 },
                 data=f'{{"id":"{credentials["id"]}","pass":"{credentials["pass"]}","grant_type":"password"}}',
             ) as r:
-                dalcom_id = await r.json(content_type=None)
-                access_token = dalcom_id["data"]["access_token"]
+                tokens = await r.json(content_type=None)
+                access_token = tokens["data"]["access_token"]
+                parsed_access_token = quote_plus(access_token)
+
+            async with session.get(
+                url=f"https://oauth.dalcomsoft.net/v1/user?access_token={parsed_access_token}",
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": "Basic bnZQb1RweVg4WVlyUlZERE85Zkc6WVBrQklrNFdhcQ==",
+                },
+            ) as r:
+                pass
 
             async with session.post(
                 url=apiUrl,
