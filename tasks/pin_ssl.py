@@ -198,7 +198,9 @@ class PinSSL(commands.Cog):
                 url=apiUrl,
                 headers=SUPERSTAR_HEADERS,
                 data=encrypt_cbc(
-                    credentials["account"].format(access_token, **credentials)
+                    credentials["account"].format(
+                        access_token=access_token, **credentials
+                    )
                 ),
             ) as r:
                 try:
