@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 import aiohttp
 import discord
 from discord.ext import commands, tasks
+from packaging.version import Version
 
 from statics.consts import CREDENTIALS_DATA, GAMES, SUPERSTAR_HEADERS
 from statics.helpers import (
@@ -38,8 +39,9 @@ class PinSSL(commands.Cog):
         with open(CREDENTIALS_DATA, "r") as f:
             all_credentials = json.load(f)
 
-        for game in self.ALLOWED_GAME:
-            game_details = GAMES[game]
+        for game, game_details in GAMES.items():
+            if not game_details["pinChannelIds"] or game not in all_credentials:
+                continue
 
             timezone = game_details["timezone"]
             offset = game_details["resetOffset"]
@@ -47,27 +49,36 @@ class PinSSL(commands.Cog):
             if current_time.hour != 0:
                 continue
 
+            apiUrl = game_details["api"]
+
             credentials = all_credentials[game]
             async with aiohttp.ClientSession() as session:
+                async with session.get(
+                    url=credentials["manifest"].format(**credentials),
+                ) as r:
+                    manifest = await r.json(content_type=None)
+                    credentials["version"] = str(
+                        max(
+                            Version(credentials["version"]),
+                            Version(manifest["ActiveVersion_Android"]),
+                            Version(manifest["ActiveVersion_IOS"]),
+                        )
+                    )
+
                 async with session.post(
-                    url=game_details["api"],
+                    url=apiUrl,
                     headers=SUPERSTAR_HEADERS,
-                    data=encrypt_cbc(
-                        f'{"{"}"class":"Account","method":"login","params":[1,'
-                        f'"{credentials["email"]}","{credentials["password"]}"'
-                        f',1,"{credentials["version"]}",false,-1]{"}"}'
-                    ),
+                    data=encrypt_cbc(credentials["account"].format(**credentials)),
                 ) as r:
                     try:
                         account = await r.json(content_type=None)
                     except json.JSONDecodeError:
                         account = json.loads(decrypt_cbc(await r.text()))
-
                 oid = account["result"]["user"]["objectID"]
                 key = account["invoke"][0]["params"][0]
 
                 async with session.post(
-                    url=game_details["api"],
+                    url=apiUrl,
                     headers=SUPERSTAR_HEADERS,
                     data=encrypt_cbc(
                         f'{"{"}"class":"StarLeague","method":"getWeekPlayMusic",'
@@ -152,6 +163,9 @@ class PinSSL(commands.Cog):
                     pin_channel,
                     new_pin,
                 )
+
+        with open(CREDENTIALS_DATA, "w") as f:
+            json.dump(all_credentials, f, indent=4)
 
     @pin_ssl.before_loop
     async def before_loop(self) -> None:
