@@ -34,7 +34,7 @@ class PinSSL(commands.Cog):
         self.pin_ssl.cancel()
         await super().cog_unload()
 
-    @tasks.loop(time=[time(hour=h, second=1) for h in range(24)])
+    @tasks.loop(minutes=1)
     async def pin_ssl(self) -> None:
         with open(CREDENTIALS_DATA, "r") as f:
             all_credentials = json.load(f)
@@ -147,7 +147,7 @@ class PinSSL(commands.Cog):
                 if not channel_id:
                     continue
 
-                pin_channel = self.bot.get_channel(channel_id)
+                pin_channel = {540849436868214784: 1343840449357418516}
                 assert isinstance(pin_channel, discord.TextChannel)
                 new_pin = await pin_new_ssl(embed, pin_channel)
                 topic = (
