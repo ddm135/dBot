@@ -21,7 +21,6 @@ if TYPE_CHECKING:
 
 
 class PinSSL(commands.Cog):
-    ALLOWED_GAME = ["SM_JP"]
 
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
@@ -34,7 +33,7 @@ class PinSSL(commands.Cog):
         self.pin_ssl.cancel()
         await super().cog_unload()
 
-    @tasks.loop(minutes=1)
+    @tasks.loop(time=[time(hour=h, second=1) for h in range(24)])
     async def pin_ssl(self) -> None:
         with open(CREDENTIALS_DATA, "r") as f:
             all_credentials = json.load(f)
@@ -46,8 +45,8 @@ class PinSSL(commands.Cog):
             timezone = game_details["timezone"]
             offset = game_details["resetOffset"]
             current_time = datetime.now(tz=timezone) - offset
-            # if current_time.hour != 0:
-            #     continue
+            if current_time.hour != 0:
+                continue
 
             apiUrl = game_details["api"]
             credentials = all_credentials[game]
@@ -109,7 +108,7 @@ class PinSSL(commands.Cog):
                 self.bot.user.name,  # type: ignore[union-attr]
             )
 
-            pin_channels = {540849436868214784: 1343840449357418516}
+            pin_channels = game_details["pinChannelIds"]
             pin_roles = game_details["pinRoles"]
             for guild_id, channel_id in pin_channels.items():
                 if not channel_id:
