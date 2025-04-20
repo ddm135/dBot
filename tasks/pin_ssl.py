@@ -45,7 +45,7 @@ class PinSSL(commands.Cog):
             timezone = game_details["timezone"]
             offset = game_details["resetOffset"]
             current_time = datetime.now(tz=timezone) - offset
-            if current_time.hour != 22:
+            if current_time.hour != 0:
                 continue
 
             apiUrl = game_details["api"]
@@ -108,7 +108,7 @@ class PinSSL(commands.Cog):
                 self.bot.user.name,  # type: ignore[union-attr]
             )
 
-            pin_channels = {540849436868214784: 1343840449357418516}
+            pin_channels = game_details["pinChannelIds"]
             pin_roles = game_details["pinRoles"]
             for guild_id, channel_id in pin_channels.items():
                 if not channel_id:
