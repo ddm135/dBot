@@ -37,7 +37,7 @@ class PinSSL(commands.Cog):
         self.pin_ssls.cancel()
         await super().cog_unload()
 
-    @tasks.loop(minutes=1)
+    @tasks.loop(time=[time(hour=h) for h in range(24)])
     async def pin_ssls(self) -> None:
         with open(CREDENTIALS_DATA, "r") as f:
             all_credentials = json.load(f)
@@ -58,8 +58,8 @@ class PinSSL(commands.Cog):
         timezone = game_details["timezone"]
         offset = game_details["resetOffset"]
         current_time = datetime.now(tz=timezone) - offset
-        # if current_time.hour != 0:
-        #     return
+        if current_time.hour != 0:
+            return
 
         apiUrl = game_details["api"]
         credentials["version"] = await self.get_active_version(credentials)
