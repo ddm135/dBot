@@ -1,3 +1,4 @@
+import asyncio
 import json
 from datetime import datetime, time
 from typing import TYPE_CHECKING
@@ -20,6 +21,7 @@ from statics.helpers import (
 
 if TYPE_CHECKING:
     from dBot import dBot
+    from statics.types import GameDetails
 
 
 class PinSSL(commands.Cog):
@@ -28,118 +30,119 @@ class PinSSL(commands.Cog):
         self.bot = bot
 
     async def cog_load(self) -> None:
-        self.pin_ssl.start()
+        self.pin_ssls.start()
         await super().cog_load()
 
     async def cog_unload(self) -> None:
-        self.pin_ssl.cancel()
+        self.pin_ssls.cancel()
         await super().cog_unload()
 
     @tasks.loop(time=[time(hour=h) for h in range(24)])
-    async def pin_ssl(self) -> None:
+    async def pin_ssls(self) -> None:
         with open(CREDENTIALS_DATA, "r") as f:
             all_credentials = json.load(f)
 
-        for game, game_details in GAMES.items():
-            if not game_details["pinChannelIds"] or game not in all_credentials:
-                continue
-
-            timezone = game_details["timezone"]
-            offset = game_details["resetOffset"]
-            current_time = datetime.now(tz=timezone) - offset
-            if current_time.hour != 0:
-                continue
-
-            apiUrl = game_details["api"]
-            credentials = all_credentials[game]
-            credentials["version"] = await self.get_active_version(credentials)
-            if credentials["isSNS"]:
-                if credentials["provider"] == 0:
-                    oid, key = await self.login_google(apiUrl, credentials)
-                elif credentials["provider"] == 3:
-                    oid, key = await self.login_dalcom_id(apiUrl, credentials)
-                else:
-                    continue
-            else:
-                oid, key = await self.login(apiUrl, credentials)
-            ssleague = await self.get_ssleague(apiUrl, oid, key)
-
-            curday = ssleague["result"]["curday"]
-            music_list = ssleague["result"]["musicList"]
-            music = next(music for music in music_list if music["day"] == curday)
-            song_id = music["music"]
-            ssl_song = self.bot.info_by_id[game][str(song_id)]
-
-            info_columns = game_details["infoColumns"]
-            artist_name_index = info_columns.index("artist_name")
-            song_name_index = info_columns.index("song_name")
-            duration_index = info_columns.index("duration")
-            skills_index = (
-                info_columns.index("skills") if "skills" in info_columns else None
-            )
-
-            artist_name = (
-                ssl_song[artist_name_index].replace(r"*", r"\*").replace(r"_", r"\_")
-            )
-            song_name = (
-                ssl_song[song_name_index].replace(r"*", r"\*").replace(r"_", r"\_")
-            )
-            duration = ssl_song[duration_index]
-            skills = ssl_song[skills_index] if skills_index is not None else None
-
-            color = game_details["color"]
-            image_url = None
-
-            msd_data = self.bot.info_msd[game]
-            for song in msd_data:
-                if song["code"] == song_id:
-                    color = int(song["albumBgColor"][:-2], 16)
-                    image_url = song["album"]
-                    break
-
-            if game_details["legacyUrlScheme"]:
-                url_data = self.bot.info_url[game]
-                for url in url_data:
-                    if url["code"] == image_url:
-                        image_url = url["url"]
-                        break
-
-            embed = generate_ssl_embed(
-                artist_name,
-                song_name,
-                duration,
-                image_url,
-                color,
-                skills,
-                current_time,
-                self.bot.user.name,  # type: ignore[union-attr]
-            )
-
-            pin_channels = game_details["pinChannelIds"]
-            pin_roles = game_details["pinRoles"]
-            for guild_id, channel_id in pin_channels.items():
-                if not channel_id:
-                    continue
-
-                pin_channel = self.bot.get_channel(channel_id)
-                assert isinstance(pin_channel, discord.TextChannel)
-                new_pin = await pin_new_ssl(embed, pin_channel)
-                topic = (
-                    f"[{current_time.strftime("%m.%d.%y")}] {artist_name} - {song_name}"
-                )
-                if pin_role := pin_roles.get(guild_id):
-                    await pin_channel.send(f"<@&{pin_role}> {topic}")
-                else:
-                    await pin_channel.send(topic)
-                await pin_channel.edit(topic=topic)
-                await unpin_old_ssl(
-                    embed.title,  # type: ignore[arg-type]
-                    pin_channel,
-                    new_pin,
-                )
+        tasks = [
+            self.pin_ssl(game, game_details, all_credentials[game])
+            for game, game_details in GAMES.items()
+            if game_details["pinChannelIds"] and game in all_credentials
+        ]
+        await asyncio.gather(*tasks)
 
         with open(CREDENTIALS_DATA, "w") as f:
             json.dump(all_credentials, f, indent=4)
+
+    async def pin_ssl(
+        self, game: str, game_details: "GameDetails", credentials: dict
+    ) -> None:
+        timezone = game_details["timezone"]
+        offset = game_details["resetOffset"]
+        current_time = datetime.now(tz=timezone) - offset
+        if current_time.hour != 0:
+            return
+
+        apiUrl = game_details["api"]
+        credentials["version"] = await self.get_active_version(credentials)
+        if credentials["isSNS"]:
+            if credentials["provider"] == 0:
+                oid, key = await self.login_google(apiUrl, credentials)
+            elif credentials["provider"] == 3:
+                oid, key = await self.login_dalcom_id(apiUrl, credentials)
+            else:
+                return
+        else:
+            oid, key = await self.login(apiUrl, credentials)
+        ssleague = await self.get_ssleague(apiUrl, oid, key)
+
+        curday = ssleague["result"]["curday"]
+        music_list = ssleague["result"]["musicList"]
+        music = next(music for music in music_list if music["day"] == curday)
+        song_id = music["music"]
+        ssl_song = self.bot.info_by_id[game][str(song_id)]
+
+        info_columns = game_details["infoColumns"]
+        artist_name_index = info_columns.index("artist_name")
+        song_name_index = info_columns.index("song_name")
+        duration_index = info_columns.index("duration")
+        skills_index = (
+            info_columns.index("skills") if "skills" in info_columns else None
+        )
+
+        artist_name = (
+            ssl_song[artist_name_index].replace(r"*", r"\*").replace(r"_", r"\_")
+        )
+        song_name = ssl_song[song_name_index].replace(r"*", r"\*").replace(r"_", r"\_")
+        duration = ssl_song[duration_index]
+        skills = ssl_song[skills_index] if skills_index is not None else None
+
+        color = game_details["color"]
+        image_url = None
+
+        msd_data = self.bot.info_msd[game]
+        for song in msd_data:
+            if song["code"] == song_id:
+                color = int(song["albumBgColor"][:-2], 16)
+                image_url = song["album"]
+                break
+
+        if game_details["legacyUrlScheme"]:
+            url_data = self.bot.info_url[game]
+            for url in url_data:
+                if url["code"] == image_url:
+                    image_url = url["url"]
+                    break
+
+        embed = generate_ssl_embed(
+            artist_name,
+            song_name,
+            duration,
+            image_url,
+            color,
+            skills,
+            current_time,
+            self.bot.user.name,  # type: ignore[union-attr]
+        )
+
+        pin_channels = game_details["pinChannelIds"]
+        pin_roles = game_details["pinRoles"]
+        for guild_id, channel_id in pin_channels.items():
+            if not channel_id:
+                continue
+
+            pin_channel = self.bot.get_channel(channel_id)
+            assert isinstance(pin_channel, discord.TextChannel)
+            new_pin = await pin_new_ssl(embed, pin_channel)
+            topic = f"[{current_time.strftime("%m.%d.%y")}] {artist_name} - {song_name}"
+            if pin_role := pin_roles.get(guild_id):
+                await pin_channel.send(f"<@&{pin_role}> {topic}")
+            else:
+                await pin_channel.send(topic)
+            await pin_channel.edit(topic=topic)
+            await unpin_old_ssl(
+                embed.title,  # type: ignore[arg-type]
+                pin_channel,
+                new_pin,
+            )
 
     async def get_active_version(self, credentials: dict) -> str:
         async with aiohttp.ClientSession() as session:
@@ -235,7 +238,7 @@ class PinSSL(commands.Cog):
                 ssleague = await get_ss_json(r)
         return ssleague
 
-    @pin_ssl.before_loop
+    @pin_ssls.before_loop
     async def before_loop(self) -> None:
         await self.bot.wait_until_ready()
 
