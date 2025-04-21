@@ -47,7 +47,7 @@ class PinSSL(commands.Cog):
             for game, game_details in GAMES.items()
             if game_details["pinChannelIds"] and game in all_credentials
         ]
-        await asyncio.gather(*tasks)
+        await asyncio.gather(*tasks, return_exceptions=True)
 
         with open(CREDENTIALS_DATA, "w") as f:
             json.dump(all_credentials, f, indent=4)
