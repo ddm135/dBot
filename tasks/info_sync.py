@@ -94,7 +94,8 @@ class InfoSync(commands.Cog):
 
         self.bot.info_data_ready = True
 
-    async def get_a_json(self, api_url: str) -> dict[str, Any]:
+    @staticmethod
+    async def get_a_json(api_url: str) -> dict[str, Any]:
         async with aiohttp.ClientSession() as session:
             async with session.post(
                 url=api_url,
@@ -104,15 +105,18 @@ class InfoSync(commands.Cog):
                 ajs = await get_ss_json(r)
         return ajs
 
-    async def get_music_data(self, ajs: dict[str, Any]) -> list[dict[str, Any]]:
+    @classmethod
+    async def get_music_data(cls, ajs: dict[str, Any]) -> list[dict[str, Any]]:
         msd_url = ajs["result"]["context"]["MusicData"]["file"]
-        return await self.get_game_data(msd_url)
+        return await cls.get_game_data(msd_url)
 
-    async def get_url_data(self, ajs: dict[str, Any]) -> list[dict[str, Any]]:
+    @classmethod
+    async def get_url_data(cls, ajs: dict[str, Any]) -> list[dict[str, Any]]:
         url_url = ajs["result"]["context"]["URLs"]["file"]
-        return await self.get_game_data(url_url)
+        return await cls.get_game_data(url_url)
 
-    async def get_game_data(self, url: str) -> list[dict[str, Any]]:
+    @staticmethod
+    async def get_game_data(url: str) -> list[dict[str, Any]]:
         async with aiohttp.ClientSession() as session:
             async with session.get(url=url) as r:
                 msd_enc = b""

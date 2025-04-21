@@ -1,5 +1,5 @@
 from datetime import datetime, time
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import discord
 from discord.ext import commands, tasks
@@ -96,8 +96,8 @@ class NotifyBonus(commands.Cog):
                 if not artist_ping_list:
                     continue
 
-                birthday_bonuses: list[list[Any]] = []
-                album_bonuses: list[list[Any]] = []
+                birthday_bonuses = []
+                album_bonuses = []
                 notify_start = []
                 notify_end = []
                 last_birthday_start = None
@@ -163,7 +163,7 @@ class NotifyBonus(commands.Cog):
                             last_birthday_end,
                             last_birthday_start,
                         )
-                        if x is not None
+                        if x
                     ),
                     default=None,
                 )
@@ -176,7 +176,7 @@ class NotifyBonus(commands.Cog):
                             next_birthday_end,
                             next_birthday_start,
                         )
-                        if x is not None
+                        if x
                     ),
                     default=None,
                 )
@@ -204,10 +204,8 @@ class NotifyBonus(commands.Cog):
                     start_date = bonus[bonus_start_index]
                     end_date = bonus[bonus_end_index]
 
-                    song_start = max(
-                        x for x in (start_date, birthday_start) if x is not None
-                    )
-                    song_end = min(x for x in (end_date, birthday_end) if x is not None)
+                    song_start = max(x for x in (start_date, birthday_start) if x)
+                    song_end = min(x for x in (end_date, birthday_end) if x)
 
                     if song_start == current_date or song_end == current_date:
                         song_total = birthday_total + bonus[bonus_amount_index]

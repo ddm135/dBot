@@ -42,7 +42,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
         self.bot.pings[guild_id][word][user_id] = PingDetails(
             users=[], channels=[], count=0
         )
-        self.update_ping_data()
+        self.save_ping_data()
         return await itr.followup.send(
             f"Added to the ping list for `{word}` in this server!"
         )
@@ -69,7 +69,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
                 f"You are not pinged for `{word}` in this server."
             )
         self.bot.pings[guild_id][word].pop(user_id)
-        self.update_ping_data()
+        self.save_ping_data()
         return await itr.followup.send(
             f"Removed from the ping list for `{word}` in this server!"
         )
@@ -142,7 +142,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
         await itr.response.defer(ephemeral=True)
         guild_id = str(itr.guild_id)
         user_id = str(itr.user.id)
-        if word:
+        if word is not None:
             if user.id == itr.user.id:
                 return await itr.followup.send("You cannot ignore yourself.")
             if not self.bot.pings[guild_id][word][user_id]:
@@ -155,7 +155,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
                     f"for `{word}` in this server."
                 )
             self.bot.pings[guild_id][word][user_id]["users"].append(user.id)
-            self.update_ping_data()
+            self.save_ping_data()
             return await itr.followup.send(
                 f"Added {user.mention} to the ignore list "
                 f"for `{word}` in this server!"
@@ -170,7 +170,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
 
                 self.bot.pings[guild_id][word][user_id]["users"].append(user.id)
 
-            self.update_ping_data()
+            self.save_ping_data()
             return await itr.followup.send(
                 f"Added {user.mention} to the ignore list "
                 f"for all current word pings in this server!"
@@ -197,7 +197,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
         await itr.response.defer(ephemeral=True)
         guild_id = str(itr.guild_id)
         user_id = str(itr.user.id)
-        if word:
+        if word is not None:
             if not self.bot.pings[guild_id][word][user_id]:
                 return await itr.followup.send(
                     f"You are not pinged for `{word}` in this server."
@@ -208,7 +208,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
                     f"for `{word}` in this server."
                 )
             self.bot.pings[guild_id][word][user_id]["channels"].append(channel.id)
-            self.update_ping_data()
+            self.save_ping_data()
             return await itr.followup.send(
                 f"Added {channel.mention} to the ignore list "
                 f"for `{word}` in this server!"
@@ -223,7 +223,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
 
                 self.bot.pings[guild_id][word][user_id]["channels"].append(channel.id)
 
-            self.update_ping_data()
+            self.save_ping_data()
             return await itr.followup.send(
                 f"Added {channel.mention} to the ignore list "
                 f"for all current word pings in this server!"
@@ -255,7 +255,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
         await itr.response.defer(ephemeral=True)
         guild_id = str(itr.guild_id)
         user_id = str(itr.user.id)
-        if word:
+        if word is not None:
             if user.id == itr.user.id:
                 return await itr.followup.send("You cannot unignore yourself.")
             if not self.bot.pings[guild_id][word][user_id]:
@@ -268,7 +268,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
                     f"for `{word}` in this server."
                 )
             self.bot.pings[guild_id][word][user_id]["users"].remove(user.id)
-            self.update_ping_data()
+            self.save_ping_data()
             return await itr.followup.send(
                 f"Removed {user.mention} from the ignore list "
                 f"for `{word}` in this server!"
@@ -283,7 +283,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
 
                 self.bot.pings[guild_id][word][user_id]["users"].remove(user.id)
 
-            self.update_ping_data()
+            self.save_ping_data()
             return await itr.followup.send(
                 f"Removed {user.mention} from the ignore list "
                 f"for all current word pings in this server!"
@@ -310,7 +310,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
         await itr.response.defer(ephemeral=True)
         guild_id = str(itr.guild_id)
         user_id = str(itr.user.id)
-        if word:
+        if word is not None:
             if not self.bot.pings[guild_id][word][user_id]:
                 return await itr.followup.send(
                     f"You are not pinged for `{word}` in this server."
@@ -321,7 +321,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
                     f"for `{word}` in this server."
                 )
             self.bot.pings[guild_id][word][user_id]["channels"].remove(channel.id)
-            self.update_ping_data()
+            self.save_ping_data()
             return await itr.followup.send(
                 f"Removed {channel.mention} from the ignore list "
                 f"for `{word}` in this server!"
@@ -339,13 +339,13 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
 
                 self.bot.pings[guild_id][word][user_id]["channels"].remove(channel.id)
 
-            self.update_ping_data()
+            self.save_ping_data()
             return await itr.followup.send(
                 f"Removed {channel.mention} from the ignore list "
                 f"for all current word pings in this server!"
             )
 
-    def update_ping_data(self) -> None:
+    def save_ping_data(self) -> None:
         with open(PING_DATA, "w") as f:
             json.dump(self.bot.pings, f, indent=4)
 

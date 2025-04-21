@@ -75,7 +75,7 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
             if target_role.id not in self.bot.roles[user_id]:
                 return await itr.followup.send("You do not own this role.")
             self.bot.roles[user_id].remove(target_role.id)
-            self.update_role_data()
+            self.save_role_data()
             await itr.user.add_roles(target_role)
             await itr.followup.send(
                 f"Added {target_role.mention}!\n-# {self.NOTICE}",
@@ -123,7 +123,7 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
             if target_role not in user_roles:
                 return await itr.followup.send("You do not own this role.")
             self.bot.roles[user_id].append(target_role.id)
-            self.update_role_data()
+            self.save_role_data()
             await itr.user.remove_roles(target_role)
             await itr.followup.send(
                 f"Removed {target_role.mention}!\n-# {self.NOTICE}",
@@ -193,7 +193,7 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
             for r in remove_roles:
                 if r.id not in self.bot.roles[user_id]:
                     self.bot.roles[user_id].append(r.id)
-            self.update_role_data()
+            self.save_role_data()
             await itr.user.add_roles(*add_roles)
             await itr.user.remove_roles(*remove_roles)
 
@@ -256,7 +256,7 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
             silent=True,
         )
 
-    def update_role_data(self) -> None:
+    def save_role_data(self) -> None:
         with open(ROLE_DATA, "w") as f:
             json.dump(self.bot.roles, f, indent=4)
 

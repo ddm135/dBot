@@ -1,6 +1,6 @@
 import math
 from datetime import datetime, timedelta
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import discord
 from discord import app_commands
@@ -14,10 +14,9 @@ if TYPE_CHECKING:
     from dBot import dBot
     from statics.types import GameDetails
 
-STEP = 5
-
 
 class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings"):
+    STEP = 5
     GAME_CHOICES = [
         app_commands.Choice(name=game["name"], value=key)
         for key, game in GAMES.items()
@@ -76,8 +75,8 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         while tracking_date <= last_date:
             for artist in artists:
                 artist_name = artist.replace(r"*", r"\*").replace(r"_", r"\_")
-                birthday_bonuses: list[list[Any]] = []
-                album_bonuses: list[list[Any]] = []
+                birthday_bonuses = []
+                album_bonuses = []
                 last_birthday_start = None
                 last_birthday_end = None
                 next_birthday_start = None
@@ -138,7 +137,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                             last_birthday_end,
                             last_birthday_start,
                         )
-                        if x is not None
+                        if x
                     ),
                     default=None,
                 )
@@ -151,7 +150,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                             next_birthday_end,
                             next_birthday_start,
                         )
-                        if x is not None
+                        if x
                     ),
                     default=None,
                 )
@@ -183,10 +182,8 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                     start_date = bonus[bonus_start_index]
                     end_date = bonus[bonus_end_index]
 
-                    song_start = max(
-                        x for x in (start_date, birthday_start) if x is not None
-                    )
-                    song_end = min(x for x in (end_date, birthday_end) if x is not None)
+                    song_start = max(x for x in (start_date, birthday_start) if x)
+                    song_end = min(x for x in (end_date, birthday_end) if x)
 
                     if (song_start == tracking_date and start_check) or (
                         song_end == tracking_date and end_check
@@ -216,11 +213,11 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                 first_available_index = i
                 break
 
-        default_page = first_available_index // STEP + 1
-        max_page = math.ceil(len(week_bonuses) / STEP) or 1
+        default_page = first_available_index // self.STEP + 1
+        max_page = math.ceil(len(week_bonuses) / self.STEP) or 1
 
         msg = await itr.followup.send(
-            embed=create_embed(
+            embed=self.create_embed(
                 game_details,
                 week_bonuses,
                 first_date,
@@ -231,7 +228,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
             ),
             wait=True,
         )
-        view = BonusView(
+        view = self.BonusView(
             msg,
             game_details,
             first_date,
@@ -242,6 +239,126 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
             max_page,
         )
         await msg.edit(view=view)
+
+    class BonusView(discord.ui.View):
+
+        def __init__(
+            self,
+            message: discord.Message,
+            game_details: "GameDetails",
+            first_date: datetime,
+            last_date: datetime,
+            current_date: datetime,
+            bonuses: list[dict],
+            current_page: int,
+            max_page: int,
+        ) -> None:
+            self.message = message
+            self.game_details = game_details
+            self.bonuses = bonuses
+            self.first_date = first_date
+            self.last_date = last_date
+            self.current_date = current_date
+            self.current_page = current_page
+            self.max_page = max_page
+            super().__init__(timeout=60)
+
+        async def on_timeout(self) -> None:
+            for child in self.children:
+                if isinstance(child, discord.ui.Button):
+                    child.disabled = True
+            await self.message.edit(view=self)
+
+        async def update_message(self) -> None:
+            await self.message.edit(
+                embed=Bonus.create_embed(
+                    self.game_details,
+                    self.bonuses,
+                    self.first_date,
+                    self.last_date,
+                    self.current_date,
+                    self.current_page,
+                    self.max_page,
+                ),
+                view=self,
+            )
+
+        @discord.ui.button(label="Previous Page", style=discord.ButtonStyle.secondary)
+        async def previous_page(
+            self, itr: discord.Interaction["dBot"], button: discord.ui.Button
+        ) -> None:
+            await itr.response.defer()
+            self.current_page -= 1
+            if self.current_page < 1:
+                self.current_page = self.max_page
+            await self.update_message()
+
+        @discord.ui.button(label="Next Page", style=discord.ButtonStyle.primary)
+        async def next_page(
+            self, itr: discord.Interaction["dBot"], button: discord.ui.Button
+        ) -> None:
+            await itr.response.defer()
+            self.current_page += 1
+            if self.current_page > self.max_page:
+                self.current_page = 1
+            await self.update_message()
+
+    @classmethod
+    def create_embed(
+        cls,
+        game_details: "GameDetails",
+        bonuses: list[dict],
+        first_date: datetime,
+        last_date: datetime,
+        current_date: datetime,
+        current_page: int,
+        max_page: int,
+    ) -> discord.Embed:
+        end = current_page * cls.STEP
+        start = end - cls.STEP
+        filtered_bonuses = bonuses[start:end]
+        embed = discord.Embed(
+            title=(
+                f"{game_details["name"]} {current_date.strftime("%G-W%V")} Bonuses "
+                f"({first_date.strftime("%B %d")} - {last_date.strftime("%B %d")})"
+            ).replace(" 0", " "),
+            color=game_details["color"],
+        )
+        for bonus in filtered_bonuses:
+            embed.add_field(
+                name=(
+                    f"{("~~" if bonus["bonus_end"] < current_date
+                        else "" if bonus["bonus_start"] > current_date
+                        else ":white_check_mark: ")}"
+                    f"**{bonus["artist"]}**"
+                    f"{(f" {bonus["members"]}"
+                        if bonus["members"]
+                        and bonus["artist"] != bonus["members"]
+                        else "")}: "
+                    f"{(bonus["song"] if bonus["song"]
+                        else "All Songs :birthday:")}"
+                    f"{("" if not bonus["song"]
+                        else " :cd:" if bonus["bonus_amount"] == 3
+                        else " :birthday: :dvd:")}"
+                    f"{"~~" if bonus["bonus_end"] < current_date else ""}"
+                ),
+                value=(
+                    f"{"~~" if bonus["bonus_end"] < current_date else ""}"
+                    f"{bonus["bonus_amount"]}% | "
+                    f"{bonus["bonus_start"].strftime("%B %d").replace(" 0", " ")} -"
+                    f" {bonus["bonus_end"].strftime("%B %d").replace(" 0", " ")} | "
+                    f"{("Expired" if bonus["bonus_end"] < current_date
+                        else f"Available <t:{int(bonus["bonus_start"].timestamp())}:R>"
+                        if bonus["bonus_start"] > current_date
+                        else f"Ends <t:"
+                        f"{int((bonus["bonus_end"] + ONE_DAY).timestamp())}:R>")}"
+                    f"{" :bangbang:" if bonus["bonus_start"] == last_date else ""}"
+                    f"{"~~" if bonus["bonus_end"] < current_date else ""}"
+                ),
+                inline=False,
+            )
+        embed.set_footer(text=f"Page {current_page}/{max_page}")
+        return embed
 
     bonus_ping = app_commands.Group(
         name="ping",
@@ -271,7 +388,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         """
 
         assert itr.command
-        await self._handle_bonus_command(itr, game.value, artist_name, itr.command.name)
+        await self.handle_bonus_command(itr, game.value, artist_name, itr.command.name)
 
     @bonus_ping.command(name="remove")
     @app_commands.autocomplete(artist_name=artist_autocomplete)
@@ -294,7 +411,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         """
 
         assert itr.command
-        await self._handle_bonus_command(itr, game.value, artist_name, itr.command.name)
+        await self.handle_bonus_command(itr, game.value, artist_name, itr.command.name)
 
     @bonus_ping.command(name="list")
     @app_commands.choices(game=GAME_CHOICES)
@@ -313,11 +430,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
 
         await itr.response.defer(ephemeral=True)
         user_id = str(itr.user.id)
-
-        if game is None:
-            games = self.GAME_CHOICES
-        else:
-            games = [game]
+        games = [game] if game else self.GAME_CHOICES
 
         await itr.user.send("## Bonus Ping List")
         for game in games:
@@ -353,8 +466,8 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
             "Check your DMs for the list of artists you are pinged for!"
         )
 
-    async def _handle_bonus_command(
-        self,
+    @staticmethod
+    async def handle_bonus_command(
         itr: discord.Interaction["dBot"],
         game_key: str,
         artist_name: str,
@@ -372,18 +485,34 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         for i, row in enumerate(ping_data, start=1):
             _artist_name = row[artist_name_index]
             if _artist_name.lower() == artist_name.lower():
-                users = row[users_index].split(",")
+                users = set(row[users_index].split(","))
                 users.remove("") if "" in users else None
 
-                if not (
-                    message_prefix := self._update_artist_ping_list(
-                        operation, user_id, users
-                    )
-                ):
+                if operation == "add":
+                    if user_id not in users:
+                        users.add(user_id)
+                        message_prefix = "Added to"
+                    else:
+                        message_prefix = "Already in"
+                elif operation == "remove":
+                    if user_id in users:
+                        users.remove(user_id)
+                        message_prefix = "Removed from"
+                    else:
+                        message_prefix = "Already not in"
+                else:
+                    message_prefix = None
+
+                if not message_prefix:
                     return await itr.followup.send("Internal error.")
 
                 if not message_prefix.startswith("Already"):
-                    self._update_ping_data(game_details, users, i)
+                    update_sheet_data(
+                        game_details["pingId"],
+                        f"{game_details["pingWrite"]}{i}",
+                        parse_input=False,
+                        data=[[",".join(users)]],
+                    )
 
                 return await itr.followup.send(
                     f"{message_prefix} {_artist_name} ping list!"
@@ -392,160 +521,6 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         await itr.followup.send(
             f"{artist_name} is not a valid artist for {game_details["name"]}"
         )
-
-    def _update_artist_ping_list(
-        self,
-        operation: str,
-        user_id: str,
-        users: list[str],
-    ) -> str | None:
-        if operation == "add":
-            if user_id not in users:
-                users.append(user_id)
-                message_prefix = "Added to"
-            else:
-                message_prefix = "Already in"
-        elif operation == "remove":
-            if user_id in users:
-                users.remove(user_id)
-                message_prefix = "Removed from"
-            else:
-                message_prefix = "Already not in"
-        else:
-            message_prefix = None
-
-        return message_prefix
-
-    def _update_ping_data(
-        self,
-        game_details: "GameDetails",
-        users: list[str],
-        artist_index: int,
-    ) -> None:
-        update_sheet_data(
-            game_details["pingId"],
-            f"{game_details["pingWrite"]}{artist_index}",
-            parse_input=False,
-            data=[[",".join(users)]],
-        )
-
-
-class BonusView(discord.ui.View):
-
-    def __init__(
-        self,
-        message: discord.Message,
-        game_details: "GameDetails",
-        first_date: datetime,
-        last_date: datetime,
-        current_date: datetime,
-        bonuses: list[dict],
-        current_page: int,
-        max_page: int,
-    ) -> None:
-        self.message = message
-        self.game_details = game_details
-        self.bonuses = bonuses
-        self.first_date = first_date
-        self.last_date = last_date
-        self.current_date = current_date
-        self.current_page = current_page
-        self.max_page = max_page
-        super().__init__(timeout=60)
-
-    async def on_timeout(self) -> None:
-        for child in self.children:
-            if isinstance(child, discord.ui.Button):
-                child.disabled = True
-        await self.message.edit(view=self)
-
-    async def update_message(self) -> None:
-        await self.message.edit(
-            embed=create_embed(
-                self.game_details,
-                self.bonuses,
-                self.first_date,
-                self.last_date,
-                self.current_date,
-                self.current_page,
-                self.max_page,
-            ),
-            view=self,
-        )
-
-    @discord.ui.button(label="Previous Page", style=discord.ButtonStyle.secondary)
-    async def previous_page(
-        self, itr: discord.Interaction["dBot"], button: discord.ui.Button
-    ) -> None:
-        await itr.response.defer()
-        self.current_page -= 1
-        if self.current_page < 1:
-            self.current_page = self.max_page
-        await self.update_message()
-
-    @discord.ui.button(label="Next Page", style=discord.ButtonStyle.primary)
-    async def next_page(
-        self, itr: discord.Interaction["dBot"], button: discord.ui.Button
-    ) -> None:
-        await itr.response.defer()
-        self.current_page += 1
-        if self.current_page > self.max_page:
-            self.current_page = 1
-        await self.update_message()
-
-
-def create_embed(
-    game_details: "GameDetails",
-    bonuses: list[dict],
-    first_date: datetime,
-    last_date: datetime,
-    current_date: datetime,
-    current_page: int,
-    max_page: int,
-) -> discord.Embed:
-    end = current_page * STEP
-    start = end - STEP
-    filtered_bonuses = bonuses[start:end]
-    embed = discord.Embed(
-        title=(
-            f"{game_details["name"]} {current_date.strftime("%G-W%V")} Bonuses "
-            f"({first_date.strftime("%B %d")} - {last_date.strftime("%B %d")})"
-        ).replace(" 0", " "),
-        color=game_details["color"],
-    )
-    for bonus in filtered_bonuses:
-        embed.add_field(
-            name=(
-                f"{("~~" if bonus["bonus_end"] < current_date
-                    else "" if bonus["bonus_start"] > current_date
-                    else ":white_check_mark: ")}"
-                f"**{bonus["artist"]}**"
-                f"{(f" {bonus["members"]}"
-                    if bonus["members"] and bonus["artist"] != bonus["members"]
-                    else "")}: "
-                f"{bonus["song"] if bonus["song"] else "All Songs :birthday:"}"
-                f"{("" if not bonus["song"]
-                    else " :cd:" if bonus["bonus_amount"] == 3
-                    else " :birthday: :dvd:")}"
-                f"{"~~" if bonus["bonus_end"] < current_date else ""}"
-            ),
-            value=(
-                f"{"~~" if bonus["bonus_end"] < current_date else ""}"
-                f"{bonus["bonus_amount"]}% | "
-                f"{bonus["bonus_start"].strftime("%B %d").replace(" 0", " ")} "
-                f"- {bonus["bonus_end"].strftime("%B %d").replace(" 0", " ")} | "
-                f"{("Expired" if bonus["bonus_end"] < current_date
-                    else f"Available <t:{int(bonus["bonus_start"].timestamp())}:R>"
-                    if bonus["bonus_start"] > current_date
-                    else f"Ends <t:{int((bonus["bonus_end"] + ONE_DAY).timestamp())}"
-                    f":R>")}"
-                f"{" :bangbang:" if bonus["bonus_start"] == last_date else ""}"
-                f"{"~~" if bonus["bonus_end"] < current_date else ""}"
-            ),
-            inline=False,
-        )
-    embed.set_footer(text=f"Page {current_page}/{max_page}")
-    return embed
 
 
 async def setup(bot: "dBot") -> None:

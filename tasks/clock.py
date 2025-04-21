@@ -14,10 +14,10 @@ class Clock(commands.Cog):
     STEP = 1
     TIMEZONE_ITEMS = tuple(TIMEZONES.items())
     TIMEZONE_COUNT = len(TIMEZONES)
-    counter = 0
 
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
+        self.counter = 0
 
     async def cog_load(self) -> None:
         self.clock.start()

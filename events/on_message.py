@@ -43,7 +43,7 @@ class OnMessage(commands.Cog):
 
     @commands.Cog.listener("on_message")
     async def word_ping(self, message: discord.Message) -> None:
-        if message.guild is None or message.author.bot:
+        if not message.guild or message.author.bot:
             return
 
         guild_id = str(message.guild.id)
@@ -69,7 +69,7 @@ class OnMessage(commands.Cog):
                     continue
 
                 user = await self.bot.fetch_user(user_id_int)
-                if user is None:
+                if not user:
                     continue
 
                 self.bot.pings[guild_id][word][user_id]["count"] += 1

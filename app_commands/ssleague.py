@@ -15,7 +15,6 @@ from statics.helpers import generate_ssl_embed, pin_new_ssl, unpin_old_ssl
 
 if TYPE_CHECKING:
     from dBot import dBot
-    from statics.types import GameDetails
 
 
 @app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)
@@ -62,35 +61,26 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             )
 
         game = game_choice.value
-        game_details = GAMES[game]
         assert (guild_id := itr.guild_id)
-        pin_channel_id = game_details["pinChannelIds"].get(guild_id)
-        if not pin_channel_id:
-            return await itr.followup.send(
-                f"Pin channel for {game_choice.name} is not set for this server.",
-            )
-
-        info_columns = game_details["infoColumns"]
-        song_id_index = info_columns.index("song_id")
-        duration_index = info_columns.index("duration")
-        skills_index = (
-            info_columns.index("skills") if "skills" in info_columns else None
-        )
 
         ssl_song = self.bot.info_by_name[game][artist_name][song_name]
         if not ssl_song:
             return await itr.followup.send("Song not found.")
 
-        await self.handle_ssl_command(
-            itr,
-            artist_name,
-            song_name,
-            int(ssl_song[song_id_index]),
-            ssl_song[duration_index],
-            ssl_song[skills_index] if skills_index is not None else None,
-            pin_channel_id,
-            game_details,
+        pinned = await self.handle_ssl_command(
+            game,
+            ssl_song,
+            guild_id,
+            itr.user.name,
+            artist_name=artist_name,
+            song_name=song_name,
         )
+
+        if not pinned:
+            return await itr.followup.send(
+                f"Pin channel for {game_choice.name} is not set for this server.",
+            )
+        await itr.followup.send("Pinned!")
 
     @app_commands.command()
     @app_commands.choices(game_choice=GAME_CHOICES)
@@ -121,55 +111,58 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             )
 
         game = game_choice.value
-        game_details = GAMES[game]
         assert (guild_id := itr.guild_id)
-        pin_channel_id = game_details["pinChannelIds"].get(guild_id)
-        if not pin_channel_id:
-            return await itr.followup.send(
-                f"Pin channel for {game_choice.name} is not set for this server.",
-            )
-
-        info_columns = game_details["infoColumns"]
-        artist_name_index = info_columns.index("artist_name")
-        song_name_index = info_columns.index("song_name")
-        duration_index = info_columns.index("duration")
-        skills_index = (
-            info_columns.index("skills") if "skills" in info_columns else None
-        )
 
         ssl_song = self.bot.info_by_id[game][song_id]
         if not ssl_song:
             return await itr.followup.send("Song not found.")
 
-        await self.handle_ssl_command(
-            itr,
-            ssl_song[artist_name_index],
-            ssl_song[song_name_index],
-            int(song_id),
-            ssl_song[duration_index],
-            ssl_song[skills_index] if skills_index is not None else None,
-            pin_channel_id,
-            game_details,
+        pinned = await self.handle_ssl_command(
+            game,
+            ssl_song,
+            guild_id,
+            itr.user.name,
+            song_id=int(song_id),
         )
+
+        if not pinned:
+            return await itr.followup.send(
+                f"Pin channel for {game_choice.name} is not set for this server.",
+            )
+        await itr.followup.send("Pinned!")
 
     async def handle_ssl_command(
         self,
-        itr: discord.Interaction["dBot"],
-        artist_name: str,
-        song_name: str,
-        song_id: int,
-        duration: str,
-        skills: str | None,
-        pin_channel_id: int,
-        game_details: "GameDetails",
-    ) -> None:
-        game = itr.namespace.game
+        game: str,
+        ssl_song: list[str],
+        guild_id: int,
+        pinner: str,
+        *,
+        artist_name: str | None = None,
+        song_name: str | None = None,
+        song_id: int | None = None,
+    ) -> bool:
+        game_details = GAMES[game]
+
+        pin_channel_id = game_details["pinChannelIds"].get(guild_id)
+        if not pin_channel_id:
+            return False
+        pin_role = game_details["pinRoles"].get(guild_id)
+
+        info_columns = game_details["infoColumns"]
+        if artist_name is None:
+            artist_name = ssl_song[info_columns.index("artist_name")]
+        if song_name is None:
+            song_name = ssl_song[info_columns.index("song_name")]
+        if song_id is None:
+            song_id = int(ssl_song[info_columns.index("song_id")])
+
         artist_name = artist_name.replace(r"*", r"\*").replace(r"_", r"\_")
         song_name = song_name.replace(r"*", r"\*").replace(r"_", r"\_")
-        timezone = game_details["timezone"]
-        offset = game_details["resetOffset"]
-        assert (guild_id := itr.guild_id)
-        pin_role = game_details["pinRoles"].get(guild_id)
+        duration = ssl_song[info_columns.index("duration")]
+        skills = (
+            ssl_song[info_columns.index("skills")] if "skills" in info_columns else None
+        )
 
         color = game_details["color"]
         image_url = None
@@ -188,7 +181,10 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
                     image_url = url["url"]
                     break
 
+        timezone = game_details["timezone"]
+        offset = game_details["resetOffset"]
         current_time = datetime.now(tz=timezone) - offset
+
         embed = generate_ssl_embed(
             artist_name,
             song_name,
@@ -197,11 +193,10 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             color,
             skills,
             current_time,
-            itr.user.name,
+            pinner,
         )
 
         pin_channel = self.bot.get_channel(pin_channel_id)
-
         assert isinstance(pin_channel, discord.TextChannel)
         new_pin = await pin_new_ssl(embed, pin_channel)
         topic = f"[{current_time.strftime("%m.%d.%y")}] {artist_name} - {song_name}"
@@ -210,12 +205,13 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         else:
             await pin_channel.send(topic)
         await pin_channel.edit(topic=topic)
-        await itr.followup.send("Pinned!")
         await unpin_old_ssl(
             embed.title,  # type: ignore[arg-type]
             pin_channel,
             new_pin,
         )
+
+        return True
 
     async def cog_app_command_error(
         self,

@@ -44,7 +44,8 @@ class Memes(commands.Cog):
         diff = self.days_since(self.BONUSBOT_DEATH)
         await ctx.send(f"It has been {diff} days since bonusBot's death.")
 
-    def days_since(self, date: datetime) -> int:
+    @staticmethod
+    def days_since(date: datetime) -> int:
         current = datetime.now(tz=date.tzinfo)
         diff = current - date
         return diff.days

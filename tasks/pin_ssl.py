@@ -21,7 +21,6 @@ from statics.helpers import (
 
 if TYPE_CHECKING:
     from dBot import dBot
-    from statics.types import GameDetails
 
 
 class PinSSL(commands.Cog):
@@ -43,7 +42,7 @@ class PinSSL(commands.Cog):
             all_credentials = json.load(f)
 
         tasks = [
-            self.pin_ssl(game, game_details, all_credentials[game])
+            self.pin_ssl(game, all_credentials[game])
             for game, game_details in GAMES.items()
             if game_details["pinChannelIds"] and game in all_credentials
         ]
@@ -52,9 +51,8 @@ class PinSSL(commands.Cog):
         with open(CREDENTIALS_DATA, "w") as f:
             json.dump(all_credentials, f, indent=4)
 
-    async def pin_ssl(
-        self, game: str, game_details: "GameDetails", credentials: dict
-    ) -> None:
+    async def pin_ssl(self, game: str, credentials: dict) -> None:
+        game_details = GAMES[game]
         timezone = game_details["timezone"]
         offset = game_details["resetOffset"]
         current_time = datetime.now(tz=timezone) - offset
@@ -144,7 +142,8 @@ class PinSSL(commands.Cog):
                 new_pin,
             )
 
-    async def get_active_version(self, credentials: dict) -> str:
+    @staticmethod
+    async def get_active_version(credentials: dict) -> str:
         async with aiohttp.ClientSession() as session:
             async with session.get(
                 url=credentials["manifest"].format(**credentials),
@@ -158,7 +157,8 @@ class PinSSL(commands.Cog):
                     )
                 )
 
-    async def login(self, apiUrl: str, credentials: dict) -> tuple[int, str]:
+    @staticmethod
+    async def login(apiUrl: str, credentials: dict) -> tuple[int, str]:
         async with aiohttp.ClientSession() as session:
             async with session.post(
                 url=apiUrl,
@@ -171,7 +171,8 @@ class PinSSL(commands.Cog):
         key = account["invoke"][0]["params"][0]
         return oid, key
 
-    async def login_google(self, apiUrl: str, credentials: dict) -> tuple[int, str]:
+    @staticmethod
+    async def login_google(apiUrl: str, credentials: dict) -> tuple[int, str]:
         gCredentials = IDTokenCredentials.from_service_account_file(
             filename=credentials["service_account"],
             target_audience=credentials["target_audience"],
@@ -193,7 +194,8 @@ class PinSSL(commands.Cog):
         key = account["invoke"][0]["params"][0]
         return oid, key
 
-    async def login_dalcom_id(self, apiUrl: str, credentials: dict) -> tuple[int, str]:
+    @staticmethod
+    async def login_dalcom_id(apiUrl: str, credentials: dict) -> tuple[int, str]:
         async with aiohttp.ClientSession() as session:
             async with session.post(
                 url="https://oauth.dalcomsoft.net/v1/token",
@@ -225,7 +227,8 @@ class PinSSL(commands.Cog):
         key = account["invoke"][0]["params"][0]
         return oid, key
 
-    async def get_ssleague(self, apiUrl: str, oid: int, key: str) -> dict:
+    @staticmethod
+    async def get_ssleague(apiUrl: str, oid: int, key: str) -> dict:
         async with aiohttp.ClientSession() as session:
             async with session.post(
                 url=apiUrl,

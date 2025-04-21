@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from discord.ext import commands, tasks
 from googleapiclient.http import MediaFileUpload
 
-from statics.consts import PING_DATA, ROLE_DATA
+from statics.consts import CREDENTIALS_DATA, PING_DATA, ROLE_DATA
 from statics.helpers import (
     create_drive_data_file,
     get_drive_data_file,
@@ -20,8 +20,8 @@ if TYPE_CHECKING:
 
 
 class DataSync(commands.Cog):
-    data = [PING_DATA, ROLE_DATA]
-    data_folder = "1yugfZQu3T8G9sC6WQR_YzK7bXhpdXoy4"
+    DATA = [PING_DATA, ROLE_DATA, CREDENTIALS_DATA]
+    FOLDER = "1yugfZQu3T8G9sC6WQR_YzK7bXhpdXoy4"
     LOGGER = logging.getLogger(__name__)
 
     def __init__(self, bot: "dBot") -> None:
@@ -37,13 +37,14 @@ class DataSync(commands.Cog):
         await self.data_upload()
         await super().cog_unload()
 
-    def data_download(self) -> None:
+    @classmethod
+    def data_download(cls) -> None:
         drive_files = get_drive_data_files()
-        for data in self.data:
+        for data in cls.DATA:
             if data.exists():
                 continue
 
-            self.LOGGER.info(f"Downloading {data.name}...")
+            cls.LOGGER.info(f"Downloading {data.name}...")
             for file in drive_files["files"]:
                 if file["name"] == data.name:
                     get_drive_data_file(file["id"], data)
@@ -52,7 +53,7 @@ class DataSync(commands.Cog):
     @tasks.loop(time=time(hour=10))
     async def data_upload(self) -> None:
         drive_files = get_drive_data_files()
-        for data in self.data:
+        for data in self.DATA:
             self.LOGGER.info(f"Uploading {data.name}...")
             media = MediaFileUpload(data)
             for file in drive_files["files"]:
@@ -62,7 +63,7 @@ class DataSync(commands.Cog):
             else:
                 metadata = {
                     "name": data.name,
-                    "parents": [self.data_folder],
+                    "parents": [self.FOLDER],
                 }
                 create_drive_data_file(
                     data=media,

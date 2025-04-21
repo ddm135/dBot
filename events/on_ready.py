@@ -11,6 +11,7 @@ from statics.consts import STATUS_CHANNEL
 
 
 class OnReady(commands.Cog):
+
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
 
