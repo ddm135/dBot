@@ -47,23 +47,22 @@ TIMEZONES = {
 }
 
 EXTENSIONS = (
-    "commands.administrative",
     "events.on_message",
     "events.on_ready",
-    "app_commands.bonus",
+    "commands.administrative",
+    "tasks.data_sync",
     "app_commands.ping",
     "app_commands.role",
+    "tasks.info_sync",
+    "tasks.pin_ssl",
     "app_commands.info",
     "app_commands.ssleague",
-    "tasks.notify_p8",
-    "tasks.notify_p9",
-    "tasks.clock",
-    "commands.memes",
-    "tasks.info_sync",
     "tasks.bonus_sync",
-    "tasks.data_sync",
+    "tasks.notify_bonus",
+    "app_commands.bonus",
+    "tasks.clock",
     "tasks.pinata",
-    "tasks.pin_ssl",
+    "commands.memes",
 )
 
 PING_DATA = Path("data/pings.json")

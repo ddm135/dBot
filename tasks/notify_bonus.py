@@ -4,47 +4,42 @@ from typing import TYPE_CHECKING, Any
 import discord
 from discord.ext import commands, tasks
 
-from statics.consts import GAMES, ONE_DAY, TIMEZONES
+from statics.consts import GAMES, ONE_DAY
 from statics.helpers import get_sheet_data
 
 if TYPE_CHECKING:
     from dBot import dBot
 
 
-class NotifyP8(commands.Cog):
+class NotifyBonus(commands.Cog):
 
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
 
     async def cog_load(self) -> None:
-        self.notify_p8.start()
+        self.notify_bonus.start()
         await super().cog_load()
 
     async def cog_unload(self) -> None:
-        self.notify_p8.cancel()
+        self.notify_bonus.cancel()
         await super().cog_unload()
 
-    @tasks.loop(
-        time=[
-            time(
-                hour=23,
-                minute=0,
-                second=0,
-                microsecond=0,
-                tzinfo=TIMEZONES["PHT"],
-            )
-        ]
-    )
-    async def notify_p8(self) -> None:
+    @tasks.loop(time=[time(hour=h) for h in range(24)])
+    async def notify_bonus(self) -> None:
         for game, game_details in GAMES.items():
-            if (timezone := game_details["timezone"]) not in (TIMEZONES["PHT"],):
+            if not game_details["bonusId"]:
                 continue
-            print(game_details["name"])
-            ping_columns = game_details["pingColumns"]
-            bonus_columns = game_details["bonusColumns"]
+
+            timezone = game_details["timezone"]
+            current_date = datetime.now(tz=timezone)
+            if current_date.hour != 23:
+                continue
+
+            game_name = game_details["name"]
+            print(game_name)
 
             current_date = (
-                datetime.now(tz=timezone).replace(
+                current_date.replace(
                     hour=0,
                     minute=0,
                     second=0,
@@ -53,10 +48,11 @@ class NotifyP8(commands.Cog):
                 + ONE_DAY
             )
             initial_msg = (
-                f"## Bonus Reminder for {game_details["name"]} on "
+                f"## Bonus Reminder for {game_name} on "
                 f"<t:{int(current_date.timestamp())}:f>"
             )
 
+            ping_columns = game_details["pingColumns"]
             ping_users_index = ping_columns.index("users")
             ping_artist_index = ping_columns.index("artist_name")
             ping_emblem_index = ping_columns.index("emblem")
@@ -76,6 +72,7 @@ class NotifyP8(commands.Cog):
             if not game_ping_dict:
                 continue
 
+            bonus_columns = game_details["bonusColumns"]
             member_name_index = bonus_columns.index("member_name")
             album_name_index = bonus_columns.index("album_name")
             song_name_index = bonus_columns.index("song_name")
@@ -273,16 +270,13 @@ class NotifyP8(commands.Cog):
                             name=artist.replace(r"*", r"\*").replace(r"_", r"\_"),
                             icon_url=artist_pings[ping_emblem_index] or None,
                         )
-                        # embed.set_footer(
-                        #     text="Today's bonuses are sent early as the bot "
-                        #     "won't be available 19:00 4/3 - 7:00 5/3 PHT"
-                        # )
+
                         await user.send(embed=embed, silent=True)
 
-    @notify_p8.before_loop
-    async def before_notify_p8(self) -> None:
+    @notify_bonus.before_loop
+    async def before_notify_bonus(self) -> None:
         await self.bot.wait_until_ready()
 
 
 async def setup(bot: "dBot") -> None:
-    await bot.add_cog(NotifyP8(bot))
+    await bot.add_cog(NotifyBonus(bot))
