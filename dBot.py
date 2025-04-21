@@ -94,7 +94,7 @@ class dBot(commands.Bot):
 intents = discord.Intents.default()
 intents.message_content = True
 bot = dBot(
-    command_prefix="db!",
+    command_prefix=["db!", "DB!", "dB!", "Db!"],
     help_command=None,
     intents=intents,
     status=discord.Status.dnd,

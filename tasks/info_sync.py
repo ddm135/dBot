@@ -8,7 +8,7 @@ import aiohttp
 from discord.ext import commands, tasks
 
 from statics.consts import A_JSON_BODY, GAMES, SUPERSTAR_HEADERS, TIMEZONES
-from statics.helpers import decrypt_cbc, decrypt_ecb, get_sheet_data
+from statics.helpers import decrypt_ecb, get_sheet_data, get_ss_json
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -101,10 +101,7 @@ class InfoSync(commands.Cog):
                 headers=SUPERSTAR_HEADERS,
                 data=A_JSON_BODY,
             ) as r:
-                try:
-                    ajs = await r.json(content_type=None)
-                except json.JSONDecodeError:
-                    ajs = json.loads(decrypt_cbc(await r.text()))
+                ajs = await get_ss_json(r)
         return ajs
 
     async def get_music_data(self, ajs: dict[str, Any]) -> list[dict[str, Any]]:

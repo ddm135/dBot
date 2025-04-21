@@ -56,23 +56,23 @@ class OnMessage(commands.Cog):
             if not re.search(regexp, message.content, flags=re.IGNORECASE):
                 continue
 
-            for owner in self.bot.pings[guild_id][word]:
-                _owner = int(owner)
+            for user_id in self.bot.pings[guild_id][word]:
+                user_id_int = int(user_id)
                 if (
-                    message.author.id == _owner
-                    or not self.bot.pings[guild_id][word][owner]
+                    message.author.id == user_id_int
+                    or not self.bot.pings[guild_id][word][user_id]
                     or message.author.id
-                    in self.bot.pings[guild_id][word][owner]["users"]
+                    in self.bot.pings[guild_id][word][user_id]["users"]
                     or message.channel.id
-                    in self.bot.pings[guild_id][word][owner]["channels"]
+                    in self.bot.pings[guild_id][word][user_id]["channels"]
                 ):
                     continue
 
-                user = await self.bot.fetch_user(_owner)
+                user = await self.bot.fetch_user(user_id_int)
                 if user is None:
                     continue
 
-                self.bot.pings[guild_id][word][owner]["count"] += 1
+                self.bot.pings[guild_id][word][user_id]["count"] += 1
                 with open(PING_DATA, "w") as f:
                     json.dump(self.bot.pings, f, indent=4)
 

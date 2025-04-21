@@ -55,18 +55,18 @@ class Info(commands.Cog):
         duration_index = game_details["infoColumns"].index("duration")
 
         if not artist_name:
-            _songs = self.bot.info_by_id[game_choice.value].values()
+            songs = self.bot.info_by_id[game_choice.value].values()
         else:
             if artist_name not in self.bot.info_by_name[game_choice.value]:
                 return await itr.followup.send("Artist not found.")
 
-            _songs = self.bot.info_by_name[game_choice.value][artist_name].values()
+            songs = self.bot.info_by_name[game_choice.value][artist_name].values()
 
-        songs = sorted(_songs, key=lambda x: x[duration_index])
+        sorted_songs = sorted(songs, key=lambda x: x[duration_index])
         msg = await itr.followup.send(
-            embed=create_embed(game_details, artist_name, songs), wait=True
+            embed=create_embed(game_details, artist_name, sorted_songs), wait=True
         )
-        view = InfoView(msg, game_details, artist_name, songs)
+        view = InfoView(msg, game_details, artist_name, sorted_songs)
         await msg.edit(view=view)
 
 

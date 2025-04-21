@@ -71,7 +71,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
 
         bonus_data = self.bot.bonus_data[game.value]
         artists = bonus_data.keys()
-        full_bonuses = []
+        week_bonuses = []
 
         while tracking_date <= last_date:
             for artist in artists:
@@ -176,8 +176,8 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                         "bonus_end": birthday_end,
                         "bonus_amount": birthday_total,
                     }
-                    if bonus_dict not in full_bonuses:
-                        full_bonuses.append(bonus_dict)
+                    if bonus_dict not in week_bonuses:
+                        week_bonuses.append(bonus_dict)
 
                 for bonus in album_bonuses:
                     start_date = bonus[bonus_start_index]
@@ -205,24 +205,24 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                             "bonus_end": song_end,
                             "bonus_amount": song_total,
                         }
-                        if bonus_dict not in full_bonuses:
-                            full_bonuses.append(bonus_dict)
+                        if bonus_dict not in week_bonuses:
+                            week_bonuses.append(bonus_dict)
             tracking_date += ONE_DAY
 
-        full_bonuses.sort(key=lambda x: (x["bonus_end"], x["bonus_start"]))
+        week_bonuses.sort(key=lambda x: (x["bonus_end"], x["bonus_start"]))
         first_available_index = 0
-        for i, _bonus in enumerate(full_bonuses):
+        for i, _bonus in enumerate(week_bonuses):
             if _bonus["bonus_end"] >= current_date:
                 first_available_index = i
                 break
 
         default_page = first_available_index // STEP + 1
-        max_page = math.ceil(len(full_bonuses) / STEP) or 1
+        max_page = math.ceil(len(week_bonuses) / STEP) or 1
 
         msg = await itr.followup.send(
             embed=create_embed(
                 game_details,
-                full_bonuses,
+                week_bonuses,
                 first_date,
                 last_date,
                 current_date,
@@ -237,7 +237,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
             first_date,
             last_date,
             current_date,
-            full_bonuses,
+            week_bonuses,
             default_page,
             max_page,
         )
@@ -343,7 +343,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                 description = description[:-1]
 
             embed = discord.Embed(
-                title=f"{game_details['name']}",
+                title=f"{game_details["name"]}",
                 description=description,
                 color=game_details["color"],
             )
@@ -509,7 +509,7 @@ def create_embed(
     embed = discord.Embed(
         title=(
             f"{game_details["name"]} {current_date.strftime("%G-W%V")} Bonuses "
-            f"({first_date.strftime('%B %d')} - {last_date.strftime('%B %d')})"
+            f"({first_date.strftime("%B %d")} - {last_date.strftime("%B %d")})"
         ).replace(" 0", " "),
         color=game_details["color"],
     )

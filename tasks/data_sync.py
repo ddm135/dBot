@@ -64,7 +64,10 @@ class DataSync(commands.Cog):
                     "name": data.name,
                     "parents": [self.data_folder],
                 }
-                create_drive_data_file(data=media, metadata=metadata)  # type: ignore
+                create_drive_data_file(
+                    data=media,
+                    metadata=metadata,  # type: ignore[arg-type]
+                )
 
     @data_upload.before_loop
     async def before_loop(self) -> None:

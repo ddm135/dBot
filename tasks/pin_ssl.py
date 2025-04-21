@@ -5,13 +5,15 @@ from typing import TYPE_CHECKING
 import aiohttp
 import discord
 from discord.ext import commands, tasks
+from google.auth.transport import requests
+from google.oauth2.service_account import IDTokenCredentials
 from packaging.version import Version
 
 from statics.consts import CREDENTIALS_DATA, GAMES, SUPERSTAR_HEADERS
 from statics.helpers import (
-    decrypt_cbc,
     encrypt_cbc,
     generate_ssl_embed,
+    get_ss_json,
     pin_new_ssl,
     unpin_old_ssl,
 )
@@ -51,10 +53,15 @@ class PinSSL(commands.Cog):
             apiUrl = game_details["api"]
             credentials = all_credentials[game]
             credentials["version"] = await self.get_active_version(credentials)
-            if credentials["type"] in (0, 1):
-                oid, key = await self.login(apiUrl, credentials)
+            if credentials["isSNS"]:
+                if credentials["provider"] == 0:
+                    oid, key = await self.login_google(apiUrl, credentials)
+                elif credentials["provider"] == 3:
+                    oid, key = await self.login_dalcom_id(apiUrl, credentials)
+                else:
+                    continue
             else:
-                oid, key = await self.login_dalcom_id(apiUrl, credentials)
+                oid, key = await self.login(apiUrl, credentials)
             ssleague = await self.get_ssleague(apiUrl, oid, key)
 
             curday = ssleague["result"]["curday"]
@@ -148,22 +155,6 @@ class PinSSL(commands.Cog):
                     )
                 )
 
-    async def get_ssleague(self, apiUrl: str, oid: int, key: str) -> dict:
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                url=apiUrl,
-                headers=SUPERSTAR_HEADERS,
-                data=encrypt_cbc(
-                    f'{"{"}"class":"StarLeague","method":"getWeekPlayMusic",'
-                    f'"params":[{oid},"{key}"]{"}"}'
-                ),
-            ) as r:
-                try:
-                    ssleague = await r.json(content_type=None)
-                except json.JSONDecodeError:
-                    ssleague = json.loads(decrypt_cbc(await r.text()))
-        return ssleague
-
     async def login(self, apiUrl: str, credentials: dict) -> tuple[int, str]:
         async with aiohttp.ClientSession() as session:
             async with session.post(
@@ -171,10 +162,29 @@ class PinSSL(commands.Cog):
                 headers=SUPERSTAR_HEADERS,
                 data=encrypt_cbc(credentials["account"].format(**credentials)),
             ) as r:
-                try:
-                    account = await r.json(content_type=None)
-                except json.JSONDecodeError:
-                    account = json.loads(decrypt_cbc(await r.text()))
+                account = await get_ss_json(r)
+
+        oid = account["result"]["user"]["objectID"]
+        key = account["invoke"][0]["params"][0]
+        return oid, key
+
+    async def login_google(self, apiUrl: str, credentials: dict) -> tuple[int, str]:
+        gCredentials = IDTokenCredentials.from_service_account_file(
+            filename=credentials["service_account"],
+            target_audience=credentials["target_audience"],
+        )
+        gCredentials.refresh(requests.Request())
+        id_token = gCredentials.token
+
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                url=apiUrl,
+                headers=SUPERSTAR_HEADERS,
+                data=encrypt_cbc(
+                    credentials["account"].format(id_token=id_token, **credentials)
+                ),
+            ) as r:
+                account = await get_ss_json(r)
 
         oid = account["result"]["user"]["objectID"]
         key = account["invoke"][0]["params"][0]
@@ -206,14 +216,24 @@ class PinSSL(commands.Cog):
                     )
                 ),
             ) as r:
-                try:
-                    account = await r.json(content_type=None)
-                except json.JSONDecodeError:
-                    account = json.loads(decrypt_cbc(await r.text()))
+                account = await get_ss_json(r)
 
         oid = account["result"]["user"]["objectID"]
         key = account["invoke"][0]["params"][0]
         return oid, key
+
+    async def get_ssleague(self, apiUrl: str, oid: int, key: str) -> dict:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                url=apiUrl,
+                headers=SUPERSTAR_HEADERS,
+                data=encrypt_cbc(
+                    f'{"{"}"class":"StarLeague","method":"getWeekPlayMusic",'
+                    f'"params":[{oid},"{key}"]{"}"}'
+                ),
+            ) as r:
+                ssleague = await get_ss_json(r)
+        return ssleague
 
     @pin_ssl.before_loop
     async def before_loop(self) -> None:

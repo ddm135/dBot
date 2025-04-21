@@ -2,16 +2,22 @@ import asyncio
 from base64 import b64decode, b64encode
 from datetime import datetime
 from io import BytesIO
+import json
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import discord
+from aiohttp import ClientResponse
 from Cryptodome.Cipher import AES
 from Cryptodome.Util.Padding import pad, unpad
 from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 
 from statics.consts import AES_IV, AES_KEY, MAX_RETRIES
-from statics.services import driveService, sheetService, sheetServiceKR  # noqa: F401
+from statics.services import (  # noqa: F401
+    driveService,
+    sheetServiceDefault,
+    sheetServiceKR,
+)
 
 if TYPE_CHECKING:
     from googleapiclient._apis.drive.v3 import File, FileList  # type: ignore
@@ -24,7 +30,7 @@ def get_sheet_data(
     instance: str | None = None,
 ) -> list[list[str]]:
     _sheetService: "SheetsResource.SpreadsheetsResource.ValuesResource" = globals()[
-        f"sheetService{instance or ""}"
+        f"sheetService{instance or "Default"}"
     ]
     result = _sheetService.get(
         spreadsheetId=spreadsheet_id,
@@ -41,7 +47,7 @@ def update_sheet_data(
     instance: str | None = None,
 ) -> None:
     _sheetService: "SheetsResource.SpreadsheetsResource.ValuesResource" = globals()[
-        f"sheetService{instance or ""}"
+        f"sheetService{instance or "Default"}"
     ]
 
     _sheetService.update(
@@ -58,7 +64,7 @@ def clear_sheet_data(
     instance: str | None = None,
 ) -> None:
     _sheetService: "SheetsResource.SpreadsheetsResource.ValuesResource" = globals()[
-        f"sheetService{instance or ""}"
+        f"sheetService{instance or "Default"}"
     ]
 
     _sheetService.clear(
@@ -181,6 +187,14 @@ async def unpin_old_ssl(
         if embeds and embeds[0].title and embed_title in embeds[0].title:
             await pin.unpin()
             break
+
+
+async def get_ss_json(response: ClientResponse) -> dict[str, Any]:
+    try:
+        result = await response.json(content_type=None)
+    except json.JSONDecodeError:
+        result = json.loads(decrypt_cbc(await response.text()))
+    return result
 
 
 def get_column_letter(index: int) -> str:

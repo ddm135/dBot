@@ -57,26 +57,28 @@ class BonusSync(commands.Cog):
             date_format = game_details["dateFormat"]
             timezone = game_details["timezone"]
 
-            for row in bonus:
-                _row: list[Any] = row
-                _row[bonus_start_index] = datetime.strptime(
-                    row[bonus_start_index], date_format
+            for raw_row in bonus:
+                row: list[Any] = raw_row
+                row[bonus_start_index] = datetime.strptime(
+                    raw_row[bonus_start_index], date_format
                 ).replace(tzinfo=timezone)
-                _row[bonus_end_index] = datetime.strptime(
-                    row[bonus_end_index], date_format
+                row[bonus_end_index] = datetime.strptime(
+                    raw_row[bonus_end_index], date_format
                 ).replace(tzinfo=timezone)
-                _row[duration_index] = (
+                row[duration_index] = (
                     ""
-                    if not row[duration_index]
+                    if not raw_row[duration_index]
                     else (
-                        row[duration_index]
-                        if ":" in row[duration_index]
-                        else f"{int(row[duration_index]) // 60}:"
-                        f"{int(row[duration_index]) % 60:02d}"
+                        raw_row[duration_index]
+                        if ":" in raw_row[duration_index]
+                        else f"{int(raw_row[duration_index]) // 60}:"
+                        f"{int(raw_row[duration_index]) % 60:02d}"
                     )
                 )
-                _row[bonus_amount_index] = int(row[bonus_amount_index].replace("%", ""))
-                self.bot.bonus_data[game][row[artist_name_index]].append(_row)
+                row[bonus_amount_index] = int(
+                    raw_row[bonus_amount_index].replace("%", "")
+                )
+                self.bot.bonus_data[game][raw_row[artist_name_index]].append(row)
 
         self.bot.bonus_data_ready = True
 
