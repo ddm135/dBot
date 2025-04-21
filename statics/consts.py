@@ -103,7 +103,7 @@ GAMES: dict[str, "GameDetails"] = {
         "color": 0xEA04F0,
         "pinChannelIds": {
             TEST_GUILD: 1336210286289616917,
-            SSRG_GUILD: 401291379810107394,
+            # SSRG_GUILD: 401291379810107394,
         },
         "pinRoles": {
             TEST_GUILD: 1350860245487845570,
@@ -146,7 +146,8 @@ GAMES: dict[str, "GameDetails"] = {
         ),
         "color": 0x4776FB,
         "pinChannelIds": {
-            SSRG_GUILD: 360109303199432705,
+            TEST_GUILD: 1354222667384885329,
+            # SSRG_GUILD: 360109303199432705,
         },
         "pinRoles": {
             SSRG_GUILD: 420428238171668480,
@@ -215,7 +216,7 @@ GAMES: dict[str, "GameDetails"] = {
         "color": 0xD60480,
         "pinChannelIds": {
             TEST_GUILD: 1343840449357418516,
-            SSRG_GUILD: 481907573948153857,
+            # SSRG_GUILD: 481907573948153857,
         },
         "pinRoles": {},
         "dateFormat": "%Y-%m-%d",
@@ -257,7 +258,7 @@ GAMES: dict[str, "GameDetails"] = {
         "color": 0x1A6DE1,
         "pinChannelIds": {
             TEST_GUILD: 1335936325685084242,
-            SSRG_GUILD: 951350075190313010,
+            # SSRG_GUILD: 951350075190313010,
         },
         "pinRoles": {},
         "dateFormat": "%Y-%m-%d",
@@ -299,7 +300,7 @@ GAMES: dict[str, "GameDetails"] = {
         "color": 0xFF9700,
         "pinChannelIds": {
             TEST_GUILD: 1340868523957813348,
-            SSRG_GUILD: 1039132737979813908,
+            # SSRG_GUILD: 1039132737979813908,
         },
         "pinRoles": {},
         "dateFormat": "%Y-%m-%d",
