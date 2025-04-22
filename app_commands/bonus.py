@@ -155,17 +155,12 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                     default=None,
                 )
 
-                start_check = last_birthday_end != tracking_date
-                end_check = next_birthday_start != tracking_date
-
                 if (
                     birthday_bonuses
                     and birthday_start
                     and birthday_end
-                    and (
-                        (birthday_end == tracking_date and end_check)
-                        or (birthday_start == tracking_date and start_check)
-                    )
+                    and birthday_end == tracking_date
+                    or birthday_start == tracking_date
                 ):
                     bonus_dict = {
                         "artist": artist_name,
@@ -185,9 +180,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                     song_start = max(x for x in (start_date, birthday_start) if x)
                     song_end = min(x for x in (end_date, birthday_end) if x)
 
-                    if (song_start == tracking_date and start_check) or (
-                        song_end == tracking_date and end_check
-                    ):
+                    if song_start == tracking_date or song_end == tracking_date:
                         song_total = birthday_total + bonus[bonus_amount_index]
                         song_name = (
                             bonus[bonus_columns.index("song_name")]
