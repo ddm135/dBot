@@ -1,13 +1,12 @@
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 from discord.ext import commands
 
+from statics.consts import STATUS_CHANNEL
+
 if TYPE_CHECKING:
     from dBot import dBot
-
-from datetime import datetime
-
-from statics.consts import STATUS_CHANNEL
 
 
 class OnReady(commands.Cog):

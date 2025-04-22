@@ -219,10 +219,11 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         error: app_commands.AppCommandError,
     ) -> None:
         if isinstance(error, app_commands.errors.MissingAnyRole):
-            return await interaction.response.send_message(
+            await interaction.response.send_message(
                 "You do not have permission to use this command.",
                 ephemeral=True,
             )
+            return
 
         await super().cog_app_command_error(interaction, error)
         raise error

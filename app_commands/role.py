@@ -266,16 +266,18 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
         error: app_commands.AppCommandError,
     ) -> None:
         if isinstance(error, app_commands.errors.MissingAnyRole):
-            return await interaction.response.send_message(
+            await interaction.response.send_message(
                 "You do not have permission to use this command.",
             )
+            return
 
         if isinstance(error, app_commands.errors.CheckFailure):
             assert (guild_id := interaction.guild_id)
-            return await interaction.response.send_message(
+            await interaction.response.send_message(
                 f"wrong channel bruv <#{ROLE_STORAGE_CHANNEL[guild_id]}>",
                 ephemeral=True,
             )
+            return
 
         await super().cog_app_command_error(interaction, error)
         raise error
