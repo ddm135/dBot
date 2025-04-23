@@ -159,6 +159,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                     birthday_bonuses
                     and birthday_start
                     and birthday_end
+                    and birthday_total > 0
                     and birthday_end == tracking_date
                     or birthday_start == tracking_date
                 ):
