@@ -1,3 +1,4 @@
+from ast import literal_eval
 from typing import TYPE_CHECKING
 
 import discord
@@ -105,7 +106,7 @@ class Administrative(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def print(self, ctx: commands.Context, *, message: str) -> None:
-        print(eval(message))
+        print(literal_eval(message))
 
 
 async def setup(bot: "dBot") -> None:
