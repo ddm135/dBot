@@ -1,7 +1,7 @@
-from ast import literal_eval
 from typing import TYPE_CHECKING
 
 import discord
+from asteval import Interpreter  # type: ignore[import-untyped]
 from discord.ext import commands
 
 from statics.consts import EXTENSIONS, STATUS_CHANNEL
@@ -14,6 +14,12 @@ class Administrative(commands.Cog):
 
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
+        self.eval = Interpreter(
+            minimal=True,
+            symtable={"bot": bot},
+            builtins_readonly=True,
+            config={"listcomp": True},
+        )
 
     @commands.command()
     @commands.is_owner()
@@ -106,7 +112,7 @@ class Administrative(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def print(self, ctx: commands.Context, *, message: str) -> None:
-        print(literal_eval(message))
+        print(self.eval(message))
 
 
 async def setup(bot: "dBot") -> None:
