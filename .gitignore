@@ -558,8 +558,6 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-dBotDefault.json
-dBotKR.json
 data/
-test.py
-test2.py
+dBot*.json
+test*.*

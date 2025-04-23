@@ -87,7 +87,7 @@ def get_drive_data_files() -> "FileList":
     ).execute(num_retries=MAX_RETRIES)
 
 
-def get_drive_data_file(file_id: str, path: Path) -> None:
+def get_drive_file(file_id: str, path: Path) -> None:
     request = driveService.get_media(fileId=file_id)
     file = BytesIO()
     downloader = MediaIoBaseDownload(file, request)
@@ -98,6 +98,15 @@ def get_drive_data_file(file_id: str, path: Path) -> None:
     with open(path, "wb") as f:
         f.write(file.getbuffer())
     file.close()
+
+
+def get_drive_file_last_modified(file_id: str) -> datetime:
+    return datetime.strptime(
+        driveService.get(  # pyright: ignore[reportTypedDictNotRequiredAccess]
+            fileId=file_id, fields="modifiedTime"
+        ).execute(num_retries=MAX_RETRIES)["modifiedTime"],
+        "%Y-%m-%dT%H:%M:%S.%fZ",
+    )
 
 
 def update_drive_data_file(file_id: str, data: "MediaFileUpload") -> None:
