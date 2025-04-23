@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 import discord
 from discord.ext import commands, tasks
 
-from statics.consts import GAMES, ONE_DAY
+from statics.consts import GAMES, ME, ONE_DAY
 from statics.helpers import get_sheet_data
 
 if TYPE_CHECKING:
@@ -272,7 +272,11 @@ class NotifyBonus(commands.Cog):
                         try:
                             await user.send(embed=embed, silent=True)
                         except discord.Forbidden:
-                            pass
+                            me = await self.bot.fetch_user(ME)
+                            await me.send(
+                                f"Failed to send bonus ping to {user.name} ({user.id})"
+                                f" for {game_name} {artist}."
+                            )
 
     @notify_bonus.before_loop
     async def before_notify_bonus(self) -> None:
