@@ -269,7 +269,10 @@ class NotifyBonus(commands.Cog):
                             icon_url=artist_pings[ping_emblem_index] or None,
                         )
 
-                        await user.send(embed=embed, silent=True)
+                        try:
+                            await user.send(embed=embed, silent=True)
+                        except discord.Forbidden:
+                            pass
 
     @notify_bonus.before_loop
     async def before_notify_bonus(self) -> None:
