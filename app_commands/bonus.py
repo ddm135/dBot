@@ -183,6 +183,9 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
 
                     if song_start == tracking_date or song_end == tracking_date:
                         song_total = birthday_total + bonus[bonus_amount_index]
+                        if song_total <= 0:
+                            continue
+
                         song_name = (
                             bonus[bonus_columns.index("song_name")]
                             .replace(r"*", r"\*")
@@ -198,6 +201,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                         }
                         if bonus_dict not in week_bonuses:
                             week_bonuses.append(bonus_dict)
+
             tracking_date += ONE_DAY
 
         week_bonuses.sort(key=lambda x: (x["bonus_end"], x["bonus_start"]))
