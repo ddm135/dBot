@@ -160,8 +160,9 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                     and birthday_start
                     and birthday_end
                     and birthday_total > 0
-                    and birthday_end == tracking_date
-                    or birthday_start == tracking_date
+                    and (
+                        birthday_end == tracking_date or birthday_start == tracking_date
+                    )
                 ):
                     bonus_dict = {
                         "artist": artist_name,
