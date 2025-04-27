@@ -241,35 +241,35 @@ class NotifyBonus(commands.Cog):
                 if notify_start or notify_end:
                     for user_id in artist_ping_list:
                         user = await self.bot.fetch_user(int(user_id))
-                        if not game_ping_dict[user_id]:
-                            await user.send(f"{initial_msg}")
-                            game_ping_dict[user_id] = True
-                        embed = discord.Embed(color=game_details["color"])
-                        if notify_start:
-                            embed.add_field(
-                                name=(
-                                    f"Available <t:{int(current_date.timestamp())}:R>"
-                                    f" :green_circle:"
-                                ),
-                                value="".join(notify_start),
-                                inline=False,
-                            )
-                        if notify_end:
-                            embed.add_field(
-                                name=(
-                                    f"Ends "
-                                    f"<t:{int((current_date + ONE_DAY).timestamp())}:R>"
-                                    f" :orange_circle:"
-                                ),
-                                value="".join(notify_end),
-                                inline=False,
-                            )
-                        embed.set_author(
-                            name=artist.replace(r"*", r"\*").replace(r"_", r"\_"),
-                            icon_url=artist_pings[ping_emblem_index] or None,
-                        )
-
                         try:
+                            if not game_ping_dict[user_id]:
+                                await user.send(f"{initial_msg}")
+                                game_ping_dict[user_id] = True
+                            embed = discord.Embed(color=game_details["color"])
+                            if notify_start:
+                                embed.add_field(
+                                    name=(
+                                        f"Available <t:{int(current_date.timestamp())}"
+                                        f":R> :green_circle:"
+                                    ),
+                                    value="".join(notify_start),
+                                    inline=False,
+                                )
+                            if notify_end:
+                                embed.add_field(
+                                    name=(
+                                        f"Ends <t:"
+                                        f"{int((current_date + ONE_DAY).timestamp())}"
+                                        f":R> :orange_circle:"
+                                    ),
+                                    value="".join(notify_end),
+                                    inline=False,
+                                )
+                            embed.set_author(
+                                name=artist.replace(r"*", r"\*").replace(r"_", r"\_"),
+                                icon_url=artist_pings[ping_emblem_index] or None,
+                            )
+
                             await user.send(embed=embed, silent=True)
                         except discord.Forbidden:
                             me = await self.bot.fetch_user(ME)
@@ -277,6 +277,8 @@ class NotifyBonus(commands.Cog):
                                 f"Failed to send bonus ping to {user.name} ({user.id})"
                                 f" for {game_name} {artist}."
                             )
+                        except discord.NotFound:
+                            pass
 
     @notify_bonus.before_loop
     async def before_notify_bonus(self) -> None:
