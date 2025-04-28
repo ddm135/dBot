@@ -222,6 +222,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                 first_date,
                 last_date,
                 current_date,
+                itr.user,
                 default_page,
                 max_page,
             ),
@@ -234,6 +235,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
             last_date,
             current_date,
             week_bonuses,
+            itr.user,
             default_page,
             max_page,
         )
@@ -249,6 +251,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
             last_date: datetime,
             current_date: datetime,
             bonuses: list[dict],
+            user: discord.User | discord.Member,
             current_page: int,
             max_page: int,
         ) -> None:
@@ -258,9 +261,10 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
             self.first_date = first_date
             self.last_date = last_date
             self.current_date = current_date
+            self.user = user
             self.current_page = current_page
             self.max_page = max_page
-            super().__init__(timeout=60)
+            super().__init__()
 
         async def on_timeout(self) -> None:
             for child in self.children:
@@ -268,14 +272,16 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                     child.disabled = True
             await self.message.edit(view=self)
 
-        async def update_message(self) -> None:
-            await self.message.edit(
+        async def update_message(self, itr: discord.Interaction) -> None:
+            await itr.followup.edit_message(
+                message_id=self.message.id,
                 embed=Bonus.create_embed(
                     self.game_details,
                     self.bonuses,
                     self.first_date,
                     self.last_date,
                     self.current_date,
+                    self.user,
                     self.current_page,
                     self.max_page,
                 ),
@@ -287,20 +293,32 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
             self, itr: discord.Interaction["dBot"], button: discord.ui.Button
         ) -> None:
             await itr.response.defer()
+            if itr.user.id != self.user.id:
+                await itr.followup.send(
+                    "You are not the original requester.", ephemeral=True
+                )
+                return
+
             self.current_page -= 1
             if self.current_page < 1:
                 self.current_page = self.max_page
-            await self.update_message()
+            await self.update_message(itr)
 
         @discord.ui.button(label="Next Page", style=discord.ButtonStyle.primary)
         async def next_page(
             self, itr: discord.Interaction["dBot"], button: discord.ui.Button
         ) -> None:
             await itr.response.defer()
+            if itr.user.id != self.user.id:
+                await itr.followup.send(
+                    "You are not the original requester.", ephemeral=True
+                )
+                return
+
             self.current_page += 1
             if self.current_page > self.max_page:
                 self.current_page = 1
-            await self.update_message()
+            await self.update_message(itr)
 
     @classmethod
     def create_embed(
@@ -310,6 +328,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         first_date: datetime,
         last_date: datetime,
         current_date: datetime,
+        user: discord.User | discord.Member,
         current_page: int,
         max_page: int,
     ) -> discord.Embed:
@@ -356,7 +375,9 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                 ),
                 inline=False,
             )
-        embed.set_footer(text=f"Page {current_page}/{max_page}")
+        embed.set_footer(
+            text=f"Page {current_page}/{max_page} · Requested by {user.name}"
+        )
         return embed
 
     bonus_ping = app_commands.Group(

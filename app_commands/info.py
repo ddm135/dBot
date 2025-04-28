@@ -174,7 +174,6 @@ class Info(commands.Cog):
                 f"Page {current}/{max or math.ceil(len(songs) / Info.STEP)}"
                 f" · Requested by {user.name}"
             ),
-            icon_url=user.display_avatar.url,
         )
         return embed
 
