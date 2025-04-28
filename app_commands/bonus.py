@@ -182,26 +182,25 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                     song_start = max(x for x in (start_date, birthday_start) if x)
                     song_end = min(x for x in (end_date, birthday_end) if x)
 
-                    if song_start == tracking_date or song_end == tracking_date:
-                        song_total = birthday_total + bonus[bonus_amount_index]
-                        if song_total <= 0:
-                            continue
+                    if song_start != tracking_date and song_end != tracking_date:
+                        continue
 
-                        song_name = (
-                            bonus[bonus_columns.index("song_name")]
-                            .replace(r"*", r"\*")
-                            .replace(r"_", r"\_")
-                        )
-                        bonus_dict = {
-                            "artist": artist_name,
-                            "members": None,
-                            "song": song_name,
-                            "bonus_start": song_start,
-                            "bonus_end": song_end,
-                            "bonus_amount": song_total,
-                        }
-                        if bonus_dict not in week_bonuses:
-                            week_bonuses.append(bonus_dict)
+                    song_total = birthday_total + bonus[bonus_amount_index]
+                    song_name = (
+                        bonus[bonus_columns.index("song_name")]
+                        .replace(r"*", r"\*")
+                        .replace(r"_", r"\_")
+                    )
+                    bonus_dict = {
+                        "artist": artist_name,
+                        "members": None,
+                        "song": song_name,
+                        "bonus_start": song_start,
+                        "bonus_end": song_end,
+                        "bonus_amount": song_total,
+                    }
+                    if bonus_dict not in week_bonuses:
+                        week_bonuses.append(bonus_dict)
 
             tracking_date += ONE_DAY
 
@@ -504,39 +503,41 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
 
         for i, row in enumerate(ping_data, start=1):
             _artist_name = row[artist_name_index]
-            if _artist_name.lower() == artist_name.lower():
-                users = set(row[users_index].split(","))
-                users.remove("") if "" in users else None
+            if _artist_name.lower() != artist_name.lower():
+                continue
 
-                if operation == "add":
-                    if user_id not in users:
-                        users.add(user_id)
-                        message_prefix = "Added to"
-                    else:
-                        message_prefix = "Already in"
-                elif operation == "remove":
-                    if user_id in users:
-                        users.remove(user_id)
-                        message_prefix = "Removed from"
-                    else:
-                        message_prefix = "Already not in"
+            users = set(row[users_index].split(","))
+            users.remove("") if "" in users else None
+
+            if operation == "add":
+                if user_id not in users:
+                    users.add(user_id)
+                    message_prefix = "Added to"
                 else:
-                    message_prefix = None
+                    message_prefix = "Already in"
+            elif operation == "remove":
+                if user_id in users:
+                    users.remove(user_id)
+                    message_prefix = "Removed from"
+                else:
+                    message_prefix = "Already not in"
+            else:
+                message_prefix = None
 
-                if not message_prefix:
-                    return await itr.followup.send("Internal error.")
+            if not message_prefix:
+                return await itr.followup.send("Internal error.")
 
-                if not message_prefix.startswith("Already"):
-                    update_sheet_data(
-                        game_details["pingId"],
-                        f"{game_details["pingWrite"]}{i}",
-                        parse_input=False,
-                        data=[[",".join(users)]],
-                    )
-
-                return await itr.followup.send(
-                    f"{message_prefix} {_artist_name} ping list!"
+            if not message_prefix.startswith("Already"):
+                update_sheet_data(
+                    game_details["pingId"],
+                    f"{game_details["pingWrite"]}{i}",
+                    parse_input=False,
+                    data=[[",".join(users)]],
                 )
+
+            return await itr.followup.send(
+                f"{message_prefix} {_artist_name} ping list!"
+            )
 
         await itr.followup.send(
             f"{artist_name} is not a valid artist for {game_details["name"]}"

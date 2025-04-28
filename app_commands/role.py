@@ -211,6 +211,7 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
                 embed_description += "\n".join(
                     f"{r.mention}" for r in reversed(remove_roles)
                 )
+
             embed = discord.Embed(
                 title="Changes",
                 description=embed_description or "None",

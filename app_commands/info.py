@@ -114,10 +114,9 @@ class Info(commands.Cog):
         ) -> None:
             await itr.response.defer()
             if itr.user.id != self.user.id:
-                await itr.followup.send(
+                return await itr.followup.send(
                     "You are not the original requester.", ephemeral=True
                 )
-                return
 
             self.current -= 1
             if self.current < 1:
@@ -130,10 +129,9 @@ class Info(commands.Cog):
         ) -> None:
             await itr.response.defer()
             if itr.user.id != self.user.id:
-                await itr.followup.send(
+                return await itr.followup.send(
                     "You are not the original requester.", ephemeral=True
                 )
-                return
 
             self.current += 1
             if self.current > self.max:

@@ -93,15 +93,15 @@ class PinSSL(commands.Cog):
         duration = ssl_song[duration_index]
         skills = ssl_song[skills_index] if skills_index is not None else None
 
-        color = game_details["color"]
-        image_url = None
-
         msd_data = self.bot.info_msd[game]
         for song in msd_data:
             if song["code"] == song_id:
                 color = int(song["albumBgColor"][:-2], 16)
                 image_url = song["album"]
                 break
+        else:
+            color = game_details["color"]
+            image_url = None
 
         if game_details["legacyUrlScheme"]:
             url_data = self.bot.info_url[game]

@@ -245,6 +245,7 @@ class NotifyBonus(commands.Cog):
                             if not game_ping_dict[user_id]:
                                 await user.send(f"{initial_msg}")
                                 game_ping_dict[user_id] = True
+
                             embed = discord.Embed(color=game_details["color"])
                             if notify_start:
                                 embed.add_field(

@@ -192,6 +192,7 @@ async def unpin_old_ssl(
     for pin in pins:
         if pin.id == new_pin:
             continue
+
         embeds = pin.embeds
         if embeds and embeds[0].title and embed_title in embeds[0].title:
             await pin.unpin()

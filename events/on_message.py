@@ -40,6 +40,7 @@ class OnMessage(commands.Cog):
             and message.channel.id == 401412343629742090
         ):
             await message.reply("Use dBot's `/info` instead.")
+            return
 
     @commands.Cog.listener("on_message")
     async def word_ping(self, message: discord.Message) -> None:
