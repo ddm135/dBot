@@ -63,27 +63,30 @@ class Info(commands.Cog):
 
         sorted_songs = sorted(songs, key=lambda x: x[duration_index])
         msg = await itr.followup.send(
-            embed=self.create_embed(game_details, artist_name, sorted_songs), wait=True
+            embed=self.create_embed(game_details, artist_name, sorted_songs, itr.user),
+            wait=True,
         )
-        view = self.InfoView(msg, game_details, artist_name, sorted_songs)
+        view = self.InfoView(msg, game_details, artist_name, sorted_songs, itr.user)
         await msg.edit(view=view)
 
     class InfoView(discord.ui.View):
 
         def __init__(
             self,
-            message: discord.Message,
+            message_id: discord.Message,
             game_details: "GameDetails",
             artist: str | None,
             songs: list[list[str]],
+            user: discord.User | discord.Member,
         ) -> None:
-            self.message = message
+            self.message = message_id
             self.game_details = game_details
             self.artist = artist
             self.songs = songs
             self.current = 1
             self.max = math.ceil(len(songs) / Info.STEP) or 1
-            super().__init__(timeout=60)
+            self.user = user
+            super().__init__()
 
         async def on_timeout(self) -> None:
             for child in self.children:
@@ -91,10 +94,16 @@ class Info(commands.Cog):
                     child.disabled = True
             await self.message.edit(view=self)
 
-        async def update_message(self) -> None:
-            await self.message.edit(
+        async def update_message(self, itr: discord.Interaction) -> None:
+            await itr.followup.edit_message(
+                message_id=self.message.id,
                 embed=Info.create_embed(
-                    self.game_details, self.artist, self.songs, self.current, self.max
+                    self.game_details,
+                    self.artist,
+                    self.songs,
+                    self.user,
+                    self.current,
+                    self.max,
                 ),
                 view=self,
             )
@@ -104,20 +113,32 @@ class Info(commands.Cog):
             self, itr: discord.Interaction["dBot"], button: discord.ui.Button
         ) -> None:
             await itr.response.defer()
+            if itr.user.id != self.user.id:
+                await itr.followup.send(
+                    "You are not the original requester.", ephemeral=True
+                )
+                return
+
             self.current -= 1
             if self.current < 1:
                 self.current = self.max
-            await self.update_message()
+            await self.update_message(itr)
 
         @discord.ui.button(label="Next Page", style=discord.ButtonStyle.primary)
         async def next_page(
             self, itr: discord.Interaction["dBot"], button: discord.ui.Button
         ) -> None:
             await itr.response.defer()
+            if itr.user.id != self.user.id:
+                await itr.followup.send(
+                    "You are not the original requester.", ephemeral=True
+                )
+                return
+
             self.current += 1
             if self.current > self.max:
                 self.current = 1
-            await self.update_message()
+            await self.update_message(itr)
 
     @classmethod
     def create_embed(
@@ -125,6 +146,7 @@ class Info(commands.Cog):
         game_details: "GameDetails",
         artist: str | None,
         songs: list[list[str]],
+        user: discord.User | discord.Member,
         current: int = 1,
         max: int | None = None,
     ) -> discord.Embed:
@@ -148,7 +170,11 @@ class Info(commands.Cog):
             color=game_details["color"],
         )
         embed.set_footer(
-            text=f"Page {current}/{max or math.ceil(len(songs) / Info.STEP)}"
+            text=(
+                f"Page {current}/{max or math.ceil(len(songs) / Info.STEP)}"
+                f" · Requested by {user.name}"
+            ),
+            icon_url=user.display_avatar.url,
         )
         return embed
 
