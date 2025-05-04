@@ -66,3 +66,24 @@ async def song_id_autocomplete(
             value=current,
         )
     ]
+
+
+async def what_autocomplete(
+    itr: discord.Interaction["dBot"], current: str
+) -> list[app_commands.Choice[str]]:
+    if not (game := itr.namespace.game) or not itr.client.info_data_ready:
+        return []
+    info_columns = GAMES[game]["infoColumns"]
+    artist_name_index = info_columns.index("artist_name")
+    song_name_index = info_columns.index("song_name")
+
+    song = itr.client.info_by_id[game][current]
+    if not song:
+        return []
+
+    return [
+        app_commands.Choice(
+            name="ok - i guess",
+            value=current,
+        )
+    ]

@@ -9,6 +9,7 @@ from app_commands.autocomplete.ssleague import (
     artist_autocomplete,
     song_autocomplete,
     song_id_autocomplete,
+    what_autocomplete,
 )
 from statics.consts import GAMES, SSRG_ROLE_MOD, SSRG_ROLE_SS, TEST_ROLE_OWNER
 from statics.helpers import generate_ssl_embed, pin_new_ssl, unpin_old_ssl
@@ -84,7 +85,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
 
     @app_commands.command()
     @app_commands.choices(game_choice=GAME_CHOICES)
-    @app_commands.autocomplete(song_id=song_id_autocomplete)
+    @app_commands.autocomplete(song_id=what_autocomplete)
     @app_commands.rename(game_choice="game", song_id="id")
     @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     async def pin_by_id(
