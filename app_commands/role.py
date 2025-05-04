@@ -1,15 +1,12 @@
+import importlib
 import json
+import sys
 from typing import TYPE_CHECKING
 
 import discord
 from discord import app_commands
 from discord.ext import commands
 
-from app_commands.autocomplete.role import (
-    role_add_autocomplete,
-    role_remove_autocomplete,
-    role_set_autocomplete,
-)
 from statics.consts import (
     ROLE_DATA,
     ROLE_STORAGE_CHANNEL,
@@ -17,6 +14,14 @@ from statics.consts import (
     SSRG_ROLE_MOD,
     SSRG_ROLE_SS,
     TEST_ROLE_OWNER,
+)
+
+if (AUTOCOMPLETES := "app_commands.autocompletes.role") in sys.modules:
+    importlib.reload(sys.modules[AUTOCOMPLETES])
+from app_commands.autocompletes.role import (
+    role_add_autocomplete,
+    role_remove_autocomplete,
+    role_set_autocomplete,
 )
 
 if TYPE_CHECKING:
@@ -279,8 +284,6 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
                 ephemeral=True,
             )
             return
-
-        await super().cog_app_command_error(interaction, error)
         raise error
 
 

@@ -50,6 +50,11 @@ class Memes(commands.Cog):
         diff = current - date
         return diff.days
 
+    async def cog_command_error(self, ctx: commands.Context, error: Exception) -> None:
+        if isinstance(error, commands.errors.NotOwner):
+            return
+        raise error
+
 
 async def setup(bot: "dBot") -> None:
     await bot.add_cog(Memes(bot))

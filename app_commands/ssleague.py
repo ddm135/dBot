@@ -7,15 +7,16 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-if "app_commands.autocomplete.ssleague" in sys.modules:
-    importlib.reload(sys.modules["app_commands.autocomplete.ssleague"])
-from app_commands.autocomplete.ssleague import (
+from statics.consts import GAMES, SSRG_ROLE_MOD, SSRG_ROLE_SS, TEST_ROLE_OWNER
+from statics.helpers import generate_ssl_embed, pin_new_ssl, unpin_old_ssl
+
+if (AUTOCOMPLETES := "app_commands.autocompletes.ssleague") in sys.modules:
+    importlib.reload(sys.modules[AUTOCOMPLETES])
+from app_commands.autocompletes.ssleague import (
     artist_autocomplete,
     song_autocomplete,
     song_id_autocomplete,
 )
-from statics.consts import GAMES, SSRG_ROLE_MOD, SSRG_ROLE_SS, TEST_ROLE_OWNER
-from statics.helpers import generate_ssl_embed, pin_new_ssl, unpin_old_ssl
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -228,8 +229,6 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
                 ephemeral=True,
             )
             return
-
-        await super().cog_app_command_error(interaction, error)
         raise error
 
 

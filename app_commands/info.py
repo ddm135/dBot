@@ -1,12 +1,17 @@
+import importlib
 import math
+import sys
 from typing import TYPE_CHECKING
 
 import discord
 from discord import app_commands
 from discord.ext import commands
 
-from app_commands.autocomplete.info import artist_autocomplete
 from statics.consts import GAMES
+
+if (AUTOCOMPLETES := "app_commands.autocompletes.info") in sys.modules:
+    importlib.reload(sys.modules[AUTOCOMPLETES])
+from app_commands.autocompletes.info import artist_autocomplete
 
 if TYPE_CHECKING:
     from dBot import dBot
