@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from dBot import dBot
 
 
-async def artist(
+async def artist_autocomplete(
     itr: discord.Interaction["dBot"], current: str
 ) -> list[app_commands.Choice[str]]:
     if not (game := itr.namespace.game) or not itr.client.info_data_ready:
@@ -26,7 +26,7 @@ async def artist(
     return list(islice(artist_choices, MAX_AUTOCOMPLETE))
 
 
-async def song(
+async def song_autocomplete(
     itr: discord.Interaction["dBot"], current: str
 ) -> list[app_commands.Choice[str]]:
     if not (game := itr.namespace.game) or not itr.client.info_data_ready:
@@ -47,7 +47,7 @@ async def song(
     return list(islice(song_choices, MAX_AUTOCOMPLETE))
 
 
-async def song_id(
+async def song_id_autocomplete(
     itr: discord.Interaction["dBot"], current: str
 ) -> list[app_commands.Choice[str]]:
     if not (game := itr.namespace.game) or not itr.client.info_data_ready:
@@ -63,27 +63,6 @@ async def song_id(
     return [
         app_commands.Choice(
             name=f"{song[artist_name_index]} - {song[song_name_index]}",
-            value=current,
-        )
-    ]
-
-
-async def what(
-    itr: discord.Interaction["dBot"], current: str
-) -> list[app_commands.Choice[str]]:
-    if not (game := itr.namespace.game) or not itr.client.info_data_ready:
-        return []
-    info_columns = GAMES[game]["infoColumns"]
-    artist_name_index = info_columns.index("artist_name")
-    song_name_index = info_columns.index("song_name")
-
-    song = itr.client.info_by_id[game][current]
-    if not song:
-        return []
-
-    return [
-        app_commands.Choice(
-            name="ok - i guess",
             value=current,
         )
     ]
