@@ -1,4 +1,5 @@
 import importlib
+import sys
 from datetime import datetime
 from typing import TYPE_CHECKING
 
@@ -6,7 +7,11 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-import app_commands.autocomplete.ssleague as autocomplete
+if "app_commands.autocomplete.ssleague" in sys.modules:
+    importlib.reload(autocomplete)
+else:
+    import app_commands.autocomplete.ssleague as autocomplete
+
 from statics.consts import GAMES, SSRG_ROLE_MOD, SSRG_ROLE_SS, TEST_ROLE_OWNER
 from statics.helpers import generate_ssl_embed, pin_new_ssl, unpin_old_ssl
 
@@ -21,6 +26,9 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         for key, game in GAMES.items()
         if game["pinChannelIds"]
     ]
+
+    def __new__(cls, *args, **kwargs) -> "SSLeague":
+        return super().__new__(cls, *args, **kwargs)
 
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
