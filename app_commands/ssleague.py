@@ -7,12 +7,6 @@ from discord import app_commands
 from discord.ext import commands
 
 import app_commands.autocomplete.ssleague as autocomplete
-from app_commands.autocomplete.ssleague import (
-    artist_autocomplete,
-    song_autocomplete,
-    song_id_autocomplete,
-    what_autocomplete,
-)
 from statics.consts import GAMES, SSRG_ROLE_MOD, SSRG_ROLE_SS, TEST_ROLE_OWNER
 from statics.helpers import generate_ssl_embed, pin_new_ssl, unpin_old_ssl
 
@@ -34,8 +28,8 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
 
     @app_commands.command()
     @app_commands.choices(game_choice=GAME_CHOICES)
-    @app_commands.autocomplete(artist_name=artist_autocomplete)
-    @app_commands.autocomplete(song_name=song_autocomplete)
+    @app_commands.autocomplete(artist_name=autocomplete.artist)
+    @app_commands.autocomplete(song_name=autocomplete.song)
     @app_commands.rename(game_choice="game", artist_name="artist", song_name="song")
     @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     async def pin_by_name(
@@ -88,7 +82,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
 
     @app_commands.command()
     @app_commands.choices(game_choice=GAME_CHOICES)
-    @app_commands.autocomplete(song_id=what_autocomplete)
+    @app_commands.autocomplete(song_id=autocomplete.song_id)
     @app_commands.rename(game_choice="game", song_id="id")
     @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     async def pin_by_id(

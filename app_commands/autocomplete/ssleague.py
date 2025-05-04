@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from dBot import dBot
 
 
-async def artist_autocomplete(
+async def artist(
     itr: discord.Interaction["dBot"], current: str
 ) -> list[app_commands.Choice[str]]:
     if not (game := itr.namespace.game) or not itr.client.info_data_ready:
@@ -26,7 +26,7 @@ async def artist_autocomplete(
     return list(islice(artist_choices, MAX_AUTOCOMPLETE))
 
 
-async def song_autocomplete(
+async def song(
     itr: discord.Interaction["dBot"], current: str
 ) -> list[app_commands.Choice[str]]:
     if not (game := itr.namespace.game) or not itr.client.info_data_ready:
@@ -47,7 +47,7 @@ async def song_autocomplete(
     return list(islice(song_choices, MAX_AUTOCOMPLETE))
 
 
-async def song_id_autocomplete(
+async def song_id(
     itr: discord.Interaction["dBot"], current: str
 ) -> list[app_commands.Choice[str]]:
     if not (game := itr.namespace.game) or not itr.client.info_data_ready:
@@ -68,7 +68,7 @@ async def song_id_autocomplete(
     ]
 
 
-async def what_autocomplete(
+async def what(
     itr: discord.Interaction["dBot"], current: str
 ) -> list[app_commands.Choice[str]]:
     if not (game := itr.namespace.game) or not itr.client.info_data_ready:
