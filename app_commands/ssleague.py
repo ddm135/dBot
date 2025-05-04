@@ -1,3 +1,4 @@
+import importlib
 from datetime import datetime
 from typing import TYPE_CHECKING
 
@@ -5,6 +6,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+import app_commands.autocomplete.ssleague as autocomplete
 from app_commands.autocomplete.ssleague import (
     artist_autocomplete,
     song_autocomplete,
@@ -28,6 +30,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
 
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
+        importlib.reload(autocomplete)
 
     @app_commands.command()
     @app_commands.choices(game_choice=GAME_CHOICES)
