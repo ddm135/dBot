@@ -103,7 +103,7 @@ class PinSSL(commands.Cog):
             color = game_details["color"]
             image_url = None
 
-        if game_details["legacyUrlScheme"]:
+        if game_details["legacyUrlScheme"] and image_url:
             url_data = self.bot.info_url[game]
             for url in url_data:
                 if url["code"] == image_url:
