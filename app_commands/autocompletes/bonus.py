@@ -36,7 +36,6 @@ def get_ping_data(
 
 def _ping_preprocess(game: str) -> tuple["GameDetails", list[list[str]], int, int]:
     game_details = GAMES[game]
-    ping_columns = game_details["pingColumns"]
     return (
         game_details,
         get_ping_data(
@@ -44,13 +43,11 @@ def _ping_preprocess(game: str) -> tuple["GameDetails", list[list[str]], int, in
             game_details["pingRange"],
             "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
         ),
-        *get_ping_indexes(ping_columns),
+        *get_ping_indexes(game_details["pingColumns"]),
     )
 
 
 def get_ping_indexes(
     ping_columns: tuple[str, ...],
 ) -> tuple[int, int]:
-    artist_name_index = ping_columns.index("artist_name")
-    users_index = ping_columns.index("users")
-    return artist_name_index, users_index
+    return ping_columns.index("artist_name"), ping_columns.index("users")

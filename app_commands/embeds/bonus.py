@@ -3,12 +3,11 @@ from typing import TYPE_CHECKING
 
 import discord
 
+from app_commands.commons.bonus import STEP
 from statics.consts import ONE_DAY
 
 if TYPE_CHECKING:
     from statics.types import GameDetails
-
-STEP = 5
 
 
 class BonusEmbed(discord.Embed):

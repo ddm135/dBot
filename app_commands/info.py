@@ -1,5 +1,4 @@
 import importlib
-import math
 import sys
 from typing import TYPE_CHECKING
 
@@ -13,13 +12,22 @@ if (AUTOCOMPLETES := "app_commands.autocompletes.info") in sys.modules:
     importlib.reload(sys.modules[AUTOCOMPLETES])
 from app_commands.autocompletes.info import artist_autocomplete
 
+if (COMMONS := "app_commands.commons.info") in sys.modules:
+    importlib.reload(sys.modules[COMMONS])
+
+if (EMBEDS := "app_commands.embeds.info") in sys.modules:
+    importlib.reload(sys.modules[EMBEDS])
+from app_commands.embeds.info import InfoEmbed
+
+if (VIEWS := "app_commands.views.info") in sys.modules:
+    importlib.reload(sys.modules[VIEWS])
+from app_commands.views.info import InfoView
+
 if TYPE_CHECKING:
     from dBot import dBot
-    from statics.types import GameDetails
 
 
 class Info(commands.Cog):
-    STEP = 10
     GAME_CHOICES = [
         app_commands.Choice(name=game["name"], value=key)
         for key, game in GAMES.items()
@@ -68,117 +76,11 @@ class Info(commands.Cog):
 
         sorted_songs = sorted(songs, key=lambda x: x[duration_index])
         msg = await itr.followup.send(
-            embed=self.create_embed(game_details, artist_name, sorted_songs, itr.user),
+            embed=InfoEmbed(game_details, artist_name, sorted_songs, itr.user),
             wait=True,
         )
-        view = self.InfoView(msg, game_details, artist_name, sorted_songs, itr.user)
+        view = InfoView(msg, game_details, artist_name, sorted_songs, itr.user)
         await msg.edit(view=view)
-
-    class InfoView(discord.ui.View):
-
-        def __init__(
-            self,
-            message_id: discord.Message,
-            game_details: "GameDetails",
-            artist: str | None,
-            songs: list[list[str]],
-            user: discord.User | discord.Member,
-        ) -> None:
-            self.message = message_id
-            self.game_details = game_details
-            self.artist = artist
-            self.songs = songs
-            self.current = 1
-            self.max = math.ceil(len(songs) / Info.STEP) or 1
-            self.user = user
-            super().__init__()
-
-        async def on_timeout(self) -> None:
-            for child in self.children:
-                if isinstance(child, discord.ui.Button):
-                    child.disabled = True
-            await self.message.edit(view=self)
-
-        async def update_message(self, itr: discord.Interaction) -> None:
-            await itr.followup.edit_message(
-                message_id=self.message.id,
-                embed=Info.create_embed(
-                    self.game_details,
-                    self.artist,
-                    self.songs,
-                    self.user,
-                    self.current,
-                    self.max,
-                ),
-                view=self,
-            )
-
-        @discord.ui.button(label="Previous Page", style=discord.ButtonStyle.secondary)
-        async def previous_page(
-            self, itr: discord.Interaction["dBot"], button: discord.ui.Button
-        ) -> None:
-            await itr.response.defer()
-            if itr.user.id != self.user.id:
-                return await itr.followup.send(
-                    "You are not the original requester.", ephemeral=True
-                )
-
-            self.current -= 1
-            if self.current < 1:
-                self.current = self.max
-            await self.update_message(itr)
-
-        @discord.ui.button(label="Next Page", style=discord.ButtonStyle.primary)
-        async def next_page(
-            self, itr: discord.Interaction["dBot"], button: discord.ui.Button
-        ) -> None:
-            await itr.response.defer()
-            if itr.user.id != self.user.id:
-                return await itr.followup.send(
-                    "You are not the original requester.", ephemeral=True
-                )
-
-            self.current += 1
-            if self.current > self.max:
-                self.current = 1
-            await self.update_message(itr)
-
-    @classmethod
-    def create_embed(
-        cls,
-        game_details: "GameDetails",
-        artist: str | None,
-        songs: list[list[str]],
-        user: discord.User | discord.Member,
-        current: int = 1,
-        max: int | None = None,
-    ) -> discord.Embed:
-        end = current * cls.STEP
-        start = end - cls.STEP
-        filtered_songs = songs[start:end]
-        duration_index = game_details["infoColumns"].index("duration")
-        artist_name_index = game_details["infoColumns"].index("artist_name")
-        song_name_index = game_details["infoColumns"].index("song_name")
-
-        description = "\n".join(
-            f"({song[duration_index]}) "
-            f"{(f"{song[artist_name_index].replace(r"*", r"\*").replace(r"_", r"\_")}"
-                f" - " if not artist else "")}"
-            f"**{song[song_name_index].replace(r"*", r"\*").replace(r"_", r"\_")}**"
-            for song in filtered_songs
-        )
-        embed = discord.Embed(
-            title=f"{game_details["name"]}{f" - {artist}" if artist else ""}",
-            description=description,
-            color=game_details["color"],
-        )
-        embed.set_footer(
-            text=(
-                f"Page {current}/{max or math.ceil(len(songs) / Info.STEP)}"
-                f" · Requested by {user.name}"
-            ),
-        )
-        return embed
 
 
 async def setup(bot: "dBot") -> None:
