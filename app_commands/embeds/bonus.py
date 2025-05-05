@@ -30,6 +30,7 @@ class BonusEmbed(discord.Embed):
                 f"{game_details["name"]} {current_date.strftime("%G-W%V")} Bonuses "
                 f"({first_date.strftime("%B %d")} - {last_date.strftime("%B %d")})"
             ).replace(" 0", " "),
+            description="None" if not filtered_bonuses else None,
             color=game_details["color"],
         )
         for bonus in filtered_bonuses:
