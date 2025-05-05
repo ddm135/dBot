@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from dBot import dBot
 
 
-class Memes(commands.Cog):
+class Misc(commands.Cog):
     MOTS7_RELEASE = datetime(year=2020, month=2, day=21, tzinfo=TIMEZONES["KST"])
     LP_RELEASE = datetime(year=2020, month=11, day=30, tzinfo=TIMEZONES["KST"])
     BAEMON_DEBUT = datetime(year=2024, month=4, day=1, tzinfo=TIMEZONES["KST"])
@@ -57,4 +57,4 @@ class Memes(commands.Cog):
 
 
 async def setup(bot: "dBot") -> None:
-    await bot.add_cog(Memes(bot))
+    await bot.add_cog(Misc(bot))

@@ -10,7 +10,6 @@ if TYPE_CHECKING:
 
 
 class InfoEmbed(discord.Embed):
-
     def __init__(
         self,
         game_details: "GameDetails",

@@ -1,6 +1,6 @@
 import importlib
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import TYPE_CHECKING
 
 import discord
@@ -187,8 +187,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
                     break
 
         timezone = game_details["timezone"]
-        offset = game_details["resetOffset"]
-        current_time = datetime.now(tz=timezone) - offset
+        current_time = datetime.now(tz=timezone) - timedelta(hours=2)
 
         embed = generate_ssl_embed(
             artist_name,

@@ -12,7 +12,6 @@ if TYPE_CHECKING:
 
 
 class InfoView(discord.ui.View):
-
     def __init__(
         self,
         message_id: discord.Message,

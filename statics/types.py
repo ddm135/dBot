@@ -1,4 +1,3 @@
-from datetime import timedelta
 from typing import TypedDict
 from zoneinfo import ZoneInfo
 
@@ -22,7 +21,6 @@ class GameDetails(TypedDict):
     pinRoles: dict[int, int | None]
     dateFormat: str
     timezone: ZoneInfo
-    resetOffset: timedelta
     api: str
     legacyUrlScheme: bool
 

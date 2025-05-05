@@ -60,7 +60,6 @@ class DataSync(commands.Cog):
                 break
 
         if PING_DATA.exists():
-            self.LOGGER.info(f"Loading {PING_DATA.name}...")
             self.bot.pings.clear()
             with open(PING_DATA, "r") as f:
                 self.bot.pings = json.load(f)
@@ -87,7 +86,6 @@ class DataSync(commands.Cog):
                 json.dump(self.bot.pings, f, indent=4)
 
         if ROLE_DATA.exists():
-            self.LOGGER.info(f"Loading {ROLE_DATA.name}...")
             self.bot.roles.clear()
             with open(ROLE_DATA, "r") as f:
                 self.bot.roles = json.load(f)

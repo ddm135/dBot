@@ -1,6 +1,6 @@
 import asyncio
 import json
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 from typing import TYPE_CHECKING
 
 import aiohttp
@@ -23,8 +23,7 @@ if TYPE_CHECKING:
     from dBot import dBot
 
 
-class PinSSL(commands.Cog):
-
+class PinSSLeague(commands.Cog):
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
 
@@ -54,8 +53,7 @@ class PinSSL(commands.Cog):
     async def pin_ssl(self, game: str, credentials: dict) -> None:
         game_details = GAMES[game]
         timezone = game_details["timezone"]
-        offset = game_details["resetOffset"]
-        current_time = datetime.now(tz=timezone) - offset
+        current_time = datetime.now(tz=timezone) - timedelta(hours=2)
         if current_time.hour != 0:
             return
 
@@ -247,4 +245,4 @@ class PinSSL(commands.Cog):
 
 
 async def setup(bot: "dBot") -> None:
-    await bot.add_cog(PinSSL(bot))
+    await bot.add_cog(PinSSLeague(bot))

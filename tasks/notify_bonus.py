@@ -12,7 +12,6 @@ if TYPE_CHECKING:
 
 
 class NotifyBonus(commands.Cog):
-
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
 

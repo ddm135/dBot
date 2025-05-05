@@ -11,7 +11,6 @@ if TYPE_CHECKING:
 
 
 class BonusView(discord.ui.View):
-
     def __init__(
         self,
         message: discord.Message,

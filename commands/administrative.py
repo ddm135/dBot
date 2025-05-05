@@ -1,17 +1,18 @@
+import importlib
+import sys
 from typing import TYPE_CHECKING
 
 import discord
 from asteval import Interpreter  # type: ignore[import-untyped]
 from discord.ext import commands
 
-from statics.consts import EXTENSIONS, STATUS_CHANNEL
+from statics.consts import EXTENSIONS, STATIC_MODULES, STATUS_CHANNEL
 
 if TYPE_CHECKING:
     from dBot import dBot
 
 
 class Administrative(commands.Cog):
-
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
         self.eval = Interpreter(
@@ -47,6 +48,8 @@ class Administrative(commands.Cog):
 
         if not extensions:
             extensions = EXTENSIONS
+            for module in STATIC_MODULES:
+                importlib.reload(sys.modules[module])
         else:
             for ext in extensions:
                 if ext not in EXTENSIONS:

@@ -11,7 +11,6 @@ if TYPE_CHECKING:
 
 
 class BonusEmbed(discord.Embed):
-
     def __init__(
         self,
         game_details: "GameDetails",
@@ -69,60 +68,3 @@ class BonusEmbed(discord.Embed):
         self.set_footer(
             text=f"Page {current_page}/{max_page} · Requested by {user.name}"
         )
-
-
-def create_embed(
-    game_details: "GameDetails",
-    bonuses: list[dict],
-    first_date: datetime,
-    last_date: datetime,
-    current_date: datetime,
-    user: discord.User | discord.Member,
-    current_page: int,
-    max_page: int,
-) -> discord.Embed:
-    end = current_page * STEP
-    start = end - STEP
-    filtered_bonuses = bonuses[start:end]
-    embed = discord.Embed(
-        title=(
-            f"{game_details["name"]} {current_date.strftime("%G-W%V")} Bonuses "
-            f"({first_date.strftime("%B %d")} - {last_date.strftime("%B %d")})"
-        ).replace(" 0", " "),
-        color=game_details["color"],
-    )
-    for bonus in filtered_bonuses:
-        embed.add_field(
-            name=(
-                f"{("~~" if bonus["bonus_end"] < current_date
-                    else "" if bonus["bonus_start"] > current_date
-                    else ":white_check_mark: ")}"
-                f"**{bonus["artist"]}**"
-                f"{(f" {bonus["members"]}"
-                    if bonus["members"]
-                    and bonus["artist"] != bonus["members"]
-                    else "")}: "
-                f"{(bonus["song"] if bonus["song"]
-                    else "All Songs :birthday:")}"
-                f"{("" if not bonus["song"]
-                    else " :cd:" if bonus["bonus_amount"] == 3
-                    else " :birthday: :dvd:")}"
-                f"{"~~" if bonus["bonus_end"] < current_date else ""}"
-            ),
-            value=(
-                f"{"~~" if bonus["bonus_end"] < current_date else ""}"
-                f"{bonus["bonus_amount"]}% | "
-                f"{bonus["bonus_start"].strftime("%B %d").replace(" 0", " ")} -"
-                f" {bonus["bonus_end"].strftime("%B %d").replace(" 0", " ")} | "
-                f"{("Expired" if bonus["bonus_end"] < current_date
-                    else f"Available <t:{int(bonus["bonus_start"].timestamp())}:R>"
-                    if bonus["bonus_start"] > current_date
-                    else f"Ends <t:"
-                    f"{int((bonus["bonus_end"] + ONE_DAY).timestamp())}:R>")}"
-                f"{" :bangbang:" if bonus["bonus_start"] == last_date else ""}"
-                f"{"~~" if bonus["bonus_end"] < current_date else ""}"
-            ),
-            inline=False,
-        )
-    embed.set_footer(text=f"Page {current_page}/{max_page} · Requested by {user.name}")
-    return embed
