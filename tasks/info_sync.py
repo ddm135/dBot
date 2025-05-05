@@ -77,7 +77,7 @@ class InfoSync(commands.Cog):
             duration_index = info_columns.index("duration")
 
             for row in info:
-                if not row:
+                if not row or len(row) < len(info_columns):
                     continue
 
                 row[duration_index] = (
