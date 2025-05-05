@@ -80,7 +80,6 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
             if target_role.id not in self.bot.roles[user_id]:
                 return await itr.followup.send("You do not own this role.")
             self.bot.roles[user_id].remove(target_role.id)
-            self.save_role_data()
             await itr.user.add_roles(target_role)
             await itr.followup.send(
                 f"Added {target_role.mention}!\n-# {self.NOTICE}",
@@ -89,6 +88,8 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
             )
         except ValueError:
             await itr.followup.send("Role not found.")
+        finally:
+            self.save_role_data()
 
     @app_commands.command(name="remove")
     @app_commands.autocomplete(role=role_remove_autocomplete)
@@ -128,7 +129,6 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
             if target_role not in user_roles:
                 return await itr.followup.send("You do not own this role.")
             self.bot.roles[user_id].append(target_role.id)
-            self.save_role_data()
             await itr.user.remove_roles(target_role)
             await itr.followup.send(
                 f"Removed {target_role.mention}!\n-# {self.NOTICE}",
@@ -137,6 +137,8 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
             )
         except ValueError:
             await itr.followup.send("Role not found.")
+        finally:
+            self.save_role_data()
 
     @app_commands.command(name="set")
     @app_commands.autocomplete(role=role_set_autocomplete)
@@ -198,7 +200,6 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
             for r in remove_roles:
                 if r.id not in self.bot.roles[user_id]:
                     self.bot.roles[user_id].append(r.id)
-            self.save_role_data()
             await itr.user.add_roles(*add_roles)
             await itr.user.remove_roles(*remove_roles)
 
@@ -231,6 +232,8 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
             )
         except ValueError:
             await itr.followup.send("Role not found.")
+        finally:
+            self.save_role_data()
 
     @app_commands.command(name="inventory")
     @app_commands.check(in_channels)
