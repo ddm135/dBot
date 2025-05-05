@@ -34,12 +34,10 @@ class DataSync(commands.Cog):
     async def cog_load(self) -> None:
         self.data_download()
         self.data_upload.start()
-        await super().cog_load()
 
     async def cog_unload(self) -> None:
         self.data_upload.cancel()
         await self.data_upload()
-        await super().cog_unload()
 
     def data_download(self) -> None:
         drive_files = get_drive_data_files()

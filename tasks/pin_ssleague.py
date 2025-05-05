@@ -29,11 +29,9 @@ class PinSSLeague(commands.Cog):
 
     async def cog_load(self) -> None:
         self.pin_ssls.start()
-        await super().cog_load()
 
     async def cog_unload(self) -> None:
         self.pin_ssls.cancel()
-        await super().cog_unload()
 
     @tasks.loop(time=[time(hour=h) for h in range(24)])
     async def pin_ssls(self) -> None:

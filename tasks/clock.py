@@ -21,11 +21,9 @@ class Clock(commands.Cog):
 
     async def cog_load(self) -> None:
         self.clock.start()
-        await super().cog_load()
 
     async def cog_unload(self) -> None:
         self.clock.cancel()
-        await super().cog_unload()
 
     @tasks.loop(time=[time(hour=h, minute=m) for h in range(24) for m in range(60)])
     async def clock(self) -> None:

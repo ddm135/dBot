@@ -23,7 +23,6 @@ class InfoSync(commands.Cog):
     async def cog_load(self) -> None:
         await self.info_sync()
         self.info_sync.start()
-        await super().cog_load()
 
     async def cog_unload(self) -> None:
         self.bot.info_data_ready = False
@@ -33,7 +32,6 @@ class InfoSync(commands.Cog):
         self.bot.info_url.clear()
         self.bot.info_by_name.clear()
         self.bot.info_by_id.clear()
-        await super().cog_unload()
 
     @tasks.loop(time=time(hour=10, tzinfo=TIMEZONES["KST"]))
     async def info_sync(self) -> None:

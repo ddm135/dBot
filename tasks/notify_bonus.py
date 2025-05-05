@@ -17,11 +17,9 @@ class NotifyBonus(commands.Cog):
 
     async def cog_load(self) -> None:
         self.notify_bonus.start()
-        await super().cog_load()
 
     async def cog_unload(self) -> None:
         self.notify_bonus.cancel()
-        await super().cog_unload()
 
     @tasks.loop(time=[time(hour=h) for h in range(24)])
     async def notify_bonus(self) -> None:

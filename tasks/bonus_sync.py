@@ -20,13 +20,11 @@ class BonusSync(commands.Cog):
     async def cog_load(self) -> None:
         await self.bonus_sync()
         self.bonus_sync.start()
-        await super().cog_load()
 
     async def cog_unload(self) -> None:
         self.bot.bonus_data_ready = False
         self.bonus_sync.cancel()
         self.bot.bonus_data.clear()
-        await super().cog_unload()
 
     @tasks.loop(time=time(hour=10, tzinfo=TIMEZONES["KST"]))
     async def bonus_sync(self) -> None:

@@ -39,7 +39,6 @@ class dBot(commands.Bot):
     async def setup_hook(self) -> None:
         for ext in EXTENSIONS:
             await self.load_extension(ext)
-        await super().setup_hook()
 
     async def close(self) -> None:
         try:
