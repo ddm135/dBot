@@ -25,6 +25,7 @@ class BonusEmbed(discord.Embed):
         end = current_page * STEP
         start = end - STEP
         filtered_bonuses = bonuses[start:end]
+
         super().__init__(
             title=(
                 f"{game_details["name"]} {current_date.strftime("%G-W%V")} Bonuses "
@@ -33,6 +34,10 @@ class BonusEmbed(discord.Embed):
             description="None" if not filtered_bonuses else None,
             color=game_details["color"],
         )
+        self.set_footer(
+            text=f"Page {current_page}/{max_page} · Requested by {user.name}"
+        )
+
         for bonus in filtered_bonuses:
             self.add_field(
                 name=(
@@ -66,6 +71,3 @@ class BonusEmbed(discord.Embed):
                 ),
                 inline=False,
             )
-        self.set_footer(
-            text=f"Page {current_page}/{max_page} · Requested by {user.name}"
-        )

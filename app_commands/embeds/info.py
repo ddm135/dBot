@@ -26,16 +26,15 @@ class InfoEmbed(discord.Embed):
         artist_name_index = game_details["infoColumns"].index("artist_name")
         song_name_index = game_details["infoColumns"].index("song_name")
 
-        description = "\n".join(
-            f"({song[duration_index]}) "
-            f"{(f"{song[artist_name_index].replace(r"*", r"\*").replace(r"_", r"\_")}"
-                f" - " if not artist else "")}"
-            f"**{song[song_name_index].replace(r"*", r"\*").replace(r"_", r"\_")}**"
-            for song in filtered_songs
-        )
         super().__init__(
             title=f"{game_details["name"]}{f" - {artist}" if artist else ""}",
-            description=description,
+            description="\n".join(
+                f"({song[duration_index]}) "
+                f"{(f"{song[artist_name_index].replace(r"*", r"\*")
+                    .replace(r"_", r"\_")} - " if not artist else "")}"
+                f"**{song[song_name_index].replace(r"*", r"\*").replace(r"_", r"\_")}**"
+                for song in filtered_songs
+            ),
             color=game_details["color"],
         )
         self.set_footer(

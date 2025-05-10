@@ -13,11 +13,11 @@ from statics.helpers import update_sheet_data
 
 if (AUTOCOMPLETES := "app_commands.autocompletes.bonus") in sys.modules:
     importlib.reload(sys.modules[AUTOCOMPLETES])
-from app_commands.autocompletes.bonus import _ping_preprocess, artist_autocomplete
+from app_commands.autocompletes.bonus import artist_autocomplete
 
 if (COMMONS := "app_commands.commons.bonus") in sys.modules:
     importlib.reload(sys.modules[COMMONS])
-from app_commands.commons.bonus import STEP
+from app_commands.commons.bonus import STEP, ping_preprocess
 
 if (EMBEDS := "app_commands.embeds.bonus") in sys.modules:
     importlib.reload(sys.modules[EMBEDS])
@@ -334,7 +334,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                 ping_data,
                 artist_name_index,
                 users_index,
-            ) = _ping_preprocess(game.value)
+            ) = ping_preprocess(game.value)
 
             description = ""
             for row in ping_data:
@@ -375,7 +375,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
             ping_data,
             artist_name_index,
             users_index,
-        ) = _ping_preprocess(game_key)
+        ) = ping_preprocess(game_key)
 
         for i, row in enumerate(ping_data, start=1):
             _artist_name = row[artist_name_index]

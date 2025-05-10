@@ -31,12 +31,10 @@ class Administrative(commands.Cog):
         msg = await ctx.send("Syncing app commands...")
         try:
             await self.bot.tree.sync()
-            self.bot.tree.clear_commands(guild=ctx.guild)
-            await self.bot.tree.sync(guild=ctx.guild)
-            await msg.edit(content="Synced!")
-        except discord.RateLimited as e:
+        except discord.RateLimited:
             await msg.edit(content="Rate limited.")
-            print(e)
+        else:
+            await msg.edit(content="Synced!")
 
     @commands.command()
     @commands.is_owner()

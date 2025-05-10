@@ -7,7 +7,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from statics.consts import GAMES, SSRG_ROLE_MOD, SSRG_ROLE_SS, TEST_ROLE_OWNER
+from statics.consts import GAMES
 from statics.helpers import generate_ssl_embed, pin_new_ssl, unpin_old_ssl
 
 if (AUTOCOMPLETES := "app_commands.autocompletes.ssleague") in sys.modules:
@@ -38,7 +38,6 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
     @app_commands.autocomplete(artist_name=artist_autocomplete)
     @app_commands.autocomplete(song_name=song_autocomplete)
     @app_commands.rename(game_choice="game", artist_name="artist", song_name="song")
-    @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     async def pin_by_name(
         self,
         itr: discord.Interaction["dBot"],
@@ -47,7 +46,6 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         song_name: str,
     ) -> None:
         """Pin SSL song of the day using Artist Name and Song Name
-        (Requires SUPERSTAR Role)
 
         Parameters
         -----------
@@ -91,7 +89,6 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
     @app_commands.choices(game_choice=GAME_CHOICES)
     @app_commands.autocomplete(song_id=song_id_autocomplete)
     @app_commands.rename(game_choice="game", song_id="id")
-    @app_commands.checks.has_any_role(TEST_ROLE_OWNER, SSRG_ROLE_MOD, SSRG_ROLE_SS)
     async def pin_by_id(
         self,
         itr: discord.Interaction["dBot"],
@@ -99,7 +96,6 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         song_id: str,
     ) -> None:
         """Pin SSL song of the day using Song ID
-        (Requires SUPERSTAR Role)
 
         Parameters
         -----------
@@ -216,19 +212,6 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         )
 
         return True
-
-    async def cog_app_command_error(
-        self,
-        interaction: discord.Interaction,
-        error: app_commands.AppCommandError,
-    ) -> None:
-        if isinstance(error, app_commands.errors.MissingAnyRole):
-            await interaction.response.send_message(
-                "You do not have permission to use this command.",
-                ephemeral=True,
-            )
-            return
-        raise error
 
 
 async def setup(bot: "dBot") -> None:

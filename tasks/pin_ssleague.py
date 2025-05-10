@@ -1,10 +1,12 @@
 import asyncio
 import json
+import logging
 from datetime import datetime, time, timedelta
 from typing import TYPE_CHECKING
 
 import aiohttp
 import discord
+import discord.backoff
 from discord.ext import commands, tasks
 from google.auth.transport import requests
 from google.oauth2.service_account import IDTokenCredentials
@@ -24,6 +26,8 @@ if TYPE_CHECKING:
 
 
 class PinSSLeague(commands.Cog):
+    LOGGER = logging.getLogger(__name__)
+
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
 
@@ -54,19 +58,27 @@ class PinSSLeague(commands.Cog):
         current_time = datetime.now(tz=timezone) - timedelta(hours=2)
         if current_time.hour != 0:
             return
-
         apiUrl = game_details["api"]
-        credentials["version"] = await self.get_active_version(credentials)
-        if credentials["isSNS"]:
-            if credentials["provider"] == 0:
-                oid, key = await self.login_google(apiUrl, credentials)
-            elif credentials["provider"] == 3:
-                oid, key = await self.login_dalcom_id(apiUrl, credentials)
+        backoff = discord.backoff.ExponentialBackoff()
+
+        while True:
+            try:
+                credentials["version"] = await self.get_active_version(credentials)
+                match credentials["provider"]:
+                    case 0 | 1 if not credentials["isSNS"]:
+                        oid, key = await self.login(apiUrl, credentials)
+                    case 0 if credentials["isSNS"]:
+                        oid, key = await self.login_google(apiUrl, credentials)
+                    case 3 if credentials["isSNS"]:
+                        oid, key = await self.login_dalcom_id(apiUrl, credentials)
+                    case _:
+                        return
+                ssleague = await self.get_ssleague(apiUrl, oid, key)
+            except aiohttp.ClientError as e:
+                self.LOGGER.exception(str(e))
+                await asyncio.sleep(backoff.delay())
             else:
-                return
-        else:
-            oid, key = await self.login(apiUrl, credentials)
-        ssleague = await self.get_ssleague(apiUrl, oid, key)
+                break
 
         curday = ssleague["result"]["curday"]
         music_list = ssleague["result"]["musicList"]
