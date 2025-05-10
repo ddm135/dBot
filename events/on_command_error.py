@@ -12,7 +12,13 @@ class OnCommandError(commands.Cog):
 
     @commands.Cog.listener("on_command_error")
     async def on_command_error(self, ctx: commands.Context, error: Exception) -> None:
-        if isinstance(error, commands.errors.NotOwner):
+        if isinstance(
+            error,
+            (
+                commands.errors.NotOwner,
+                commands.errors.CommandNotFound,
+            ),
+        ):
             return
         raise error
 
