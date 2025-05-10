@@ -15,8 +15,8 @@ class OnCommandError(commands.Cog):
         if isinstance(
             error,
             (
-                commands.errors.NotOwner,
-                commands.errors.CommandNotFound,
+                commands.NotOwner,
+                commands.CommandNotFound,
             ),
         ):
             return

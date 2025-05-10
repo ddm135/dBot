@@ -57,7 +57,7 @@ bot = dBot(
     command_prefix=["db!", "DB!", "dB!", "Db!"],
     help_command=None,
     intents=intents,
-    status=discord.Status.dnd,
+    status=discord.Status.idle,
     activity=discord.CustomActivity("Waiting for clock..."),
 )
 

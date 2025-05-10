@@ -15,30 +15,18 @@ class OnMessage(commands.Cog):
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
 
-    # @commands.Cog.listener("on_message")
-    # async def bonusBot(self, message: discord.Message) -> None:
-    #     if message.author.bot:
-    #         return
-
-    #     if message.content.startswith(("h!", "H!")) and message.channel.id in (
-    #         401412343629742090,
-    #         936397358852358164,
-    #         936395886186098708,
-    #         931718347190591498,
-    #         953812391089537064,
-    #     ):
-    #         await message.reply("bonusBot was shut down on <t:1742765700:f>.")
-
     @commands.Cog.listener("on_message")
     async def bonusBot_info(self, message: discord.Message) -> None:
         if message.author.bot:
             return
 
+        msg_content = message.content.lower()
         if (
-            message.content.lower() == "h!info wakeone"
+            msg_content.startswith("h!i")
+            and msg_content.endswith(("wakeone", "wo", "w1"))
             and message.channel.id == 401412343629742090
         ):
-            await message.reply("Use dBot's `/info` instead.")
+            await message.reply("Use dBot's `/info` instead.", mention_author=False)
             return
 
     @commands.Cog.listener("on_message")

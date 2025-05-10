@@ -55,10 +55,14 @@ class Administrative(commands.Cog):
                     return
 
         for ext in extensions:
-            await self.bot.load_extension(ext)
+            try:
+                await self.bot.load_extension(ext)
+            except commands.ExtensionAlreadyLoaded:
+                continue
+
             if ext == "tasks.clock":
                 await self.bot.change_presence(
-                    status=discord.Status.dnd,
+                    status=discord.Status.idle,
                     activity=discord.CustomActivity("Waiting for clock..."),
                 )
         await msg.edit(content="Loaded!")
@@ -80,7 +84,11 @@ class Administrative(commands.Cog):
                     return
 
         for ext in extensions:
-            await self.bot.unload_extension(ext)
+            try:
+                await self.bot.unload_extension(ext)
+            except commands.ExtensionNotLoaded:
+                continue
+
             if ext == "tasks.clock":
                 await self.bot.change_presence(
                     status=discord.Status.dnd,
@@ -105,10 +113,14 @@ class Administrative(commands.Cog):
                     return
 
         for ext in extensions:
-            await self.bot.reload_extension(ext)
+            try:
+                await self.bot.reload_extension(ext)
+            except commands.ExtensionNotLoaded:
+                continue
+
             if ext == "tasks.clock":
                 await self.bot.change_presence(
-                    status=discord.Status.dnd,
+                    status=discord.Status.idle,
                     activity=discord.CustomActivity("Waiting for clock..."),
                 )
         await msg.edit(content="Reloaded!")
