@@ -129,11 +129,6 @@ class Administrative(commands.Cog):
 
         print(self.eval(message))
 
-    async def cog_command_error(self, ctx: commands.Context, error: Exception) -> None:
-        if isinstance(error, commands.errors.NotOwner):
-            return
-        raise error
-
 
 async def setup(bot: "dBot") -> None:
     await bot.add_cog(Administrative(bot))
