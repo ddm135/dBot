@@ -47,7 +47,7 @@ STATIC_MODULES = (
 )
 
 EXTENSIONS = (
-    "events.on_command_error"
+    "events.on_command_error",
     "events.on_message",
     "events.on_ready",
     "commands.administrative",
