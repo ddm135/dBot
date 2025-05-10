@@ -8,7 +8,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from statics.consts import GAMES, ONE_DAY
+from statics.consts import BONUS_OFFSET, GAMES
 from statics.helpers import update_sheet_data
 
 if (AUTOCOMPLETES := "app_commands.autocompletes.bonus") in sys.modules:
@@ -104,14 +104,14 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                         last_birthday_start = start_date
 
                     if end_date < tracking_date and bonus[member_name_index]:
-                        last_birthday_end = end_date + ONE_DAY
+                        last_birthday_end = end_date + BONUS_OFFSET
 
                     if (
                         not next_birthday_start
                         and tracking_date < start_date
                         and bonus[member_name_index]
                     ):
-                        next_birthday_start = start_date - ONE_DAY
+                        next_birthday_start = start_date - BONUS_OFFSET
 
                     if (
                         not next_birthday_end
@@ -217,7 +217,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                     if bonus_dict not in week_bonuses:
                         week_bonuses.append(bonus_dict)
 
-            tracking_date += ONE_DAY
+            tracking_date += BONUS_OFFSET
 
         week_bonuses.sort(key=lambda x: (x["bonus_end"], x["bonus_start"]))
         first_available_index = 0

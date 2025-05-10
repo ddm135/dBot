@@ -1,7 +1,24 @@
+import random
+import string
 from typing import TypedDict
 from zoneinfo import ZoneInfo
 
 import discord
+
+from statics.consts import IV_LENGTH
+
+
+class SuperStarHeaders(dict):
+    def __init__(self) -> None:
+        super().__init__(
+            {
+                "X-SuperStar-AES-IV": "".join(
+                    random.choices(string.ascii_uppercase, k=IV_LENGTH)
+                ),
+                "X-SuperStar-Asset-Ignore": "true",
+                "X-SuperStar-API-Version": "8",
+            }
+        )
 
 
 class GameDetails(TypedDict):

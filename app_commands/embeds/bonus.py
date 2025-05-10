@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 import discord
 
 from app_commands.commons.bonus import STEP
-from statics.consts import ONE_DAY
+from statics.consts import BONUS_OFFSET
 
 if TYPE_CHECKING:
     from statics.types import GameDetails
@@ -65,7 +65,7 @@ class BonusEmbed(discord.Embed):
                         else f"Available <t:{int(bonus["bonus_start"].timestamp())}:R>"
                         if bonus["bonus_start"] > current_date
                         else f"Ends <t:"
-                        f"{int((bonus["bonus_end"] + ONE_DAY).timestamp())}:R>")}"
+                        f"{int((bonus["bonus_end"] + BONUS_OFFSET).timestamp())}:R>")}"
                     f"{" :bangbang:" if bonus["bonus_start"] == last_date else ""}"
                     f"{"~~" if bonus["bonus_end"] < current_date else ""}"
                 ),

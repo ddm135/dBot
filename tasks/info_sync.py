@@ -7,8 +7,9 @@ from typing import TYPE_CHECKING, Any
 import aiohttp
 from discord.ext import commands, tasks
 
-from statics.consts import A_JSON_BODY, GAMES, SUPERSTAR_HEADERS, TIMEZONES
-from statics.helpers import decrypt_ecb, get_sheet_data, get_ss_json
+from statics.consts import GAMES, TIMEZONES
+from statics.helpers import decrypt_ecb, encrypt_cbc, get_sheet_data, get_ss_json
+from statics.types import SuperStarHeaders
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -94,13 +95,18 @@ class InfoSync(commands.Cog):
 
     @staticmethod
     async def get_a_json(api_url: str) -> dict[str, Any]:
+        headers = SuperStarHeaders()
+        iv = headers["X-SuperStar-AES-IV"]
+
         async with aiohttp.ClientSession() as session:
             async with session.post(
                 url=api_url,
-                headers=SUPERSTAR_HEADERS,
-                data=A_JSON_BODY,
+                headers=headers,
+                data=encrypt_cbc(
+                    '{"class":"Platform","method":"checkAssetBundle","params":[0]}', iv
+                ),
             ) as r:
-                ajs = await get_ss_json(r)
+                ajs = await get_ss_json(r, iv)
         return ajs
 
     @classmethod

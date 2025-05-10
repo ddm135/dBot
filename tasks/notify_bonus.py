@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 import discord
 from discord.ext import commands, tasks
 
-from statics.consts import GAMES, ME, ONE_DAY, STATUS_CHANNEL
+from statics.consts import BONUS_OFFSET, GAMES, ME, STATUS_CHANNEL
 from statics.helpers import get_sheet_data
 
 if TYPE_CHECKING:
@@ -42,7 +42,7 @@ class NotifyBonus(commands.Cog):
                     second=0,
                     microsecond=0,
                 )
-                + ONE_DAY
+                + BONUS_OFFSET
             )
             initial_msg = (
                 f"## Bonus Reminder for {game_name} on "
@@ -109,14 +109,14 @@ class NotifyBonus(commands.Cog):
                         last_birthday_start = start_date
 
                     if end_date < current_date and bonus[member_name_index]:
-                        last_birthday_end = end_date + ONE_DAY
+                        last_birthday_end = end_date + BONUS_OFFSET
 
                     if (
                         not next_birthday_start
                         and current_date < start_date
                         and bonus[member_name_index]
                     ):
-                        next_birthday_start = start_date - ONE_DAY
+                        next_birthday_start = start_date - BONUS_OFFSET
 
                     if (
                         not next_birthday_end
@@ -250,7 +250,7 @@ class NotifyBonus(commands.Cog):
                         embed.add_field(
                             name=(
                                 f"Ends <t:"
-                                f"{int((current_date + ONE_DAY).timestamp())}"
+                                f"{int((current_date + BONUS_OFFSET).timestamp())}"
                                 f":R> :orange_circle:"
                             ),
                             value="".join(notify_end),

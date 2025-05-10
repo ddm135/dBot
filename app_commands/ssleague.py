@@ -1,13 +1,13 @@
 import importlib
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 import discord
 from discord import app_commands
 from discord.ext import commands
 
-from statics.consts import GAMES
+from statics.consts import GAMES, RESET_OFFSET
 from statics.helpers import generate_ssl_embed, pin_new_ssl, unpin_old_ssl
 
 if (AUTOCOMPLETES := "app_commands.autocompletes.ssleague") in sys.modules:
@@ -183,7 +183,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
                     break
 
         timezone = game_details["timezone"]
-        current_time = datetime.now(tz=timezone) - timedelta(hours=2)
+        current_time = datetime.now(tz=timezone) - RESET_OFFSET
 
         embed = generate_ssl_embed(
             artist_name,

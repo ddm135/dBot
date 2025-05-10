@@ -1,7 +1,7 @@
 import asyncio
 import json
 import logging
-from datetime import datetime, time, timedelta
+from datetime import datetime, time
 from typing import TYPE_CHECKING
 
 import aiohttp
@@ -12,7 +12,7 @@ from google.auth.transport import requests
 from google.oauth2.service_account import IDTokenCredentials
 from packaging.version import Version
 
-from statics.consts import CREDENTIALS_DATA, GAMES, SUPERSTAR_HEADERS
+from statics.consts import CREDENTIALS_DATA, GAMES, RESET_OFFSET
 from statics.helpers import (
     encrypt_cbc,
     generate_ssl_embed,
@@ -20,6 +20,7 @@ from statics.helpers import (
     pin_new_ssl,
     unpin_old_ssl,
 )
+from statics.types import SuperStarHeaders
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -55,7 +56,7 @@ class PinSSLeague(commands.Cog):
     async def pin_ssl(self, game: str, credentials: dict) -> None:
         game_details = GAMES[game]
         timezone = game_details["timezone"]
-        current_time = datetime.now(tz=timezone) - timedelta(hours=2)
+        current_time = datetime.now(tz=timezone) - RESET_OFFSET
         if current_time.hour != 0:
             return
         apiUrl = game_details["api"]
@@ -167,13 +168,16 @@ class PinSSLeague(commands.Cog):
 
     @staticmethod
     async def login(apiUrl: str, credentials: dict) -> tuple[int, str]:
+        headers = SuperStarHeaders()
+        iv = headers["X-SuperStar-AES-IV"]
+
         async with aiohttp.ClientSession() as session:
             async with session.post(
                 url=apiUrl,
-                headers=SUPERSTAR_HEADERS,
-                data=encrypt_cbc(credentials["account"].format(**credentials)),
+                headers=headers,
+                data=encrypt_cbc(credentials["account"].format(**credentials), iv),
             ) as r:
-                account = await get_ss_json(r)
+                account = await get_ss_json(r, iv)
 
         oid = account["result"]["user"]["objectID"]
         key = account["invoke"][0]["params"][0]
@@ -188,15 +192,18 @@ class PinSSLeague(commands.Cog):
         gCredentials.refresh(requests.Request())
         id_token = gCredentials.token
 
+        headers = SuperStarHeaders()
+        iv = headers["X-SuperStar-AES-IV"]
+
         async with aiohttp.ClientSession() as session:
             async with session.post(
                 url=apiUrl,
-                headers=SUPERSTAR_HEADERS,
+                headers=headers,
                 data=encrypt_cbc(
-                    credentials["account"].format(id_token=id_token, **credentials)
+                    credentials["account"].format(id_token=id_token, **credentials), iv
                 ),
             ) as r:
-                account = await get_ss_json(r)
+                account = await get_ss_json(r, iv)
 
         oid = account["result"]["user"]["objectID"]
         key = account["invoke"][0]["params"][0]
@@ -204,6 +211,9 @@ class PinSSLeague(commands.Cog):
 
     @staticmethod
     async def login_dalcom_id(apiUrl: str, credentials: dict) -> tuple[int, str]:
+        headers = SuperStarHeaders()
+        iv = headers["X-SuperStar-AES-IV"]
+
         async with aiohttp.ClientSession() as session:
             async with session.post(
                 url="https://oauth.dalcomsoft.net/v1/token",
@@ -222,14 +232,15 @@ class PinSSLeague(commands.Cog):
 
             async with session.post(
                 url=apiUrl,
-                headers=SUPERSTAR_HEADERS,
+                headers=headers,
                 data=encrypt_cbc(
                     credentials["account"].format(
                         access_token=access_token, **credentials
-                    )
+                    ),
+                    iv,
                 ),
             ) as r:
-                account = await get_ss_json(r)
+                account = await get_ss_json(r, iv)
 
         oid = account["result"]["user"]["objectID"]
         key = account["invoke"][0]["params"][0]
@@ -237,16 +248,21 @@ class PinSSLeague(commands.Cog):
 
     @staticmethod
     async def get_ssleague(apiUrl: str, oid: int, key: str) -> dict:
+        headers = SuperStarHeaders()
+        iv = headers["X-SuperStar-AES-IV"]
+
         async with aiohttp.ClientSession() as session:
             async with session.post(
                 url=apiUrl,
-                headers=SUPERSTAR_HEADERS,
+                headers=headers,
                 data=encrypt_cbc(
-                    f'{"{"}"class":"StarLeague","method":"getWeekPlayMusic",'
-                    f'"params":[{oid},"{key}"]{"}"}'
+                    f'{{"class":"StarLeague",'
+                    f'"method":"getWeekPlayMusic",'
+                    f'"params":[{oid},"{key}"]}}',
+                    iv,
                 ),
             ) as r:
-                ssleague = await get_ss_json(r)
+                ssleague = await get_ss_json(r, iv)
         return ssleague
 
     @pin_ssls.before_loop

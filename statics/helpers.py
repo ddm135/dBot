@@ -12,7 +12,7 @@ from Cryptodome.Cipher import AES
 from Cryptodome.Util.Padding import pad, unpad
 from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 
-from statics.consts import AES_IV, AES_KEY, MAX_RETRIES
+from statics.consts import AES_KEY, MAX_RETRIES
 from statics.services import (  # noqa: F401
     driveService,
     sheetServiceDefault,
@@ -117,24 +117,25 @@ def update_drive_data_file(file_id: str, data: "MediaFileUpload") -> None:
 
 
 def decrypt_ecb(data: str | bytes) -> bytes:
-    cipherECB = AES.new(AES_KEY.encode(), AES.MODE_ECB)
+    cipherECB = AES.new(AES_KEY, AES.MODE_ECB)
     return unpad(cipherECB.decrypt(b64decode(data)), AES.block_size)
 
 
-def decrypt_cbc(data: str | bytes) -> bytes:
-    cipherCBC = AES.new(AES_KEY.encode(), AES.MODE_CBC, AES_IV.encode())
+def decrypt_cbc(data: str | bytes, iv: str | bytes) -> bytes:
+    if isinstance(iv, str):
+        iv = iv.encode()
+
+    cipherCBC = AES.new(AES_KEY, AES.MODE_CBC, iv)
     return unpad(cipherCBC.decrypt(b64decode(data)), AES.block_size)
 
 
-def encrypt_cbc(data: bytes | str) -> str:
+def encrypt_cbc(data: str | bytes, iv: str | bytes) -> str:
     if isinstance(data, str):
         data = data.encode()
+    if isinstance(iv, str):
+        iv = iv.encode()
 
-    cipherCBC = AES.new(
-        AES_KEY.encode(),
-        AES.MODE_CBC,
-        AES_IV.encode(),
-    )
+    cipherCBC = AES.new(AES_KEY, AES.MODE_CBC, iv)
     return b64encode(cipherCBC.encrypt(pad(data, AES.block_size))).decode()
 
 
@@ -199,11 +200,11 @@ async def unpin_old_ssl(
             break
 
 
-async def get_ss_json(response: ClientResponse) -> dict[str, Any]:
+async def get_ss_json(response: ClientResponse, iv: str | bytes) -> dict[str, Any]:
     try:
         result = await response.json(content_type=None)
     except json.JSONDecodeError:
-        result = json.loads(decrypt_cbc(await response.text()))
+        result = json.loads(decrypt_cbc(await response.text(), iv))
     return result
 
 
