@@ -1,7 +1,11 @@
 import importlib
 
-from . import autocompletes
+from statics.consts import LOCK
 
-importlib.reload(autocompletes)
+from . import autocompletes, ssleague
 
-from .ssleague import setup  # noqa: E402, F401
+if LOCK.exists():
+    for module in (autocompletes, ssleague):
+        importlib.reload(module)
+
+from .ssleague import setup  # noqa: F401

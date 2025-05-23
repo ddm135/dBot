@@ -1,7 +1,11 @@
 import importlib
 
-from . import embeds
+from statics.consts import LOCK
 
-importlib.reload(embeds)
+from . import embeds, on_message
 
-from .on_message import setup  # noqa: E402, F401
+if LOCK.exists():
+    for module in (embeds, on_message):
+        importlib.reload(module)
+
+from .on_message import setup  # noqa: F401

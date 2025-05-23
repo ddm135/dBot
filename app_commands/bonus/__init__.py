@@ -1,8 +1,11 @@
 import importlib
 
-from . import autocompletes, commons, embeds, views
+from statics.consts import LOCK
 
-for module in (autocompletes, commons, embeds, views):
-    importlib.reload(module)
+from . import autocompletes, bonus, commons, embeds, views
 
-from .bonus import setup  # noqa: E402, F401
+if LOCK.exists():
+    for module in (autocompletes, commons, embeds, views, bonus):
+        importlib.reload(module)
+
+from .bonus import setup  # noqa: F401

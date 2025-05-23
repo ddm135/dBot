@@ -1,8 +1,11 @@
 import importlib
 
-from . import autocompletes, commons, embeds
+from statics.consts import LOCK
 
-for module in (autocompletes, commons, embeds):
-    importlib.reload(module)
+from . import autocompletes, commons, embeds, role
 
-from .role import setup  # noqa: E402, F401
+if LOCK.exists():
+    for module in (autocompletes, commons, embeds, role):
+        importlib.reload(module)
+
+from .role import setup  # noqa: F401

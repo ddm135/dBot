@@ -6,7 +6,7 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 
-from statics.consts import EXTENSIONS, STATUS_CHANNEL
+from statics.consts import EXTENSIONS, LOCK, STATUS_CHANNEL
 
 if TYPE_CHECKING:
     from statics.types import PingDetails
@@ -41,6 +41,7 @@ class dBot(commands.Bot):
     async def setup_hook(self) -> None:
         for ext in EXTENSIONS:
             await self.load_extension(ext)
+        LOCK.touch(exist_ok=True)
 
     async def close(self) -> None:
         try:
@@ -51,6 +52,7 @@ class dBot(commands.Bot):
             pass
         finally:
             await super().close()
+            LOCK.unlink(missing_ok=True)
 
 
 intents = discord.Intents.default()

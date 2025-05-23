@@ -1,8 +1,11 @@
 import importlib
 
-from . import autocompletes, embeds
+from statics.consts import LOCK
 
-for module in (autocompletes, embeds):
-    importlib.reload(module)
+from . import autocompletes, embeds, ping
 
-from .ping import setup  # noqa: E402, F401
+if LOCK.exists():
+    for module in (autocompletes, embeds, ping):
+        importlib.reload(module)
+
+from .ping import setup  # noqa: F401

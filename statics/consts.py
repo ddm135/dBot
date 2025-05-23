@@ -61,6 +61,7 @@ EXTENSIONS = (
 PING_DATA = Path("data/pings.json")
 ROLE_DATA = Path("data/roles.json")
 CREDENTIALS_DATA = Path("data/credentials.json")
+LOCK = Path(".dBot")
 
 GAMES: dict[str, "GameDetails"] = {
     "SM": {

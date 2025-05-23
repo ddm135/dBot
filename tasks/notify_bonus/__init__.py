@@ -1,7 +1,11 @@
 import importlib
 
-from . import embeds
+from statics.consts import LOCK
 
-importlib.reload(embeds)
+from . import embeds, notify_bonus
 
-from .notify_bonus import setup  # noqa: E402, F401
+if LOCK.exists():
+    for module in (embeds, notify_bonus):
+        importlib.reload(module)
+
+from .notify_bonus import setup  # noqa: F401
