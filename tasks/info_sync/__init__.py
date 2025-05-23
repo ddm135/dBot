@@ -7,4 +7,7 @@ from . import info_sync
 if LOCK.exists():
     importlib.reload(info_sync)
 
-from .info_sync import setup  # noqa: F401
+from .info_sync import setup
+
+__all__ = ("setup",)
+__author__ = "ddm135 | Aut"

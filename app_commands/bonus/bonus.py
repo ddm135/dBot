@@ -11,7 +11,7 @@ from statics.helpers import update_sheet_data
 
 from .autocompletes import artist_autocomplete
 from .commons import STEP, ping_preprocess
-from .embeds import BonusPingsEmbed, BonusesEmbed
+from .embeds import BonusesEmbed, BonusPingsEmbed
 from .views import BonusView
 
 if TYPE_CHECKING:

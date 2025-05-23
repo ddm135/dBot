@@ -7,4 +7,7 @@ from . import administrative
 if LOCK.exists():
     importlib.reload(administrative)
 
-from .administrative import setup  # noqa: F401
+from .administrative import setup
+
+__all__ = ("setup",)
+__author__ = "ddm135 | Aut"

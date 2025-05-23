@@ -248,8 +248,11 @@ class NotifyBonus(commands.Cog):
                     )
 
                     for user_id in artist_ping_list:
+                        int_user_id = int(user_id)
                         try:
-                            user = await self.bot.fetch_user(int(user_id))
+                            user = self.bot.get_user(
+                                int_user_id
+                            ) or await self.bot.fetch_user(int_user_id)
                         except discord.NotFound:
                             continue
 
@@ -260,9 +263,11 @@ class NotifyBonus(commands.Cog):
 
                             await user.send(embed=embed, silent=True)
                         except discord.Forbidden:
-                            await self.bot.get_channel(  # type: ignore[union-attr]
+                            channel = self.bot.get_channel(
                                 STATUS_CHANNEL
-                            ).send(  # pyright: ignore
+                            ) or await self.bot.fetch_channel(STATUS_CHANNEL)
+                            assert isinstance(channel, discord.TextChannel)
+                            await channel.send(
                                 f"<@{ME}> Failed to send bonus ping to {user.name} "
                                 f"({user.id}) for {game_name} - {artist}."
                             )

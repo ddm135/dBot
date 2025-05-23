@@ -133,7 +133,9 @@ class PinSSLeague(commands.Cog):
             if not channel_id:
                 continue
 
-            pin_channel = self.bot.get_channel(channel_id)
+            pin_channel = self.bot.get_channel(
+                channel_id
+            ) or await self.bot.fetch_channel(channel_id)
             assert isinstance(pin_channel, discord.TextChannel)
             new_pin = await pin_new_ssl(embed, pin_channel)
             topic = f"[{current_time.strftime("%m.%d.%y")}] {artist_name} - {song_name}"

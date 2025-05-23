@@ -8,4 +8,7 @@ if LOCK.exists():
     for module in (autocompletes, commons, embeds, role):
         importlib.reload(module)
 
-from .role import setup  # noqa: F401
+from .role import setup
+
+__all__ = ("setup",)
+__author__ = "ddm135 | Aut"

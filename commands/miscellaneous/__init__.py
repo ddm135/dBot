@@ -7,4 +7,7 @@ from . import miscellaneous
 if LOCK.exists():
     importlib.reload(miscellaneous)
 
-from .miscellaneous import setup  # noqa: F401
+from .miscellaneous import setup
+
+__all__ = ("setup",)
+__author__ = "ddm135 | Aut"

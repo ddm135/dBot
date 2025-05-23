@@ -7,4 +7,7 @@ from . import on_command_error
 if LOCK.exists():
     importlib.reload(on_command_error)
 
-from .on_command_error import setup  # noqa: F401
+from .on_command_error import setup
+
+__all__ = ("setup",)
+__author__ = "ddm135 | Aut"

@@ -58,8 +58,11 @@ class OnMessage(commands.Cog):
                 ):
                     continue
 
-                user = await self.bot.fetch_user(user_id_int)
-                if not user:
+                try:
+                    user = self.bot.get_user(user_id_int) or await self.bot.fetch_user(
+                        user_id_int
+                    )
+                except discord.NotFound:
                     continue
 
                 self.bot.pings[guild_id][word][user_id]["count"] += 1

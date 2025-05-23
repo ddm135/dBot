@@ -102,7 +102,9 @@ class Pinata(commands.Cog):
         if not rewards:
             return
 
-        channel = self.bot.get_channel(PINATA_TEST_CHANNEL)
+        channel = self.bot.get_channel(
+            PINATA_TEST_CHANNEL
+        ) or await self.bot.fetch_channel(PINATA_TEST_CHANNEL)
         assert isinstance(channel, discord.TextChannel)
 
         real_rewards = [

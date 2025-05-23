@@ -8,4 +8,7 @@ if LOCK.exists():
     for module in (embeds, notify_bonus):
         importlib.reload(module)
 
-from .notify_bonus import setup  # noqa: F401
+from .notify_bonus import setup
+
+__all__ = ("setup",)
+__author__ = "ddm135 | Aut"

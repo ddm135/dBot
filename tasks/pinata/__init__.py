@@ -7,4 +7,7 @@ from . import pinata
 if LOCK.exists():
     importlib.reload(pinata)
 
-from .pinata import setup  # noqa: F401
+from .pinata import setup
+
+__all__ = ("setup",)
+__author__ = "ddm135 | Aut"

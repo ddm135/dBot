@@ -8,4 +8,7 @@ if LOCK.exists():
     for module in (autocompletes, embeds, ping):
         importlib.reload(module)
 
-from .ping import setup  # noqa: F401
+from .ping import setup
+
+__all__ = ("setup",)
+__author__ = "ddm135 | Aut"

@@ -45,24 +45,25 @@ class dBot(commands.Bot):
 
     async def close(self) -> None:
         try:
-            await self.get_channel(STATUS_CHANNEL).send(  # type: ignore[union-attr]
-                "Shutting down..."
+            channel = self.get_channel(STATUS_CHANNEL) or self.fetch_channel(
+                STATUS_CHANNEL
             )
-        except AttributeError:
+            assert isinstance(channel, discord.TextChannel)
+            await channel.send("Shutting down...")
+        except Exception:
             pass
         finally:
             await super().close()
             LOCK.unlink(missing_ok=True)
 
 
-intents = discord.Intents.default()
-intents.message_content = True
 bot = dBot(
     command_prefix=["db!", "DB!", "dB!", "Db!"],
     help_command=None,
-    intents=intents,
+    intents=discord.Intents.all(),
     status=discord.Status.idle,
     activity=discord.CustomActivity("Waiting for clock..."),
+    member_cache_flags=discord.MemberCacheFlags.all(),
 )
 
 load_dotenv()

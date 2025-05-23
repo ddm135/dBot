@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
 
+import discord
 from discord.ext import commands
 
 from statics.consts import STATUS_CHANNEL
@@ -15,9 +16,14 @@ class OnReady(commands.Cog):
 
     @commands.Cog.listener("on_ready")
     async def on_ready(self) -> None:
-        await self.bot.get_channel(STATUS_CHANNEL).send(  # type: ignore[union-attr]
-            f"Successful start at {datetime.now()}"
-        )
+        try:
+            channel = self.bot.get_channel(
+                STATUS_CHANNEL
+            ) or await self.bot.fetch_channel(STATUS_CHANNEL)
+            assert isinstance(channel, discord.TextChannel)
+            await channel.send(f"Successful start at {datetime.now()}")
+        except Exception:
+            pass
 
 
 async def setup(bot: "dBot") -> None:

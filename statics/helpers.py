@@ -1,3 +1,5 @@
+# pyright: reportMissingModuleSource=false
+
 import asyncio
 import json
 from base64 import b64decode, b64encode
@@ -20,8 +22,8 @@ from statics.services import (  # noqa: F401
 )
 
 if TYPE_CHECKING:
-    from googleapiclient._apis.drive.v3 import File, FileList  # type: ignore
-    from googleapiclient._apis.sheets.v4 import SheetsResource  # type: ignore
+    from googleapiclient._apis.drive.v3 import File, FileList
+    from googleapiclient._apis.sheets.v4 import SheetsResource
 
 
 def get_sheet_data(
