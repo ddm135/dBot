@@ -1,10 +1,9 @@
 import importlib
+import sys
 
 from . import autocomplete
 from .ssleague import *  # noqa: F401, F403
 
-print(autocomplete.__file__)
-print(autocomplete.__name__)
-print(autocomplete.__package__)
-print(autocomplete.__path__)
-importlib.reload(autocomplete)
+if autocomplete.__name__ in sys.modules:
+    print("Reload autocomplete")
+    importlib.reload(autocomplete)
