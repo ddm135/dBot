@@ -1,6 +1,4 @@
-import importlib
 import json
-import sys
 from typing import TYPE_CHECKING
 
 import discord
@@ -9,21 +7,13 @@ from discord.ext import commands
 
 from statics.consts import ROLE_DATA, ROLES
 
-if (AUTOCOMPLETES := "app_commands.autocompletes.role") in sys.modules:
-    importlib.reload(sys.modules[AUTOCOMPLETES])
-from app_commands.autocompletes.role import (
+from .autocompletes import (
     role_add_autocomplete,
     role_remove_autocomplete,
     role_set_autocomplete,
 )
-
-if (COMMONS := "app_commands.commons.role") in sys.modules:
-    importlib.reload(sys.modules[COMMONS])
-from app_commands.commons.role import NOTICE
-
-if (EMBEDS := "app_commands.embeds.role") in sys.modules:
-    importlib.reload(sys.modules[EMBEDS])
-from app_commands.embeds.role import RoleInventoryEmbed, RoleSetEmbed
+from .commons import NOTICE
+from .embeds import RoleInventoryEmbed, RoleSetEmbed
 
 if TYPE_CHECKING:
     from dBot import dBot

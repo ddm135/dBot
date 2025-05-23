@@ -15,12 +15,11 @@ from packaging.version import Version
 from statics.consts import CREDENTIALS_DATA, GAMES, RESET_OFFSET
 from statics.helpers import (
     encrypt_cbc,
-    generate_ssl_embed,
     get_ss_json,
     pin_new_ssl,
     unpin_old_ssl,
 )
-from statics.types import SuperStarHeaders
+from statics.types import SSLeagueEmbed, SuperStarHeaders
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -95,10 +94,8 @@ class PinSSLeague(commands.Cog):
             info_columns.index("skills") if "skills" in info_columns else None
         )
 
-        artist_name = (
-            ssl_song[artist_name_index].replace(r"*", r"\*").replace(r"_", r"\_")
-        )
-        song_name = ssl_song[song_name_index].replace(r"*", r"\*").replace(r"_", r"\_")
+        artist_name = ssl_song[artist_name_index]
+        song_name = ssl_song[song_name_index]
         duration = ssl_song[duration_index]
         skills = ssl_song[skills_index] if skills_index is not None else None
 
@@ -119,7 +116,7 @@ class PinSSLeague(commands.Cog):
                     image_url = url["url"]
                     break
 
-        embed = generate_ssl_embed(
+        embed = SSLeagueEmbed(
             artist_name,
             song_name,
             duration,

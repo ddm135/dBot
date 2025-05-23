@@ -1,7 +1,5 @@
-import importlib
 import json
 import re
-import sys
 from typing import TYPE_CHECKING
 
 import discord
@@ -9,9 +7,7 @@ from discord.ext import commands
 
 from statics.consts import PING_DATA
 
-if (EMBEDS := "events.embeds.on_message") in sys.modules:
-    importlib.reload(sys.modules[EMBEDS])
-from events.embeds.on_message import WordPingEmbed
+from .embeds import WordPingEmbed
 
 if TYPE_CHECKING:
     from dBot import dBot

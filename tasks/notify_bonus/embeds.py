@@ -5,7 +5,7 @@ import discord
 from statics.consts import BONUS_OFFSET
 
 
-class NotifyEmbed(discord.Embed):
+class NotifyBonusEmbed(discord.Embed):
     def __init__(
         self,
         artist: str,

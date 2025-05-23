@@ -139,43 +139,6 @@ def encrypt_cbc(data: str | bytes, iv: str | bytes) -> str:
     return b64encode(cipherCBC.encrypt(pad(data, AES.block_size))).decode()
 
 
-def generate_ssl_embed(
-    artist_name: str,
-    song_name: str,
-    duration: str,
-    image_url: str | None,
-    color: int,
-    skills: str | None,
-    current_time: datetime,
-    user_name: str,
-) -> discord.Embed:
-    embed = discord.Embed(
-        color=color,
-        title=f"SSL #{current_time.strftime("%u")}",
-        description=f"**{artist_name} - {song_name}**",
-    )
-
-    embed.add_field(
-        name="Duration",
-        value=duration,
-    )
-    if skills:
-        embed.add_field(
-            name="Skill Order",
-            value=skills,
-        )
-
-    embed.set_thumbnail(url=image_url)
-    embed.set_footer(
-        text=(
-            f"{current_time.strftime("%A, %B %d, %Y").replace(" 0", " ")}"
-            f" · Pinned by {user_name}"
-        )
-    )
-
-    return embed
-
-
 async def pin_new_ssl(
     embed: discord.Embed,
     pin_channel: discord.TextChannel,

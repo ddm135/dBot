@@ -1,6 +1,4 @@
-import importlib
 import math
-import sys
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING
 
@@ -11,21 +9,10 @@ from discord.ext import commands
 from statics.consts import BONUS_OFFSET, GAMES
 from statics.helpers import update_sheet_data
 
-if (AUTOCOMPLETES := "app_commands.autocompletes.bonus") in sys.modules:
-    importlib.reload(sys.modules[AUTOCOMPLETES])
-from app_commands.autocompletes.bonus import artist_autocomplete
-
-if (COMMONS := "app_commands.commons.bonus") in sys.modules:
-    importlib.reload(sys.modules[COMMONS])
-from app_commands.commons.bonus import STEP, ping_preprocess
-
-if (EMBEDS := "app_commands.embeds.bonus") in sys.modules:
-    importlib.reload(sys.modules[EMBEDS])
-from app_commands.embeds.bonus import BonusesEmbed
-
-if (VIEWS := "app_commands.views.bonus") in sys.modules:
-    importlib.reload(sys.modules[VIEWS])
-from app_commands.views.bonus import BonusView
+from .autocompletes import artist_autocomplete
+from .commons import STEP, ping_preprocess
+from .embeds import BonusPingsEmbed, BonusesEmbed
+from .views import BonusView
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -328,32 +315,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
 
         await itr.user.send("## Bonus Ping List")
         for game in games:
-            (
-                game_details,
-                ping_data,
-                artist_name_index,
-                users_index,
-            ) = ping_preprocess(game.value)
-
-            description = ""
-            for row in ping_data:
-                _artist_name = row[artist_name_index]
-                users = row[users_index].split(",")
-                users.remove("") if "" in users else None
-
-                if user_id in users:
-                    description += f"- {_artist_name}\n"
-
-            if not description:
-                description = "None"
-            else:
-                description = description[:-1]
-
-            embed = discord.Embed(
-                title=game_details["name"],
-                description=description,
-                color=game_details["color"],
-            )
+            embed = BonusPingsEmbed(game.value, user_id)
             await itr.user.send(embed=embed, silent=True)
 
         return await itr.followup.send(

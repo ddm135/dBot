@@ -1,6 +1,6 @@
 import discord
 
-from app_commands.commons.role import NOTICE
+from .commons import NOTICE
 
 
 class RoleSetEmbed(discord.Embed):

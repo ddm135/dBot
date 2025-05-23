@@ -3,15 +3,46 @@ from typing import TYPE_CHECKING
 
 import discord
 
-from app_commands.commons.bonus import STEP
 from statics.consts import BONUS_OFFSET
+
+from .commons import STEP, ping_preprocess
 
 if TYPE_CHECKING:
     from statics.types import GameDetails
 
 
 class BonusPingsEmbed(discord.Embed):
-    ...
+    def __init__(
+        self,
+        game: str,
+        user_id: str,
+    ) -> None:
+        (
+            game_details,
+            ping_data,
+            artist_name_index,
+            users_index,
+        ) = ping_preprocess(game)
+
+        description = ""
+        for row in ping_data:
+            _artist_name = row[artist_name_index]
+            users = row[users_index].split(",")
+            users.remove("") if "" in users else None
+
+            if user_id in users:
+                description += f"- {_artist_name}\n"
+
+        if not description:
+            description = "None"
+        else:
+            description = description[:-1]
+
+        super().__init__(
+            title=game_details["name"],
+            description=description,
+            color=game_details["color"],
+        )
 
 
 class BonusesEmbed(discord.Embed):

@@ -1,5 +1,3 @@
-import importlib
-import sys
 from typing import TYPE_CHECKING
 
 import discord
@@ -8,20 +6,9 @@ from discord.ext import commands
 
 from statics.consts import GAMES
 
-if (AUTOCOMPLETES := "app_commands.autocompletes.info") in sys.modules:
-    importlib.reload(sys.modules[AUTOCOMPLETES])
-from app_commands.autocompletes.info import artist_autocomplete
-
-if (COMMONS := "app_commands.commons.info") in sys.modules:
-    importlib.reload(sys.modules[COMMONS])
-
-if (EMBEDS := "app_commands.embeds.info") in sys.modules:
-    importlib.reload(sys.modules[EMBEDS])
-from app_commands.embeds.info import InfoEmbed
-
-if (VIEWS := "app_commands.views.info") in sys.modules:
-    importlib.reload(sys.modules[VIEWS])
-from app_commands.views.info import InfoView
+from .autocompletes import artist_autocomplete
+from .embeds import InfoEmbed
+from .views import InfoView
 
 if TYPE_CHECKING:
     from dBot import dBot

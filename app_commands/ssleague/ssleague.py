@@ -6,9 +6,10 @@ from discord import app_commands
 from discord.ext import commands
 
 from statics.consts import GAMES, RESET_OFFSET
-from statics.helpers import generate_ssl_embed, pin_new_ssl, unpin_old_ssl
+from statics.helpers import pin_new_ssl, unpin_old_ssl
+from statics.types import SSLeagueEmbed
 
-from .autocomplete import (
+from .autocompletes import (
     artist_autocomplete,
     song_autocomplete,
     song_id_autocomplete,
@@ -154,8 +155,6 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         if song_id is None:
             song_id = int(ssl_song[info_columns.index("song_id")])
 
-        artist_name = artist_name.replace(r"*", r"\*").replace(r"_", r"\_")
-        song_name = song_name.replace(r"*", r"\*").replace(r"_", r"\_")
         duration = ssl_song[info_columns.index("duration")]
         skills = (
             ssl_song[info_columns.index("skills")] if "skills" in info_columns else None
@@ -181,7 +180,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         timezone = game_details["timezone"]
         current_time = datetime.now(tz=timezone) - RESET_OFFSET
 
-        embed = generate_ssl_embed(
+        embed = SSLeagueEmbed(
             artist_name,
             song_name,
             duration,

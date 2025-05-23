@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from dBot import dBot
 
 
-class Misc(commands.Cog):
+class Miscellaneous(commands.Cog):
     MOTS7_RELEASE = datetime(year=2020, month=2, day=21, tzinfo=TIMEZONES["KST"])
     LP_RELEASE = datetime(year=2020, month=11, day=30, tzinfo=TIMEZONES["KST"])
     BAEMON_DEBUT = datetime(year=2024, month=4, day=1, tzinfo=TIMEZONES["KST"])
@@ -52,4 +52,4 @@ class Misc(commands.Cog):
 
 
 async def setup(bot: "dBot") -> None:
-    await bot.add_cog(Misc(bot))
+    await bot.add_cog(Miscellaneous(bot))

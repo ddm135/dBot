@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 import discord
 
-from app_commands.commons.info import STEP
+from .commons import STEP
 
 if TYPE_CHECKING:
     from statics.types import GameDetails

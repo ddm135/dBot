@@ -1,6 +1,4 @@
-import importlib
 import json
-import sys
 from typing import TYPE_CHECKING
 
 import discord
@@ -10,13 +8,8 @@ from discord.ext import commands
 from statics.consts import PING_DATA
 from statics.types import PingDetails
 
-if (AUTOCOMPLETES := "app_commands.autocompletes.ping") in sys.modules:
-    importlib.reload(sys.modules[AUTOCOMPLETES])
-from app_commands.autocompletes.ping import word_autocomplete
-
-if (EMBEDS := "app_commands.embeds.ping") in sys.modules:
-    importlib.reload(sys.modules[EMBEDS])
-from app_commands.embeds.ping import WordPingsEmbed
+from .autocompletes import word_autocomplete
+from .embeds import WordPingsEmbed
 
 if TYPE_CHECKING:
     from dBot import dBot

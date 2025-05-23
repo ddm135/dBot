@@ -1,32 +1,37 @@
-import math
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 import discord
 
-from app_commands.commons.info import STEP
-from app_commands.embeds.info import InfoEmbed
+from .embeds import BonusesEmbed
 
 if TYPE_CHECKING:
     from dBot import dBot
     from statics.types import GameDetails
 
 
-class InfoView(discord.ui.View):
+class BonusView(discord.ui.View):
     def __init__(
         self,
-        message_id: discord.Message,
+        message: discord.Message,
         game_details: "GameDetails",
-        artist: str | None,
-        songs: list[list[str]],
+        first_date: datetime,
+        last_date: datetime,
+        current_date: datetime,
+        bonuses: list[dict],
         user: discord.User | discord.Member,
+        current_page: int,
+        max_page: int,
     ) -> None:
-        self.message = message_id
+        self.message = message
         self.game_details = game_details
-        self.artist = artist
-        self.songs = songs
-        self.current = 1
-        self.max = math.ceil(len(songs) / STEP) or 1
+        self.bonuses = bonuses
+        self.first_date = first_date
+        self.last_date = last_date
+        self.current_date = current_date
         self.user = user
+        self.current_page = current_page
+        self.max_page = max_page
         super().__init__()
 
     async def on_timeout(self) -> None:
@@ -38,12 +43,14 @@ class InfoView(discord.ui.View):
     async def update_message(self, itr: discord.Interaction) -> None:
         await itr.followup.edit_message(
             message_id=self.message.id,
-            embed=InfoEmbed(
+            embed=BonusesEmbed(
                 self.game_details,
-                self.artist,
-                self.songs,
-                self.current,
-                self.max,
+                self.bonuses,
+                self.first_date,
+                self.last_date,
+                self.current_date,
+                self.current_page,
+                self.max_page,
             ),
             view=self,
         )
@@ -54,13 +61,14 @@ class InfoView(discord.ui.View):
     ) -> None:
         await itr.response.defer()
         if itr.user.id != self.user.id:
-            return await itr.followup.send(
+            await itr.followup.send(
                 "You are not the original requester.", ephemeral=True
             )
+            return
 
-        self.current -= 1
-        if self.current < 1:
-            self.current = self.max
+        self.current_page -= 1
+        if self.current_page < 1:
+            self.current_page = self.max_page
         await self.update_message(itr)
 
     @discord.ui.button(label="Next Page", style=discord.ButtonStyle.primary)
@@ -69,11 +77,12 @@ class InfoView(discord.ui.View):
     ) -> None:
         await itr.response.defer()
         if itr.user.id != self.user.id:
-            return await itr.followup.send(
+            await itr.followup.send(
                 "You are not the original requester.", ephemeral=True
             )
+            return
 
-        self.current += 1
-        if self.current > self.max:
-            self.current = 1
+        self.current_page += 1
+        if self.current_page > self.max_page:
+            self.current_page = 1
         await self.update_message(itr)
