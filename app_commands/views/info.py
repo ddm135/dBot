@@ -42,7 +42,6 @@ class InfoView(discord.ui.View):
                 self.game_details,
                 self.artist,
                 self.songs,
-                self.user,
                 self.current,
                 self.max,
             ),

@@ -76,7 +76,7 @@ class Info(commands.Cog):
 
         sorted_songs = sorted(songs, key=lambda x: x[duration_index])
         msg = await itr.followup.send(
-            embed=InfoEmbed(game_details, artist_name, sorted_songs, itr.user),
+            embed=InfoEmbed(game_details, artist_name, sorted_songs),
             wait=True,
         )
         view = InfoView(msg, game_details, artist_name, sorted_songs, itr.user)

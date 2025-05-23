@@ -1,3 +1,5 @@
+import importlib
+import sys
 from datetime import datetime, time
 from typing import TYPE_CHECKING
 
@@ -6,6 +8,10 @@ from discord.ext import commands, tasks
 
 from statics.consts import BONUS_OFFSET, GAMES, ME, STATUS_CHANNEL
 from statics.helpers import get_sheet_data
+
+if (EMBEDS := "tasks.embeds.notify_bonus") in sys.modules:
+    importlib.reload(sys.modules[EMBEDS])
+from tasks.embeds.notify_bonus import NotifyEmbed
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -236,29 +242,13 @@ class NotifyBonus(commands.Cog):
                             notify_start.append(msg)
 
                 if notify_start or notify_end:
-                    embed = discord.Embed(color=game_details["color"])
-                    if notify_start:
-                        embed.add_field(
-                            name=(
-                                f"Available <t:{int(current_date.timestamp())}"
-                                f":R> :green_circle:"
-                            ),
-                            value="".join(notify_start),
-                            inline=False,
-                        )
-                    if notify_end:
-                        embed.add_field(
-                            name=(
-                                f"Ends <t:"
-                                f"{int((current_date + BONUS_OFFSET).timestamp())}"
-                                f":R> :orange_circle:"
-                            ),
-                            value="".join(notify_end),
-                            inline=False,
-                        )
-                    embed.set_author(
-                        name=artist.replace(r"*", r"\*").replace(r"_", r"\_"),
-                        icon_url=artist_pings[ping_emblem_index] or None,
+                    embed = NotifyEmbed(
+                        artist,
+                        artist_pings[ping_emblem_index] or None,
+                        current_date,
+                        notify_start,
+                        notify_end,
+                        game_details["color"],
                     )
 
                     for user_id in artist_ping_list:

@@ -10,7 +10,11 @@ if TYPE_CHECKING:
     from statics.types import GameDetails
 
 
-class BonusEmbed(discord.Embed):
+class BonusPingsEmbed(discord.Embed):
+    ...
+
+
+class BonusesEmbed(discord.Embed):
     def __init__(
         self,
         game_details: "GameDetails",
@@ -18,7 +22,6 @@ class BonusEmbed(discord.Embed):
         first_date: datetime,
         last_date: datetime,
         current_date: datetime,
-        user: discord.User | discord.Member,
         current_page: int,
         max_page: int,
     ) -> None:
@@ -34,9 +37,7 @@ class BonusEmbed(discord.Embed):
             description="None" if not filtered_bonuses else None,
             color=game_details["color"],
         )
-        self.set_footer(
-            text=f"Page {current_page}/{max_page} · Requested by {user.name}"
-        )
+        self.set_footer(text=f"Page {current_page}/{max_page}")
 
         for bonus in filtered_bonuses:
             self.add_field(

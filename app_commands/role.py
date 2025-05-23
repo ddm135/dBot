@@ -17,17 +17,20 @@ from app_commands.autocompletes.role import (
     role_set_autocomplete,
 )
 
+if (COMMONS := "app_commands.commons.role") in sys.modules:
+    importlib.reload(sys.modules[COMMONS])
+from app_commands.commons.role import NOTICE
+
+if (EMBEDS := "app_commands.embeds.role") in sys.modules:
+    importlib.reload(sys.modules[EMBEDS])
+from app_commands.embeds.role import RoleInventoryEmbed, RoleSetEmbed
+
 if TYPE_CHECKING:
     from dBot import dBot
 
 
 @app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)
 class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles"):
-    NOTICE = (
-        "bonusBot and dBot do not share databases and as such, "
-        "storing roles on dBot will affect bonusBot's functionalities."
-    )
-
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
 
@@ -70,7 +73,7 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
         await itr.user.add_roles(target_role)
         self.save_role_data()
         await itr.followup.send(
-            f"Added {target_role.mention}!\n-# {self.NOTICE}",
+            f"Added {target_role.mention}!\n-# {NOTICE}",
             allowed_mentions=discord.AllowedMentions.none(),
             silent=True,
         )
@@ -114,7 +117,7 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
         await itr.user.remove_roles(target_role)
         self.save_role_data()
         await itr.followup.send(
-            f"Removed {target_role.mention}!\n-# {self.NOTICE}",
+            f"Removed {target_role.mention}!\n-# {NOTICE}",
             allowed_mentions=discord.AllowedMentions.none(),
             silent=True,
         )
@@ -181,28 +184,9 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
         await itr.user.remove_roles(*remove_roles)
         self.save_role_data()
 
-        embed_description = ""
-        if add_roles:
-            embed_description += "**Applied**\n"
-            embed_description += "\n".join(f"{r.mention}" for r in reversed(add_roles))
-
-            if remove_roles:
-                embed_description += "\n\n"
-        if remove_roles:
-            embed_description += "**Stored**\n"
-            embed_description += "\n".join(
-                f"{r.mention}" for r in reversed(remove_roles)
-            )
-
-        embed = discord.Embed(
-            title="Changes",
-            description=embed_description or "None",
-            color=target_role.color,
-        )
-        embed.set_footer(text=self.NOTICE)
         await itr.followup.send(
             f"Set to {target_role.mention}!",
-            embed=embed,
+            embed=RoleSetEmbed(target_role, add_roles, remove_roles),
             allowed_mentions=discord.AllowedMentions.none(),
             silent=True,
         )
@@ -220,18 +204,9 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
             (role for role in self.bot.roles[user_id] if role in group_roles),
             key=lambda x: group_roles.index(x),
         )
-        embed = discord.Embed(
-            title="Inventory",
-            description=(
-                "\n".join(f"<@&{role}>" for role in sorted_stored_roles)
-                if sorted_stored_roles
-                else "Empty"
-            ),
-            color=itr.user.color,
-        )
-        embed.set_footer(text=self.NOTICE)
+
         await itr.followup.send(
-            embed=embed,
+            embed=RoleInventoryEmbed(itr.user, sorted_stored_roles),
             allowed_mentions=discord.AllowedMentions.none(),
             silent=True,
         )

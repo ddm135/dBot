@@ -1,11 +1,17 @@
+import importlib
 import json
 import re
+import sys
 from typing import TYPE_CHECKING
 
 import discord
 from discord.ext import commands
 
 from statics.consts import PING_DATA
+
+if (EMBEDS := "events.embeds.on_message") in sys.modules:
+    importlib.reload(sys.modules[EMBEDS])
+from events.embeds.on_message import WordPingEmbed
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -64,23 +70,7 @@ class OnMessage(commands.Cog):
                 with open(PING_DATA, "w") as f:
                     json.dump(self.bot.pings, f, indent=4)
 
-                embed = discord.Embed(
-                    description=(
-                        f"`{message.author.name}` mentioned `{word}` in "
-                        f"<#{message.channel.id}> on "
-                        f"<t:{int(message.created_at.timestamp())}:f>\n\n"
-                        f"{message.content}"
-                    ),
-                    color=message.author.color,
-                )
-                embed.set_author(
-                    name=f"Word Ping in {message.guild.name}",
-                    url=message.jump_url,
-                    icon_url=message.guild.icon.url if message.guild.icon else None,
-                )
-                embed.set_thumbnail(url=message.author.display_avatar.url)
-
-                await user.send(embed=embed)
+                await user.send(embed=WordPingEmbed(word, message))
 
 
 async def setup(bot: "dBot") -> None:

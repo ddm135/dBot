@@ -1,13 +1,15 @@
 import os
 from collections import defaultdict
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 
 from statics.consts import EXTENSIONS, STATUS_CHANNEL
-from statics.types import PingDetails
+
+if TYPE_CHECKING:
+    from statics.types import PingDetails
 
 
 class dBot(commands.Bot):
@@ -27,7 +29,7 @@ class dBot(commands.Bot):
     )
     bonus_data_ready = False
 
-    pings: defaultdict[str, defaultdict[str, defaultdict[str, PingDetails]]] = (
+    pings: defaultdict[str, defaultdict[str, defaultdict[str, "PingDetails"]]] = (
         defaultdict(
             lambda: defaultdict(
                 lambda: defaultdict(dict),  # type: ignore[arg-type]

@@ -15,7 +15,6 @@ class InfoEmbed(discord.Embed):
         game_details: "GameDetails",
         artist: str | None,
         songs: list[list[str]],
-        user: discord.User | discord.Member,
         current: int = 1,
         max: int | None = None,
     ) -> None:
@@ -38,8 +37,5 @@ class InfoEmbed(discord.Embed):
             color=game_details["color"],
         )
         self.set_footer(
-            text=(
-                f"Page {current}/{max or math.ceil(len(songs) / STEP)}"
-                f" · Requested by {user.name}"
-            ),
+            text=f"Page {current}/{max or math.ceil(len(songs) / STEP)}",
         )

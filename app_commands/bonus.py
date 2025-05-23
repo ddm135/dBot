@@ -21,7 +21,7 @@ from app_commands.commons.bonus import STEP, ping_preprocess
 
 if (EMBEDS := "app_commands.embeds.bonus") in sys.modules:
     importlib.reload(sys.modules[EMBEDS])
-from app_commands.embeds.bonus import BonusEmbed
+from app_commands.embeds.bonus import BonusesEmbed
 
 if (VIEWS := "app_commands.views.bonus") in sys.modules:
     importlib.reload(sys.modules[VIEWS])
@@ -230,13 +230,12 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         max_page = math.ceil(len(week_bonuses) / STEP) or 1
 
         msg = await itr.followup.send(
-            embed=BonusEmbed(
+            embed=BonusesEmbed(
                 game_details,
                 week_bonuses,
                 first_date,
                 last_date,
                 current_date,
-                itr.user,
                 default_page,
                 max_page,
             ),
@@ -351,7 +350,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                 description = description[:-1]
 
             embed = discord.Embed(
-                title=f"{game_details["name"]}",
+                title=game_details["name"],
                 description=description,
                 color=game_details["color"],
             )

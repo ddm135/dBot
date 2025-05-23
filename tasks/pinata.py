@@ -9,10 +9,10 @@ import discord
 from discord.ext import commands, tasks
 
 from statics.consts import PINATA, PINATA_TEST_CHANNEL, ROLE_DATA, ROLES, TIMEZONES
-from statics.types import PinataDetails
 
 if TYPE_CHECKING:
     from dBot import dBot
+    from statics.types import PinataDetails
 
 
 class JoinAll(discord.ui.Button["PinataView"]):
@@ -69,7 +69,7 @@ class PinataView(discord.ui.View):
 
     def __init__(
         self,
-        rewards: list[PinataDetails],
+        rewards: list["PinataDetails"],
         message: discord.Message,
     ) -> None:
         self.rewards = rewards

@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 import discord
 
-from app_commands.embeds.bonus import BonusEmbed
+from app_commands.embeds.bonus import BonusesEmbed
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -43,13 +43,12 @@ class BonusView(discord.ui.View):
     async def update_message(self, itr: discord.Interaction) -> None:
         await itr.followup.edit_message(
             message_id=self.message.id,
-            embed=BonusEmbed(
+            embed=BonusesEmbed(
                 self.game_details,
                 self.bonuses,
                 self.first_date,
                 self.last_date,
                 self.current_date,
-                self.user,
                 self.current_page,
                 self.max_page,
             ),

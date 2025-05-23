@@ -14,6 +14,10 @@ if (AUTOCOMPLETES := "app_commands.autocompletes.ping") in sys.modules:
     importlib.reload(sys.modules[AUTOCOMPLETES])
 from app_commands.autocompletes.ping import word_autocomplete
 
+if (EMBEDS := "app_commands.embeds.ping") in sys.modules:
+    importlib.reload(sys.modules[EMBEDS])
+from app_commands.embeds.ping import WordPingsEmbed
+
 if TYPE_CHECKING:
     from dBot import dBot
 
@@ -85,37 +89,11 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
     ) -> None:
         """List all ping words and their ping count"""
         await itr.response.defer(ephemeral=True)
-        guild_id = str(itr.guild_id)
-        user_id = str(itr.user.id)
-        description = ""
-        for word in self.bot.pings[guild_id]:
-            if not self.bot.pings[guild_id][word][user_id]:
-                continue
-
-            description += (
-                f"`{word}` - pinged "
-                f"`{self.bot.pings[guild_id][word][user_id].setdefault("count", 0)}`"
-                f"{(" times"
-                    if self.bot.pings[guild_id][word][user_id]["count"] > 1
-                    else " time")}\n"
-            )
-
-        if not description:
-            description = "None"
-        else:
-            description = description[:-1]
 
         assert itr.guild
-        embed = discord.Embed(
-            description=description,
-            color=itr.user.color,
+        await itr.user.send(
+            embed=WordPingsEmbed(itr.user, itr.guild, self.bot.pings[str(itr.guild_id)])
         )
-        embed.set_author(
-            name=f"Word Pings in {itr.guild.name}",
-            icon_url=itr.guild.icon.url if itr.guild.icon else None,
-        )
-
-        await itr.user.send(embed=embed)
         return await itr.followup.send(
             "Check your DMs for the list of words you are pinged for!"
         )
