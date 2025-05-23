@@ -1,5 +1,3 @@
-import importlib
-import sys
 from datetime import datetime
 from typing import TYPE_CHECKING
 
@@ -10,9 +8,7 @@ from discord.ext import commands
 from statics.consts import GAMES, RESET_OFFSET
 from statics.helpers import generate_ssl_embed, pin_new_ssl, unpin_old_ssl
 
-if (AUTOCOMPLETES := "app_commands.autocompletes.ssleague") in sys.modules:
-    importlib.reload(sys.modules[AUTOCOMPLETES])
-from app_commands.autocompletes.ssleague import (
+from .autocomplete import (
     artist_autocomplete,
     song_autocomplete,
     song_id_autocomplete,
