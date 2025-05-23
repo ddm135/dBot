@@ -55,7 +55,7 @@ EXTENSIONS = (
     "app_commands.role",
     "tasks.clock",
     "tasks.pinata",
-    "commands.misc",
+    "commands.miscellaneous",
 )
 
 PING_DATA = Path("data/pings.json")
