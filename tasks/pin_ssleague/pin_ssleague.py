@@ -63,14 +63,20 @@ class PinSSLeague(commands.Cog):
 
         while True:
             try:
-                credentials["version"] = await self.get_active_version(credentials)
+                credentials["version"] = await self.get_active_version(
+                    game_details["manifest"], credentials
+                )
                 match credentials["provider"]:
                     case 0 | 1 if not credentials["isSNS"]:
                         oid, key = await self.login(apiUrl, credentials)
                     case 0 if credentials["isSNS"]:
-                        oid, key = await self.login_google(apiUrl, credentials)
+                        oid, key = await self.login_google(
+                            apiUrl, credentials, game_details["target_audience"]
+                        )
                     case 3 if credentials["isSNS"]:
-                        oid, key = await self.login_dalcom_id(apiUrl, credentials)
+                        oid, key = await self.login_dalcom_id(
+                            apiUrl, credentials, game_details["authorization"]
+                        )
                     case _:
                         return
                 ssleague = await self.get_ssleague(apiUrl, oid, key)
@@ -151,10 +157,10 @@ class PinSSLeague(commands.Cog):
             )
 
     @staticmethod
-    async def get_active_version(credentials: dict) -> str:
+    async def get_active_version(manifestUrl: str, credentials: dict) -> str:
         async with aiohttp.ClientSession() as session:
             async with session.get(
-                url=credentials["manifest"].format(**credentials),
+                url=manifestUrl.format(version=credentials["version"]),
             ) as r:
                 manifest = await r.json(content_type=None)
                 return str(
@@ -183,10 +189,12 @@ class PinSSLeague(commands.Cog):
         return oid, key
 
     @staticmethod
-    async def login_google(apiUrl: str, credentials: dict) -> tuple[int, str]:
+    async def login_google(
+        apiUrl: str, credentials: dict, target_audience: str
+    ) -> tuple[int, str]:
         gCredentials = IDTokenCredentials.from_service_account_file(
             filename=credentials["service_account"],
-            target_audience=credentials["target_audience"],
+            target_audience=f"{target_audience}.apps.googleusercontent.com",
         )
         gCredentials.refresh(requests.Request())
         id_token = gCredentials.token
@@ -209,7 +217,9 @@ class PinSSLeague(commands.Cog):
         return oid, key
 
     @staticmethod
-    async def login_dalcom_id(apiUrl: str, credentials: dict) -> tuple[int, str]:
+    async def login_dalcom_id(
+        apiUrl: str, credentials: dict, authorization: str
+    ) -> tuple[int, str]:
         headers = SuperStarHeaders()
         iv = headers["X-SuperStar-AES-IV"]
 
@@ -218,7 +228,7 @@ class PinSSLeague(commands.Cog):
                 url="https://oauth.dalcomsoft.net/v1/token",
                 headers={
                     "Content-Type": "application/json",
-                    "Authorization": f"Basic {credentials["authorization"]}",
+                    "Authorization": f"Basic {authorization}",
                 },
                 data=(
                     f'{{"id":"{credentials["id"]}",'

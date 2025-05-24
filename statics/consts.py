@@ -104,7 +104,10 @@ GAMES: dict[str, "GameDetails"] = {
         },
         "dateFormat": "%Y-%m-%d",
         "timezone": TIMEZONES["KST"],
+        "manifest": "https://super-star.s3.amazonaws.com/version/{version}.txt",
         "api": "https://smtown-api-https.dalcomsoft.net",
+        "authorization": "SFFINkh6ckdwRkZiRmlYeis1Mi86U1cwU0JxdWg1dw==",
+        "target_audience": "864447301209-h0hsb0denh03td7sgoelh5lmdvv79f9h",
         "legacyUrlScheme": False,
     },
     "JYP": {
@@ -146,7 +149,12 @@ GAMES: dict[str, "GameDetails"] = {
         },
         "dateFormat": "%Y-%m-%d",
         "timezone": TIMEZONES["KST"],
+        "manifest": (
+            "https://superstar-jyp-resource.s3.amazonaws.com/version/j_{version}.txt"
+        ),
         "api": "https://jypnation-api-https.dalcomsoft.net",
+        "authorization": "MHhYTEhMQnV1aGpqY3ZRd1JHbUY6SlE0VFZZaVhXYw==",
+        "target_audience": "506321732908-4u8t2uk3888gm8087i7lcpi97ff6ld4a",
         "legacyUrlScheme": False,
     },
     "SC": {
@@ -185,7 +193,13 @@ GAMES: dict[str, "GameDetails"] = {
         "pinRoles": {},
         "dateFormat": "%Y-%m-%d",
         "timezone": TIMEZONES["KST"],
+        "manifest": (
+            "https://superstar-stayc.s3.amazonaws.com"
+            "/version/real/manifest/{version}.txt"
+        ),
         "api": "https://api-https.sssc.dalcomsoft.net",
+        "authorization": "WW5yI0VCPmlKM182fG5qXllrMzQ6THpULVQ3UF9dfg==",
+        "target_audience": "154091709836-q1sk7hq02vi16f3v0q88uvuf6op5lenv",
         "legacyUrlScheme": False,
     },
     "WO": {
@@ -210,7 +224,13 @@ GAMES: dict[str, "GameDetails"] = {
         "pinRoles": {},
         "dateFormat": "%Y-%m-%d",
         "timezone": TIMEZONES["KST"],
+        "manifest": (
+            "https://superstar-wakeone.s3.amazonaws.com"
+            "/version/real/manifest/{version}.txt"
+        ),
         "api": "https://sswo-api-https.dalcomsoft.net",
+        "authorization": "",
+        "target_audience": "259379396797-tfc19vpi39fosa2sic420po6l67p9ltu",
         "legacyUrlScheme": False,
     },
     "SM_JP": {
@@ -250,7 +270,12 @@ GAMES: dict[str, "GameDetails"] = {
         "pinRoles": {},
         "dateFormat": "%Y-%m-%d",
         "timezone": TIMEZONES["JST"],
+        "manifest": (
+            "https://superstar-smtown-real.s3.amazonaws.com/version/{version}.txt"
+        ),
         "api": "http://ss-sm-api-real.superstarsmtown.jp",
+        "authorization": "",
+        "target_audience": "28835016655-choauh766oss3ht8ddqiamavvtfm05ur",
         "legacyUrlScheme": False,
     },
     "JYP_JP": {
@@ -291,7 +316,13 @@ GAMES: dict[str, "GameDetails"] = {
         "pinRoles": {},
         "dateFormat": "%Y-%m-%d",
         "timezone": TIMEZONES["JST"],
+        "manifest": (
+            "https://superstar-jyp-jp-real.s3.amazonaws.com"
+            "/version/manifest/{version}.txt"
+        ),
         "api": "https://ss-jyp-api-real.superstarjyp.jp",
+        "authorization": "",
+        "target_audience": "776124120237-r7q2lcrob52mp0asch12hbmkd52elej5",
         "legacyUrlScheme": True,
     },
     "LP": {
@@ -332,7 +363,13 @@ GAMES: dict[str, "GameDetails"] = {
         "pinRoles": {},
         "dateFormat": "%Y-%m-%d",
         "timezone": TIMEZONES["JST"],
+        "manifest": (
+            "https://superstar-lapone-jp-real.s3.amazonaws.com"
+            "/version/manifest/{version}.txt"
+        ),
         "api": "https://ss-lapone-api-real.superstarlapone.jp",
+        "authorization": "",
+        "target_audience": "668693032380-fmhat079lhao0o335ov5uk4jkl6kget6",
         "legacyUrlScheme": True,
     },
     "EB": {
@@ -363,7 +400,13 @@ GAMES: dict[str, "GameDetails"] = {
         "pinRoles": {},
         "dateFormat": "%Y-%m-%d",
         "timezone": TIMEZONES["JST"],
+        "manifest": (
+            "https://superstar-ebidan-jp-real.s3.amazonaws.com"
+            "/version/manifest/{version}.txt"
+        ),
         "api": "https://ss-ebidan-api-real.superstarebidan.jp",
+        "authorization": "",
+        "target_audience": "",
         "legacyUrlScheme": True,
     },
     "PH": {
@@ -394,7 +437,13 @@ GAMES: dict[str, "GameDetails"] = {
         "pinRoles": {},
         "dateFormat": "%d-%m-%Y",
         "timezone": TIMEZONES["PHT"],
+        "manifest": (
+            "https://superstar-philippines.s3.amazonaws.com"
+            "/version/real/manifest/{version}.txt"
+        ),
         "api": "https://ssph-api-https.dalcomsoft.net",
+        "authorization": "",
+        "target_audience": "",
         "legacyUrlScheme": True,
     },
 }

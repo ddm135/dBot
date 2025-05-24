@@ -79,7 +79,10 @@ class GameDetails(TypedDict):
     pinRoles: dict[int, int | None]
     dateFormat: str
     timezone: ZoneInfo
+    manifest: str
     api: str
+    authorization: str
+    target_audience: str
     legacyUrlScheme: bool
 
 
