@@ -10,5 +10,7 @@ if LOCK.exists():
 
 from .on_message import setup
 
+del importlib, embeds, on_message, LOCK
+
 __all__ = ("setup",)
 __author__ = "ddm135 | Aut"

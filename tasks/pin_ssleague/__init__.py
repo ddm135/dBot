@@ -9,5 +9,7 @@ if LOCK.exists():
 
 from .pin_ssleague import setup
 
+del importlib, pin_ssleague, LOCK
+
 __all__ = ("setup",)
 __author__ = "ddm135 | Aut"

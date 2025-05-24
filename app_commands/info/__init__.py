@@ -10,5 +10,7 @@ if LOCK.exists():
 
 from .info import setup
 
+del importlib, autocompletes, commons, embeds, views, info, LOCK
+
 __all__ = ("setup",)
 __author__ = "ddm135 | Aut"

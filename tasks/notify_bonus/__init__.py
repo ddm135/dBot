@@ -10,5 +10,7 @@ if LOCK.exists():
 
 from .notify_bonus import setup
 
+del importlib, embeds, notify_bonus, LOCK
+
 __all__ = ("setup",)
 __author__ = "ddm135 | Aut"

@@ -10,5 +10,7 @@ if LOCK.exists():
 
 from .ssleague import setup
 
+del importlib, autocompletes, ssleague, LOCK
+
 __all__ = ("setup",)
 __author__ = "ddm135 | Aut"

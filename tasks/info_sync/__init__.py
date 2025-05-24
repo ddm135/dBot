@@ -9,5 +9,7 @@ if LOCK.exists():
 
 from .info_sync import setup
 
+del importlib, info_sync, LOCK
+
 __all__ = ("setup",)
 __author__ = "ddm135 | Aut"

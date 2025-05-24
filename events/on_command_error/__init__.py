@@ -9,5 +9,7 @@ if LOCK.exists():
 
 from .on_command_error import setup
 
+del importlib, on_command_error, LOCK
+
 __all__ = ("setup",)
 __author__ = "ddm135 | Aut"

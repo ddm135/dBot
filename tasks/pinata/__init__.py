@@ -9,5 +9,7 @@ if LOCK.exists():
 
 from .pinata import setup
 
+del importlib, pinata, LOCK
+
 __all__ = ("setup",)
 __author__ = "ddm135 | Aut"

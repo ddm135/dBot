@@ -10,5 +10,7 @@ if LOCK.exists():
 
 from .ping import setup
 
+del importlib, autocompletes, embeds, ping, LOCK
+
 __all__ = ("setup",)
 __author__ = "ddm135 | Aut"
