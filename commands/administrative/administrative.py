@@ -106,6 +106,8 @@ class Administrative(commands.Cog):
 
         if not extensions:
             extensions = EXTENSIONS
+            for module in STATIC_MODULES:
+                importlib.reload(sys.modules[module])
         else:
             for ext in extensions:
                 if ext not in EXTENSIONS:
