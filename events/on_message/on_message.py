@@ -66,7 +66,7 @@ class OnMessage(commands.Cog):
                     continue
 
                 self.bot.pings[guild_id][word][user_id]["count"] += 1
-                with open(PING_DATA, "w") as f:
+                with open(PING_DATA, "w", encoding="utf-8") as f:
                     json.dump(self.bot.pings, f, indent=4)
 
                 await user.send(embed=WordPingEmbed(word, message))

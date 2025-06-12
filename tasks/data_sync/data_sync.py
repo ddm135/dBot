@@ -52,14 +52,14 @@ class DataSync(commands.Cog):
                 ):
                     continue
 
-                self.LOGGER.info(f"Downloading {data.name}...")
+                self.LOGGER.info("Downloading %s...", data.name)
                 data.parent.mkdir(parents=True, exist_ok=True)
                 get_drive_file(file["id"], data)
                 break
 
         if PING_DATA.exists():
             self.bot.pings.clear()
-            with open(PING_DATA, "r") as f:
+            with open(PING_DATA, "r", encoding="utf-8") as f:
                 self.bot.pings = json.load(f)
 
             self.bot.pings = defaultdict(
@@ -80,25 +80,25 @@ class DataSync(commands.Cog):
                     )
         else:
             PING_DATA.parent.mkdir(parents=True, exist_ok=True)
-            with open(PING_DATA, "w") as f:
+            with open(PING_DATA, "w", encoding="utf-8") as f:
                 json.dump(self.bot.pings, f, indent=4)
 
         if ROLE_DATA.exists():
             self.bot.roles.clear()
-            with open(ROLE_DATA, "r") as f:
+            with open(ROLE_DATA, "r", encoding="utf-8") as f:
                 self.bot.roles = json.load(f)
 
             self.bot.roles = defaultdict(list[int], self.bot.roles)
         else:
             ROLE_DATA.parent.mkdir(parents=True, exist_ok=True)
-            with open(ROLE_DATA, "w") as f:
+            with open(ROLE_DATA, "w", encoding="utf-8") as f:
                 json.dump(self.bot.roles, f, indent=4)
 
     @tasks.loop(time=time(hour=10))
     async def data_upload(self) -> None:
         drive_files = get_drive_data_files()
         for data in self.DATA:
-            self.LOGGER.info(f"Uploading {data.name}...")
+            self.LOGGER.info("Uploading %s...", data.name)
             media = MediaFileUpload(data)
 
             for file in drive_files["files"]:

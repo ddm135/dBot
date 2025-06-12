@@ -15,10 +15,10 @@ class InfoEmbed(discord.Embed):
         game_details: "GameDetails",
         artist: str | None,
         songs: list[list[str]],
-        current: int = 1,
-        max: int | None = None,
+        current_page: int = 1,
+        max_page: int | None = None,
     ) -> None:
-        end = current * STEP
+        end = current_page * STEP
         start = end - STEP
         filtered_songs = songs[start:end]
         duration_index = game_details["infoColumns"].index("duration")
@@ -37,5 +37,5 @@ class InfoEmbed(discord.Embed):
             color=game_details["color"],
         )
         self.set_footer(
-            text=f"Page {current}/{max or math.ceil(len(songs) / STEP)}",
+            text=f"Page {current_page}/{max_page or math.ceil(len(songs) / STEP)}",
         )

@@ -192,7 +192,7 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
         group_roles = ROLES[itr.guild.id]
         sorted_stored_roles = sorted(
             (role for role in self.bot.roles[user_id] if role in group_roles),
-            key=lambda x: group_roles.index(x),
+            key=group_roles.index,
         )
 
         await itr.followup.send(
@@ -202,7 +202,7 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
         )
 
     def save_role_data(self) -> None:
-        with open(ROLE_DATA, "w") as f:
+        with open(ROLE_DATA, "w", encoding="utf-8") as f:
             json.dump(self.bot.roles, f, indent=4)
 
 

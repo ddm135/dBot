@@ -1,5 +1,6 @@
 import importlib
 import sys
+from pprint import pprint
 from typing import TYPE_CHECKING
 
 import discord
@@ -142,6 +143,14 @@ class Administrative(commands.Cog):
             return
 
         print(self.eval(message))
+
+    @commands.command()
+    @commands.is_owner()
+    async def pprint(self, ctx: commands.Context, *, message: str) -> None:
+        if ctx.channel.id != STATUS_CHANNEL:
+            return
+
+        pprint(self.eval(message))
 
 
 async def setup(bot: "dBot") -> None:

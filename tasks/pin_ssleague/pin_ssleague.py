@@ -39,17 +39,17 @@ class PinSSLeague(commands.Cog):
 
     @tasks.loop(time=[time(hour=h) for h in range(24)])
     async def pin_ssls(self) -> None:
-        with open(CREDENTIALS_DATA, "r") as f:
+        with open(CREDENTIALS_DATA, "r", encoding="utf-8") as f:
             all_credentials = json.load(f)
 
-        tasks = [
+        pin_tasks = [
             self.pin_ssl(game, all_credentials[game])
             for game, game_details in GAMES.items()
             if game_details["pinChannelIds"] and game in all_credentials
         ]
-        await asyncio.gather(*tasks, return_exceptions=True)
+        await asyncio.gather(*pin_tasks, return_exceptions=True)
 
-        with open(CREDENTIALS_DATA, "w") as f:
+        with open(CREDENTIALS_DATA, "w", encoding="utf-8") as f:
             json.dump(all_credentials, f, indent=4)
 
     async def pin_ssl(self, game: str, credentials: dict) -> None:

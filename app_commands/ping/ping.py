@@ -321,7 +321,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
             )
 
     def save_ping_data(self) -> None:
-        with open(PING_DATA, "w") as f:
+        with open(PING_DATA, "w", encoding="utf-8") as f:
             json.dump(self.bot.pings, f, indent=4)
 
 

@@ -47,7 +47,7 @@ class InfoSync(commands.Cog):
             ajs = self.bot.info_ajs[game] = await self.get_a_json(game_details["api"])
             if ajs["code"] != 1000:
                 self.LOGGER.info(
-                    f"{game_details["name"]} server is unavailable. Skipping..."
+                    "%s server is unavailable. Skipping...", game_details["name"]
                 )
                 continue
 

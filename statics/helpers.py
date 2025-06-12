@@ -31,10 +31,10 @@ def get_sheet_data(
     range_str: str,
     instance: str | None = None,
 ) -> list[list[str]]:
-    _sheetService: "SheetsResource.SpreadsheetsResource.ValuesResource" = globals()[
+    sheetService: "SheetsResource.SpreadsheetsResource.ValuesResource" = globals()[
         f"sheetService{instance or "Default"}"
     ]
-    result = _sheetService.get(
+    result = sheetService.get(
         spreadsheetId=spreadsheet_id,
         range=range_str,
     ).execute(num_retries=MAX_RETRIES)
@@ -48,11 +48,11 @@ def update_sheet_data(
     data: list[list[str]],
     instance: str | None = None,
 ) -> None:
-    _sheetService: "SheetsResource.SpreadsheetsResource.ValuesResource" = globals()[
+    sheetService: "SheetsResource.SpreadsheetsResource.ValuesResource" = globals()[
         f"sheetService{instance or "Default"}"
     ]
 
-    _sheetService.update(
+    sheetService.update(
         spreadsheetId=spreadsheet_id,
         range=range_str,
         valueInputOption="USER_ENTERED" if parse_input else "RAW",
@@ -65,11 +65,11 @@ def clear_sheet_data(
     range_str: str,
     instance: str | None = None,
 ) -> None:
-    _sheetService: "SheetsResource.SpreadsheetsResource.ValuesResource" = globals()[
+    sheetService: "SheetsResource.SpreadsheetsResource.ValuesResource" = globals()[
         f"sheetService{instance or "Default"}"
     ]
 
-    _sheetService.clear(
+    sheetService.clear(
         spreadsheetId=spreadsheet_id,
         range=range_str,
         body={},
@@ -119,16 +119,16 @@ def update_drive_data_file(file_id: str, data: "MediaFileUpload") -> None:
 
 
 def decrypt_ecb(data: str | bytes) -> bytes:
-    cipherECB = AES.new(AES_KEY, AES.MODE_ECB)
-    return unpad(cipherECB.decrypt(b64decode(data)), AES.block_size)
+    cipher_ecb = AES.new(AES_KEY, AES.MODE_ECB)
+    return unpad(cipher_ecb.decrypt(b64decode(data)), AES.block_size)
 
 
 def decrypt_cbc(data: str | bytes, iv: str | bytes) -> bytes:
     if isinstance(iv, str):
         iv = iv.encode()
 
-    cipherCBC = AES.new(AES_KEY, AES.MODE_CBC, iv)
-    return unpad(cipherCBC.decrypt(b64decode(data)), AES.block_size)
+    cipher_cbc = AES.new(AES_KEY, AES.MODE_CBC, iv)
+    return unpad(cipher_cbc.decrypt(b64decode(data)), AES.block_size)
 
 
 def encrypt_cbc(data: str | bytes, iv: str | bytes) -> str:
@@ -137,8 +137,8 @@ def encrypt_cbc(data: str | bytes, iv: str | bytes) -> str:
     if isinstance(iv, str):
         iv = iv.encode()
 
-    cipherCBC = AES.new(AES_KEY, AES.MODE_CBC, iv)
-    return b64encode(cipherCBC.encrypt(pad(data, AES.block_size))).decode()
+    cipher_cbc = AES.new(AES_KEY, AES.MODE_CBC, iv)
+    return b64encode(cipher_cbc.encrypt(pad(data, AES.block_size))).decode()
 
 
 async def pin_new_ssl(

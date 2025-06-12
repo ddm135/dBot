@@ -225,7 +225,7 @@ class Pinata(commands.Cog):
                     if reward["role"].id not in self.bot.roles[str(winner.id)]:
                         self.bot.roles[str(winner.id)].append(reward["role"].id)
 
-                    with open(ROLE_DATA, "w") as f:
+                    with open(ROLE_DATA, "w", encoding="utf-8") as f:
                         json.dump(self.bot.roles, f, indent=4)
 
                     _message += "The role has been added to your inventory."
