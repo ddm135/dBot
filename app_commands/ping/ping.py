@@ -6,7 +6,6 @@ from discord import app_commands
 from discord.ext import commands
 
 from statics.consts import PING_DATA
-from statics.types import PingDetails
 
 from .autocompletes import word_autocomplete
 from .embeds import WordPingsEmbed
@@ -40,9 +39,11 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
             return await itr.followup.send(
                 f"You are already pinged for `{word}` in this server."
             )
-        self.bot.pings[guild_id][word][user_id] = PingDetails(
-            users=[], channels=[], count=0
-        )
+        self.bot.pings[guild_id][word][user_id] = {
+            "users": [],
+            "channels": [],
+            "count": 0,
+        }
         self.save_ping_data()
         return await itr.followup.send(
             f"Added to the ping list for `{word}` in this server!"
@@ -69,7 +70,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
             return await itr.followup.send(
                 f"You are not pinged for `{word}` in this server."
             )
-        self.bot.pings[guild_id][word].pop(user_id)
+        self.bot.pings[guild_id][word][user_id].clear()
         self.save_ping_data()
         return await itr.followup.send(
             f"Removed from the ping list for `{word}` in this server!"

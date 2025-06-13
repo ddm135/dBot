@@ -152,8 +152,11 @@ async def pin_new_ssl(
 
 
 async def unpin_old_ssl(
-    embed_title: str, pin_channel: discord.TextChannel, new_pin: int
+    embed_title: str | None, pin_channel: discord.TextChannel, new_pin: int
 ) -> None:
+    if embed_title is None:
+        return
+
     pins = await pin_channel.pins()
     for pin in pins:
         if pin.id == new_pin:

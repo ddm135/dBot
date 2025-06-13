@@ -1,10 +1,6 @@
 from collections import defaultdict
-from typing import TYPE_CHECKING
 
 import discord
-
-if TYPE_CHECKING:
-    from statics.types import PingDetails
 
 
 class WordPingsEmbed(discord.Embed):
@@ -12,7 +8,7 @@ class WordPingsEmbed(discord.Embed):
         self,
         user: discord.User | discord.Member,
         guild: discord.Guild,
-        pings: defaultdict[str, defaultdict[str, "PingDetails"]],
+        pings: defaultdict[str, defaultdict[str, dict]],
     ) -> None:
         user_id = str(user.id)
         description = ""

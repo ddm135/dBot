@@ -12,7 +12,7 @@ from google.auth.transport import requests
 from google.oauth2.service_account import IDTokenCredentials
 from packaging.version import Version
 
-from statics.consts import CREDENTIALS_DATA, GAMES, RESET_OFFSET
+from statics.consts import CREDENTIALS_DATA, GAMES, RESET_OFFSET, SSLEAGUE_DATA
 from statics.helpers import (
     encrypt_cbc,
     get_ss_json,
@@ -39,6 +39,13 @@ class PinSSLeague(commands.Cog):
 
     @tasks.loop(time=[time(hour=h) for h in range(24)])
     async def pin_ssls(self) -> None:
+        for game in self.bot.ssleague_manual:
+            target = self.bot.ssleague[game][self.bot.ssleague_manual[game]["artist"]]
+            date = self.bot.ssleague_manual[game]["date"]
+            target["songs"][self.bot.ssleague_manual[game]["song_id"]] = date
+            target["date"] = date
+        self.bot.ssleague_manual.clear()
+
         with open(CREDENTIALS_DATA, "r", encoding="utf-8") as f:
             all_credentials = json.load(f)
 
@@ -51,6 +58,8 @@ class PinSSLeague(commands.Cog):
 
         with open(CREDENTIALS_DATA, "w", encoding="utf-8") as f:
             json.dump(all_credentials, f, indent=4)
+        with open(SSLEAGUE_DATA, "w", encoding="utf-8") as f:
+            json.dump(self.bot.ssleague, f, indent=4)
 
     async def pin_ssl(self, game: str, credentials: dict) -> None:
         game_details = GAMES[game]
@@ -122,6 +131,18 @@ class PinSSLeague(commands.Cog):
                     image_url = url["url"]
                     break
 
+        artist_last_str = self.bot.ssleague[game][artist_name]["date"]
+        if artist_last_str:
+            artist_last = datetime.strptime(artist_last_str, game_details["dateFormat"])
+        else:
+            artist_last = None
+
+        song_last_str = self.bot.ssleague[game][artist_name]["songs"][str(song_id)]
+        if song_last_str:
+            song_last = datetime.strptime(song_last_str, game_details["dateFormat"])
+        else:
+            song_last = None
+
         embed = SSLeagueEmbed(
             artist_name,
             song_name,
@@ -131,6 +152,8 @@ class PinSSLeague(commands.Cog):
             skills,
             current_time,
             self.bot.user.name,  # type: ignore[union-attr]
+            artist_last,
+            song_last,
         )
 
         pin_channels = game_details["pinChannelIds"]
@@ -155,6 +178,13 @@ class PinSSLeague(commands.Cog):
                 pin_channel,
                 new_pin,
             )
+
+        self.bot.ssleague[game][artist_name]["date"] = current_time.strftime(
+            game_details["dateFormat"]
+        )
+        self.bot.ssleague[game][artist_name]["songs"][str(song_id)] = (
+            current_time.strftime(game_details["dateFormat"])
+        )
 
     @staticmethod
     async def get_active_version(manifestUrl: str, credentials: dict) -> str:

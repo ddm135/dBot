@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 from discord.ext import commands, tasks
 from googleapiclient.http import MediaFileUpload
 
-from statics.consts import CREDENTIALS_DATA, PING_DATA, ROLE_DATA
+from statics.consts import CREDENTIALS_DATA, PING_DATA, ROLE_DATA, SSLEAGUE_DATA
 from statics.helpers import (
     create_drive_data_file,
     get_drive_data_files,
@@ -18,13 +18,14 @@ from statics.helpers import (
     get_drive_file_last_modified,
     update_drive_data_file,
 )
+from statics.types import LastAppearance
 
 if TYPE_CHECKING:
     from dBot import dBot
 
 
 class DataSync(commands.Cog):
-    DATA = [PING_DATA, ROLE_DATA, CREDENTIALS_DATA]
+    DATA = [PING_DATA, ROLE_DATA, CREDENTIALS_DATA, SSLEAGUE_DATA]
     FOLDER = "1yugfZQu3T8G9sC6WQR_YzK7bXhpdXoy4"
     LOGGER = logging.getLogger(__name__)
 
@@ -64,18 +65,18 @@ class DataSync(commands.Cog):
 
             self.bot.pings = defaultdict(
                 lambda: defaultdict(
-                    lambda: defaultdict(dict),  # type: ignore[arg-type]
+                    lambda: defaultdict(dict),
                 ),
                 self.bot.pings,
             )
             for key in self.bot.pings:
                 self.bot.pings[key] = defaultdict(
-                    lambda: defaultdict(dict),  # type: ignore[arg-type]
+                    lambda: defaultdict(dict),
                     self.bot.pings[key],
                 )
                 for subkey in self.bot.pings[key]:
                     self.bot.pings[key][subkey] = defaultdict(
-                        dict,  # type: ignore[arg-type]
+                        dict,
                         self.bot.pings[key][subkey],
                     )
         else:
@@ -93,6 +94,33 @@ class DataSync(commands.Cog):
             ROLE_DATA.parent.mkdir(parents=True, exist_ok=True)
             with open(ROLE_DATA, "w", encoding="utf-8") as f:
                 json.dump(self.bot.roles, f, indent=4)
+
+        if SSLEAGUE_DATA.exists():
+            self.bot.ssleague.clear()
+            with open(SSLEAGUE_DATA, "r", encoding="utf-8") as f:
+                self.bot.ssleague = json.load(f)
+
+            self.bot.ssleague = defaultdict(
+                lambda: defaultdict(
+                    lambda: LastAppearance(songs=defaultdict(None), date=None),
+                ),
+                self.bot.ssleague,
+            )
+            for key in self.bot.ssleague:
+                self.bot.ssleague[key] = defaultdict(
+                    lambda: LastAppearance(songs=defaultdict(None), date=None),
+                    self.bot.ssleague[key],
+                )
+                for subkey in self.bot.ssleague[key]:
+                    if "songs" in self.bot.ssleague[key][subkey]:
+                        self.bot.ssleague[key][subkey]["songs"] = defaultdict(
+                            None,
+                            self.bot.ssleague[key][subkey]["songs"],
+                        )
+        else:
+            SSLEAGUE_DATA.parent.mkdir(parents=True, exist_ok=True)
+            with open(SSLEAGUE_DATA, "w", encoding="utf-8") as f:
+                json.dump(self.bot.ssleague, f, indent=4)
 
     @tasks.loop(time=time(hour=10))
     async def data_upload(self) -> None:

@@ -180,6 +180,18 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         timezone = game_details["timezone"]
         current_time = datetime.now(tz=timezone) - RESET_OFFSET
 
+        artist_last_str = self.bot.ssleague[game][artist_name]["date"]
+        if artist_last_str:
+            artist_last = datetime.strptime(artist_last_str, game_details["dateFormat"])
+        else:
+            artist_last = None
+
+        song_last_str = self.bot.ssleague[game][artist_name]["songs"][str(song_id)]
+        if song_last_str:
+            song_last = datetime.strptime(song_last_str, game_details["dateFormat"])
+        else:
+            song_last = None
+
         embed = SSLeagueEmbed(
             artist_name,
             song_name,
@@ -189,6 +201,8 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             skills,
             current_time,
             pinner,
+            artist_last,
+            song_last,
         )
 
         pin_channel = self.bot.get_channel(
@@ -203,10 +217,16 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             await pin_channel.send(topic)
         await pin_channel.edit(topic=topic)
         await unpin_old_ssl(
-            embed.title,  # type: ignore[arg-type]
+            embed.title,
             pin_channel,
             new_pin,
         )
+
+        self.bot.ssleague_manual[game] = {
+            "artist": artist_name,
+            "song_id": str(song_id),
+            "date": current_time.strftime(game_details["dateFormat"]),
+        }
 
         return True
 

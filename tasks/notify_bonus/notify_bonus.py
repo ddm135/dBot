@@ -35,8 +35,6 @@ class NotifyBonus(commands.Cog):
                 continue
 
             game_name = game_details["name"]
-            print(game_name)
-
             current_date = (
                 current_date.replace(
                     hour=0,
@@ -83,7 +81,6 @@ class NotifyBonus(commands.Cog):
             bonus_data = self.bot.bonus_data[game]
             artists = bonus_data.keys()
             for artist in artists:
-                print(artist)
                 artist_pings = next(
                     (ping for ping in ping_data if ping[ping_artist_index] == artist),
                     None,
@@ -132,9 +129,6 @@ class NotifyBonus(commands.Cog):
                             birthday_bonuses.append(bonus)
                         else:
                             album_bonuses.append(bonus)
-
-                print(birthday_bonuses)
-                print(album_bonuses)
 
                 birthday_members = ""
                 birthday_total = 0

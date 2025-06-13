@@ -33,6 +33,8 @@ class SSLeagueEmbed(discord.Embed):
         skills: str | None,
         current_time: datetime,
         user_name: str,
+        artist_last: datetime | None = None,
+        song_last: datetime | None = None,
     ) -> None:
         super().__init__(
             color=color,
@@ -46,12 +48,29 @@ class SSLeagueEmbed(discord.Embed):
         self.add_field(
             name="Duration",
             value=duration,
+            inline=True if skills else False,
         )
         if skills:
             self.add_field(
                 name="Skill Order",
                 value=skills,
             )
+        self.add_field(
+            name="Artist Last Appearance",
+            value=(
+                artist_last.strftime("%A, %B %d, %Y").replace(" 0", " ")
+                if artist_last
+                else "N/A"
+            ),
+        )
+        self.add_field(
+            name="Song Last Appearance",
+            value=(
+                song_last.strftime("%A, %B %d, %Y").replace(" 0", " ")
+                if song_last
+                else "N/A"
+            ),
+        )
 
         self.set_thumbnail(url=image_url)
         self.set_footer(
@@ -86,10 +105,9 @@ class GameDetails(TypedDict):
     legacyUrlScheme: bool
 
 
-class PingDetails(TypedDict):
-    users: list[int]
-    channels: list[int]
-    count: int
+class LastAppearance(TypedDict):
+    songs: dict[str, str | None]
+    date: str | None
 
 
 PinataDetails = TypedDict(

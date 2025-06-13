@@ -1,15 +1,13 @@
 import os
 from collections import defaultdict
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 
 from statics.consts import EXTENSIONS, LOCK, STATUS_CHANNEL
-
-if TYPE_CHECKING:
-    from statics.types import PingDetails
+from statics.types import LastAppearance
 
 
 class dBot(commands.Bot):
@@ -29,14 +27,14 @@ class dBot(commands.Bot):
     )
     bonus_data_ready = False
 
-    pings: defaultdict[str, defaultdict[str, defaultdict[str, "PingDetails"]]] = (
-        defaultdict(
-            lambda: defaultdict(
-                lambda: defaultdict(dict),  # type: ignore[arg-type]
-            )
-        )
+    pings: defaultdict[str, defaultdict[str, defaultdict[str, dict]]] = defaultdict(
+        lambda: defaultdict(lambda: defaultdict(dict))
     )
     roles: defaultdict[str, list[int]] = defaultdict(list[int])
+    ssleague: defaultdict[str, defaultdict[str, LastAppearance]] = defaultdict(
+        lambda: defaultdict(lambda: LastAppearance(songs=defaultdict(None), date=None))
+    )
+    ssleague_manual: dict[str, dict[str, str]] = {}
 
     async def setup_hook(self) -> None:
         for ext in EXTENSIONS:
