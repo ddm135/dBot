@@ -54,11 +54,6 @@ class SSLeagueEmbed(discord.Embed):
                 name="Skill Order",
                 value=skills,
             )
-        self.add_field(
-            name="** **",
-            value="** **",
-            inline=True if skills else False,
-        )
 
         self.add_field(
             name="Artist Last Appearance",
@@ -67,6 +62,7 @@ class SSLeagueEmbed(discord.Embed):
                 if artist_last
                 else "N/A"
             ),
+            inline=False,
         )
         self.add_field(
             name="Song Last Appearance",
@@ -75,6 +71,7 @@ class SSLeagueEmbed(discord.Embed):
                 if song_last
                 else "N/A"
             ),
+            inline=False,
         )
 
         self.set_thumbnail(url=image_url)
