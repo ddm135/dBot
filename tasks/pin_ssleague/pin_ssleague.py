@@ -36,12 +36,16 @@ class PinSSLeague(commands.Cog):
 
     async def cog_unload(self) -> None:
         self.pin_ssls.cancel()
-        self.save_manual_pin_last_appearance()
-        self.save_last_appearance()
 
     @tasks.loop(time=[time(hour=h) for h in range(24)])
     async def pin_ssls(self) -> None:
-        self.save_manual_pin_last_appearance()
+        for game in self.bot.ssleague_manual:
+            target = self.bot.ssleague[game][self.bot.ssleague_manual[game]["artist"]]
+            date = self.bot.ssleague_manual[game]["date"]
+            target["songs"][self.bot.ssleague_manual[game]["song_id"]] = date
+            target["date"] = date
+        self.bot.ssleague_manual.clear()
+
         with open(CREDENTIALS_DATA, "r", encoding="utf-8") as f:
             all_credentials = json.load(f)
 
@@ -54,17 +58,6 @@ class PinSSLeague(commands.Cog):
 
         with open(CREDENTIALS_DATA, "w", encoding="utf-8") as f:
             json.dump(all_credentials, f, indent=4)
-        self.save_last_appearance()
-
-    def save_manual_pin_last_appearance(self):
-        for game in self.bot.ssleague_manual:
-            target = self.bot.ssleague[game][self.bot.ssleague_manual[game]["artist"]]
-            date = self.bot.ssleague_manual[game]["date"]
-            target["songs"][self.bot.ssleague_manual[game]["song_id"]] = date
-            target["date"] = date
-        self.bot.ssleague_manual.clear()
-
-    def save_last_appearance(self):
         with open(SSLEAGUE_DATA, "w", encoding="utf-8") as f:
             json.dump(self.bot.ssleague, f, indent=4)
 

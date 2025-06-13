@@ -10,7 +10,13 @@ from typing import TYPE_CHECKING
 from discord.ext import commands, tasks
 from googleapiclient.http import MediaFileUpload
 
-from statics.consts import CREDENTIALS_DATA, PING_DATA, ROLE_DATA, SSLEAGUE_DATA
+from statics.consts import (
+    CREDENTIALS_DATA,
+    PING_DATA,
+    ROLE_DATA,
+    SSLEAGUE_DATA,
+    TIMEZONES,
+)
 from statics.helpers import (
     create_drive_data_file,
     get_drive_data_files,
@@ -122,8 +128,16 @@ class DataSync(commands.Cog):
             with open(SSLEAGUE_DATA, "w", encoding="utf-8") as f:
                 json.dump(self.bot.ssleague, f, indent=4)
 
-    @tasks.loop(time=time(hour=10))
+    @tasks.loop(time=time(hour=1, tzinfo=TIMEZONES["KST"]))
     async def data_upload(self) -> None:
+        for game in self.bot.ssleague_manual:
+            target = self.bot.ssleague[game][self.bot.ssleague_manual[game]["artist"]]
+            date = self.bot.ssleague_manual[game]["date"]
+            target["songs"][self.bot.ssleague_manual[game]["song_id"]] = date
+            target["date"] = date
+        with open(SSLEAGUE_DATA, "w", encoding="utf-8") as f:
+            json.dump(self.bot.ssleague, f, indent=4)
+
         drive_files = get_drive_data_files()
         for data in self.DATA:
             self.LOGGER.info("Uploading %s...", data.name)
