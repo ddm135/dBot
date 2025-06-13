@@ -32,7 +32,9 @@ class dBot(commands.Bot):
     )
     roles: defaultdict[str, list[int]] = defaultdict(list[int])
     ssleague: defaultdict[str, defaultdict[str, LastAppearance]] = defaultdict(
-        lambda: defaultdict(lambda: LastAppearance(songs=defaultdict(None), date=None))
+        lambda: defaultdict(
+            lambda: LastAppearance(songs=defaultdict(lambda: None), date=None)
+        )
     )
     ssleague_manual: dict[str, dict[str, str]] = {}
 

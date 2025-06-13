@@ -102,19 +102,19 @@ class DataSync(commands.Cog):
 
             self.bot.ssleague = defaultdict(
                 lambda: defaultdict(
-                    lambda: LastAppearance(songs=defaultdict(None), date=None),
+                    lambda: LastAppearance(songs=defaultdict(lambda: None), date=None),
                 ),
                 self.bot.ssleague,
             )
             for key in self.bot.ssleague:
                 self.bot.ssleague[key] = defaultdict(
-                    lambda: LastAppearance(songs=defaultdict(None), date=None),
+                    lambda: LastAppearance(songs=defaultdict(lambda: None), date=None),
                     self.bot.ssleague[key],
                 )
                 for subkey in self.bot.ssleague[key]:
                     if "songs" in self.bot.ssleague[key][subkey]:
                         self.bot.ssleague[key][subkey]["songs"] = defaultdict(
-                            None,
+                            lambda: None,
                             self.bot.ssleague[key][subkey]["songs"],
                         )
         else:
