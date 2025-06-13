@@ -134,12 +134,18 @@ class PinSSLeague(commands.Cog):
         artist_last_str = self.bot.ssleague[game][artist_name]["date"]
         if artist_last_str:
             artist_last = datetime.strptime(artist_last_str, game_details["dateFormat"])
+            artist_last = artist_last.replace(
+                tzinfo=timezone, hour=2, minute=0, second=0, microsecond=0
+            )
         else:
             artist_last = None
 
         song_last_str = self.bot.ssleague[game][artist_name]["songs"][str(song_id)]
         if song_last_str:
             song_last = datetime.strptime(song_last_str, game_details["dateFormat"])
+            song_last = song_last.replace(
+                tzinfo=timezone, hour=2, minute=0, second=0, microsecond=0
+            )
         else:
             song_last = None
 

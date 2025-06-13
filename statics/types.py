@@ -58,7 +58,8 @@ class SSLeagueEmbed(discord.Embed):
         self.add_field(
             name="Artist Last Appearance",
             value=(
-                artist_last.strftime("%A, %B %d, %Y").replace(" 0", " ")
+                f"{artist_last.strftime("%A, %B %d, %Y").replace(" 0", " ")}"
+                f"(<t:{int(artist_last.timestamp())}:R>)"
                 if artist_last
                 else "N/A"
             ),
@@ -67,7 +68,8 @@ class SSLeagueEmbed(discord.Embed):
         self.add_field(
             name="Song Last Appearance",
             value=(
-                song_last.strftime("%A, %B %d, %Y").replace(" 0", " ")
+                f"{song_last.strftime("%A, %B %d, %Y").replace(" 0", " ")}"
+                f"(<t:{int(song_last.timestamp())}:R>)"
                 if song_last
                 else "N/A"
             ),
