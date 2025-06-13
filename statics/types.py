@@ -48,14 +48,18 @@ class SSLeagueEmbed(discord.Embed):
         self.add_field(
             name="Duration",
             value=duration,
-            inline=True if skills else False,
         )
         if skills:
             self.add_field(
                 name="Skill Order",
                 value=skills,
             )
-            self.add_field(name="** **", value="** **")
+        self.add_field(
+            name="** **",
+            value="** **",
+            inline=True if skills else False,
+        )
+
         self.add_field(
             name="Artist Last Appearance",
             value=(
