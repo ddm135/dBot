@@ -55,6 +55,7 @@ class SSLeagueEmbed(discord.Embed):
                 name="Skill Order",
                 value=skills,
             )
+            self.add_field(name="** **", value="** **")
         self.add_field(
             name="Artist Last Appearance",
             value=(
