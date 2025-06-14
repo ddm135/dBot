@@ -1,13 +1,22 @@
 import importlib
+import json
 import sys
 from pprint import pprint
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Annotated
 
 import discord
 from asteval import Interpreter  # type: ignore[import-untyped]
 from discord.ext import commands
 
-from statics.consts import EXTENSIONS, STATIC_MODULES, STATUS_CHANNEL
+from statics.consts import (
+    EXTENSIONS,
+    GAMES,
+    SSLEAGUE_DATA,
+    STATIC_MODULES,
+    STATUS_CHANNEL,
+    TIMEZONES,
+)
+from statics.helpers import find_replace_sheet_data
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -151,6 +160,81 @@ class Administrative(commands.Cog):
             return
 
         pprint(self.eval(message))
+
+    @commands.command()
+    @commands.is_owner()
+    async def rename(
+        self,
+        ctx: commands.Context,
+        game: str,
+        old_name: Annotated[str, lambda s: s.strip()],
+        new_name: Annotated[str, lambda s: s.strip()],
+    ) -> None:
+        if (
+            ctx.channel.id != STATUS_CHANNEL
+            or game not in GAMES
+            or not old_name
+            or not new_name
+        ):
+            return
+
+        game_details = GAMES[game]
+        text = f"Renaming {old_name} to {new_name} in {game_details["name"]}..."
+        msg = await ctx.send(text)
+
+        if game_details["infoReplaceGrid"]:
+            await msg.edit(content=f"{text}\nRenaming info sheet...")
+            find_replace_sheet_data(
+                game_details["infoSpreadsheet"],
+                game_details["infoReplaceGrid"],
+                old_name,
+                new_name,
+                "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
+            )
+        if game_details["pingReplaceGrid"]:
+            await msg.edit(content=f"{text}\nRenaming ping sheet...")
+            find_replace_sheet_data(
+                game_details["pingSpreadsheet"],
+                game_details["pingReplaceGrid"],
+                old_name,
+                new_name,
+                "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
+            )
+        if game_details["bonusReplaceGrid"]:
+            await msg.edit(content=f"{text}\nRenaming bonus sheet...")
+            find_replace_sheet_data(
+                game_details["bonusSpreadsheet"],
+                game_details["bonusReplaceGrid"],
+                old_name,
+                new_name,
+                "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
+            )
+        if game_details["pinChannelIds"]:
+            await msg.edit(content=f"{text}\nRenaming last appearance data...")
+            if old_name in self.bot.ssleague[game]:
+                self.bot.ssleague[game][new_name] = self.bot.ssleague[game].pop(
+                    old_name
+                )
+            if self.bot.ssleague_manual[game].get("artist", "") == old_name:
+                self.bot.ssleague_manual[game]["artist"] = new_name
+            with open(SSLEAGUE_DATA, "w", encoding="utf-8") as f:
+                json.dump(self.bot.ssleague, f, indent=4)
+
+        await msg.edit(content=f"{text}\nDownloading info data...")
+        self.bot.info_data_ready = False
+        cog = self.bot.get_cog("InfoSync")
+        await cog.get_info_data(game, game_details)  # type: ignore
+        self.bot.info_data_ready = True
+
+        await msg.edit(content=f"{text}\nDownloading bonus data...")
+        self.bot.bonus_data_ready = False
+        cog = self.bot.get_cog("BonusSync")
+        await cog.get_bonus_data(game, game_details)  # type: ignore
+        self.bot.bonus_data_ready = True
+
+        await msg.edit(
+            content=f"Renamed {old_name} to {new_name} in {game_details["name"]}!"
+        )
 
 
 async def setup(bot: "dBot") -> None:

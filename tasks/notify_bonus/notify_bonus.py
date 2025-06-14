@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 import discord
 from discord.ext import commands, tasks
 
-from statics.consts import BONUS_OFFSET, GAMES, ME, STATUS_CHANNEL
+from statics.consts import BONUS_OFFSET, GAMES, ME, STATUS_CHANNEL, TIMEZONES
 from statics.helpers import get_sheet_data
 
 from .embeds import NotifyBonusEmbed
@@ -55,7 +55,9 @@ class NotifyBonus(commands.Cog):
             ping_emblem_index = ping_columns.index("emblem")
 
             ping_data = get_sheet_data(
-                game_details["pingSpreadsheet"], game_details["pingRange"]
+                game_details["pingSpreadsheet"],
+                game_details["pingRange"],
+                "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
             )
             game_ping_dict = dict.fromkeys(
                 (

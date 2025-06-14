@@ -34,18 +34,22 @@ def get_sheet_data(
     sheetService: "SheetsResource.SpreadsheetsResource" = globals()[
         f"sheetService{instance or "Default"}"
     ]
-    result = sheetService.values().get(
-        spreadsheetId=spreadsheet_id,
-        range=range_str,
-    ).execute(num_retries=MAX_RETRIES)
+    result = (
+        sheetService.values()
+        .get(
+            spreadsheetId=spreadsheet_id,
+            range=range_str,
+        )
+        .execute(num_retries=MAX_RETRIES)
+    )
     return result.get("values", [])
 
 
 def update_sheet_data(
     spreadsheet_id: str,
     range_str: str,
-    parse_input: bool,
     data: list[list[str]],
+    parse_input: bool,
     instance: str | None = None,
 ) -> None:
     sheetService: "SheetsResource.SpreadsheetsResource" = globals()[
@@ -73,6 +77,38 @@ def clear_sheet_data(
         spreadsheetId=spreadsheet_id,
         range=range_str,
         body={},
+    ).execute(num_retries=MAX_RETRIES)
+
+
+def find_replace_sheet_data(
+    spreadsheet_id: str,
+    range_grid: dict[str, int | str],
+    find: str,
+    replace: str,
+    instance: str | None = None,
+) -> None:
+    sheetService: "SheetsResource.SpreadsheetsResource" = globals()[
+        f"sheetService{instance or "Default"}"
+    ]
+
+    sheetService.batchUpdate(
+        spreadsheetId=spreadsheet_id,
+        body={
+            "requests": [
+                {
+                    "findReplace": {
+                        "find": find,
+                        "replacement": replace,
+                        "matchCase": True,
+                        "matchEntireCell": True,
+                        "searchByRegex": False,
+                        "includeFormulas": False,
+                        "range": range_grid,  # pyright: ignore[reportArgumentType]
+                    }
+                }
+            ],
+            "includeSpreadsheetInResponse": False,
+        },
     ).execute(num_retries=MAX_RETRIES)
 
 

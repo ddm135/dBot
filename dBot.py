@@ -36,7 +36,7 @@ class dBot(commands.Bot):
             lambda: LastAppearance(songs=defaultdict(lambda: None), date=None)
         )
     )
-    ssleague_manual: dict[str, dict[str, str]] = {}
+    ssleague_manual: defaultdict[str, dict[str, str]] = defaultdict(dict)
 
     async def setup_hook(self) -> None:
         for ext in EXTENSIONS:

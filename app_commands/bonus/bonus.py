@@ -6,7 +6,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from statics.consts import BONUS_OFFSET, GAMES
+from statics.consts import BONUS_OFFSET, GAMES, TIMEZONES
 from statics.helpers import update_sheet_data
 
 from .autocompletes import artist_autocomplete
@@ -417,8 +417,9 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                 update_sheet_data(
                     game_details["pingSpreadsheet"],
                     f"{game_details["pingUsers"]}{i}",
-                    parse_input=False,
-                    data=[[",".join(users)]],
+                    [[",".join(users)]],
+                    False,
+                    "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
                 )
 
             return await itr.followup.send(

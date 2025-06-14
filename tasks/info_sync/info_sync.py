@@ -13,6 +13,7 @@ from statics.types import SuperStarHeaders
 
 if TYPE_CHECKING:
     from dBot import dBot
+    from statics.types import GameDetails
 
 
 class InfoSync(commands.Cog):
@@ -40,58 +41,61 @@ class InfoSync(commands.Cog):
             return
 
         self.bot.info_data_ready = False
-        self.LOGGER.info("Downloading song data...")
+        self.LOGGER.info("Downloading info data...")
 
         for game, game_details in GAMES.items():
-            self.bot.info_ajs[game].clear()
-            ajs = self.bot.info_ajs[game] = await self.get_a_json(game_details["api"])
-            if ajs["code"] != 1000:
-                self.LOGGER.info(
-                    "%s server is unavailable. Skipping...", game_details["name"]
-                )
-                continue
-
-            self.bot.info_msd[game].clear()
-            self.bot.info_by_name[game].clear()
-            self.bot.info_by_id[game].clear()
-
-            self.bot.info_msd[game] = await self.get_music_data(ajs)
-            if game_details["legacyUrlScheme"]:
-                self.bot.info_url[game].clear()
-                self.bot.info_url[game] = await self.get_url_data(ajs)
-
-            if not game_details["infoSpreadsheet"]:
-                continue
-
-            info = get_sheet_data(
-                game_details["infoSpreadsheet"],
-                game_details["infoRange"],
-                "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
-            )
-
-            info_columns = game_details["infoColumns"]
-            artist_name_index = info_columns.index("artist_name")
-            song_name_index = info_columns.index("song_name")
-            song_id_index = info_columns.index("song_id")
-            duration_index = info_columns.index("duration")
-
-            for row in info:
-                if not row or len(row) < len(info_columns):
-                    continue
-
-                row[duration_index] = (
-                    row[duration_index]
-                    if ":" in row[duration_index]
-                    else f"{int(row[duration_index]) // 60}:"
-                    f"{int(row[duration_index]) % 60:02d}"
-                )
-
-                self.bot.info_by_name[game][row[artist_name_index]][
-                    row[song_name_index]
-                ] = row
-                self.bot.info_by_id[game][row[song_id_index]] = row
+            await self.get_info_data(game, game_details)
 
         self.bot.info_data_ready = True
+
+    async def get_info_data(self, game: str, game_details: "GameDetails") -> None:
+        self.bot.info_ajs[game].clear()
+        ajs = self.bot.info_ajs[game] = await self.get_a_json(game_details["api"])
+        if ajs["code"] != 1000:
+            self.LOGGER.info(
+                "%s server is unavailable. Skipping...", game_details["name"]
+            )
+            return
+
+        self.bot.info_msd[game].clear()
+        self.bot.info_by_name[game].clear()
+        self.bot.info_by_id[game].clear()
+
+        self.bot.info_msd[game] = await self.get_music_data(ajs)
+        if game_details["legacyUrlScheme"]:
+            self.bot.info_url[game].clear()
+            self.bot.info_url[game] = await self.get_url_data(ajs)
+
+        if not game_details["infoSpreadsheet"]:
+            return
+
+        info = get_sheet_data(
+            game_details["infoSpreadsheet"],
+            game_details["infoRange"],
+            "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
+        )
+
+        info_columns = game_details["infoColumns"]
+        artist_name_index = info_columns.index("artist_name")
+        song_name_index = info_columns.index("song_name")
+        song_id_index = info_columns.index("song_id")
+        duration_index = info_columns.index("duration")
+
+        for row in info:
+            if not row or len(row) < len(info_columns):
+                continue
+
+            row[duration_index] = (
+                row[duration_index]
+                if ":" in row[duration_index]
+                else f"{int(row[duration_index]) // 60}:"
+                f"{int(row[duration_index]) % 60:02d}"
+            )
+
+            self.bot.info_by_name[game][row[artist_name_index]][
+                row[song_name_index]
+            ] = row
+            self.bot.info_by_id[game][row[song_id_index]] = row
 
     @staticmethod
     async def get_a_json(api_url: str) -> dict[str, Any]:
