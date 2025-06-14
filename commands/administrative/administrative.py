@@ -215,7 +215,10 @@ class Administrative(commands.Cog):
                 self.bot.ssleague[game][new_name] = self.bot.ssleague[game].pop(
                     old_name
                 )
-            if self.bot.ssleague_manual[game].get("artist", "") == old_name:
+            if (
+                game in self.bot.ssleague_manual
+                and self.bot.ssleague_manual[game]["artist"] == old_name
+            ):
                 self.bot.ssleague_manual[game]["artist"] = new_name
             with open(SSLEAGUE_DATA, "w", encoding="utf-8") as f:
                 json.dump(self.bot.ssleague, f, indent=4)

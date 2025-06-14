@@ -2,7 +2,7 @@ import gzip
 import json
 import logging
 from datetime import datetime, time
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import aiohttp
 from discord.ext import commands, tasks
@@ -98,7 +98,7 @@ class InfoSync(commands.Cog):
             self.bot.info_by_id[game][row[song_id_index]] = row
 
     @staticmethod
-    async def get_a_json(api_url: str) -> dict[str, Any]:
+    async def get_a_json(api_url: str) -> dict:
         headers = SuperStarHeaders()
         iv = headers["X-SuperStar-AES-IV"]
 
@@ -114,17 +114,17 @@ class InfoSync(commands.Cog):
         return ajs
 
     @classmethod
-    async def get_music_data(cls, ajs: dict[str, Any]) -> list[dict[str, Any]]:
+    async def get_music_data(cls, ajs: dict) -> list[dict]:
         msd_url = ajs["result"]["context"]["MusicData"]["file"]
         return await cls.get_game_data(msd_url)
 
     @classmethod
-    async def get_url_data(cls, ajs: dict[str, Any]) -> list[dict[str, Any]]:
+    async def get_url_data(cls, ajs: dict) -> list[dict]:
         url_url = ajs["result"]["context"]["URLs"]["file"]
         return await cls.get_game_data(url_url)
 
     @staticmethod
-    async def get_game_data(url: str) -> list[dict[str, Any]]:
+    async def get_game_data(url: str) -> list[dict]:
         async with aiohttp.ClientSession() as session:
             async with session.get(url=url) as r:
                 msd_enc = b""

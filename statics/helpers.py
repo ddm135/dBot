@@ -6,7 +6,7 @@ from base64 import b64decode, b64encode
 from datetime import datetime
 from io import BytesIO
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import discord
 from aiohttp import ClientResponse
@@ -204,7 +204,7 @@ async def unpin_old_ssl(
             break
 
 
-async def get_ss_json(response: ClientResponse, iv: str | bytes) -> dict[str, Any]:
+async def get_ss_json(response: ClientResponse, iv: str | bytes) -> dict:
     try:
         result = await response.json(content_type=None)
     except json.JSONDecodeError:

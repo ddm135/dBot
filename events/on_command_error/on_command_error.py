@@ -17,6 +17,7 @@ class OnCommandError(commands.Cog):
             (
                 commands.NotOwner,
                 commands.CommandNotFound,
+                commands.MissingRequiredArgument,
             ),
         ):
             return

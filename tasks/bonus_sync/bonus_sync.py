@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime, time
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from discord.ext import commands, tasks
 
@@ -62,7 +62,7 @@ class BonusSync(commands.Cog):
         timezone = game_details["timezone"]
 
         for raw_row in bonus:
-            row: list[Any] = raw_row
+            row: list = raw_row
             row[bonus_start_index] = datetime.strptime(
                 raw_row[bonus_start_index], date_format
             ).replace(tzinfo=timezone)

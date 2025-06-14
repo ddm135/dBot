@@ -1,6 +1,5 @@
 import os
 from collections import defaultdict
-from typing import Any
 
 import discord
 from discord.ext import commands
@@ -11,9 +10,9 @@ from statics.types import LastAppearance
 
 
 class dBot(commands.Bot):
-    info_ajs: defaultdict[str, dict[str, Any]] = defaultdict(dict[str, Any])
-    info_msd: defaultdict[str, list[dict[str, Any]]] = defaultdict(list[dict[str, Any]])
-    info_url: defaultdict[str, list[dict[str, Any]]] = defaultdict(list[dict[str, Any]])
+    info_ajs: defaultdict[str, dict] = defaultdict(dict)
+    info_msd: defaultdict[str, list[dict]] = defaultdict(list[dict])
+    info_url: defaultdict[str, list[dict]] = defaultdict(list[dict])
     info_by_name: defaultdict[str, defaultdict[str, defaultdict[str, list[str]]]] = (
         defaultdict(lambda: defaultdict(lambda: defaultdict(list[str])))
     )
@@ -22,8 +21,8 @@ class dBot(commands.Bot):
     )
     info_data_ready = False
 
-    bonus_data: defaultdict[str, defaultdict[str, list[list[Any]]]] = defaultdict(
-        lambda: defaultdict(list[list[Any]])
+    bonus_data: defaultdict[str, defaultdict[str, list[list]]] = defaultdict(
+        lambda: defaultdict(list[list])
     )
     bonus_data_ready = False
 
@@ -36,7 +35,7 @@ class dBot(commands.Bot):
             lambda: LastAppearance(songs=defaultdict(lambda: None), date=None)
         )
     )
-    ssleague_manual: defaultdict[str, dict[str, str]] = defaultdict(dict)
+    ssleague_manual: dict[str, dict[str, str]] = {}
 
     async def setup_hook(self) -> None:
         for ext in EXTENSIONS:
