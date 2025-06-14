@@ -49,6 +49,7 @@ class BonusesEmbed(discord.Embed):
     def __init__(
         self,
         game_details: "GameDetails",
+        artist: str | None,
         bonuses: list[dict],
         first_date: datetime,
         last_date: datetime,
@@ -62,7 +63,7 @@ class BonusesEmbed(discord.Embed):
 
         super().__init__(
             title=(
-                f"{game_details["name"]} {current_date.strftime("%G-W%V")} Bonuses "
+                f"{game_details["name"]}{f" - {artist}" if artist else ""} Bonuses "
                 f"({first_date.strftime("%B %d")} - {last_date.strftime("%B %d")})"
             ).replace(" 0", " "),
             description="None" if not filtered_bonuses else None,
@@ -76,11 +77,13 @@ class BonusesEmbed(discord.Embed):
                     f"{("~~" if bonus["bonus_end"] < current_date
                         else "" if bonus["bonus_start"] > current_date
                         else ":white_check_mark: ")}"
-                    f"**{bonus["artist"]}**"
-                    f"{(f" {bonus["members"]}"
+                    f"**{bonus["artist"] if not artist else ""}**"
+                    f"{" " if not artist and bonus["members"] else ""}"
+                    f"{(f"{bonus["members"]}"
                         if bonus["members"]
                         and bonus["artist"] != bonus["members"]
-                        else "")}: "
+                        else "")}"
+                    f"{": " if not artist or bonus["members"] else ""}"
                     f"{(bonus["song"] if bonus["song"]
                         else "All Songs :birthday:")}"
                     f"{("" if not bonus["song"]

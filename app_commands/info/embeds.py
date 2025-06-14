@@ -26,7 +26,7 @@ class InfoEmbed(discord.Embed):
         song_name_index = game_details["infoColumns"].index("song_name")
 
         super().__init__(
-            title=f"{game_details["name"]}{f" - {artist}" if artist else ""}",
+            title=f"{game_details["name"]}{f" - {artist}" if artist else ""} Songs",
             description="\n".join(
                 f"({song[duration_index]}) "
                 f"{(f"{song[artist_name_index].replace(r"*", r"\*")

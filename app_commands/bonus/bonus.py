@@ -253,6 +253,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         msg = await itr.followup.send(
             embed=BonusesEmbed(
                 game_details,
+                artist_choice,
                 week_bonuses,
                 first_date,
                 last_date,

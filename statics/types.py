@@ -1,7 +1,7 @@
 import random
 import string
 from datetime import datetime
-from typing import NotRequired, TypedDict
+from typing import TypedDict
 from zoneinfo import ZoneInfo
 
 import discord
@@ -88,16 +88,16 @@ class SSLeagueEmbed(discord.Embed):
 class GameDetails(TypedDict):
     name: str
     infoSpreadsheet: str
-    infoReplaceGrid: NotRequired[dict[str, int | str]]
+    infoReplaceGrid: dict[str, int | str]
     infoRange: str
     infoColumns: tuple[str, ...]
     pingSpreadsheet: str
-    pingReplaceGrid: NotRequired[dict[str, int | str]]
+    pingReplaceGrid: dict[str, int | str]
     pingRange: str
     pingUsers: str
     pingColumns: tuple[str, ...]
     bonusSpreadsheet: str
-    bonusReplaceGrid: NotRequired[dict[str, int | str]]
+    bonusReplaceGrid: dict[str, int | str]
     bonusRange: str
     bonusColumns: tuple[str, ...]
     color: int
