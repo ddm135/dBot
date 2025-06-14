@@ -266,6 +266,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         view = BonusView(
             msg,
             game_details,
+            artist_choice,
             first_date,
             last_date,
             current_date,
