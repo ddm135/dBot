@@ -77,7 +77,7 @@ class BonusesEmbed(discord.Embed):
                     f"{("~~" if bonus["bonus_end"] < current_date
                         else "" if bonus["bonus_start"] > current_date
                         else ":white_check_mark: ")}"
-                    f"**{bonus["artist"] if not artist else ""}**"
+                    f"{f"**{bonus["artist"]}**" if not artist else ""}"
                     f"{" " if not artist and bonus["members"] else ""}"
                     f"{(f"{bonus["members"]}"
                         if bonus["members"]
