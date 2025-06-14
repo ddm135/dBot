@@ -53,9 +53,9 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         game_choice: Choice[:class:`str`]
             Game
         artist_choice: Optional[:class:`str`]
-            Artist name
+            Artist Name
         time: Optional[Choice[:class:`str`]]
-            Time period
+            Time Period
         """
 
         await itr.response.defer()
