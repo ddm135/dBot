@@ -22,7 +22,7 @@ def ping_preprocess(game: str) -> tuple["GameDetails", list[list[str]], int, int
     return (
         game_details,
         get_ping_data(
-            game_details["pingId"],
+            game_details["pingSpreadsheet"],
             game_details["pingRange"],
             "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
         ),

@@ -60,11 +60,11 @@ class InfoSync(commands.Cog):
                 self.bot.info_url[game].clear()
                 self.bot.info_url[game] = await self.get_url_data(ajs)
 
-            if not game_details["infoId"]:
+            if not game_details["infoSpreadsheet"]:
                 continue
 
             info = get_sheet_data(
-                game_details["infoId"],
+                game_details["infoSpreadsheet"],
                 game_details["infoRange"],
                 "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
             )

@@ -31,10 +31,10 @@ def get_sheet_data(
     range_str: str,
     instance: str | None = None,
 ) -> list[list[str]]:
-    sheetService: "SheetsResource.SpreadsheetsResource.ValuesResource" = globals()[
+    sheetService: "SheetsResource.SpreadsheetsResource" = globals()[
         f"sheetService{instance or "Default"}"
     ]
-    result = sheetService.get(
+    result = sheetService.values().get(
         spreadsheetId=spreadsheet_id,
         range=range_str,
     ).execute(num_retries=MAX_RETRIES)
@@ -48,11 +48,11 @@ def update_sheet_data(
     data: list[list[str]],
     instance: str | None = None,
 ) -> None:
-    sheetService: "SheetsResource.SpreadsheetsResource.ValuesResource" = globals()[
+    sheetService: "SheetsResource.SpreadsheetsResource" = globals()[
         f"sheetService{instance or "Default"}"
     ]
 
-    sheetService.update(
+    sheetService.values().update(
         spreadsheetId=spreadsheet_id,
         range=range_str,
         valueInputOption="USER_ENTERED" if parse_input else "RAW",
@@ -65,11 +65,11 @@ def clear_sheet_data(
     range_str: str,
     instance: str | None = None,
 ) -> None:
-    sheetService: "SheetsResource.SpreadsheetsResource.ValuesResource" = globals()[
+    sheetService: "SheetsResource.SpreadsheetsResource" = globals()[
         f"sheetService{instance or "Default"}"
     ]
 
-    sheetService.clear(
+    sheetService.values().clear(
         spreadsheetId=spreadsheet_id,
         range=range_str,
         body={},

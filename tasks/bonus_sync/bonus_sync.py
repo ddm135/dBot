@@ -37,11 +37,11 @@ class BonusSync(commands.Cog):
         for game, game_details in GAMES.items():
             self.bot.bonus_data[game].clear()
 
-            if not game_details["bonusId"]:
+            if not game_details["bonusSpreadsheet"]:
                 continue
 
             bonus = get_sheet_data(
-                game_details["bonusId"],
+                game_details["bonusSpreadsheet"],
                 game_details["bonusRange"],
                 "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
             )

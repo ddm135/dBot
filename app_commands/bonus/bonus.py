@@ -1,6 +1,6 @@
 import math
 from datetime import datetime, timedelta
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterable
 
 import discord
 from discord import app_commands
@@ -22,26 +22,39 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
     GAME_CHOICES = [
         app_commands.Choice(name=game["name"], value=key)
         for key, game in GAMES.items()
-        if game["pingId"]
+        if game["pingSpreadsheet"]
     ]
 
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
 
     @app_commands.command()
-    @app_commands.choices(game=GAME_CHOICES)
-    async def week(
+    @app_commands.choices(game_choice=GAME_CHOICES)
+    @app_commands.autocomplete(artist_choice=artist_autocomplete)
+    @app_commands.choices(
+        time=[
+            app_commands.Choice(name="current week", value="current week"),
+            app_commands.Choice(name="current month", value="current month"),
+        ]
+    )
+    @app_commands.rename(game_choice="game", artist_choice="artist")
+    async def list(
         self,
         itr: discord.Interaction["dBot"],
-        game: app_commands.Choice[str],
+        game_choice: app_commands.Choice[str],
+        artist_choice: str | None = None,
+        time: app_commands.Choice[str] | None = None,
     ) -> None:
-        """View bonus information for the current week,
-        sorted by end date then start date
+        """View bonus information, sorted by end date then start date
 
         Parameters
         -----------
         game_choice: Choice[:class:`str`]
             Game
+        artist_choice: Optional[:class:`str`]
+            Artist name
+        time: Optional[Choice[:class:`str`]]
+            Time period
         """
 
         await itr.response.defer()
@@ -50,7 +63,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                 "Bonus data synchronization in progress, feature unavailable."
             )
 
-        game_details = GAMES[game.value]
+        game_details = GAMES[game_choice.value]
         timezone = game_details["timezone"]
         bonus_columns = game_details["bonusColumns"]
 
@@ -61,18 +74,39 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
             microsecond=0,
         )
 
-        first_date = current_date - timedelta(days=current_date.weekday())
+        if time is None:
+            first_date = current_date.replace(day=1, month=1)
+            last_date = current_date.replace(day=31, month=12)
+        else:
+            match time.value:
+                case "current week":
+                    first_date = current_date - timedelta(days=current_date.weekday())
+                    last_date = first_date + timedelta(days=7)
+                case "current month":
+                    first_date = current_date.replace(day=1)
+                    if current_date.month == 12:
+                        last_date = first_date.replace(day=31)
+                    last_date = current_date.replace(
+                        month=current_date.month + 1, day=1
+                    ) - timedelta(days=1)
+                case _:
+                    return await itr.followup.send("Invalid time period.")
         tracking_date = first_date
-        last_date = tracking_date + timedelta(days=7)
 
         member_name_index = bonus_columns.index("member_name")
         bonus_start_index = bonus_columns.index("bonus_start")
         bonus_end_index = bonus_columns.index("bonus_end")
         bonus_amount_index = bonus_columns.index("bonus_amount")
 
-        bonus_data = self.bot.bonus_data[game.value]
-        artists = bonus_data.keys()
+        bonus_data = self.bot.bonus_data[game_choice.value]
         week_bonuses = []
+        artists: Iterable[str]
+        if not artist_choice:
+            artists = bonus_data.keys()
+        else:
+            if artist_choice not in bonus_data:
+                return await itr.followup.send("Artist not found.")
+            artists = [artist_choice]
 
         while tracking_date <= last_date:
             for artist in artists:
@@ -247,14 +281,14 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
     )
 
     @bonus_ping.command(name="add")
-    @app_commands.autocomplete(artist_name=artist_autocomplete)
-    @app_commands.choices(game=GAME_CHOICES)
-    @app_commands.rename(artist_name="artist")
+    @app_commands.choices(game_choice=GAME_CHOICES)
+    @app_commands.autocomplete(artist_choice=artist_autocomplete)
+    @app_commands.rename(game_choice="game", artist_choice="artist")
     async def bonus_ping_add(
         self,
         itr: discord.Interaction["dBot"],
-        game: app_commands.Choice[str],
-        artist_name: str,
+        game_choice: app_commands.Choice[str],
+        artist_choice: str,
     ) -> None:
         """Add an artist to your bonus ping list
         (1 hour before bonus starts,
@@ -262,60 +296,65 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
 
         Parameters
         -----------
-        game: Choice[:class:`str`]
+        game_choice: Choice[:class:`str`]
             Game
-        artist_name: :class:`str`
+        artist_choice: :class:`str`
             Artist Name
         """
 
         assert itr.command
-        await self.handle_bonus_command(itr, game.value, artist_name, itr.command.name)
+        await self.handle_bonus_command(
+            itr, game_choice.value, artist_choice, itr.command.name
+        )
 
     @bonus_ping.command(name="remove")
-    @app_commands.autocomplete(artist_name=artist_autocomplete)
-    @app_commands.choices(game=GAME_CHOICES)
-    @app_commands.rename(artist_name="artist")
+    @app_commands.choices(game_choice=GAME_CHOICES)
+    @app_commands.autocomplete(artist_choice=artist_autocomplete)
+    @app_commands.rename(game_choice="game", artist_choice="artist")
     async def bonus_ping_remove(
         self,
         itr: discord.Interaction["dBot"],
-        game: app_commands.Choice[str],
-        artist_name: str,
+        game_choice: app_commands.Choice[str],
+        artist_choice: str,
     ) -> None:
         """Remove an artist from your bonus ping list
 
         Parameters
         -----------
-        game: Choice[:class:`str`]
+        game_choice: Choice[:class:`str`]
             Game
-        artist_name: :class:`str`
+        artist_choice: :class:`str`
             Artist Name
         """
 
         assert itr.command
-        await self.handle_bonus_command(itr, game.value, artist_name, itr.command.name)
+        await self.handle_bonus_command(
+            itr, game_choice.value, artist_choice, itr.command.name
+        )
 
     @bonus_ping.command(name="list")
-    @app_commands.choices(game=GAME_CHOICES)
+    @app_commands.choices(game_choice=GAME_CHOICES)
+    @app_commands.rename(game_choice="game")
     async def bonus_ping_list(
         self,
         itr: discord.Interaction["dBot"],
-        game: app_commands.Choice[str] | None = None,
+        game_choice: app_commands.Choice[str] | None = None,
     ) -> None:
         """List your bonus ping list
 
         Parameters
         -----------
-        game: Optional[Choice[:class:`str`]]
+        game_choice: Optional[Choice[:class:`str`]]
             Game. If left empty, will list all games.
         """
 
         await itr.response.defer(ephemeral=True)
         user_id = str(itr.user.id)
-        games = [game] if game else self.GAME_CHOICES
+        games = [game_choice] if game_choice else self.GAME_CHOICES
 
         await itr.user.send("## Bonus Ping List")
-        for game in games:
-            embed = BonusPingsEmbed(game.value, user_id)
+        for game_choice in games:
+            embed = BonusPingsEmbed(game_choice.value, user_id)
             await itr.user.send(embed=embed, silent=True)
 
         return await itr.followup.send(
@@ -366,8 +405,8 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
 
             if not message_prefix.startswith("Already"):
                 update_sheet_data(
-                    game_details["pingId"],
-                    f"{game_details["pingWrite"]}{i}",
+                    game_details["pingSpreadsheet"],
+                    f"{game_details["pingUsers"]}{i}",
                     parse_input=False,
                     data=[[",".join(users)]],
                 )

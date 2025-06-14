@@ -32,14 +32,14 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
 
     @app_commands.command()
     @app_commands.choices(game_choice=GAME_CHOICES)
-    @app_commands.autocomplete(artist_name=artist_autocomplete)
+    @app_commands.autocomplete(artist_choice=artist_autocomplete)
     @app_commands.autocomplete(song_name=song_autocomplete)
-    @app_commands.rename(game_choice="game", artist_name="artist", song_name="song")
+    @app_commands.rename(game_choice="game", artist_choice="artist", song_name="song")
     async def pin_by_name(
         self,
         itr: discord.Interaction["dBot"],
         game_choice: app_commands.Choice[str],
-        artist_name: str,
+        artist_choice: str,
         song_name: str,
     ) -> None:
         """Pin SSL song of the day using Artist Name and Song Name
@@ -48,7 +48,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         -----------
         game_choice: Choice[:class:`str`]
             Game
-        artist_name: :class:`str`
+        artist_choice: :class:`str`
             Artist Name
         song_name: :class:`str`
             Song Name
@@ -63,7 +63,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         game = game_choice.value
         assert (guild_id := itr.guild_id)
 
-        ssl_song = self.bot.info_by_name[game][artist_name][song_name]
+        ssl_song = self.bot.info_by_name[game][artist_choice][song_name]
         if not ssl_song:
             return await itr.followup.send("Song not found.")
 
@@ -72,7 +72,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             ssl_song,
             guild_id,
             itr.user.name,
-            artist_name=artist_name,
+            artist_name=artist_choice,
             song_name=song_name,
         )
 

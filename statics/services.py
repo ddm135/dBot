@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from googleapiclient._apis.drive.v3 import DriveResource
     from googleapiclient._apis.sheets.v4 import SheetsResource
 
-sheetServiceDefault: "SheetsResource.SpreadsheetsResource.ValuesResource" = (
+sheetServiceDefault: "SheetsResource.SpreadsheetsResource" = (
     build(
         serviceName="sheets",
         version="v4",
@@ -23,9 +23,8 @@ sheetServiceDefault: "SheetsResource.SpreadsheetsResource.ValuesResource" = (
         static_discovery=True,
     )
     .spreadsheets()
-    .values()
 )
-sheetServiceKR: "SheetsResource.SpreadsheetsResource.ValuesResource" = (
+sheetServiceKR: "SheetsResource.SpreadsheetsResource" = (
     build(
         serviceName="sheets",
         version="v4",
@@ -37,7 +36,6 @@ sheetServiceKR: "SheetsResource.SpreadsheetsResource.ValuesResource" = (
         static_discovery=True,
     )
     .spreadsheets()
-    .values()
 )
 
 driveService: "DriveResource.FilesResource" = build(

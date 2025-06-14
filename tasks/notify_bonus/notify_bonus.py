@@ -26,7 +26,7 @@ class NotifyBonus(commands.Cog):
     @tasks.loop(time=[time(hour=h) for h in range(24)])
     async def notify_bonus(self) -> None:
         for game, game_details in GAMES.items():
-            if not game_details["bonusId"]:
+            if not game_details["bonusSpreadsheet"]:
                 continue
 
             timezone = game_details["timezone"]
@@ -55,7 +55,7 @@ class NotifyBonus(commands.Cog):
             ping_emblem_index = ping_columns.index("emblem")
 
             ping_data = get_sheet_data(
-                game_details["pingId"], game_details["pingRange"]
+                game_details["pingSpreadsheet"], game_details["pingRange"]
             )
             game_ping_dict = dict.fromkeys(
                 (

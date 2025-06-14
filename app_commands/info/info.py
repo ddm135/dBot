@@ -18,7 +18,7 @@ class Info(commands.Cog):
     GAME_CHOICES = [
         app_commands.Choice(name=game["name"], value=key)
         for key, game in GAMES.items()
-        if game["infoId"]
+        if game["infoSpreadsheet"]
     ]
 
     def __init__(self, bot: "dBot") -> None:
@@ -26,13 +26,13 @@ class Info(commands.Cog):
 
     @app_commands.command()
     @app_commands.choices(game_choice=GAME_CHOICES)
-    @app_commands.autocomplete(artist_name=artist_autocomplete)
-    @app_commands.rename(game_choice="game", artist_name="artist")
+    @app_commands.autocomplete(artist_choice=artist_autocomplete)
+    @app_commands.rename(game_choice="game", artist_choice="artist")
     async def info(
         self,
         itr: discord.Interaction["dBot"],
         game_choice: app_commands.Choice[str],
-        artist_name: str | None = None,
+        artist_choice: str | None = None,
     ) -> None:
         """View song information, sorted by duration
 
@@ -40,7 +40,7 @@ class Info(commands.Cog):
         -----------
         game_choice: Choice[:class:`str`]
             Game
-        artist_name: Optional[:class:`str`]
+        artist_choice: Optional[:class:`str`]
             Artist Name
         """
 
@@ -53,20 +53,20 @@ class Info(commands.Cog):
         game_details = GAMES[game_choice.value]
         duration_index = game_details["infoColumns"].index("duration")
 
-        if not artist_name:
+        if not artist_choice:
             songs = self.bot.info_by_id[game_choice.value].values()
         else:
-            if artist_name not in self.bot.info_by_name[game_choice.value]:
+            if artist_choice not in self.bot.info_by_name[game_choice.value]:
                 return await itr.followup.send("Artist not found.")
 
-            songs = self.bot.info_by_name[game_choice.value][artist_name].values()
+            songs = self.bot.info_by_name[game_choice.value][artist_choice].values()
 
         sorted_songs = sorted(songs, key=lambda x: x[duration_index])
         msg = await itr.followup.send(
-            embed=InfoEmbed(game_details, artist_name, sorted_songs),
+            embed=InfoEmbed(game_details, artist_choice, sorted_songs),
             wait=True,
         )
-        view = InfoView(msg, game_details, artist_name, sorted_songs, itr.user)
+        view = InfoView(msg, game_details, artist_choice, sorted_songs, itr.user)
         await msg.edit(view=view)
 
 
