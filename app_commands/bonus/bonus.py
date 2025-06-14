@@ -34,6 +34,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
     @app_commands.choices(
         time=[
             app_commands.Choice(name="current week", value="current week"),
+            app_commands.Choice(name="next week", value="next week"),
             app_commands.Choice(name="current month", value="current month"),
         ]
     )
@@ -81,6 +82,13 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
             match time.value:
                 case "current week":
                     first_date = current_date - timedelta(days=current_date.weekday())
+                    last_date = first_date + timedelta(days=7)
+                case "next week":
+                    first_date = (
+                        current_date
+                        - timedelta(days=current_date.weekday())
+                        + timedelta(days=7)
+                    )
                     last_date = first_date + timedelta(days=7)
                 case "current month":
                     first_date = current_date.replace(day=1)

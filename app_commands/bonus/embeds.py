@@ -83,7 +83,9 @@ class BonusesEmbed(discord.Embed):
                         if bonus["members"]
                         and bonus["artist"] != bonus["members"]
                         else "")}"
-                    f"{": " if not artist or bonus["members"] else ""}"
+                    f"{(": " if not artist
+                        or bonus["members"] and bonus["artist"] != bonus["members"]
+                        else "")}"
                     f"{(bonus["song"] if bonus["song"]
                         else "All Songs :birthday:")}"
                     f"{("" if not bonus["song"]
