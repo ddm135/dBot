@@ -72,17 +72,17 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
             case None:
                 first_date = current_date.replace(day=1, month=1)
                 last_date = current_date.replace(day=31, month=12)
-            case BonusPeriod.CURRENT_WEEK:
+            case BonusPeriod["current week"]:
                 first_date = current_date - timedelta(days=current_date.weekday())
                 last_date = first_date + timedelta(days=7)
-            case BonusPeriod.NEXT_WEEK:
+            case BonusPeriod["next week"]:
                 first_date = (
                     current_date
                     - timedelta(days=current_date.weekday())
                     + timedelta(days=7)
                 )
                 last_date = first_date + timedelta(days=7)
-            case BonusPeriod.CURRENT_MONTH:
+            case BonusPeriod["current month"]:
                 first_date = current_date.replace(day=1)
                 if current_date.month == 12:
                     last_date = first_date.replace(day=31)

@@ -11,10 +11,9 @@ if TYPE_CHECKING:
 STEP = 5
 
 
-class BonusPeriod(Enum):
-    CURRENT_WEEK = "current week"
-    NEXT_WEEK = "next week"
-    CURRENT_MONTH = "current month"
+BonusPeriod = Enum(
+    "BonusPeriod", [("current week", 1), ("next week", 2), ("current month", 3)]
+)
 
 
 def get_ping_data(
