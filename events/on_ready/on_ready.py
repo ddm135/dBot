@@ -16,14 +16,11 @@ class OnReady(commands.Cog):
 
     @commands.Cog.listener("on_ready")
     async def on_ready(self) -> None:
-        try:
-            channel = self.bot.get_channel(
-                STATUS_CHANNEL
-            ) or await self.bot.fetch_channel(STATUS_CHANNEL)
-            assert isinstance(channel, discord.TextChannel)
-            await channel.send(f"Successful start at {datetime.now()}")
-        except Exception:
-            pass
+        channel = self.bot.get_channel(
+            STATUS_CHANNEL
+        ) or await self.bot.fetch_channel(STATUS_CHANNEL)
+        assert isinstance(channel, discord.TextChannel)
+        await channel.send(f"Successful start at {datetime.now()}")
 
 
 async def setup(bot: "dBot") -> None:

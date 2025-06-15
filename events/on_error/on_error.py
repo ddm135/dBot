@@ -14,7 +14,7 @@ class OnError(commands.Cog):
         self.bot = bot
 
     @commands.Cog.listener("on_error")
-    async def on_error(self, ctx: commands.Context, error: Exception) -> None:
+    async def on_error(self, _: commands.Context, error: Exception) -> None:
         channel = self.bot.get_channel(STATUS_CHANNEL) or await self.bot.fetch_channel(
             STATUS_CHANNEL
         )

@@ -11,7 +11,7 @@ class OnCommandError(commands.Cog):
         self.bot = bot
 
     @commands.Cog.listener("on_command_error")
-    async def on_command_error(self, ctx: commands.Context, error: Exception) -> None:
+    async def on_command_error(self, _: commands.Context, error: Exception) -> None:
         if isinstance(
             error,
             (

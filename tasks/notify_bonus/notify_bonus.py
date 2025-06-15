@@ -90,7 +90,8 @@ class NotifyBonus(commands.Cog):
                 if not artist_pings:
                     continue
                 artist_ping_list = artist_pings[ping_users_index].split(",")
-                artist_ping_list.remove("") if "" in artist_ping_list else None
+                if "" in artist_ping_list:
+                    artist_ping_list.remove("")
                 if not artist_ping_list:
                     continue
 

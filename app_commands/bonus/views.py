@@ -60,7 +60,7 @@ class BonusView(discord.ui.View):
 
     @discord.ui.button(label="Previous Page", style=discord.ButtonStyle.secondary)
     async def previous_page(
-        self, itr: discord.Interaction["dBot"], button: discord.ui.Button
+        self, itr: discord.Interaction["dBot"], _: discord.ui.Button
     ) -> None:
         await itr.response.defer()
         if itr.user.id != self.user.id:
@@ -76,7 +76,7 @@ class BonusView(discord.ui.View):
 
     @discord.ui.button(label="Next Page", style=discord.ButtonStyle.primary)
     async def next_page(
-        self, itr: discord.Interaction["dBot"], button: discord.ui.Button
+        self, itr: discord.Interaction["dBot"], _: discord.ui.Button
     ) -> None:
         await itr.response.defer()
         if itr.user.id != self.user.id:

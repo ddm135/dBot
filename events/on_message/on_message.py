@@ -15,20 +15,6 @@ class OnMessage(commands.Cog):
         self.bot = bot
 
     @commands.Cog.listener("on_message")
-    async def bonusBot_info(self, message: discord.Message) -> None:
-        if message.author.bot:
-            return
-
-        msg_content = message.content.lower()
-        if (
-            msg_content.startswith("h!i")
-            and msg_content.endswith(("wakeone", "wo", "w1"))
-            and message.channel.id == 401412343629742090
-        ):
-            await message.reply("Use dBot's `/info` instead.", mention_author=False)
-            return
-
-    @commands.Cog.listener("on_message")
     async def word_ping(self, message: discord.Message) -> None:
         if not message.guild or message.author.bot:
             return

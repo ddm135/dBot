@@ -10,7 +10,7 @@ from statics.consts import BONUS_OFFSET, GAMES, TIMEZONES
 from statics.helpers import update_sheet_data
 
 from .autocompletes import artist_autocomplete
-from .commons import STEP, ping_preprocess
+from .commons import STEP, BonusPeriod, ping_preprocess
 from .embeds import BonusesEmbed, BonusPingsEmbed
 from .views import BonusView
 
@@ -31,20 +31,13 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
     @app_commands.command()
     @app_commands.choices(game_choice=GAME_CHOICES)
     @app_commands.autocomplete(artist_choice=artist_autocomplete)
-    @app_commands.choices(
-        time=[
-            app_commands.Choice(name="current week", value="current week"),
-            app_commands.Choice(name="next week", value="next week"),
-            app_commands.Choice(name="current month", value="current month"),
-        ]
-    )
     @app_commands.rename(game_choice="game", artist_choice="artist")
     async def list(
         self,
         itr: discord.Interaction["dBot"],
         game_choice: app_commands.Choice[str],
         artist_choice: str | None = None,
-        time: app_commands.Choice[str] | None = None,
+        time: BonusPeriod | None = None,
     ) -> None:
         """View bonus information, sorted by end date then start date
 
@@ -54,7 +47,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
             Game
         artist_choice: Optional[:class:`str`]
             Artist Name
-        time: Optional[Choice[:class:`str`]]
+        time: Optional[:class:`BonusPeriod`]
             Time Period
         """
 
@@ -75,30 +68,30 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
             microsecond=0,
         )
 
-        if time is None:
-            first_date = current_date.replace(day=1, month=1)
-            last_date = current_date.replace(day=31, month=12)
-        else:
-            match time.value:
-                case "current week":
-                    first_date = current_date - timedelta(days=current_date.weekday())
-                    last_date = first_date + timedelta(days=7)
-                case "next week":
-                    first_date = (
-                        current_date
-                        - timedelta(days=current_date.weekday())
-                        + timedelta(days=7)
-                    )
-                    last_date = first_date + timedelta(days=7)
-                case "current month":
-                    first_date = current_date.replace(day=1)
-                    if current_date.month == 12:
-                        last_date = first_date.replace(day=31)
+        match time:
+            case None:
+                first_date = current_date.replace(day=1, month=1)
+                last_date = current_date.replace(day=31, month=12)
+            case BonusPeriod.CURRENT_WEEK:
+                first_date = current_date - timedelta(days=current_date.weekday())
+                last_date = first_date + timedelta(days=7)
+            case BonusPeriod.NEXT_WEEK:
+                first_date = (
+                    current_date
+                    - timedelta(days=current_date.weekday())
+                    + timedelta(days=7)
+                )
+                last_date = first_date + timedelta(days=7)
+            case BonusPeriod.CURRENT_MONTH:
+                first_date = current_date.replace(day=1)
+                if current_date.month == 12:
+                    last_date = first_date.replace(day=31)
+                else:
                     last_date = current_date.replace(
                         month=current_date.month + 1, day=1
                     ) - timedelta(days=1)
-                case _:
-                    return await itr.followup.send("Invalid time period.")
+            case _:
+                return await itr.followup.send("Invalid time period.")
         tracking_date = first_date
 
         member_name_index = bonus_columns.index("member_name")
@@ -393,7 +386,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                 continue
 
             users = set(row[users_index].split(","))
-            users.remove("") if "" in users else None
+            users.discard("")
 
             if operation == "add":
                 if user_id not in users:

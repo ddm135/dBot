@@ -1,3 +1,5 @@
+# pylint: disable=invalid-name
+
 import os
 from collections import defaultdict
 
@@ -50,7 +52,7 @@ class dBot(commands.Bot):
             )
             assert isinstance(channel, discord.TextChannel)
             await channel.send("Shutting down...")
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             pass
         finally:
             await super().close()

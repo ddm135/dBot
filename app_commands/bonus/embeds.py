@@ -28,7 +28,8 @@ class BonusPingsEmbed(discord.Embed):
         for row in ping_data:
             _artist_name = row[artist_name_index]
             users = row[users_index].split(",")
-            users.remove("") if "" in users else None
+            if "" in users:
+                users.remove("")
 
             if user_id in users:
                 description += f"- {_artist_name}\n"
