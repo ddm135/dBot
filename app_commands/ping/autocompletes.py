@@ -21,7 +21,7 @@ async def word_autocomplete(
         app_commands.Choice(name=word, value=word)
         for word in itr.client.pings[guild_id]
         if current.lower() in word.lower()
-        and str(itr.user.id) in itr.client.pings[guild_id][word]
+        and itr.client.pings[guild_id][word][str(itr.user.id)]
     )
 
     return list(islice(words, MAX_AUTOCOMPLETE))
