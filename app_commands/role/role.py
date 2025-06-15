@@ -1,11 +1,10 @@
-import json
 from typing import TYPE_CHECKING
 
 import discord
 from discord import app_commands
 from discord.ext import commands
 
-from statics.consts import ROLE_DATA, ROLES
+from statics.consts import ROLES
 
 from .autocompletes import (
     role_add_autocomplete,
@@ -61,7 +60,9 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
 
         self.bot.roles[user_id].remove(target_role.id)
         await itr.user.add_roles(target_role)
-        self.save_role_data()
+
+        cog = self.bot.get_cog("DataSync")
+        cog.save_role_data()  # type: ignore
         await itr.followup.send(
             f"Added {target_role.mention}!\n-# {NOTICE}",
             allowed_mentions=discord.AllowedMentions.none(),
@@ -105,7 +106,9 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
 
         self.bot.roles[user_id].append(target_role.id)
         await itr.user.remove_roles(target_role)
-        self.save_role_data()
+
+        cog = self.bot.get_cog("DataSync")
+        cog.save_role_data()  # type: ignore
         await itr.followup.send(
             f"Removed {target_role.mention}!\n-# {NOTICE}",
             allowed_mentions=discord.AllowedMentions.none(),
@@ -172,8 +175,9 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
                 self.bot.roles[user_id].append(r.id)
         await itr.user.add_roles(*add_roles)
         await itr.user.remove_roles(*remove_roles)
-        self.save_role_data()
 
+        cog = self.bot.get_cog("DataSync")
+        cog.save_role_data()  # type: ignore
         await itr.followup.send(
             f"Set to {target_role.mention}!",
             embed=RoleSetEmbed(target_role, add_roles, remove_roles),
@@ -200,10 +204,6 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
             allowed_mentions=discord.AllowedMentions.none(),
             silent=True,
         )
-
-    def save_role_data(self) -> None:
-        with open(ROLE_DATA, "w", encoding="utf-8") as f:
-            json.dump(self.bot.roles, f, indent=4)
 
 
 async def setup(bot: "dBot") -> None:

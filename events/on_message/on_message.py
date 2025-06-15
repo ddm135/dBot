@@ -1,11 +1,8 @@
-import json
 import re
 from typing import TYPE_CHECKING
 
 import discord
 from discord.ext import commands
-
-from statics.consts import PING_DATA
 
 from .embeds import WordPingEmbed
 
@@ -66,8 +63,8 @@ class OnMessage(commands.Cog):
                     continue
 
                 self.bot.pings[guild_id][word][user_id]["count"] += 1
-                with open(PING_DATA, "w", encoding="utf-8") as f:
-                    json.dump(self.bot.pings, f, indent=4)
+                cog = self.bot.get_cog("DataSync")
+                cog.save_ping_data()  # type: ignore
 
                 await user.send(embed=WordPingEmbed(word, message))
 

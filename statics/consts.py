@@ -1,5 +1,4 @@
 from datetime import timedelta
-from pathlib import Path
 from typing import TYPE_CHECKING
 from zoneinfo import ZoneInfo
 
@@ -57,12 +56,6 @@ EXTENSIONS = (
     "tasks.pinata",
     "commands.miscellaneous",
 )
-
-PING_DATA = Path("data/pings.json")
-ROLE_DATA = Path("data/roles.json")
-CREDENTIALS_DATA = Path("data/credentials.json")
-SSLEAGUE_DATA = Path("data/ssleague.json")
-LOCK = Path(".dBot")
 
 GAMES: dict[str, "GameDetails"] = {
     "SM": {

@@ -1,5 +1,4 @@
 import asyncio
-import json
 import logging
 from datetime import datetime, time
 from typing import TYPE_CHECKING
@@ -12,7 +11,7 @@ from google.auth.transport import requests
 from google.oauth2.service_account import IDTokenCredentials
 from packaging.version import Version
 
-from statics.consts import CREDENTIALS_DATA, GAMES, RESET_OFFSET, SSLEAGUE_DATA
+from statics.consts import GAMES, RESET_OFFSET
 from statics.helpers import (
     encrypt_cbc,
     get_ss_json,
@@ -39,27 +38,18 @@ class PinSSLeague(commands.Cog):
 
     @tasks.loop(time=[time(hour=h) for h in range(24)])
     async def pin_ssls(self) -> None:
-        for game in self.bot.ssleague_manual:
-            target = self.bot.ssleague[game][self.bot.ssleague_manual[game]["artist"]]
-            date = self.bot.ssleague_manual[game]["date"]
-            target["songs"][self.bot.ssleague_manual[game]["song_id"]] = date
-            target["date"] = date
-        self.bot.ssleague_manual.clear()
-
-        with open(CREDENTIALS_DATA, "r", encoding="utf-8") as f:
-            all_credentials = json.load(f)
+        cog = self.bot.get_cog("DataSync")
+        cog.save_last_appearance()  # type: ignore
 
         pin_tasks = [
-            self.pin_ssl(game, all_credentials[game])
+            self.pin_ssl(game, self.bot.credentials[game])
             for game, game_details in GAMES.items()
-            if game_details["pinChannelIds"] and game in all_credentials
+            if game_details["pinChannelIds"] and game in self.bot.credentials
         ]
         await asyncio.gather(*pin_tasks, return_exceptions=True)
 
-        with open(CREDENTIALS_DATA, "w", encoding="utf-8") as f:
-            json.dump(all_credentials, f, indent=4)
-        with open(SSLEAGUE_DATA, "w", encoding="utf-8") as f:
-            json.dump(self.bot.ssleague, f, indent=4)
+        cog.save_credential_data()  # type: ignore
+        cog.save_ssleague_data()  # type: ignore
 
     async def pin_ssl(self, game: str, credentials: dict) -> None:
         game_details = GAMES[game]

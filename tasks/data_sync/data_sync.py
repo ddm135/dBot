@@ -5,18 +5,13 @@ import json
 import logging
 from collections import defaultdict
 from datetime import datetime, time
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from discord.ext import commands, tasks
 from googleapiclient.http import MediaFileUpload
 
-from statics.consts import (
-    CREDENTIALS_DATA,
-    PING_DATA,
-    ROLE_DATA,
-    SSLEAGUE_DATA,
-    TIMEZONES,
-)
+from statics.consts import TIMEZONES
 from statics.helpers import (
     create_drive_data_file,
     get_drive_data_files,
@@ -31,7 +26,11 @@ if TYPE_CHECKING:
 
 
 class DataSync(commands.Cog):
-    DATA = [PING_DATA, ROLE_DATA, CREDENTIALS_DATA, SSLEAGUE_DATA]
+    PING_DATA = Path("data/pings.json")
+    ROLE_DATA = Path("data/roles.json")
+    CREDENTIAL_DATA = Path("data/credentials.json")
+    SSLEAGUE_DATA = Path("data/ssleague.json")
+    DATA = [PING_DATA, ROLE_DATA, CREDENTIAL_DATA, SSLEAGUE_DATA]
     FOLDER = "1yugfZQu3T8G9sC6WQR_YzK7bXhpdXoy4"
     LOGGER = logging.getLogger(__name__)
 
@@ -64,9 +63,14 @@ class DataSync(commands.Cog):
                 get_drive_file(file["id"], data)
                 break
 
-        if PING_DATA.exists():
+        if self.CREDENTIAL_DATA.exists():
+            self.bot.credentials.clear()
+            with open(self.CREDENTIAL_DATA, "r", encoding="utf-8") as f:
+                self.bot.credentials = json.load(f)
+
+        if self.PING_DATA.exists():
             self.bot.pings.clear()
-            with open(PING_DATA, "r", encoding="utf-8") as f:
+            with open(self.PING_DATA, "r", encoding="utf-8") as f:
                 self.bot.pings = json.load(f)
 
             self.bot.pings = defaultdict(
@@ -86,24 +90,22 @@ class DataSync(commands.Cog):
                         self.bot.pings[key][subkey],
                     )
         else:
-            PING_DATA.parent.mkdir(parents=True, exist_ok=True)
-            with open(PING_DATA, "w", encoding="utf-8") as f:
-                json.dump(self.bot.pings, f, indent=4)
+            self.PING_DATA.parent.mkdir(parents=True, exist_ok=True)
+            self.save_ping_data()
 
-        if ROLE_DATA.exists():
+        if self.ROLE_DATA.exists():
             self.bot.roles.clear()
-            with open(ROLE_DATA, "r", encoding="utf-8") as f:
+            with open(self.ROLE_DATA, "r", encoding="utf-8") as f:
                 self.bot.roles = json.load(f)
 
             self.bot.roles = defaultdict(list[int], self.bot.roles)
         else:
-            ROLE_DATA.parent.mkdir(parents=True, exist_ok=True)
-            with open(ROLE_DATA, "w", encoding="utf-8") as f:
-                json.dump(self.bot.roles, f, indent=4)
+            self.ROLE_DATA.parent.mkdir(parents=True, exist_ok=True)
+            self.save_role_data()
 
-        if SSLEAGUE_DATA.exists():
+        if self.SSLEAGUE_DATA.exists():
             self.bot.ssleague.clear()
-            with open(SSLEAGUE_DATA, "r", encoding="utf-8") as f:
+            with open(self.SSLEAGUE_DATA, "r", encoding="utf-8") as f:
                 self.bot.ssleague = json.load(f)
 
             self.bot.ssleague = defaultdict(
@@ -124,18 +126,13 @@ class DataSync(commands.Cog):
                             self.bot.ssleague[key][subkey]["songs"],
                         )
         else:
-            SSLEAGUE_DATA.parent.mkdir(parents=True, exist_ok=True)
-            with open(SSLEAGUE_DATA, "w", encoding="utf-8") as f:
-                json.dump(self.bot.ssleague, f, indent=4)
+            self.SSLEAGUE_DATA.parent.mkdir(parents=True, exist_ok=True)
+            self.save_ssleague_data()
 
     @tasks.loop(time=time(hour=1, tzinfo=TIMEZONES["KST"]))
     async def data_upload(self) -> None:
-        for game in self.bot.ssleague_manual:
-            target = self.bot.ssleague[game][self.bot.ssleague_manual[game]["artist"]]
-            date = self.bot.ssleague_manual[game]["date"]
-            target["songs"][self.bot.ssleague_manual[game]["song_id"]] = date
-            target["date"] = date
-        with open(SSLEAGUE_DATA, "w", encoding="utf-8") as f:
+        self.save_last_appearance()
+        with open(self.SSLEAGUE_DATA, "w", encoding="utf-8") as f:
             json.dump(self.bot.ssleague, f, indent=4)
 
         drive_files = get_drive_data_files()
@@ -145,7 +142,7 @@ class DataSync(commands.Cog):
 
             for file in drive_files["files"]:
                 if file["name"] == data.name:
-                    update_drive_data_file(file["id"], data=media)
+                    update_drive_data_file(file["id"], media)
                     break
             else:
                 metadata = {
@@ -153,11 +150,35 @@ class DataSync(commands.Cog):
                     "parents": [self.FOLDER],
                 }
                 create_drive_data_file(
-                    data=media,
-                    metadata=metadata,  # type: ignore[arg-type]
+                    media,
+                    metadata,  # type: ignore[arg-type]
                 )
 
             data.touch(exist_ok=True)
+
+    def save_credential_data(self) -> None:
+        with open(self.CREDENTIAL_DATA, "w", encoding="utf-8") as f:
+            json.dump(self.bot.credentials, f, indent=4)
+
+    def save_ping_data(self) -> None:
+        with open(self.PING_DATA, "w", encoding="utf-8") as f:
+            json.dump(self.bot.pings, f, indent=4)
+
+    def save_role_data(self) -> None:
+        with open(self.ROLE_DATA, "w", encoding="utf-8") as f:
+            json.dump(self.bot.roles, f, indent=4)
+
+    def save_ssleague_data(self) -> None:
+        with open(self.SSLEAGUE_DATA, "w", encoding="utf-8") as f:
+            json.dump(self.bot.ssleague, f, indent=4)
+
+    def save_last_appearance(self) -> None:
+        for game in self.bot.ssleague_manual:
+            target = self.bot.ssleague[game][self.bot.ssleague_manual[game]["artist"]]
+            date = self.bot.ssleague_manual[game]["date"]
+            target["songs"][self.bot.ssleague_manual[game]["song_id"]] = date
+            target["date"] = date
+        self.bot.ssleague_manual.clear()
 
     @data_upload.before_loop
     async def before_loop(self) -> None:

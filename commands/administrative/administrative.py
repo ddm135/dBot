@@ -1,5 +1,4 @@
 import importlib
-import json
 import sys
 from pprint import pprint
 from typing import TYPE_CHECKING, Annotated
@@ -11,7 +10,6 @@ from discord.ext import commands
 from statics.consts import (
     EXTENSIONS,
     GAMES,
-    SSLEAGUE_DATA,
     STATIC_MODULES,
     STATUS_CHANNEL,
     TIMEZONES,
@@ -183,7 +181,7 @@ class Administrative(commands.Cog):
         msg = await ctx.send(text)
 
         if game_details["infoReplaceGrid"]:
-            await msg.edit(content=f"{text}\nRenaming info sheet...")
+            await msg.edit(content=f"{text}\nEditing info sheet...")
             find_replace_sheet_data(
                 game_details["infoSpreadsheet"],
                 game_details["infoReplaceGrid"],
@@ -192,7 +190,7 @@ class Administrative(commands.Cog):
                 "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
             )
         if game_details["pingReplaceGrid"]:
-            await msg.edit(content=f"{text}\nRenaming ping sheet...")
+            await msg.edit(content=f"{text}\nEditing ping sheet...")
             find_replace_sheet_data(
                 game_details["pingSpreadsheet"],
                 game_details["pingReplaceGrid"],
@@ -201,7 +199,7 @@ class Administrative(commands.Cog):
                 "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
             )
         if game_details["bonusReplaceGrid"]:
-            await msg.edit(content=f"{text}\nRenaming bonus sheet...")
+            await msg.edit(content=f"{text}\nEditing bonus sheet...")
             find_replace_sheet_data(
                 game_details["bonusSpreadsheet"],
                 game_details["bonusReplaceGrid"],
@@ -210,7 +208,7 @@ class Administrative(commands.Cog):
                 "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
             )
         if game_details["pinChannelIds"]:
-            await msg.edit(content=f"{text}\nRenaming last appearance data...")
+            await msg.edit(content=f"{text}\nEditing last appearance data...")
             if old_name in self.bot.ssleague[game]:
                 self.bot.ssleague[game][new_name] = self.bot.ssleague[game].pop(
                     old_name
@@ -220,8 +218,9 @@ class Administrative(commands.Cog):
                 and self.bot.ssleague_manual[game]["artist"] == old_name
             ):
                 self.bot.ssleague_manual[game]["artist"] = new_name
-            with open(SSLEAGUE_DATA, "w", encoding="utf-8") as f:
-                json.dump(self.bot.ssleague, f, indent=4)
+
+                cog = self.bot.get_cog("DataSync")
+                cog.save_ssleague_data()  # type: ignore
 
         await msg.edit(content=f"{text}\nDownloading info data...")
         self.bot.info_data_ready = False

@@ -1,5 +1,4 @@
 import asyncio
-import json
 import logging
 import random
 from datetime import datetime, time
@@ -8,7 +7,7 @@ from typing import TYPE_CHECKING
 import discord
 from discord.ext import commands, tasks
 
-from statics.consts import PINATA, PINATA_TEST_CHANNEL, ROLE_DATA, ROLES, TIMEZONES
+from statics.consts import PINATA, PINATA_TEST_CHANNEL, ROLES, TIMEZONES
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -225,8 +224,8 @@ class Pinata(commands.Cog):
                     if reward["role"].id not in self.bot.roles[str(winner.id)]:
                         self.bot.roles[str(winner.id)].append(reward["role"].id)
 
-                    with open(ROLE_DATA, "w", encoding="utf-8") as f:
-                        json.dump(self.bot.roles, f, indent=4)
+                    cog = self.bot.get_cog("DataSync")
+                    cog.save_role_data()  # type: ignore
 
                     _message += "The role has been added to your inventory."
                 elif is_member:
