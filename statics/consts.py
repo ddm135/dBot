@@ -1,9 +1,12 @@
 from datetime import timedelta
+from pathlib import Path
 from typing import TYPE_CHECKING
 from zoneinfo import ZoneInfo
 
 if TYPE_CHECKING:
     from statics.types import GameDetails
+
+LOCK = Path(".dBot")
 
 TEST_GUILD = 540849436868214784
 SSRG_GUILD = 360109303199432704

@@ -1,12 +1,11 @@
 import os
 from collections import defaultdict
-from pathlib import Path
 
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 
-from statics.consts import EXTENSIONS, STATUS_CHANNEL
+from statics.consts import EXTENSIONS, LOCK, STATUS_CHANNEL
 from statics.types import LastAppearance
 
 
@@ -39,12 +38,10 @@ class dBot(commands.Bot):
     )
     ssleague_manual: dict[str, dict[str, str]] = {}
 
-    LOCK = Path(".dBot")
-
     async def setup_hook(self) -> None:
         for ext in EXTENSIONS:
             await self.load_extension(ext)
-        self.LOCK.touch(exist_ok=True)
+        LOCK.touch(exist_ok=True)
 
     async def close(self) -> None:
         try:
@@ -57,7 +54,7 @@ class dBot(commands.Bot):
             pass
         finally:
             await super().close()
-            self.LOCK.unlink(missing_ok=True)
+            LOCK.unlink(missing_ok=True)
 
 
 bot = dBot(
