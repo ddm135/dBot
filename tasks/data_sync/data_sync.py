@@ -132,8 +132,7 @@ class DataSync(commands.Cog):
     @tasks.loop(time=time(hour=1, tzinfo=TIMEZONES["KST"]))
     async def data_upload(self) -> None:
         self.save_last_appearance()
-        with open(self.SSLEAGUE_DATA, "w", encoding="utf-8") as f:
-            json.dump(self.bot.ssleague, f, indent=4)
+        self.save_ssleague_data()
 
         drive_files = get_drive_data_files()
         for data in self.DATA:
