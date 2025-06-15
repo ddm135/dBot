@@ -1,4 +1,3 @@
-from enum import Enum
 from typing import TYPE_CHECKING
 
 from statics.consts import GAMES, TIMEZONES
@@ -9,11 +8,6 @@ if TYPE_CHECKING:
 
 
 STEP = 5
-
-
-BonusPeriod = Enum(
-    "BonusPeriod", [("current week", 1), ("next week", 2), ("current month", 3)]
-)
 
 
 def get_ping_data(

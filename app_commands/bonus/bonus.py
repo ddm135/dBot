@@ -1,6 +1,6 @@
 import math
 from datetime import datetime, timedelta
-from typing import TYPE_CHECKING, Iterable
+from typing import TYPE_CHECKING, Iterable, Literal
 
 import discord
 from discord import app_commands
@@ -10,7 +10,7 @@ from statics.consts import BONUS_OFFSET, GAMES, TIMEZONES
 from statics.helpers import update_sheet_data
 
 from .autocompletes import artist_autocomplete
-from .commons import STEP, BonusPeriod, ping_preprocess
+from .commons import STEP, ping_preprocess
 from .embeds import BonusesEmbed, BonusPingsEmbed
 from .views import BonusView
 
@@ -37,7 +37,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         itr: discord.Interaction["dBot"],
         game_choice: app_commands.Choice[str],
         artist_choice: str | None = None,
-        time: BonusPeriod | None = None,
+        time: Literal["current week", "next week", "current month"] | None = None,
     ) -> None:
         """View bonus information, sorted by end date then start date
 
@@ -72,17 +72,17 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
             case None:
                 first_date = current_date.replace(day=1, month=1)
                 last_date = current_date.replace(day=31, month=12)
-            case BonusPeriod["current week"]:
+            case "current week":
                 first_date = current_date - timedelta(days=current_date.weekday())
                 last_date = first_date + timedelta(days=7)
-            case BonusPeriod["next week"]:
+            case "next week":
                 first_date = (
                     current_date
                     - timedelta(days=current_date.weekday())
                     + timedelta(days=7)
                 )
                 last_date = first_date + timedelta(days=7)
-            case BonusPeriod["current month"]:
+            case "current month":
                 first_date = current_date.replace(day=1)
                 if current_date.month == 12:
                     last_date = first_date.replace(day=31)
