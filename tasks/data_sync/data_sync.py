@@ -26,11 +26,11 @@ if TYPE_CHECKING:
 
 
 class DataSync(commands.Cog):
+    CREDENTIAL_DATA = Path("data/credentials.json")
     PING_DATA = Path("data/pings.json")
     ROLE_DATA = Path("data/roles.json")
-    CREDENTIAL_DATA = Path("data/credentials.json")
     SSLEAGUE_DATA = Path("data/ssleague.json")
-    DATA = [PING_DATA, ROLE_DATA, CREDENTIAL_DATA, SSLEAGUE_DATA]
+    DATA = [ROLE_DATA, PING_DATA, CREDENTIAL_DATA, SSLEAGUE_DATA]
     FOLDER = "1yugfZQu3T8G9sC6WQR_YzK7bXhpdXoy4"
     LOGGER = logging.getLogger(__name__)
 
