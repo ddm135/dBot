@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 import discord
 from discord.ext import commands, tasks
 
-from statics.consts import BONUS_OFFSET, GAMES, ME, STATUS_CHANNEL, TIMEZONES
+from statics.consts import BONUS_OFFSET, GAMES, STATUS_CHANNEL, TIMEZONES
 from statics.helpers import get_sheet_data
 
 from .embeds import NotifyBonusEmbed
@@ -264,8 +264,8 @@ class NotifyBonus(commands.Cog):
                             ) or await self.bot.fetch_channel(STATUS_CHANNEL)
                             assert isinstance(channel, discord.TextChannel)
                             await channel.send(
-                                f"<@{ME}> Failed to send bonus ping to {user.name} "
-                                f"({user.id}) for {game_name} - {artist}."
+                                f"<@{self.bot.owner_id}> Failed to send bonus ping to "
+                                f"{user.name} ({user.id}) for {game_name} - {artist}."
                             )
 
     @notify_bonus.before_loop
