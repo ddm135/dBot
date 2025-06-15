@@ -1,6 +1,9 @@
 from typing import TYPE_CHECKING
 
+import discord
 from discord.ext import commands
+
+from statics.consts import ME, STATUS_CHANNEL
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -21,6 +24,13 @@ class OnCommandError(commands.Cog):
             ),
         ):
             return
+
+        channel = self.bot.get_channel(STATUS_CHANNEL) or await self.bot.fetch_channel(
+            STATUS_CHANNEL
+        )
+        assert isinstance(channel, discord.TextChannel)
+        await channel.send(f"<@{ME}> Something happened.")
+
         raise error
 
 
