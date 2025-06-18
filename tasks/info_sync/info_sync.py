@@ -49,8 +49,8 @@ class InfoSync(commands.Cog):
         self.bot.info_data_ready = True
 
     async def get_info_data(self, game: str, game_details: "GameDetails") -> None:
-        self.bot.info_ajs[game].clear()
         if game_details["api"]:
+            self.bot.info_ajs[game].clear()
             ajs = self.bot.info_ajs[game] = await self.get_a_json(game_details["api"])
             if ajs["code"] != 1000:
                 self.LOGGER.info(
@@ -58,14 +58,14 @@ class InfoSync(commands.Cog):
                 )
                 return
 
-        self.bot.info_msd[game].clear()
+            self.bot.info_msd[game].clear()
+            self.bot.info_msd[game] = await self.get_music_data(ajs)
+            if game_details["legacyUrlScheme"]:
+                self.bot.info_url[game].clear()
+                self.bot.info_url[game] = await self.get_url_data(ajs)
+
         self.bot.info_by_name[game].clear()
         self.bot.info_by_id[game].clear()
-
-        self.bot.info_msd[game] = await self.get_music_data(ajs)
-        if game_details["legacyUrlScheme"]:
-            self.bot.info_url[game].clear()
-            self.bot.info_url[game] = await self.get_url_data(ajs)
 
         if not game_details["infoSpreadsheet"]:
             return
