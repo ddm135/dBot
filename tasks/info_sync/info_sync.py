@@ -49,15 +49,14 @@ class InfoSync(commands.Cog):
         self.bot.info_data_ready = True
 
     async def get_info_data(self, game: str, game_details: "GameDetails") -> None:
-        if not game_details["api"]:
-            return
         self.bot.info_ajs[game].clear()
-        ajs = self.bot.info_ajs[game] = await self.get_a_json(game_details["api"])
-        if ajs["code"] != 1000:
-            self.LOGGER.info(
-                "%s server is unavailable. Skipping...", game_details["name"]
-            )
-            return
+        if game_details["api"]:
+            ajs = self.bot.info_ajs[game] = await self.get_a_json(game_details["api"])
+            if ajs["code"] != 1000:
+                self.LOGGER.info(
+                    "%s server is unavailable. Skipping...", game_details["name"]
+                )
+                return
 
         self.bot.info_msd[game].clear()
         self.bot.info_by_name[game].clear()
