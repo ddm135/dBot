@@ -190,6 +190,41 @@ GAMES: dict[str, "GameDetails"] = {
         "target_audience": "506321732908-4u8t2uk3888gm8087i7lcpi97ff6ld4a",
         "legacyUrlScheme": False,
     },
+    "KD": {
+        "name": "SuperStar KANGDANIEL",
+        "infoSpreadsheet": "1QSCRXKtiwoMTLV8knHC_o4NwV3UZM6ZvL-l9ZCPxoRM",
+        "infoReplaceGrid": {},
+        "infoRange": "Official Local Version!A2:E",
+        "infoColumns": (
+            "song_id",
+            "artist_name",
+            "song_name",
+            "_",
+            "duration",
+        ),
+        "pingSpreadsheet": "",
+        "pingReplaceGrid": {},
+        "pingRange": "",
+        "pingUsers": "",
+        "pingColumns": (),
+        "bonusSpreadsheet": "",
+        "bonusReplaceGrid": {},
+        "bonusRange": "",
+        "bonusColumns": (),
+        "color": 0xB72476,
+        "pinChannelIds": {},
+        "pinRoles": {},
+        "dateFormat": "%Y-%m-%d",
+        "timezone": TIMEZONES["KST"],
+        "manifest": (
+            "https://superstar-kangdaniel.s3.amazonaws.com"
+            "/version/real/manifest/{version}.txt"
+        ),
+        "api": "",
+        "authorization": "",
+        "target_audience": "",
+        "legacyUrlScheme": True,
+    },
     "ATZ": {
         "name": "SUPERSTAR ATEEZ",
         "infoSpreadsheet": "1ZRfm1D2sxV183umOvK4hdWUXIVWvd-Gc8nmRbnsmajY",
@@ -306,7 +341,7 @@ GAMES: dict[str, "GameDetails"] = {
         "target_audience": "154091709836-q1sk7hq02vi16f3v0q88uvuf6op5lenv",
         "legacyUrlScheme": False,
     },
-    "WO": {
+    "W1": {
         "name": "SUPERSTAR WAKEONE",
         "infoSpreadsheet": "1HHBluEEcWmZMHjq3WlLbS9TeLfPktQ3WrfxpcgReWF0",
         "infoReplaceGrid": {},
@@ -340,7 +375,7 @@ GAMES: dict[str, "GameDetails"] = {
         "target_audience": "259379396797-tfc19vpi39fosa2sic420po6l67p9ltu",
         "legacyUrlScheme": False,
     },
-    "SM_JP": {
+    "SMTOWN": {
         "name": "SUPERSTAR SMTOWN (JP/TW)",
         "infoSpreadsheet": "1kC38CLFd6xkDXD9qLHgnnv3s3jmM_4vf4RLsWuXs9NU",
         "infoReplaceGrid": {
@@ -403,7 +438,7 @@ GAMES: dict[str, "GameDetails"] = {
         "target_audience": "28835016655-choauh766oss3ht8ddqiamavvtfm05ur",
         "legacyUrlScheme": False,
     },
-    "JYP_JP": {
+    "JYPNATION": {
         "name": "SUPERSTAR JYPNATION (JP)",
         "infoSpreadsheet": "1eVjwi0GudyMixnZtam8TeupRd3DQ6mheyRKp2lDA6qw",
         "infoReplaceGrid": {
@@ -535,10 +570,16 @@ GAMES: dict[str, "GameDetails"] = {
     },
     "EB": {
         "name": "SUPERSTAR EBiDAN",
-        "infoSpreadsheet": "",
+        "infoSpreadsheet": "1uwLl0MQM895xI4iBmdP-eVVn7HKOBisFaQCCjzJL4GQ",
         "infoReplaceGrid": {},
-        "infoRange": "",
-        "infoColumns": (),
+        "infoRange": "Songs!A2:E",
+        "infoColumns": (
+            "song_id",
+            "artist_name",
+            "song_name",
+            "search_term",
+            "duration",
+        ),
         "pingSpreadsheet": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
         "pingReplaceGrid": {
             "sheetId": 1872493199,
@@ -580,15 +621,21 @@ GAMES: dict[str, "GameDetails"] = {
         ),
         "api": "https://ss-ebidan-api-real.superstarebidan.jp",
         "authorization": "",
-        "target_audience": "",
+        "target_audience": "1006848262784-luosgb8o1hrjvbu6v8mjgh35b5oiimli",
         "legacyUrlScheme": True,
     },
     "PH": {
         "name": "SuperStar Philippines",
-        "infoSpreadsheet": "",
+        "infoSpreadsheet": "1Fz71pl3YCUIbCRcZRuKBjsDT4JEW0m9Uoj8wyJhUMOc",
         "infoReplaceGrid": {},
-        "infoRange": "",
-        "infoColumns": (),
+        "infoRange": "Songs!A2:E",
+        "infoColumns": (
+            "song_id",
+            "artist_name",
+            "song_name",
+            "search_term",
+            "duration",
+        ),
         "pingSpreadsheet": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
         "pingReplaceGrid": {
             "sheetId": 564410793,
@@ -629,8 +676,8 @@ GAMES: dict[str, "GameDetails"] = {
             "/version/real/manifest/{version}.txt"
         ),
         "api": "https://ssph-api-https.dalcomsoft.net",
-        "authorization": "",
-        "target_audience": "",
+        "authorization": "WWFeNnhxVldSJWFkVWp4Z3ViOFY6WmJRcy1uZ1YyQQ==",
+        "target_audience": "234980834479-creie63p99odjttcv9pvifjelsuf983i",
         "legacyUrlScheme": True,
     },
 }

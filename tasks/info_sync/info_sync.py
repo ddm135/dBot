@@ -37,7 +37,7 @@ class InfoSync(commands.Cog):
 
     @tasks.loop(time=time(hour=10, tzinfo=TIMEZONES["KST"]))
     async def info_sync(self) -> None:
-        if self.bot.info_data_ready and datetime.now().weekday() != 0:
+        if self.bot.info_data_ready and datetime.now().weekday():
             return
 
         self.bot.info_data_ready = False
@@ -49,6 +49,8 @@ class InfoSync(commands.Cog):
         self.bot.info_data_ready = True
 
     async def get_info_data(self, game: str, game_details: "GameDetails") -> None:
+        if not game_details["api"]:
+            return
         self.bot.info_ajs[game].clear()
         ajs = self.bot.info_ajs[game] = await self.get_a_json(game_details["api"])
         if ajs["code"] != 1000:

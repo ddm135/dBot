@@ -29,7 +29,7 @@ class BonusSync(commands.Cog):
 
     @tasks.loop(time=time(hour=10, tzinfo=TIMEZONES["KST"]))
     async def bonus_sync(self) -> None:
-        if self.bot.bonus_data_ready and datetime.now().weekday() != 0:
+        if self.bot.bonus_data_ready and datetime.now().weekday():
             return
 
         self.bot.bonus_data_ready = False
@@ -41,11 +41,9 @@ class BonusSync(commands.Cog):
         self.bot.bonus_data_ready = True
 
     async def get_bonus_data(self, game: str, game_details: "GameDetails") -> None:
-        self.bot.bonus_data[game].clear()
-
         if not game_details["bonusSpreadsheet"]:
             return
-
+        self.bot.bonus_data[game].clear()
         bonus = get_sheet_data(
             game_details["bonusSpreadsheet"],
             game_details["bonusRange"],
