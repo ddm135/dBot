@@ -1,5 +1,6 @@
 # pylint: disable=invalid-name
 
+import logging
 import os
 from collections import defaultdict
 
@@ -12,6 +13,8 @@ from statics.types import LastAppearance
 
 
 class dBot(commands.Bot):
+    LOGGER = logging.getLogger(__name__)
+
     info_ajs: defaultdict[str, dict] = defaultdict(dict)
     info_msd: defaultdict[str, list[dict]] = defaultdict(list[dict])
     info_url: defaultdict[str, list[dict]] = defaultdict(list[dict])
@@ -44,6 +47,7 @@ class dBot(commands.Bot):
         for ext in EXTENSIONS:
             await self.load_extension(ext)
         LOCK.touch(exist_ok=True)
+        self.LOGGER.info("Ready!")
 
     async def close(self) -> None:
         try:
