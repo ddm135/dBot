@@ -24,11 +24,11 @@ class InfoSync(commands.Cog):
 
     async def cog_load(self) -> None:
         await self.info_sync()
-        self.info_sync.start()
+        # self.info_sync.start()
 
     async def cog_unload(self) -> None:
         self.bot.info_data_ready = False
-        self.info_sync.cancel()
+        # self.info_sync.cancel()
         self.bot.info_ajs.clear()
         self.bot.info_msd.clear()
         self.bot.info_url.clear()

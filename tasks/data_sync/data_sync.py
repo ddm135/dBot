@@ -11,7 +11,6 @@ from typing import TYPE_CHECKING
 from discord.ext import commands, tasks
 from googleapiclient.http import MediaFileUpload
 
-from statics.consts import TIMEZONES
 from statics.helpers import (
     create_drive_data_file,
     get_drive_data_files,
@@ -42,6 +41,8 @@ class DataSync(commands.Cog):
         self.data_upload.start()
 
     async def cog_unload(self) -> None:
+        self.save_last_appearance()
+        self.save_ssleague_data()
         self.data_upload.cancel()
         await self.data_upload()
 
@@ -129,11 +130,8 @@ class DataSync(commands.Cog):
             self.SSLEAGUE_DATA.parent.mkdir(parents=True, exist_ok=True)
             self.save_ssleague_data()
 
-    @tasks.loop(time=time(hour=1, tzinfo=TIMEZONES["KST"]))
+    @tasks.loop(time=[time(hour=h) for h in range(24)])
     async def data_upload(self) -> None:
-        self.save_last_appearance()
-        self.save_ssleague_data()
-
         drive_files = get_drive_data_files()
         for data in self.DATA:
             self.LOGGER.info("Uploading %s...", data.name)
