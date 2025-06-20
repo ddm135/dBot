@@ -67,7 +67,7 @@ class DataSync(commands.Cog):
                         file["id"]
                     ).timestamp()
 
-                    if last_modified_local < last_modified_drive:
+                    if last_modified_local >= last_modified_drive:
                         continue
 
                 self.LOGGER.info("Downloading %s...", data.name)
