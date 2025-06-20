@@ -13,7 +13,7 @@ from statics.types import LastAppearance
 
 
 class dBot(commands.Bot):
-    LOGGER = logging.getLogger()
+    LOGGER = logging.getLogger("dBot")
 
     info_ajs: defaultdict[str, dict] = defaultdict(dict)
     info_msd: defaultdict[str, list[dict]] = defaultdict(list[dict])
