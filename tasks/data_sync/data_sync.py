@@ -53,11 +53,13 @@ class DataSync(commands.Cog):
                 if file["name"] != data.name:
                     continue
 
-                last_modified = get_drive_file_last_modified(file["id"])
-                if data.exists() and last_modified <= datetime.fromtimestamp(
-                    data.stat().st_mtime
-                ):
-                    continue
+                if data.exists():
+                    last_modified_local = datetime.fromtimestamp(data.stat().st_mtime)
+                    last_modified_drive = get_drive_file_last_modified(file["id"])
+                    print(last_modified_local, last_modified_drive)
+
+                    if last_modified_local >= last_modified_drive:
+                        continue
 
                 self.LOGGER.info("Downloading %s...", data.name)
                 data.parent.mkdir(parents=True, exist_ok=True)
