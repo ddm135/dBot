@@ -4,7 +4,7 @@
 import json
 import logging
 from collections import defaultdict
-from datetime import datetime, time
+from datetime import time
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -29,6 +29,7 @@ class DataSync(commands.Cog):
     PING_DATA = Path("data/pings.json")
     ROLE_DATA = Path("data/roles.json")
     SSLEAGUE_DATA = Path("data/ssleague.json")
+    LAST_MODIFIED_DATA = Path("data/last_modified.json")
     DATA = [ROLE_DATA, PING_DATA, CREDENTIAL_DATA, SSLEAGUE_DATA]
     FOLDER = "1yugfZQu3T8G9sC6WQR_YzK7bXhpdXoy4"
     LOGGER = logging.getLogger(__name__)
@@ -48,17 +49,25 @@ class DataSync(commands.Cog):
 
     def data_download(self) -> None:
         drive_files = get_drive_data_files()
+        if self.LAST_MODIFIED_DATA.exists():
+            with open(self.LAST_MODIFIED_DATA, "r", encoding="utf-8") as f:
+                last_modified = json.load(f)
+        else:
+            last_modified = {}
+
         for data in self.DATA:
             for file in drive_files["files"]:
                 if file["name"] != data.name:
                     continue
 
                 if data.exists():
-                    last_modified_local = datetime.fromtimestamp(data.stat().st_mtime)
-                    last_modified_drive = get_drive_file_last_modified(file["id"])
-                    print(last_modified_local, last_modified_drive)
+                    self.LOGGER.info("Checking %s...", data.name)
+                    last_modified_local = last_modified.get(data.name, 0)
+                    last_modified_drive = get_drive_file_last_modified(
+                        file["id"]
+                    ).timestamp()
 
-                    if last_modified_local >= last_modified_drive:
+                    if last_modified_local < last_modified_drive:
                         continue
 
                 self.LOGGER.info("Downloading %s...", data.name)
@@ -135,25 +144,32 @@ class DataSync(commands.Cog):
     @tasks.loop(time=[time(hour=h) for h in range(24)])
     async def data_upload(self) -> None:
         drive_files = get_drive_data_files()
+        last_modified = {}
+
         for data in self.DATA:
             self.LOGGER.info("Uploading %s...", data.name)
             media = MediaFileUpload(data)
 
             for file in drive_files["files"]:
                 if file["name"] == data.name:
-                    update_drive_data_file(file["id"], media)
+                    last_modified[data.name] = update_drive_data_file(
+                        file["id"],
+                        media,
+                    ).timestamp()
                     break
             else:
                 metadata = {
                     "name": data.name,
                     "parents": [self.FOLDER],
                 }
-                create_drive_data_file(
+                last_modified[data.name] = create_drive_data_file(
                     media,
                     metadata,  # type: ignore[arg-type]
-                )
-
+                ).timestamp()
             data.touch(exist_ok=True)
+
+        with open(self.LAST_MODIFIED_DATA, "w", encoding="utf-8") as f:
+            json.dump(last_modified, f, indent=4)
 
     def save_credential_data(self) -> None:
         with open(self.CREDENTIAL_DATA, "w", encoding="utf-8") as f:

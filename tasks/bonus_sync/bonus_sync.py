@@ -33,16 +33,14 @@ class BonusSync(commands.Cog):
             return
 
         self.bot.bonus_data_ready = False
-        self.LOGGER.info("Downloading bonus data...")
-
         for game, game_details in GAMES.items():
             await self.get_bonus_data(game, game_details)
-
         self.bot.bonus_data_ready = True
 
     async def get_bonus_data(self, game: str, game_details: "GameDetails") -> None:
         if not game_details["bonusSpreadsheet"]:
             return
+        self.LOGGER.info("Downloading bonus data: %s...", game_details["name"])
         self.bot.bonus_data[game].clear()
         bonus = get_sheet_data(
             game_details["bonusSpreadsheet"],
