@@ -117,7 +117,7 @@ def find_replace_sheet_data(
 def create_drive_data_file(data: "MediaFileUpload", metadata: "File") -> datetime:
     return datetime.strptime(
         driveService.create(  # pyright: ignore[reportTypedDictNotRequiredAccess]
-            body=metadata, media_body=data
+            body=metadata, media_body=data, fields="modifiedTime"
         ).execute(num_retries=MAX_RETRIES)["modifiedTime"],
         "%Y-%m-%dT%H:%M:%S.%fZ",
     )
@@ -154,7 +154,7 @@ def get_drive_file_last_modified(file_id: str) -> datetime:
 def update_drive_data_file(file_id: str, data: "MediaFileUpload") -> datetime:
     return datetime.strptime(
         driveService.update(  # pyright: ignore[reportTypedDictNotRequiredAccess]
-            fileId=file_id, media_body=data
+            fileId=file_id, media_body=data, fields="modifiedTime"
         ).execute(num_retries=MAX_RETRIES)["modifiedTime"],
         "%Y-%m-%dT%H:%M:%S.%fZ",
     )
