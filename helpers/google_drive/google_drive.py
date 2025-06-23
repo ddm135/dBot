@@ -30,7 +30,8 @@ if TYPE_CHECKING:
 
 
 class GoogleDrive(commands.Cog):
-    def __init__(self) -> None:
+    def __init__(self, bot: "dBot") -> None:
+        self.bot = bot
         self.service = build(
             serviceName=SERVICE_NAME,
             version=VERSION,
@@ -86,10 +87,4 @@ class GoogleDrive(commands.Cog):
 
 
 async def setup(bot: "dBot") -> None:
-    await bot.add_cog(GoogleDrive())
-
-
-async def teardown(bot: "dBot") -> None:
-    cog = bot.get_cog("DataSync")
-    if cog:
-        await bot.unload_extension("tasks.data_sync")
+    await bot.add_cog(GoogleDrive(bot))

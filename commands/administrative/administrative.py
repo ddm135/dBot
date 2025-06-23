@@ -50,9 +50,8 @@ class Administrative(commands.Cog):
             stderr=asyncio.subprocess.PIPE,
         )
         stdout, stderr = await process.communicate()
-        print(process.returncode)
         self.LOGGER.info(stdout.decode())
-        if stderr:
+        if process.returncode:
             self.LOGGER.error(stderr.decode())
             await msg.edit(content="Error pulling changes.")
             return
