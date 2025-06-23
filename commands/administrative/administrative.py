@@ -1,6 +1,7 @@
 # mypy: disable-error-code="union-attr"
 # pyright: reportAttributeAccessIssue=false, reportOptionalMemberAccess=false
 
+import asyncio
 import importlib
 import sys
 from pprint import pprint
@@ -31,6 +32,24 @@ class Administrative(commands.Cog):
             builtins_readonly=True,
             config={"listcomp": True},
         )
+
+    @commands.command()
+    @commands.is_owner()
+    async def pull(self, ctx: commands.Context) -> None:
+        if ctx.channel.id != STATUS_CHANNEL:
+            return
+
+        msg = await ctx.send("Pulling...")
+        process = await asyncio.create_subprocess_exec(
+            "git",
+            "pull",
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        stdout, stderr = await process.communicate()
+        print(stdout.decode())
+        print(stderr.decode())
+        await msg.edit(content="Pulled!")
 
     @commands.command()
     @commands.is_owner()
