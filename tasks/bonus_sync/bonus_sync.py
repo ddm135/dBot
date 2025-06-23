@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 
 class BonusSync(commands.Cog):
-    LOGGER = logging.getLogger(__name__)
+    LOGGER = logging.getLogger(__name__.rpartition(".")[0])
 
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot

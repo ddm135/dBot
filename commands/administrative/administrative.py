@@ -3,6 +3,7 @@
 
 import asyncio
 import importlib
+import logging
 import sys
 from pprint import pprint
 from typing import TYPE_CHECKING, Annotated
@@ -24,6 +25,8 @@ if TYPE_CHECKING:
 
 
 class Administrative(commands.Cog):
+    LOGGER = logging.getLogger(__name__.rpartition(".")[0])
+
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
         self.eval = Interpreter(
@@ -39,7 +42,7 @@ class Administrative(commands.Cog):
         if ctx.channel.id != STATUS_CHANNEL:
             return
 
-        msg = await ctx.send("Pulling...")
+        msg = await ctx.send("Pulling changes...")
         process = await asyncio.create_subprocess_exec(
             "git",
             "pull",
@@ -47,9 +50,13 @@ class Administrative(commands.Cog):
             stderr=asyncio.subprocess.PIPE,
         )
         stdout, stderr = await process.communicate()
-        print(stdout.decode())
-        print(stderr.decode())
-        await msg.edit(content="Pulled!")
+        print(process.returncode)
+        self.LOGGER.info(stdout.decode())
+        if stderr:
+            self.LOGGER.error(stderr.decode())
+            await msg.edit(content="Error pulling changes.")
+            return
+        await msg.edit(content="Success!")
 
     @commands.command()
     @commands.is_owner()

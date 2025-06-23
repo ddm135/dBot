@@ -24,7 +24,7 @@ class DataSync(commands.Cog):
     SSLEAGUE_DATA = Path("data/ssleague.json")
     LAST_MODIFIED_DATA = Path("data/last_modified.json")
     DATA = [ROLE_DATA, PING_DATA, CREDENTIAL_DATA, SSLEAGUE_DATA]
-    LOGGER = logging.getLogger(__name__)
+    LOGGER = logging.getLogger(__name__.rpartition(".")[0])
 
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
