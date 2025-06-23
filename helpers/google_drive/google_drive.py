@@ -87,3 +87,9 @@ class GoogleDrive(commands.Cog):
 
 async def setup(bot: "dBot") -> None:
     await bot.add_cog(GoogleDrive())
+
+
+async def teardown(bot: "dBot") -> None:
+    cog = bot.get_cog("DataSync")
+    if cog:
+        await bot.unload_extension("tasks.data_sync")
