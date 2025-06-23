@@ -10,16 +10,13 @@ import aiohttp
 import discord
 import discord.backoff
 from discord.ext import commands, tasks
-from google.auth.transport import requests
-from google.oauth2.service_account import IDTokenCredentials
-from packaging.version import Version
 
 from statics.consts import GAMES, RESET_OFFSET
 from statics.helpers import (
     pin_new_ssl,
     unpin_old_ssl,
 )
-from statics.types import SSLeagueEmbed, SuperStarHeaders
+from statics.types import SSLeagueEmbed
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -60,26 +57,27 @@ class PinSSLeague(commands.Cog):
             return
         api_url = game_details["api"]
         backoff = discord.backoff.ExponentialBackoff()
+        cog = self.bot.get_cog("SuperStar")
 
         while True:
             try:
-                credentials["version"] = await self.get_active_version(
+                credentials["version"] = await cog.get_active_version(
                     game_details["manifest"], credentials
                 )
                 match credentials["provider"]:
                     case 0 | 1 if not credentials["isSNS"]:
-                        oid, key = await self.login(api_url, credentials)
+                        oid, key = await cog.login_classic(api_url, credentials)
                     case 0 if credentials["isSNS"]:
-                        oid, key = await self.login_google(
+                        oid, key = await cog.login_google(
                             api_url, credentials, game_details["target_audience"]
                         )
                     case 3 if credentials["isSNS"]:
-                        oid, key = await self.login_dalcom_id(
+                        oid, key = await cog.login_dalcom_id(
                             api_url, credentials, game_details["authorization"]
                         )
                     case _:
                         return
-                ssleague = await self.get_ssleague(api_url, oid, key)
+                ssleague = await cog.get_ssleague(api_url, oid, key)
             except aiohttp.ClientError as e:
                 self.LOGGER.exception(str(e))
                 await asyncio.sleep(backoff.delay())
@@ -182,132 +180,6 @@ class PinSSLeague(commands.Cog):
         self.bot.ssleague[game][artist_name]["songs"][str(song_id)] = (
             current_time.strftime(game_details["dateFormat"])
         )
-
-    @staticmethod
-    async def get_active_version(manifest_url: str, credentials: dict) -> str:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                url=manifest_url.format(version=credentials["version"]),
-            ) as r:
-                manifest = await r.json(content_type=None)
-                return str(
-                    max(
-                        Version(credentials["version"]),
-                        Version(manifest["ActiveVersion_Android"]),
-                        Version(manifest["ActiveVersion_IOS"]),
-                    )
-                )
-
-    async def login(self, api_url: str, credentials: dict) -> tuple[int, str]:
-        headers = SuperStarHeaders()
-        iv = headers["X-SuperStar-AES-IV"]
-
-        async with aiohttp.ClientSession() as session:
-            cog = self.bot.get_cog("Cryptographic")
-
-            async with session.post(
-                url=api_url,
-                headers=headers,
-                data=cog.encrypt_cbc(credentials["account"].format(**credentials), iv),
-            ) as r:
-                cog = self.bot.get_cog("SuperStar")
-                account = await cog.read_json(r, iv)
-
-        oid = account["result"]["user"]["objectID"]
-        key = account["invoke"][0]["params"][0]
-        return oid, key
-
-    async def login_google(
-        self, api_url: str, credentials: dict, target_audience: str
-    ) -> tuple[int, str]:
-        gredentials = IDTokenCredentials.from_service_account_file(
-            filename=credentials["service_account"],
-            target_audience=f"{target_audience}.apps.googleusercontent.com",
-        )
-        gredentials.refresh(requests.Request())
-        id_token = gredentials.token
-
-        headers = SuperStarHeaders()
-        iv = headers["X-SuperStar-AES-IV"]
-
-        async with aiohttp.ClientSession() as session:
-            cog = self.bot.get_cog("Cryptographic")
-
-            async with session.post(
-                url=api_url,
-                headers=headers,
-                data=cog.encrypt_cbc(
-                    credentials["account"].format(id_token=id_token, **credentials), iv
-                ),
-            ) as r:
-                cog = self.bot.get_cog("SuperStar")
-                account = await cog.read_json(r, iv)
-
-        oid = account["result"]["user"]["objectID"]
-        key = account["invoke"][0]["params"][0]
-        return oid, key
-
-    async def login_dalcom_id(
-        self, api_url: str, credentials: dict, authorization: str
-    ) -> tuple[int, str]:
-        headers = SuperStarHeaders()
-        iv = headers["X-SuperStar-AES-IV"]
-
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                url="https://oauth.dalcomsoft.net/v1/token",
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": f"Basic {authorization}",
-                },
-                data=(
-                    f'{{"id":"{credentials["id"]}",'
-                    f'"pass":"{credentials["pass"]}",'
-                    f'"grant_type":"password"}}'
-                ),
-            ) as r:
-                dalcom_id = await r.json(content_type=None)
-                access_token = dalcom_id["data"]["access_token"]
-
-            cog = self.bot.get_cog("Cryptographic")
-
-            async with session.post(
-                url=api_url,
-                headers=headers,
-                data=cog.encrypt_cbc(
-                    credentials["account"].format(
-                        access_token=access_token, **credentials
-                    ),
-                    iv,
-                ),
-            ) as r:
-                cog = self.bot.get_cog("SuperStar")
-                account = await cog.read_json(r, iv)
-
-        oid = account["result"]["user"]["objectID"]
-        key = account["invoke"][0]["params"][0]
-        return oid, key
-
-    async def get_ssleague(self, api_url: str, oid: int, key: str) -> dict:
-        headers = SuperStarHeaders()
-        iv = headers["X-SuperStar-AES-IV"]
-
-        async with aiohttp.ClientSession() as session:
-            cog = self.bot.get_cog("Cryptographic")
-
-            async with session.post(
-                url=api_url,
-                headers=headers,
-                data=cog.encrypt_cbc(
-                    f'{{"class":"StarLeague",'
-                    f'"method":"getWeekPlayMusic",'
-                    f'"params":[{oid},"{key}"]}}',
-                    iv,
-                ),
-            ) as r:
-                cog = self.bot.get_cog("SuperStar")
-                ssleague = await cog.read_json(r, iv)
-        return ssleague
 
     @pin_ssls.before_loop
     async def before_loop(self) -> None:

@@ -7,6 +7,9 @@ from typing import TYPE_CHECKING
 
 import aiohttp
 from discord.ext import commands
+from google.auth.transport import requests
+from google.oauth2.service_account import IDTokenCredentials
+from packaging.version import Version
 
 from statics.types import SuperStarHeaders
 
@@ -17,6 +20,21 @@ if TYPE_CHECKING:
 class SuperStar(commands.Cog):
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
+
+    @staticmethod
+    async def get_active_version(manifest_url: str, credentials: dict) -> str:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                url=manifest_url.format(version=credentials["version"]),
+            ) as r:
+                manifest = await r.json(content_type=None)
+                return str(
+                    max(
+                        Version(credentials["version"]),
+                        Version(manifest["ActiveVersion_Android"]),
+                        Version(manifest["ActiveVersion_IOS"]),
+                    )
+                )
 
     async def get_a_json(self, api_url: str) -> dict:
         headers = SuperStarHeaders()
@@ -34,6 +52,113 @@ class SuperStar(commands.Cog):
             ) as r:
                 ajs = await self.read_json(r, iv)
         return ajs
+
+    async def login_classic(self, api_url: str, credentials: dict) -> tuple[int, str]:
+        headers = SuperStarHeaders()
+        iv = headers["X-SuperStar-AES-IV"]
+
+        async with aiohttp.ClientSession() as session:
+            cog = self.bot.get_cog("Cryptographic")
+
+            async with session.post(
+                url=api_url,
+                headers=headers,
+                data=cog.encrypt_cbc(credentials["account"].format(**credentials), iv),
+            ) as r:
+                account = await self.read_json(r, iv)
+
+        oid = account["result"]["user"]["objectID"]
+        key = account["invoke"][0]["params"][0]
+        return oid, key
+
+    async def login_google(
+        self, api_url: str, credentials: dict, target_audience: str
+    ) -> tuple[int, str]:
+        gredentials = IDTokenCredentials.from_service_account_file(
+            filename=credentials["service_account"],
+            target_audience=f"{target_audience}.apps.googleusercontent.com",
+        )
+        gredentials.refresh(requests.Request())
+        id_token = gredentials.token
+
+        headers = SuperStarHeaders()
+        iv = headers["X-SuperStar-AES-IV"]
+
+        async with aiohttp.ClientSession() as session:
+            cog = self.bot.get_cog("Cryptographic")
+
+            async with session.post(
+                url=api_url,
+                headers=headers,
+                data=cog.encrypt_cbc(
+                    credentials["account"].format(id_token=id_token, **credentials), iv
+                ),
+            ) as r:
+                account = await self.read_json(r, iv)
+
+        oid = account["result"]["user"]["objectID"]
+        key = account["invoke"][0]["params"][0]
+        return oid, key
+
+    async def login_dalcom_id(
+        self, api_url: str, credentials: dict, authorization: str
+    ) -> tuple[int, str]:
+        headers = SuperStarHeaders()
+        iv = headers["X-SuperStar-AES-IV"]
+
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                url="https://oauth.dalcomsoft.net/v1/token",
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Basic {authorization}",
+                },
+                data=(
+                    f'{{"id":"{credentials["id"]}",'
+                    f'"pass":"{credentials["pass"]}",'
+                    f'"grant_type":"password"}}'
+                ),
+            ) as r:
+                dalcom_id = await r.json(content_type=None)
+                access_token = dalcom_id["data"]["access_token"]
+
+            cog = self.bot.get_cog("Cryptographic")
+
+            async with session.post(
+                url=api_url,
+                headers=headers,
+                data=cog.encrypt_cbc(
+                    credentials["account"].format(
+                        access_token=access_token, **credentials
+                    ),
+                    iv,
+                ),
+            ) as r:
+                account = await self.read_json(r, iv)
+
+        oid = account["result"]["user"]["objectID"]
+        key = account["invoke"][0]["params"][0]
+        return oid, key
+
+    async def get_ssleague(self, api_url: str, oid: int, key: str) -> dict:
+        headers = SuperStarHeaders()
+        iv = headers["X-SuperStar-AES-IV"]
+
+        async with aiohttp.ClientSession() as session:
+            cog = self.bot.get_cog("Cryptographic")
+
+            async with session.post(
+                url=api_url,
+                headers=headers,
+                data=cog.encrypt_cbc(
+                    f'{{"class":"StarLeague",'
+                    f'"method":"getWeekPlayMusic",'
+                    f'"params":[{oid},"{key}"]}}',
+                    iv,
+                ),
+            ) as r:
+                ssleague = await self.read_json(r, iv)
+        return ssleague
 
     async def read_json(
         self, response: aiohttp.ClientResponse, iv: str | bytes

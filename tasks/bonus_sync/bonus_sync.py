@@ -36,7 +36,7 @@ class BonusSync(commands.Cog):
     async def get_bonus_data(self, game: str, game_details: "GameDetails") -> None:
         if not game_details["bonusSpreadsheet"]:
             return
-        self.LOGGER.info("Downloading bonus data: %s...\r", game_details["name"])
+        self.LOGGER.info("Downloading bonus data: %s...", game_details["name"])
         self.bot.bonus_data[game].clear()
 
         cog = self.bot.get_cog("GoogleSheets")

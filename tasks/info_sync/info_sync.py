@@ -1,13 +1,10 @@
 # mypy: disable-error-code="union-attr"
 # pyright: reportAttributeAccessIssue=false, reportOptionalMemberAccess=false
 
-import gzip
-import json
 import logging
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-import aiohttp
 from discord.ext import commands
 
 from statics.consts import GAMES, TIMEZONES
