@@ -1,30 +1,27 @@
 from typing import TYPE_CHECKING
 
 from statics.consts import GAMES, TIMEZONES
-from statics.helpers import get_sheet_data
 
 if TYPE_CHECKING:
+    from dBot import dBot
     from statics.types import GameDetails
 
 
 STEP = 5
 
 
-def get_ping_data(
-    spreadsheet_id: str, range_str: str, instance: str | None = None
-) -> list[list[str]]:
-    return get_sheet_data(spreadsheet_id, range_str, instance)
-
-
-def ping_preprocess(game: str) -> tuple["GameDetails", list[list[str]], int, int]:
+def ping_preprocess(
+    game: str, bot: "dBot"
+) -> tuple["GameDetails", list[list[str]], int, int]:
     game_details = GAMES[game]
     ping_columns = game_details["pingColumns"]
+    cog = bot.get_cog("GoogleSheets")
     return (
         game_details,
-        get_ping_data(
+        cog.get_sheet_data(  # type: ignore[union-attr]
             game_details["pingSpreadsheet"],
             game_details["pingRange"],
-            "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
+            "kr" if game_details["timezone"] == TIMEZONES["KST"] else None,
         ),
         ping_columns.index("artist_name"),
         ping_columns.index("users"),

@@ -1,3 +1,6 @@
+# mypy: disable-error-code="union-attr"
+# pyright: reportAttributeAccessIssue=false, reportOptionalMemberAccess=false
+
 from typing import TYPE_CHECKING
 
 import discord
@@ -62,7 +65,7 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
         await itr.user.add_roles(target_role)
 
         cog = self.bot.get_cog("DataSync")
-        cog.save_role_data()  # type: ignore
+        cog.save_role_data()
         await itr.followup.send(
             f"Added {target_role.mention}!\n-# {NOTICE}",
             allowed_mentions=discord.AllowedMentions.none(),
@@ -108,7 +111,7 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
         await itr.user.remove_roles(target_role)
 
         cog = self.bot.get_cog("DataSync")
-        cog.save_role_data()  # type: ignore
+        cog.save_role_data()
         await itr.followup.send(
             f"Removed {target_role.mention}!\n-# {NOTICE}",
             allowed_mentions=discord.AllowedMentions.none(),
@@ -177,7 +180,7 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
         await itr.user.remove_roles(*remove_roles)
 
         cog = self.bot.get_cog("DataSync")
-        cog.save_role_data()  # type: ignore
+        cog.save_role_data()
         await itr.followup.send(
             f"Set to {target_role.mention}!",
             embed=RoleSetEmbed(target_role, add_roles, remove_roles),

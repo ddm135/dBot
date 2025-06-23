@@ -1,3 +1,6 @@
+# mypy: disable-error-code="union-attr"
+# pyright: reportAttributeAccessIssue=false, reportOptionalMemberAccess=false
+
 import asyncio
 import logging
 from datetime import datetime, time
@@ -13,8 +16,6 @@ from packaging.version import Version
 
 from statics.consts import GAMES, RESET_OFFSET
 from statics.helpers import (
-    encrypt_cbc,
-    get_ss_json,
     pin_new_ssl,
     unpin_old_ssl,
 )
@@ -39,7 +40,7 @@ class PinSSLeague(commands.Cog):
     @tasks.loop(time=[time(hour=h) for h in range(24)])
     async def pin_ssls(self) -> None:
         cog = self.bot.get_cog("DataSync")
-        cog.save_last_appearance()  # type: ignore
+        cog.save_last_appearance()
 
         pin_tasks = [
             self.pin_ssl(game, self.bot.credentials[game])
@@ -48,8 +49,8 @@ class PinSSLeague(commands.Cog):
         ]
         await asyncio.gather(*pin_tasks, return_exceptions=True)
 
-        cog.save_credential_data()  # type: ignore
-        cog.save_ssleague_data()  # type: ignore
+        cog.save_credential_data()
+        cog.save_ssleague_data()
 
     async def pin_ssl(self, game: str, credentials: dict) -> None:
         game_details = GAMES[game]
@@ -147,7 +148,7 @@ class PinSSLeague(commands.Cog):
             color,
             skills,
             current_time,
-            self.bot.user.name,  # type: ignore[union-attr]
+            self.bot.user.name,
             artist_last,
             song_last,
         )
@@ -170,7 +171,7 @@ class PinSSLeague(commands.Cog):
                 await pin_channel.send(topic)
             await pin_channel.edit(topic=topic)
             await unpin_old_ssl(
-                embed.title,  # type: ignore[arg-type]
+                embed.title,
                 pin_channel,
                 new_pin,
             )
@@ -197,26 +198,27 @@ class PinSSLeague(commands.Cog):
                     )
                 )
 
-    @staticmethod
-    async def login(api_url: str, credentials: dict) -> tuple[int, str]:
+    async def login(self, api_url: str, credentials: dict) -> tuple[int, str]:
         headers = SuperStarHeaders()
         iv = headers["X-SuperStar-AES-IV"]
 
         async with aiohttp.ClientSession() as session:
+            cog = self.bot.get_cog("Cryptographic")
+
             async with session.post(
                 url=api_url,
                 headers=headers,
-                data=encrypt_cbc(credentials["account"].format(**credentials), iv),
+                data=cog.encrypt_cbc(credentials["account"].format(**credentials), iv),
             ) as r:
-                account = await get_ss_json(r, iv)
+                cog = self.bot.get_cog("SuperStar")
+                account = await cog.read_json(r, iv)
 
         oid = account["result"]["user"]["objectID"]
         key = account["invoke"][0]["params"][0]
         return oid, key
 
-    @staticmethod
     async def login_google(
-        api_url: str, credentials: dict, target_audience: str
+        self, api_url: str, credentials: dict, target_audience: str
     ) -> tuple[int, str]:
         gredentials = IDTokenCredentials.from_service_account_file(
             filename=credentials["service_account"],
@@ -229,22 +231,24 @@ class PinSSLeague(commands.Cog):
         iv = headers["X-SuperStar-AES-IV"]
 
         async with aiohttp.ClientSession() as session:
+            cog = self.bot.get_cog("Cryptographic")
+
             async with session.post(
                 url=api_url,
                 headers=headers,
-                data=encrypt_cbc(
+                data=cog.encrypt_cbc(
                     credentials["account"].format(id_token=id_token, **credentials), iv
                 ),
             ) as r:
-                account = await get_ss_json(r, iv)
+                cog = self.bot.get_cog("SuperStar")
+                account = await cog.read_json(r, iv)
 
         oid = account["result"]["user"]["objectID"]
         key = account["invoke"][0]["params"][0]
         return oid, key
 
-    @staticmethod
     async def login_dalcom_id(
-        api_url: str, credentials: dict, authorization: str
+        self, api_url: str, credentials: dict, authorization: str
     ) -> tuple[int, str]:
         headers = SuperStarHeaders()
         iv = headers["X-SuperStar-AES-IV"]
@@ -265,39 +269,44 @@ class PinSSLeague(commands.Cog):
                 dalcom_id = await r.json(content_type=None)
                 access_token = dalcom_id["data"]["access_token"]
 
+            cog = self.bot.get_cog("Cryptographic")
+
             async with session.post(
                 url=api_url,
                 headers=headers,
-                data=encrypt_cbc(
+                data=cog.encrypt_cbc(
                     credentials["account"].format(
                         access_token=access_token, **credentials
                     ),
                     iv,
                 ),
             ) as r:
-                account = await get_ss_json(r, iv)
+                cog = self.bot.get_cog("SuperStar")
+                account = await cog.read_json(r, iv)
 
         oid = account["result"]["user"]["objectID"]
         key = account["invoke"][0]["params"][0]
         return oid, key
 
-    @staticmethod
-    async def get_ssleague(api_url: str, oid: int, key: str) -> dict:
+    async def get_ssleague(self, api_url: str, oid: int, key: str) -> dict:
         headers = SuperStarHeaders()
         iv = headers["X-SuperStar-AES-IV"]
 
         async with aiohttp.ClientSession() as session:
+            cog = self.bot.get_cog("Cryptographic")
+
             async with session.post(
                 url=api_url,
                 headers=headers,
-                data=encrypt_cbc(
+                data=cog.encrypt_cbc(
                     f'{{"class":"StarLeague",'
                     f'"method":"getWeekPlayMusic",'
                     f'"params":[{oid},"{key}"]}}',
                     iv,
                 ),
             ) as r:
-                ssleague = await get_ss_json(r, iv)
+                cog = self.bot.get_cog("SuperStar")
+                ssleague = await cog.read_json(r, iv)
         return ssleague
 
     @pin_ssls.before_loop

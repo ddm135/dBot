@@ -1,5 +1,5 @@
-# pyright: reportTypedDictNotRequiredAccess=false
-# pyright: reportArgumentType=false
+# mypy: disable-error-code="union-attr"
+# pyright: reportAttributeAccessIssue=false, reportOptionalMemberAccess=false
 
 import json
 import logging
@@ -11,13 +11,6 @@ from typing import TYPE_CHECKING
 from discord.ext import commands, tasks
 from googleapiclient.http import MediaFileUpload
 
-from statics.helpers import (
-    create_drive_data_file,
-    get_drive_data_files,
-    get_drive_file,
-    get_drive_file_last_modified,
-    update_drive_data_file,
-)
 from statics.types import LastAppearance
 
 if TYPE_CHECKING:
@@ -31,7 +24,6 @@ class DataSync(commands.Cog):
     SSLEAGUE_DATA = Path("data/ssleague.json")
     LAST_MODIFIED_DATA = Path("data/last_modified.json")
     DATA = [ROLE_DATA, PING_DATA, CREDENTIAL_DATA, SSLEAGUE_DATA]
-    FOLDER = "1yugfZQu3T8G9sC6WQR_YzK7bXhpdXoy4"
     LOGGER = logging.getLogger(__name__)
 
     def __init__(self, bot: "dBot") -> None:
@@ -48,7 +40,8 @@ class DataSync(commands.Cog):
         await self.data_upload()
 
     def data_download(self) -> None:
-        drive_files = get_drive_data_files()
+        cog = self.bot.get_cog("GoogleDrive")
+        drive_files = cog.get_drive_files()
         if self.LAST_MODIFIED_DATA.exists():
             with open(self.LAST_MODIFIED_DATA, "r", encoding="utf-8") as f:
                 last_modified = json.load(f)
@@ -63,7 +56,7 @@ class DataSync(commands.Cog):
                 if data.exists():
                     self.LOGGER.info("Checking %s...", data.name)
                     last_modified_local = last_modified.get(data.name, 0)
-                    last_modified_drive = get_drive_file_last_modified(
+                    last_modified_drive = cog.get_drive_file_last_modified(
                         file["id"]
                     ).timestamp()
 
@@ -72,7 +65,7 @@ class DataSync(commands.Cog):
 
                 self.LOGGER.info("Downloading %s...", data.name)
                 data.parent.mkdir(parents=True, exist_ok=True)
-                get_drive_file(file["id"], data)
+                cog.get_drive_file(file["id"], data)
                 break
 
         if self.CREDENTIAL_DATA.exists():
@@ -143,7 +136,8 @@ class DataSync(commands.Cog):
 
     @tasks.loop(time=[time(hour=h) for h in range(24)])
     async def data_upload(self) -> None:
-        drive_files = get_drive_data_files()
+        cog = self.bot.get_cog("GoogleDrive")
+        drive_files = cog.get_drive_files()
         last_modified = {}
 
         for data in self.DATA:
@@ -152,7 +146,7 @@ class DataSync(commands.Cog):
 
             for file in drive_files["files"]:
                 if file["name"] == data.name:
-                    last_modified[data.name] = update_drive_data_file(
+                    last_modified[data.name] = cog.update_drive_file(
                         file["id"],
                         media,
                     ).timestamp()
@@ -160,11 +154,10 @@ class DataSync(commands.Cog):
             else:
                 metadata = {
                     "name": data.name,
-                    "parents": [self.FOLDER],
                 }
-                last_modified[data.name] = create_drive_data_file(
+                last_modified[data.name] = cog.create_drive_file(
                     media,
-                    metadata,  # type: ignore[arg-type]
+                    metadata,
                 ).timestamp()
             data.touch(exist_ok=True)
 
@@ -194,10 +187,6 @@ class DataSync(commands.Cog):
             target["songs"][self.bot.ssleague_manual[game]["song_id"]] = date
             target["date"] = date
         self.bot.ssleague_manual.clear()
-
-    @data_upload.before_loop
-    async def before_loop(self) -> None:
-        await self.bot.wait_until_ready()
 
 
 async def setup(bot: "dBot") -> None:

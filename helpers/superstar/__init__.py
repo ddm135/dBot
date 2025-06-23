@@ -2,14 +2,14 @@ import importlib
 
 from statics.consts import LOCK
 
-from . import on_error
+from . import superstar
 
 if LOCK.exists():
-    importlib.reload(on_error)
+    importlib.reload(superstar)
 
-from .on_error import setup
+from .superstar import setup
 
-del importlib, on_error, LOCK
+del importlib, superstar, LOCK
 
 __all__ = ("setup",)
 __author__ = "ddm135 | Aut"

@@ -7,8 +7,8 @@ if TYPE_CHECKING:
 
 
 class OnCommandError(commands.Cog):
-    def __init__(self, bot: "dBot") -> None:
-        self.bot = bot
+    def __init__(self) -> None:
+        pass
 
     @commands.Cog.listener("on_command_error")
     async def on_command_error(self, _: commands.Context, error: Exception) -> None:
@@ -25,4 +25,4 @@ class OnCommandError(commands.Cog):
 
 
 async def setup(bot: "dBot") -> None:
-    await bot.add_cog(OnCommandError(bot))
+    await bot.add_cog(OnCommandError())

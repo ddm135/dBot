@@ -7,7 +7,6 @@ from discord import app_commands
 from discord.ext import commands
 
 from statics.consts import BONUS_OFFSET, GAMES, TIMEZONES
-from statics.helpers import update_sheet_data
 
 from .autocompletes import artist_autocomplete
 from .commons import STEP, ping_preprocess
@@ -352,20 +351,19 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         """
 
         await itr.response.defer(ephemeral=True)
-        user_id = str(itr.user.id)
         games = [game_choice] if game_choice else self.GAME_CHOICES
 
         await itr.user.send("## Bonus Ping List")
-        for game_choice in games:
-            embed = BonusPingsEmbed(game_choice.value, user_id)
+        for game in games:
+            embed = BonusPingsEmbed(game.value, itr)
             await itr.user.send(embed=embed, silent=True)
 
         return await itr.followup.send(
             "Check your DMs for the list of artists you are pinged for!"
         )
 
-    @staticmethod
     async def handle_bonus_command(
+        self,
         itr: discord.Interaction["dBot"],
         game_key: str,
         artist_name: str,
@@ -378,7 +376,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
             ping_data,
             artist_name_index,
             users_index,
-        ) = ping_preprocess(game_key)
+        ) = ping_preprocess(game_key, self.bot)
 
         for i, row in enumerate(ping_data, start=1):
             _artist_name = row[artist_name_index]
@@ -407,12 +405,12 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                 return await itr.followup.send("Internal error.")
 
             if not message_prefix.startswith("Already"):
-                update_sheet_data(
+                cog = self.bot.get_cog("GoogleSheets")
+                cog.update_sheet_data(  # type: ignore[union-attr]
                     game_details["pingSpreadsheet"],
                     f"{game_details["pingUsers"]}{i}",
                     [[",".join(users)]],
-                    False,
-                    "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
+                    "kr" if game_details["timezone"] == TIMEZONES["KST"] else None,
                 )
 
             return await itr.followup.send(

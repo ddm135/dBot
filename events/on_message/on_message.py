@@ -49,10 +49,10 @@ class OnMessage(commands.Cog):
                     continue
 
                 self.bot.pings[guild_id][word][user_id]["count"] += 1
-                cog = self.bot.get_cog("DataSync")
-                cog.save_ping_data()  # type: ignore
-
                 await user.send(embed=WordPingEmbed(word, message))
+
+                cog = self.bot.get_cog("DataSync")
+                cog.save_ping_data()  # type: ignore[union-attr]
 
 
 async def setup(bot: "dBot") -> None:

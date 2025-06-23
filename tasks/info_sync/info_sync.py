@@ -1,15 +1,16 @@
+# mypy: disable-error-code="union-attr"
+# pyright: reportAttributeAccessIssue=false, reportOptionalMemberAccess=false
+
 import gzip
 import json
 import logging
-from datetime import datetime, time
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 import aiohttp
-from discord.ext import commands, tasks
+from discord.ext import commands
 
 from statics.consts import GAMES, TIMEZONES
-from statics.helpers import decrypt_ecb, encrypt_cbc, get_sheet_data, get_ss_json
-from statics.types import SuperStarHeaders
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -24,18 +25,15 @@ class InfoSync(commands.Cog):
 
     async def cog_load(self) -> None:
         await self.info_sync()
-        # self.info_sync.start()
 
     async def cog_unload(self) -> None:
         self.bot.info_data_ready = False
-        # self.info_sync.cancel()
         self.bot.info_ajs.clear()
         self.bot.info_msd.clear()
         self.bot.info_url.clear()
         self.bot.info_by_name.clear()
         self.bot.info_by_id.clear()
 
-    @tasks.loop(time=time(hour=10, tzinfo=TIMEZONES["KST"]))
     async def info_sync(self) -> None:
         if self.bot.info_data_ready and datetime.now().weekday():
             return
@@ -48,7 +46,9 @@ class InfoSync(commands.Cog):
     async def get_info_data(self, game: str, game_details: "GameDetails") -> None:
         self.LOGGER.info("Downloading info data: %s...", game_details["name"])
         if game_details["api"]:
-            ajs = await self.get_a_json(game_details["api"])
+            cog = self.bot.get_cog("SuperStar")
+            ajs = await cog.get_a_json(game_details["api"])
+
             if ajs["code"] == 1000:
                 self.bot.info_ajs[game].clear()
                 self.bot.info_ajs[game] = ajs
@@ -60,19 +60,25 @@ class InfoSync(commands.Cog):
 
             if ajs:
                 self.bot.info_msd[game].clear()
-                self.bot.info_msd[game] = await self.get_music_data(ajs)
+                self.bot.info_msd[game] = await cog.get_data(
+                    ajs["result"]["context"]["MusicData"]["file"]
+                )
                 if game_details["legacyUrlScheme"]:
                     self.bot.info_url[game].clear()
-                    self.bot.info_url[game] = await self.get_url_data(ajs)
+                    self.bot.info_url[game] = await cog.get_data(
+                        ajs["result"]["context"]["URLs"]["file"]
+                    )
 
         self.bot.info_by_name[game].clear()
         self.bot.info_by_id[game].clear()
         if not game_details["infoSpreadsheet"]:
             return
-        info = get_sheet_data(
+
+        cog = self.bot.get_cog("GoogleSheets")
+        info = cog.get_sheet_data(  # type: ignore[union-attr]
             game_details["infoSpreadsheet"],
             game_details["infoRange"],
-            "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
+            "kr" if game_details["timezone"] == TIMEZONES["KST"] else None,
         )
 
         info_columns = game_details["infoColumns"]
@@ -96,58 +102,6 @@ class InfoSync(commands.Cog):
                 row[song_name_index]
             ] = row
             self.bot.info_by_id[game][row[song_id_index]] = row
-
-    @staticmethod
-    async def get_a_json(api_url: str) -> dict:
-        headers = SuperStarHeaders()
-        iv = headers["X-SuperStar-AES-IV"]
-
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                url=api_url,
-                headers=headers,
-                data=encrypt_cbc(
-                    '{"class":"Platform","method":"checkAssetBundle","params":[0]}', iv
-                ),
-            ) as r:
-                ajs = await get_ss_json(r, iv)
-        return ajs
-
-    @classmethod
-    async def get_music_data(cls, ajs: dict) -> list[dict]:
-        msd_url = ajs["result"]["context"]["MusicData"]["file"]
-        return await cls.get_game_data(msd_url)
-
-    @classmethod
-    async def get_url_data(cls, ajs: dict) -> list[dict]:
-        url_url = ajs["result"]["context"]["URLs"]["file"]
-        return await cls.get_game_data(url_url)
-
-    @staticmethod
-    async def get_game_data(url: str) -> list[dict]:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url=url) as r:
-                msd_enc = b""
-                while True:
-                    chunk = await r.content.read(1024)
-                    if not chunk:
-                        break
-                    msd_enc += chunk
-
-        msd_js = json.loads(
-            decrypt_ecb(gzip.decompress(msd_enc))
-            .replace(rb"\/", rb"/")
-            .replace(rb"\u", rb"ddm135-u")
-        )
-        return json.loads(
-            json.dumps(msd_js, indent="\t", ensure_ascii=False)
-            .replace(r"ddm135-u", r"\u")
-            .encode()
-        )
-
-    @info_sync.before_loop
-    async def before_loop(self) -> None:
-        await self.bot.wait_until_ready()
 
 
 async def setup(bot: "dBot") -> None:

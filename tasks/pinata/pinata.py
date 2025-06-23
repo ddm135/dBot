@@ -225,7 +225,7 @@ class Pinata(commands.Cog):
                         self.bot.roles[str(winner.id)].append(reward["role"].id)
 
                     cog = self.bot.get_cog("DataSync")
-                    cog.save_role_data()  # type: ignore
+                    cog.save_role_data()  # type: ignore[union-attr]
 
                     _message += "The role has been added to your inventory."
                 elif is_member:

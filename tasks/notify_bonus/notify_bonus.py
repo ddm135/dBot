@@ -5,7 +5,6 @@ import discord
 from discord.ext import commands, tasks
 
 from statics.consts import BONUS_OFFSET, GAMES, STATUS_CHANNEL, TIMEZONES
-from statics.helpers import get_sheet_data
 
 from .embeds import NotifyBonusEmbed
 
@@ -25,6 +24,8 @@ class NotifyBonus(commands.Cog):
 
     @tasks.loop(time=[time(hour=h) for h in range(24)])
     async def notify_bonus(self) -> None:
+        cog = self.bot.get_cog("GoogleSheets")
+
         for game, game_details in GAMES.items():
             if not game_details["bonusSpreadsheet"]:
                 continue
@@ -54,10 +55,10 @@ class NotifyBonus(commands.Cog):
             ping_artist_index = ping_columns.index("artist_name")
             ping_emblem_index = ping_columns.index("emblem")
 
-            ping_data = get_sheet_data(
+            ping_data = cog.get_sheet_data(  # type: ignore[union-attr]
                 game_details["pingSpreadsheet"],
                 game_details["pingRange"],
-                "KR" if game_details["timezone"] == TIMEZONES["KST"] else None,
+                "kr" if game_details["timezone"] == TIMEZONES["KST"] else None,
             )
             game_ping_dict = dict.fromkeys(
                 (

@@ -19,7 +19,6 @@ MAX_AUTOCOMPLETE = 25
 BONUS_OFFSET = timedelta(days=1)
 RESET_OFFSET = timedelta(hours=2)
 
-AES_KEY = b"WnFKN1v_gUcgmUVZnjjjGXGwk557zBSO"
 IV_LENGTH = 16
 
 TIMEZONES = {
@@ -40,7 +39,10 @@ STATIC_MODULES = (
 )
 
 EXTENSIONS = (
-    "events.on_error",
+    "helpers.cryptographic",
+    "helpers.google_sheets",
+    "helpers.google_drive",
+    "helpers.superstar",
     "events.on_command_error",
     "events.on_message",
     "events.on_ready",
