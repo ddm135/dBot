@@ -60,8 +60,8 @@ class DataSync(commands.Cog):
                 if data.exists():
                     self.LOGGER.info("Checking %s...", data.name)
                     last_modified_local = last_modified.get(data.name, 0)
-                    last_modified_drive = await cog.get_drive_file_last_modified(
-                        file["id"]
+                    last_modified_drive = (
+                        await cog.get_drive_file_last_modified(file["id"])
                     ).timestamp()
 
                     if last_modified_local >= last_modified_drive:
@@ -150,18 +150,22 @@ class DataSync(commands.Cog):
 
             for file in drive_files["files"]:
                 if file["name"] == data.name:
-                    last_modified[data.name] = await cog.update_drive_file(
-                        file["id"],
-                        media,
+                    last_modified[data.name] = (
+                        await cog.update_drive_file(
+                            file["id"],
+                            media,
+                        )
                     ).timestamp()
                     break
             else:
                 metadata = {
                     "name": data.name,
                 }
-                last_modified[data.name] = await cog.create_drive_file(
-                    media,
-                    metadata,
+                last_modified[data.name] = (
+                    await cog.create_drive_file(
+                        media,
+                        metadata,
+                    )
                 ).timestamp()
             data.touch(exist_ok=True)
 
