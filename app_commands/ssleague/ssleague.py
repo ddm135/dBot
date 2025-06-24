@@ -1,3 +1,6 @@
+# mypy: disable-error-code="union-attr"
+# pyright: reportAttributeAccessIssue=false, reportOptionalMemberAccess=false
+
 from datetime import datetime
 from typing import TYPE_CHECKING
 
@@ -6,8 +9,6 @@ from discord import app_commands
 from discord.ext import commands
 
 from statics.consts import GAMES, RESET_OFFSET
-from statics.helpers import pin_new_ssl, unpin_old_ssl
-from statics.types import SSLeagueEmbed
 
 from .autocompletes import (
     artist_autocomplete,
@@ -198,7 +199,8 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         else:
             song_last = None
 
-        embed = SSLeagueEmbed(
+        cog = self.bot.get_cog("SuperStar")
+        embed = cog.SSLeagueEmbed(
             artist_name,
             song_name,
             duration,
@@ -215,14 +217,15 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             pin_channel_id
         ) or await self.bot.fetch_channel(pin_channel_id)
         assert isinstance(pin_channel, discord.TextChannel)
-        new_pin = await pin_new_ssl(embed, pin_channel)
+        cog = self.bot.get_cog("SuperStar")
+        new_pin = await cog.pin_new_ssl(embed, pin_channel)
         topic = f"[{current_time.strftime("%m.%d.%y")}] {artist_name} - {song_name}"
         if pin_role:
             await pin_channel.send(f"<@&{pin_role}> {topic}")
         else:
             await pin_channel.send(topic)
         await pin_channel.edit(topic=topic)
-        await unpin_old_ssl(
+        await cog.unpin_old_ssl(
             embed.title,
             pin_channel,
             new_pin,

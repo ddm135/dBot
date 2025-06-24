@@ -210,7 +210,7 @@ class Administrative(commands.Cog):
 
         if game_details["infoReplaceGrid"]:
             await msg.edit(content=f"{text}\nEditing info sheet...")
-            cog.find_replace_sheet_data(
+            await cog.find_replace_sheet_data(
                 game_details["infoSpreadsheet"],
                 game_details["infoReplaceGrid"],
                 old_name,
@@ -219,7 +219,7 @@ class Administrative(commands.Cog):
             )
         if game_details["pingReplaceGrid"]:
             await msg.edit(content=f"{text}\nEditing ping sheet...")
-            cog.find_replace_sheet_data(
+            await cog.find_replace_sheet_data(
                 game_details["pingSpreadsheet"],
                 game_details["pingReplaceGrid"],
                 old_name,
@@ -228,7 +228,7 @@ class Administrative(commands.Cog):
             )
         if game_details["bonusReplaceGrid"]:
             await msg.edit(content=f"{text}\nEditing bonus sheet...")
-            cog.find_replace_sheet_data(
+            await cog.find_replace_sheet_data(
                 game_details["bonusSpreadsheet"],
                 game_details["bonusReplaceGrid"],
                 old_name,

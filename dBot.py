@@ -47,7 +47,6 @@ class dBot(commands.Bot):
     async def setup_hook(self) -> None:
         for ext in EXTENSIONS:
             await self.load_extension(ext)
-        await self.reload_extension("helpers.google_drive")
         LOCK.touch(exist_ok=True)
         self.LOGGER.info("Ready!")
 

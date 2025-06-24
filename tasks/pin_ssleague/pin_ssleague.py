@@ -12,11 +12,6 @@ import discord.backoff
 from discord.ext import commands, tasks
 
 from statics.consts import GAMES, RESET_OFFSET
-from statics.helpers import (
-    pin_new_ssl,
-    unpin_old_ssl,
-)
-from statics.types import SSLeagueEmbed
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -138,7 +133,8 @@ class PinSSLeague(commands.Cog):
         else:
             song_last = None
 
-        embed = SSLeagueEmbed(
+        cog = self.bot.get_cog("SuperStar")
+        embed = cog.SSLeagueEmbed(
             artist_name,
             song_name,
             duration,
@@ -161,14 +157,15 @@ class PinSSLeague(commands.Cog):
                 channel_id
             ) or await self.bot.fetch_channel(channel_id)
             assert isinstance(pin_channel, discord.TextChannel)
-            new_pin = await pin_new_ssl(embed, pin_channel)
+            cog = self.bot.get_cog("SuperStar")
+            new_pin = await cog.pin_new_ssl(embed, pin_channel)
             topic = f"[{current_time.strftime("%m.%d.%y")}] {artist_name} - {song_name}"
             if pin_role := pin_roles.get(guild_id):
                 await pin_channel.send(f"<@&{pin_role}> {topic}")
             else:
                 await pin_channel.send(topic)
             await pin_channel.edit(topic=topic)
-            await unpin_old_ssl(
+            await cog.unpin_old_ssl(
                 embed.title,
                 pin_channel,
                 new_pin,

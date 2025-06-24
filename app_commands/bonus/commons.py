@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 STEP = 5
 
 
-def ping_preprocess(
+async def ping_preprocess(
     game: str, bot: "dBot"
 ) -> tuple["GameDetails", list[list[str]], int, int]:
     game_details = GAMES[game]
@@ -18,7 +18,7 @@ def ping_preprocess(
     cog = bot.get_cog("GoogleSheets")
     return (
         game_details,
-        cog.get_sheet_data(  # type: ignore[union-attr]
+        await cog.get_sheet_data(  # type: ignore[union-attr]
             game_details["pingSpreadsheet"],
             game_details["pingRange"],
             "kr" if game_details["timezone"] == TIMEZONES["KST"] else None,

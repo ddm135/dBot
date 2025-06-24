@@ -72,7 +72,7 @@ class InfoSync(commands.Cog):
             return
 
         cog = self.bot.get_cog("GoogleSheets")
-        info = cog.get_sheet_data(  # type: ignore[union-attr]
+        info = await cog.get_sheet_data(  # type: ignore[union-attr]
             game_details["infoSpreadsheet"],
             game_details["infoRange"],
             "kr" if game_details["timezone"] == TIMEZONES["KST"] else None,

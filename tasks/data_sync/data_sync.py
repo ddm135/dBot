@@ -30,7 +30,11 @@ class DataSync(commands.Cog):
         self.bot = bot
 
     async def cog_load(self) -> None:
-        self.data_download()
+        try:
+            await self.bot.load_extension("helpers.google_drive")
+        except commands.ExtensionAlreadyLoaded:
+            pass
+        await self.data_download()
         self.data_upload.start()
 
     async def cog_unload(self) -> None:
@@ -39,9 +43,9 @@ class DataSync(commands.Cog):
         self.data_upload.cancel()
         await self.data_upload()
 
-    def data_download(self) -> None:
+    async def data_download(self) -> None:
         cog = self.bot.get_cog("GoogleDrive")
-        drive_files = cog.get_drive_files()
+        drive_files = await cog.get_drive_file_list()
         if self.LAST_MODIFIED_DATA.exists():
             with open(self.LAST_MODIFIED_DATA, "r", encoding="utf-8") as f:
                 last_modified = json.load(f)
@@ -56,7 +60,7 @@ class DataSync(commands.Cog):
                 if data.exists():
                     self.LOGGER.info("Checking %s...", data.name)
                     last_modified_local = last_modified.get(data.name, 0)
-                    last_modified_drive = cog.get_drive_file_last_modified(
+                    last_modified_drive = await cog.get_drive_file_last_modified(
                         file["id"]
                     ).timestamp()
 
@@ -65,7 +69,7 @@ class DataSync(commands.Cog):
 
                 self.LOGGER.info("Downloading %s...", data.name)
                 data.parent.mkdir(parents=True, exist_ok=True)
-                cog.get_drive_file(file["id"], data)
+                await cog.get_drive_file(file["id"], data)
                 break
 
         if self.CREDENTIAL_DATA.exists():
@@ -137,7 +141,7 @@ class DataSync(commands.Cog):
     @tasks.loop(time=[time(hour=h) for h in range(24)])
     async def data_upload(self) -> None:
         cog = self.bot.get_cog("GoogleDrive")
-        drive_files = cog.get_drive_files()
+        drive_files = await cog.get_drive_file_list()
         last_modified = {}
 
         for data in self.DATA:
@@ -146,7 +150,7 @@ class DataSync(commands.Cog):
 
             for file in drive_files["files"]:
                 if file["name"] == data.name:
-                    last_modified[data.name] = cog.update_drive_file(
+                    last_modified[data.name] = await cog.update_drive_file(
                         file["id"],
                         media,
                     ).timestamp()
@@ -155,7 +159,7 @@ class DataSync(commands.Cog):
                 metadata = {
                     "name": data.name,
                 }
-                last_modified[data.name] = cog.create_drive_file(
+                last_modified[data.name] = await cog.create_drive_file(
                     media,
                     metadata,
                 ).timestamp()
@@ -191,3 +195,4 @@ class DataSync(commands.Cog):
 
 async def setup(bot: "dBot") -> None:
     await bot.add_cog(DataSync(bot))
+    await bot.reload_extension("helpers.google_drive")

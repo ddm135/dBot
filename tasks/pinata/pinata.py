@@ -11,7 +11,8 @@ from statics.consts import PINATA, PINATA_TEST_CHANNEL, ROLES, TIMEZONES
 
 if TYPE_CHECKING:
     from dBot import dBot
-    from statics.types import PinataDetails
+
+    from .types import PinataDetails
 
 
 class JoinAll(discord.ui.Button["PinataView"]):

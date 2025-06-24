@@ -5,26 +5,21 @@ import discord
 
 from statics.consts import BONUS_OFFSET
 
-from .commons import STEP, ping_preprocess
+from .commons import STEP
 
 if TYPE_CHECKING:
-    from dBot import dBot
     from statics.types import GameDetails
 
 
 class BonusPingsEmbed(discord.Embed):
     def __init__(
         self,
-        game: str,
-        itr: discord.Interaction["dBot"]
+        game_details: "GameDetails",
+        ping_data: list[list[str]],
+        user_id: str,
+        artist_name_index: int,
+        users_index: int,
     ) -> None:
-        (
-            game_details,
-            ping_data,
-            artist_name_index,
-            users_index,
-        ) = ping_preprocess(game, itr.client)
-
         description = ""
         for row in ping_data:
             _artist_name = row[artist_name_index]
@@ -32,7 +27,7 @@ class BonusPingsEmbed(discord.Embed):
             if "" in users:
                 users.remove("")
 
-            if str(itr.user.id) in users:
+            if user_id in users:
                 description += f"- {_artist_name}\n"
 
         if not description:

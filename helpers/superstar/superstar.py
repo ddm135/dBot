@@ -1,17 +1,20 @@
 # mypy: disable-error-code="union-attr"
 # pyright: reportAttributeAccessIssue=false, reportOptionalMemberAccess=false
 
+import asyncio
 import gzip
 import json
 from typing import TYPE_CHECKING
 
 import aiohttp
+import discord
 from discord.ext import commands
 from google.auth.transport import requests
 from google.oauth2.service_account import IDTokenCredentials
 from packaging.version import Version
 
-from statics.types import SuperStarHeaders
+from .types import SSLeagueEmbed as _SSLeagueEmbed
+from .types import SuperStarHeaders
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -179,6 +182,36 @@ class SuperStar(commands.Cog):
         return json.loads(
             cog.decrypt_ecb(gzip.decompress(content)).replace(rb"\/", rb"/")
         )
+
+    @staticmethod
+    async def pin_new_ssl(
+        embed: discord.Embed,
+        pin_channel: discord.TextChannel,
+    ) -> int:
+        msg = await pin_channel.send(embed=embed)
+        await asyncio.sleep(1)
+        await msg.pin()
+        return msg.id
+
+    @staticmethod
+    async def unpin_old_ssl(
+        embed_title: str | None, pin_channel: discord.TextChannel, new_pin: int
+    ) -> None:
+        if embed_title is None:
+            return
+
+        pins = await pin_channel.pins()
+        for pin in pins:
+            if pin.id == new_pin:
+                continue
+
+            embeds = pin.embeds
+            if embeds and embeds[0].title and embed_title in embeds[0].title:
+                await pin.unpin()
+                break
+
+    class SSLeagueEmbed(_SSLeagueEmbed):
+        pass
 
 
 async def setup(bot: "dBot") -> None:

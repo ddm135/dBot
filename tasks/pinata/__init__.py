@@ -2,14 +2,15 @@ import importlib
 
 from statics.consts import LOCK
 
-from . import pinata
+from . import pinata, types
 
 if LOCK.exists():
-    importlib.reload(pinata)
+    for module in (types, pinata):
+        importlib.reload(module)
 
 from .pinata import setup
 
-del importlib, pinata, LOCK
+del importlib, types, pinata, LOCK
 
 __all__ = ("setup",)
 __author__ = "ddm135 | Aut"

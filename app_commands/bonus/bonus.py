@@ -355,7 +355,19 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
 
         await itr.user.send("## Bonus Ping List")
         for game in games:
-            embed = BonusPingsEmbed(game.value, itr)
+            (
+                game_details,
+                ping_data,
+                artist_name_index,
+                users_index,
+            ) = await ping_preprocess(game.value, self.bot)
+            embed = BonusPingsEmbed(
+                game_details,
+                ping_data,
+                str(itr.user.id),
+                artist_name_index,
+                users_index,
+            )
             await itr.user.send(embed=embed, silent=True)
 
         return await itr.followup.send(
@@ -376,7 +388,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
             ping_data,
             artist_name_index,
             users_index,
-        ) = ping_preprocess(game_key, self.bot)
+        ) = await ping_preprocess(game_key, self.bot)
 
         for i, row in enumerate(ping_data, start=1):
             _artist_name = row[artist_name_index]
@@ -406,7 +418,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
 
             if not message_prefix.startswith("Already"):
                 cog = self.bot.get_cog("GoogleSheets")
-                cog.update_sheet_data(  # type: ignore[union-attr]
+                await cog.update_sheet_data(  # type: ignore[union-attr]
                     game_details["pingSpreadsheet"],
                     f"{game_details["pingUsers"]}{i}",
                     [[",".join(users)]],

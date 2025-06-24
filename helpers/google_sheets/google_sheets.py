@@ -1,7 +1,8 @@
 # mypy: disable-error-code="attr-defined"
 # pylint: disable=no-member
-# pyright: reportMissingModuleSource=false
+# pyright: reportAttributeAccessIssue=false, reportMissingModuleSource=false
 
+import asyncio
 from typing import TYPE_CHECKING
 
 from discord.ext import commands
@@ -41,7 +42,7 @@ class GoogleSheets(commands.Cog):
             static_discovery=STATIC_DISCOVERY,
         ).spreadsheets()
 
-    def get_sheet_data(
+    async def get_sheet_data(
         self,
         spreadsheet_id: str,
         range_str: str,
@@ -51,17 +52,18 @@ class GoogleSheets(commands.Cog):
             self,
             instance or "default",
         )
-        return (
+        result = await asyncio.to_thread(
             service.values()
             .get(
                 spreadsheetId=spreadsheet_id,
                 range=range_str,
             )
-            .execute(num_retries=MAX_RETRIES)
-            .get("values", [])
+            .execute,
+            num_retries=MAX_RETRIES,
         )
+        return result.get("values", [])
 
-    def update_sheet_data(
+    async def update_sheet_data(
         self,
         spreadsheet_id: str,
         range_str: str,
@@ -72,14 +74,19 @@ class GoogleSheets(commands.Cog):
             self,
             instance or "default",
         )
-        service.values().update(
-            spreadsheetId=spreadsheet_id,
-            range=range_str,
-            valueInputOption="RAW",
-            body={"values": data},
-        ).execute(num_retries=MAX_RETRIES)
+        await asyncio.to_thread(
+            service.values()
+            .update(
+                spreadsheetId=spreadsheet_id,
+                range=range_str,
+                valueInputOption="RAW",
+                body={"values": data},
+            )
+            .execute,
+            num_retries=MAX_RETRIES,
+        )
 
-    def find_replace_sheet_data(
+    async def find_replace_sheet_data(
         self,
         spreadsheet_id: str,
         range_grid: dict[str, int | str],
@@ -91,25 +98,28 @@ class GoogleSheets(commands.Cog):
             self,
             instance or "default",
         )
-        service.batchUpdate(
-            spreadsheetId=spreadsheet_id,
-            body={
-                "requests": [
-                    {
-                        "findReplace": {
-                            "find": find,
-                            "replacement": replace,
-                            "matchCase": True,
-                            "matchEntireCell": True,
-                            "searchByRegex": False,
-                            "includeFormulas": False,
-                            "range": range_grid,  # type: ignore[typeddict-item]
+        await asyncio.to_thread(
+            service.batchUpdate(
+                spreadsheetId=spreadsheet_id,
+                body={
+                    "requests": [
+                        {
+                            "findReplace": {
+                                "find": find,
+                                "replacement": replace,
+                                "matchCase": True,
+                                "matchEntireCell": True,
+                                "searchByRegex": False,
+                                "includeFormulas": False,
+                                "range": range_grid,  # type: ignore[typeddict-item]
+                            }
                         }
-                    }
-                ],
-                "includeSpreadsheetInResponse": False,
-            },
-        ).execute(num_retries=MAX_RETRIES)
+                    ],
+                    "includeSpreadsheetInResponse": False,
+                },
+            ).execute,
+            num_retries=MAX_RETRIES,
+        )
 
 
 async def setup(bot: "dBot") -> None:

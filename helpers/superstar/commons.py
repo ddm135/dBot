@@ -1,0 +1,3 @@
+IV_LENGTH = 16
+ASSET_IGNORE = "true"
+API_VERSION = "8"

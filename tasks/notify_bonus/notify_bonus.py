@@ -55,7 +55,7 @@ class NotifyBonus(commands.Cog):
             ping_artist_index = ping_columns.index("artist_name")
             ping_emblem_index = ping_columns.index("emblem")
 
-            ping_data = cog.get_sheet_data(  # type: ignore[union-attr]
+            ping_data = await cog.get_sheet_data(  # type: ignore[union-attr]
                 game_details["pingSpreadsheet"],
                 game_details["pingRange"],
                 "kr" if game_details["timezone"] == TIMEZONES["KST"] else None,

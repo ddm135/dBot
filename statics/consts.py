@@ -19,8 +19,6 @@ MAX_AUTOCOMPLETE = 25
 BONUS_OFFSET = timedelta(days=1)
 RESET_OFFSET = timedelta(hours=2)
 
-IV_LENGTH = 16
-
 TIMEZONES = {
     "KST": ZoneInfo("Asia/Seoul"),
     "JST": ZoneInfo("Asia/Tokyo"),
@@ -32,10 +30,8 @@ TIMEZONES = {
 }
 
 STATIC_MODULES = (
-    "statics.types",
     "statics.consts",
-    "statics.services",
-    "statics.helpers",
+    "statics.types",
 )
 
 EXTENSIONS = (
@@ -43,9 +39,6 @@ EXTENSIONS = (
     "helpers.google_sheets",
     "helpers.google_drive",
     "helpers.superstar",
-    "events.on_command_error",
-    "events.on_message",
-    "events.on_ready",
     "commands.administrative",
     "tasks.info_sync",
     "tasks.pin_ssleague",
@@ -60,6 +53,9 @@ EXTENSIONS = (
     "tasks.clock",
     "tasks.pinata",
     "commands.miscellaneous",
+    "events.on_command_error",
+    "events.on_message",
+    "events.on_ready",
 )
 
 GAMES: dict[str, "GameDetails"] = {

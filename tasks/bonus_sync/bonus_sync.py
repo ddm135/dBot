@@ -40,7 +40,7 @@ class BonusSync(commands.Cog):
         self.bot.bonus_data[game].clear()
 
         cog = self.bot.get_cog("GoogleSheets")
-        bonus = cog.get_sheet_data(  # type: ignore[union-attr]
+        bonus = await cog.get_sheet_data(  # type: ignore[union-attr]
             game_details["bonusSpreadsheet"],
             game_details["bonusRange"],
             "kr" if game_details["timezone"] == TIMEZONES["KST"] else None,
