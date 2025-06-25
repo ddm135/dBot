@@ -1,8 +1,8 @@
 import logging
-from datetime import datetime
+from datetime import datetime, time
 from typing import TYPE_CHECKING
 
-from discord.ext import commands
+from discord.ext import commands, tasks
 
 from statics.consts import GAMES, TIMEZONES
 
@@ -19,11 +19,14 @@ class BonusSync(commands.Cog):
 
     async def cog_load(self) -> None:
         await self.bonus_sync()
+        self.bonus_sync.start()
 
     async def cog_unload(self) -> None:
         self.bot.bonus_data_ready = False
+        self.bonus_sync.cancel()
         self.bot.bonus_data.clear()
 
+    @tasks.loop(time=[time(hour=h) for h in range(24)])
     async def bonus_sync(self) -> None:
         if self.bot.bonus_data_ready and datetime.now().weekday():
             return
