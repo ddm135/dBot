@@ -198,5 +198,6 @@ async def setup(bot: "dBot") -> None:
         await bot.load_extension("helpers.google_drive")
     except commands.ExtensionAlreadyLoaded:
         pass
-    await bot.add_cog(DataSync(bot))
-    await bot.reload_extension("helpers.google_drive")
+    finally:
+        await bot.add_cog(DataSync(bot))
+        await bot.reload_extension("helpers.google_drive")
