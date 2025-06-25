@@ -28,9 +28,6 @@ class BonusSync(commands.Cog):
 
     @tasks.loop(time=[time(hour=h) for h in range(24)])
     async def bonus_sync(self) -> None:
-        if self.bot.bonus_data_ready and datetime.now().weekday():
-            return
-
         self.bot.bonus_data_ready = False
         for game, game_details in GAMES.items():
             await self.get_bonus_data(game, game_details)

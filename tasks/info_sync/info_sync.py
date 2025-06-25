@@ -2,7 +2,7 @@
 # pyright: reportAttributeAccessIssue=false, reportOptionalMemberAccess=false
 
 import logging
-from datetime import datetime, time
+from datetime import time
 from typing import TYPE_CHECKING
 
 from discord.ext import commands, tasks
@@ -35,9 +35,6 @@ class InfoSync(commands.Cog):
 
     @tasks.loop(time=[time(hour=h) for h in range(24)])
     async def info_sync(self) -> None:
-        if self.bot.info_data_ready and datetime.now().weekday():
-            return
-
         self.bot.info_data_ready = False
         for game, game_details in GAMES.items():
             await self.get_info_data(game, game_details)
