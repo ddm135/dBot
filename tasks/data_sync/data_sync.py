@@ -38,10 +38,15 @@ class DataSync(commands.Cog):
         self.data_upload.start()
 
     async def cog_unload(self) -> None:
+        try:
+            await self.bot.load_extension("helpers.google_drive")
+        except commands.ExtensionAlreadyLoaded:
+            pass
         self.save_last_appearance()
         self.save_ssleague_data()
         self.data_upload.cancel()
         await self.data_upload()
+        await self.bot.unload_extension("helpers.google_drive")
 
     async def data_download(self) -> None:
         cog = self.bot.get_cog("GoogleDrive")
@@ -199,4 +204,3 @@ class DataSync(commands.Cog):
 
 async def setup(bot: "dBot") -> None:
     await bot.add_cog(DataSync(bot))
-    await bot.reload_extension("helpers.google_drive")
