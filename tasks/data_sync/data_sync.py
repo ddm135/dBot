@@ -30,6 +30,10 @@ class DataSync(commands.Cog):
         self.bot = bot
 
     async def cog_load(self) -> None:
+        try:
+            await self.bot.load_extension("helpers.google_drive")
+        except commands.ExtensionAlreadyLoaded:
+            pass
         await self.data_download()
         self.data_upload.start()
 
@@ -194,10 +198,5 @@ class DataSync(commands.Cog):
 
 
 async def setup(bot: "dBot") -> None:
-    try:
-        await bot.load_extension("helpers.google_drive")
-    except commands.ExtensionAlreadyLoaded:
-        pass
-    finally:
-        await bot.add_cog(DataSync(bot))
-        await bot.reload_extension("helpers.google_drive")
+    await bot.add_cog(DataSync(bot))
+    await bot.reload_extension("helpers.google_drive")
