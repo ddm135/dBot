@@ -7,7 +7,9 @@ from typing import TYPE_CHECKING
 import discord
 from discord.ext import commands, tasks
 
-from statics.consts import PINATA, PINATA_TEST_CHANNEL, ROLES, TIMEZONES
+from statics.consts import ROLES, TIMEZONES
+
+from .commons import PINATA_REWARDS, PINATA_TEST_CHANNEL
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -98,7 +100,7 @@ class Pinata(commands.Cog):
     @tasks.loop(time=[time(hour=h, minute=m) for h in range(24) for m in range(60)])
     async def pinata(self) -> None:
         current_date = datetime.now(tz=TIMEZONES["KST"]).strftime("%m%d")
-        rewards = PINATA.get(current_date, [])
+        rewards = PINATA_REWARDS.get(current_date, [])
         if not rewards:
             return
 
@@ -118,7 +120,7 @@ class Pinata(commands.Cog):
                         if isinstance(reward["role"], int)
                         else reward["role"]
                     ),
-                    "from": reward["from"],
+                    "of": reward["of"],
                 }
             )
             for reward in rewards
@@ -126,13 +128,13 @@ class Pinata(commands.Cog):
 
         for reward in real_rewards:
             reward["mention"] = (
-                f"{f"{reward["from"]} " if reward["from"] else ""}"
+                f"{f"{reward["of"]} " if reward["of"] else ""}"
                 f"{(reward["role"].mention
                     if isinstance(reward["role"], discord.Role)
                     else reward["role"])}"
             )
             reward["label"] = (
-                f"{f"{reward["from"]} " if reward["from"] else ""}"
+                f"{f"{reward["of"]} " if reward["of"] else ""}"
                 f"{(reward["role"].name
                     if isinstance(reward["role"], discord.Role)
                     else reward["role"])}"

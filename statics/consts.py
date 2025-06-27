@@ -10,7 +10,6 @@ LOCK = Path(".dBot")
 
 TEST_GUILD = 540849436868214784
 SSRG_GUILD = 360109303199432704
-PINATA_TEST_CHANNEL = 1354222667384885329
 STATUS_CHANNEL = 1335315390732963952
 
 MAX_RETRIES = 10
@@ -51,8 +50,8 @@ EXTENSIONS = (
     "app_commands.ping",
     "app_commands.role",
     "tasks.clock",
-    "tasks.pinata",
     "commands.miscellaneous",
+    # "entertainment.pinata",
     "events.on_command_error",
     "events.on_message",
     "events.on_ready",
@@ -802,22 +801,4 @@ ROLES: dict[int, tuple[int, ...]] = {
         965022365601910784,  # CLASS:y
         1105405311436726313,  # STAYC
     ),
-}
-
-PINATA: dict[str, list[dict[str, int | str]]] = {
-    # "0328": [
-    #     # {"role": 427282007131947008, "from": "TWICE"},
-    #     # {"role": 492037142718185473, "from": None},
-    #     # {"role": 431680345184665600, "from": "EXO"},
-    #     {"role": 1341036401483055147, "from": "ym"},
-    #     {"role": 1341634094269988946, "from": ""},
-    # ]
-    "0331": [
-        {"role": "End of service notice", "from": ""},
-        {"role": "Notice", "from": "Refund"},
-    ],
-    "0401": [
-        {"role": "End of service notice", "from": ""},
-        {"role": "Notice", "from": "Refund"},
-    ],
 }

@@ -26,7 +26,7 @@ class BonusSync(commands.Cog):
         self.bonus_sync.cancel()
         self.bot.bonus_data.clear()
 
-    @tasks.loop(time=[time(hour=h) for h in range(24)])
+    @tasks.loop(time=[time(hour=h, minute=5) for h in range(24)])
     async def bonus_sync(self) -> None:
         self.bot.bonus_data_ready = False
         for game, game_details in GAMES.items():
