@@ -143,7 +143,7 @@ class DataSync(commands.Cog):
             self.SSLEAGUE_DATA.parent.mkdir(parents=True, exist_ok=True)
             self.save_ssleague_data()
 
-    @tasks.loop(time=[time(hour=h, minute=10) for h in range(24)])
+    @tasks.loop(time=[time(hour=h, minute=15) for h in range(24)])
     async def data_upload(self) -> None:
         cog = self.bot.get_cog("GoogleDrive")
         drive_files = await cog.get_drive_file_list()

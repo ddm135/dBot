@@ -33,7 +33,7 @@ class InfoSync(commands.Cog):
         self.bot.info_by_name.clear()
         self.bot.info_by_id.clear()
 
-    @tasks.loop(time=[time(hour=h) for h in range(24)])
+    @tasks.loop(time=[time(hour=h, minute=5) for h in range(24)])
     async def info_sync(self) -> None:
         self.bot.info_data_ready = False
         for game, game_details in GAMES.items():
