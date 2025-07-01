@@ -3,7 +3,6 @@
 import logging
 import os
 from collections import defaultdict
-from typing import Any
 
 import discord
 from discord.ext import commands
@@ -49,14 +48,6 @@ class dBot(commands.Bot):
             await self.load_extension(ext)
         LOCK.touch(exist_ok=True)
         self.LOGGER.info("Ready!")
-
-    async def on_error(self, event_method: str, /, *args: Any, **kwargs: Any) -> None:
-        channel = self.get_channel(STATUS_CHANNEL) or await self.fetch_channel(
-            STATUS_CHANNEL
-        )
-        assert isinstance(channel, discord.TextChannel)
-        await channel.send(f"<@{self.owner_id}> Something happened in {event_method}.")
-        await super().on_error(event_method, *args, **kwargs)
 
     async def close(self) -> None:
         try:

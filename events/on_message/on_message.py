@@ -45,12 +45,11 @@ class OnMessage(commands.Cog):
                     user = self.bot.get_user(user_id_int) or await self.bot.fetch_user(
                         user_id_int
                     )
-                except discord.NotFound:
+                    await user.send(embed=WordPingEmbed(word, message))
+                except (discord.NotFound, discord.Forbidden):
                     continue
 
                 self.bot.pings[guild_id][word][user_id]["count"] += 1
-                await user.send(embed=WordPingEmbed(word, message))
-
                 cog = self.bot.get_cog("DataSync")
                 cog.save_ping_data()  # type: ignore[union-attr]
 
