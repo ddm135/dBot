@@ -20,23 +20,42 @@ class NotifyBonusEmbed(discord.Embed):
             name=artist.replace(r"*", r"\*").replace(r"_", r"\_"), icon_url=icon_url
         )
 
-        if starts:
+        started = False
+        while starts:
+            start_str = ""
+            while starts and len(start_str) + len(starts[0]) < 1024:
+                start_str += starts.pop(0)
             self.add_field(
                 name=(
-                    f"Available <t:"
-                    f"{int(current_date.timestamp())}"
-                    f":R> :green_circle:"
+                    (
+                        f"Available <t:"
+                        f"{int(current_date.timestamp())}"
+                        f":R> :green_circle:"
+                    )
+                    if not started
+                    else "\u200b"
                 ),
-                value="".join(starts),
+                value=start_str,
                 inline=False,
             )
-        if ends:
+            started = True
+
+        ended = False
+        while ends:
+            end_str = ""
+            while ends and len(end_str) + len(ends[0]) < 1024:
+                end_str += ends.pop(0)
             self.add_field(
                 name=(
-                    f"Ends <t:"
-                    f"{int((current_date + BONUS_OFFSET).timestamp())}"
-                    f":R> :orange_circle:"
+                    (
+                        f"Ends <t:"
+                        f"{int((current_date + BONUS_OFFSET).timestamp())}"
+                        f":R> :orange_circle:"
+                    )
+                    if not ended
+                    else "\u200b"
                 ),
-                value="".join(ends),
+                value=end_str,
                 inline=False,
             )
+            ended = True
