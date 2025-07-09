@@ -269,6 +269,17 @@ class NotifyBonus(commands.Cog):
                                 f"<@{OWNER_ID}> Failed to send bonus ping to "
                                 f"{user.name} ({user.id}) for {game_name} - {artist}."
                             )
+                        except discord.HTTPException:
+                            channel = self.bot.get_channel(
+                                STATUS_CHANNEL
+                            ) or await self.bot.fetch_channel(STATUS_CHANNEL)
+                            assert isinstance(channel, discord.TextChannel)
+                            await channel.send(
+                                f"<@{OWNER_ID}> Failed to send bonus ping "
+                                f"for {game_name} - {artist}."
+                            )
+                            await channel.send(str(embed.fields))
+                            break
 
     @notify_bonus.before_loop
     async def before_notify_bonus(self) -> None:
