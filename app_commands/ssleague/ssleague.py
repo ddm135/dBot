@@ -166,10 +166,12 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             if song["code"] == song_id:
                 color = int(song["albumBgColor"][:-2], 16)
                 image_url = song["album"]
+                group_code = song["groupData"]
                 break
         else:
             color = game_details["color"]
             image_url = None
+            group_code = None
 
         if game_details["legacyUrlScheme"] and image_url:
             url_data = self.bot.url[game]
@@ -177,6 +179,24 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
                 if url["code"] == image_url:
                     image_url = url["url"]
                     break
+
+        if group_code:
+            grd_data = self.bot.grd[game]
+            for group in grd_data:
+                if group["code"] == group_code:
+                    icon_url = group["emblemImage"]
+                    break
+            else:
+                icon_url = None
+
+            if game_details["legacyUrlScheme"] and icon_url:
+                url_data = self.bot.url[game]
+                for url in url_data:
+                    if url["code"] == icon_url:
+                        icon_url = url["url"]
+                        break
+        else:
+            icon_url = None
 
         timezone = game_details["timezone"]
         current_time = datetime.now(tz=timezone) - RESET_OFFSET
@@ -205,6 +225,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             song_name,
             duration,
             image_url,
+            icon_url,
             color,
             skills,
             current_time,

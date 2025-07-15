@@ -27,6 +27,7 @@ class SSLeagueEmbed(discord.Embed):
         song_name: str,
         duration: str,
         image_url: str | None,
+        icon_url: str | None,
         color: int,
         skills: str | None,
         current_time: datetime,
@@ -79,5 +80,6 @@ class SSLeagueEmbed(discord.Embed):
             text=(
                 f"{current_time.strftime("%A, %B %d, %Y").replace(" 0", " ")}"
                 f" · Pinned by {user_name}"
-            )
+            ),
+            icon_url=icon_url,
         )
