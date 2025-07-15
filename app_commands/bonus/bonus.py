@@ -51,7 +51,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         """
 
         await itr.response.defer()
-        if not self.bot.bonus_data_ready:
+        if not self.bot.bonus_ready:
             return await itr.followup.send(
                 "Bonus data synchronization in progress, feature unavailable."
             )
@@ -98,7 +98,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         bonus_end_index = bonus_columns.index("bonus_end")
         bonus_amount_index = bonus_columns.index("bonus_amount")
 
-        bonus_data = self.bot.bonus_data[game_choice.value]
+        bonus_data = self.bot.bonus[game_choice.value]
         week_bonuses = []
         artists: Iterable[str]
         if not artist_choice:

@@ -251,16 +251,16 @@ class Administrative(commands.Cog):
                 cog.save_ssleague_data()
 
         await msg.edit(content=f"{text}\nDownloading info data...")
-        self.bot.info_data_ready = False
+        self.bot.info_ready = False
         cog = self.bot.get_cog("InfoSync")
         await cog.get_info_data(game, game_details)
-        self.bot.info_data_ready = True
+        self.bot.info_ready = True
 
         await msg.edit(content=f"{text}\nDownloading bonus data...")
-        self.bot.bonus_data_ready = False
+        self.bot.bonus_ready = False
         cog = self.bot.get_cog("BonusSync")
         await cog.get_bonus_data(game, game_details)
-        self.bot.bonus_data_ready = True
+        self.bot.bonus_ready = True
 
         await msg.edit(
             content=f"Renamed {old_name} to {new_name} in {game_details["name"]}!"

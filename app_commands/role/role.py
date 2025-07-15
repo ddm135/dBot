@@ -38,7 +38,7 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
         """
 
         await itr.response.defer()
-        if not self.bot.info_data_ready:
+        if not self.bot.info_ready:
             return await itr.followup.send(
                 "Role data synchronization in progress, feature unavailable.",
             )
@@ -84,7 +84,7 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
         """
 
         await itr.response.defer()
-        if not self.bot.info_data_ready:
+        if not self.bot.info_ready:
             return await itr.followup.send(
                 "Role data synchronization in progress, feature unavailable.",
             )
@@ -130,7 +130,7 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
         """
 
         await itr.response.defer()
-        if not self.bot.info_data_ready:
+        if not self.bot.info_ready:
             return await itr.followup.send(
                 "Role data synchronization in progress, feature unavailable.",
             )

@@ -15,21 +15,23 @@ from statics.types import LastAppearance
 class dBot(commands.Bot):
     LOGGER = logging.getLogger("dBot")
 
-    info_ajs: defaultdict[str, dict] = defaultdict(dict)
-    info_msd: defaultdict[str, list[dict]] = defaultdict(list[dict])
-    info_url: defaultdict[str, list[dict]] = defaultdict(list[dict])
+    ajs: defaultdict[str, dict] = defaultdict(dict)
+    grd: defaultdict[str, list[dict]] = defaultdict(list[dict])
+    msd: defaultdict[str, list[dict]] = defaultdict(list[dict])
+    url: defaultdict[str, list[dict]] = defaultdict(list[dict])
+
     info_by_name: defaultdict[str, defaultdict[str, defaultdict[str, list[str]]]] = (
         defaultdict(lambda: defaultdict(lambda: defaultdict(list[str])))
     )
     info_by_id: defaultdict[str, defaultdict[str, list[str]]] = defaultdict(
         lambda: defaultdict(list[str])
     )
-    info_data_ready = False
+    info_ready = False
 
-    bonus_data: defaultdict[str, defaultdict[str, list[list]]] = defaultdict(
+    bonus: defaultdict[str, defaultdict[str, list[list]]] = defaultdict(
         lambda: defaultdict(list[list])
     )
-    bonus_data_ready = False
+    bonus_ready = False
 
     credentials: dict = {}
     pings: defaultdict[str, defaultdict[str, defaultdict[str, dict]]] = defaultdict(

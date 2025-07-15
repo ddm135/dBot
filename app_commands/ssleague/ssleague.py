@@ -56,7 +56,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         """
 
         await itr.response.defer(ephemeral=True)
-        if not self.bot.info_data_ready:
+        if not self.bot.info_ready:
             return await itr.followup.send(
                 "Song data synchronization in progress, feature unavailable.",
             )
@@ -104,7 +104,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         """
 
         await itr.response.defer(ephemeral=True)
-        if not self.bot.info_data_ready:
+        if not self.bot.info_ready:
             return await itr.followup.send(
                 "Song data synchronization in progress, feature unavailable.",
             )
@@ -161,7 +161,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             ssl_song[info_columns.index("skills")] if "skills" in info_columns else None
         )
 
-        msd_data = self.bot.info_msd[game]
+        msd_data = self.bot.msd[game]
         for song in msd_data:
             if song["code"] == song_id:
                 color = int(song["albumBgColor"][:-2], 16)
@@ -172,7 +172,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             image_url = None
 
         if game_details["legacyUrlScheme"] and image_url:
-            url_data = self.bot.info_url[game]
+            url_data = self.bot.url[game]
             for url in url_data:
                 if url["code"] == image_url:
                     image_url = url["url"]

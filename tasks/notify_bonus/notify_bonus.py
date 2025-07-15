@@ -74,14 +74,14 @@ class NotifyBonus(commands.Cog):
 
             bonus_columns = game_details["bonusColumns"]
             member_name_index = bonus_columns.index("member_name")
-            album_name_index = bonus_columns.index("album_name")
+            # album_name_index = bonus_columns.index("album_name")
             song_name_index = bonus_columns.index("song_name")
             duration_index = bonus_columns.index("duration")
             bonus_start_index = bonus_columns.index("bonus_start")
             bonus_end_index = bonus_columns.index("bonus_end")
             bonus_amount_index = bonus_columns.index("bonus_amount")
 
-            bonus_data = self.bot.bonus_data[game]
+            bonus_data = self.bot.bonus[game]
             artists = bonus_data.keys()
             for artist in artists:
                 artist_pings = next(
@@ -206,11 +206,11 @@ class NotifyBonus(commands.Cog):
 
                     if song_start == current_date or song_end == current_date:
                         song_total = birthday_total + bonus[bonus_amount_index]
-                        album_name = (
-                            bonus[album_name_index]
-                            .replace(r"*", r"\*")
-                            .replace(r"_", r"\_")
-                        )
+                        # album_name = (
+                        #     bonus[album_name_index]
+                        #     .replace(r"*", r"\*")
+                        #     .replace(r"_", r"\_")
+                        # )
                         song_name = (
                             bonus[song_name_index]
                             .replace(r"*", r"\*")
@@ -220,7 +220,7 @@ class NotifyBonus(commands.Cog):
 
                         if song_end == current_date and end_check:
                             msg = (
-                                f"> {album_name} - **{song_name}** ({song_duration})\n"
+                                f"> **{song_name}** ({song_duration})\n"
                                 f"> {song_total}% | "
                                 f"{song_start.strftime("%B %d").replace(" 0", " ")} "
                                 f"- {song_end.strftime("%B %d").replace(" 0", " ")}\n"
@@ -228,7 +228,7 @@ class NotifyBonus(commands.Cog):
                             notify_end.append(msg)
                         elif song_start == current_date and start_check:
                             msg = (
-                                f"> {album_name} - **{song_name}** ({song_duration})\n"
+                                f"> **{song_name}** ({song_duration})\n"
                                 f"> {song_total}% | "
                                 f"{song_start.strftime("%B %d").replace(" 0", " ")} "
                                 f"- {song_end.strftime("%B %d").replace(" 0", " ")}\n"
@@ -236,9 +236,28 @@ class NotifyBonus(commands.Cog):
                             notify_start.append(msg)
 
                 if notify_start or notify_end:
+                    try:
+                        group_code = int(artist_pings[ping_emblem_index])
+                        grd_data = self.bot.grd[game]
+                        for group in grd_data:
+                            if group["code"] == group_code:
+                                icon_url = group["emblemImage"]
+                                break
+                        else:
+                            icon_url = None
+
+                        if game_details["legacyUrlScheme"] and icon_url:
+                            url_data = self.bot.url[game]
+                            for url in url_data:
+                                if url["code"] == icon_url:
+                                    icon_url = url["url"]
+                                    break
+                    except ValueError:
+                        icon_url = artist_pings[ping_emblem_index] or None
+
                     embed = NotifyBonusEmbed(
                         artist,
-                        artist_pings[ping_emblem_index] or None,
+                        icon_url,
                         current_date,
                         notify_start,
                         notify_end,

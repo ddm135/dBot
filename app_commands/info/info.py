@@ -45,7 +45,7 @@ class Info(commands.Cog):
         """
 
         await itr.response.defer()
-        if not self.bot.info_data_ready:
+        if not self.bot.info_ready:
             return await itr.followup.send(
                 "Song data synchronization in progress, feature unavailable."
             )

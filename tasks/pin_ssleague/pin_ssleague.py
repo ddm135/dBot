@@ -98,7 +98,7 @@ class PinSSLeague(commands.Cog):
         duration = ssl_song[duration_index]
         skills = ssl_song[skills_index] if skills_index is not None else None
 
-        msd_data = self.bot.info_msd[game]
+        msd_data = self.bot.msd[game]
         for song in msd_data:
             if song["code"] == song_id:
                 color = int(song["albumBgColor"][:-2], 16)
@@ -109,7 +109,7 @@ class PinSSLeague(commands.Cog):
             image_url = None
 
         if game_details["legacyUrlScheme"] and image_url:
-            url_data = self.bot.info_url[game]
+            url_data = self.bot.url[game]
             for url in url_data:
                 if url["code"] == image_url:
                     image_url = url["url"]

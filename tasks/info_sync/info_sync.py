@@ -25,47 +25,20 @@ class InfoSync(commands.Cog):
         self.info_sync.start()
 
     async def cog_unload(self) -> None:
-        self.bot.info_data_ready = False
+        self.bot.info_ready = False
         self.info_sync.cancel()
-        self.bot.info_ajs.clear()
-        self.bot.info_msd.clear()
-        self.bot.info_url.clear()
         self.bot.info_by_name.clear()
         self.bot.info_by_id.clear()
 
-    @tasks.loop(time=[time(hour=h, minute=5) for h in range(24)])
+    @tasks.loop(time=[time(hour=h, minute=20) for h in range(24)])
     async def info_sync(self) -> None:
-        self.bot.info_data_ready = False
+        self.bot.info_ready = False
         for game, game_details in GAMES.items():
             await self.get_info_data(game, game_details)
-        self.bot.info_data_ready = True
+        self.bot.info_ready = True
 
     async def get_info_data(self, game: str, game_details: "GameDetails") -> None:
         self.LOGGER.info("Downloading info data: %s...", game_details["name"])
-        if game_details["api"]:
-            cog = self.bot.get_cog("SuperStar")
-            ajs = await cog.get_a_json(game_details["api"])
-
-            if ajs["code"] == 1000:
-                self.bot.info_ajs[game].clear()
-                self.bot.info_ajs[game] = ajs
-            else:
-                self.LOGGER.info(
-                    "%s server is unavailable. Skipping...", game_details["name"]
-                )
-                ajs = self.bot.info_ajs[game]
-
-            if ajs:
-                self.bot.info_msd[game].clear()
-                self.bot.info_msd[game] = await cog.get_data(
-                    ajs["result"]["context"]["MusicData"]["file"]
-                )
-                if game_details["legacyUrlScheme"]:
-                    self.bot.info_url[game].clear()
-                    self.bot.info_url[game] = await cog.get_data(
-                        ajs["result"]["context"]["URLs"]["file"]
-                    )
-
         self.bot.info_by_name[game].clear()
         self.bot.info_by_id[game].clear()
         if not game_details["infoSpreadsheet"]:

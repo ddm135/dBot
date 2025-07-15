@@ -22,22 +22,22 @@ class BonusSync(commands.Cog):
         self.bonus_sync.start()
 
     async def cog_unload(self) -> None:
-        self.bot.bonus_data_ready = False
+        self.bot.bonus_ready = False
         self.bonus_sync.cancel()
-        self.bot.bonus_data.clear()
+        self.bot.bonus.clear()
 
-    @tasks.loop(time=[time(hour=h, minute=10) for h in range(24)])
+    @tasks.loop(time=[time(hour=h, minute=30) for h in range(24)])
     async def bonus_sync(self) -> None:
-        self.bot.bonus_data_ready = False
+        self.bot.bonus_ready = False
         for game, game_details in GAMES.items():
             await self.get_bonus_data(game, game_details)
-        self.bot.bonus_data_ready = True
+        self.bot.bonus_ready = True
 
     async def get_bonus_data(self, game: str, game_details: "GameDetails") -> None:
         if not game_details["bonusSpreadsheet"]:
             return
         self.LOGGER.info("Downloading bonus data: %s...", game_details["name"])
-        self.bot.bonus_data[game].clear()
+        self.bot.bonus[game].clear()
 
         cog = self.bot.get_cog("GoogleSheets")
         bonus = await cog.get_sheet_data(  # type: ignore[union-attr]
@@ -74,7 +74,7 @@ class BonusSync(commands.Cog):
                 )
             )
             row[bonus_amount_index] = int(raw_row[bonus_amount_index].replace("%", ""))
-            self.bot.bonus_data[game][raw_row[artist_name_index]].append(row)
+            self.bot.bonus[game][raw_row[artist_name_index]].append(row)
 
 
 async def setup(bot: "dBot") -> None:

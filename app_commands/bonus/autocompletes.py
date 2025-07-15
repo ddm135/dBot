@@ -13,10 +13,10 @@ if TYPE_CHECKING:
 async def artist_autocomplete(
     itr: discord.Interaction["dBot"], current: str
 ) -> list[app_commands.Choice[str]]:
-    if not (game := itr.namespace.game) or not itr.client.bonus_data_ready:
+    if not (game := itr.namespace.game) or not itr.client.bonus_ready:
         return []
 
-    artists = itr.client.bonus_data[game].keys()
+    artists = itr.client.bonus[game].keys()
     artist_choices = (
         app_commands.Choice(name=artist, value=artist)
         for artist in artists

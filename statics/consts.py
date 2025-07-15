@@ -40,6 +40,7 @@ EXTENSIONS = (
     "helpers.google_drive",
     "helpers.superstar",
     "commands.administrative",
+    "tasks.dalcom_sync",
     "tasks.info_sync",
     "tasks.pin_ssleague",
     "app_commands.info",
