@@ -22,7 +22,7 @@ class NotifyBonus(commands.Cog):
     async def cog_unload(self) -> None:
         self.notify_bonus.cancel()
 
-    @tasks.loop(time=[time(hour=h, minute=10) for h in range(24)])
+    @tasks.loop(time=[time(hour=h, minute=13) for h in range(24)])
     async def notify_bonus(self) -> None:
         cog = self.bot.get_cog("GoogleSheets")
 
