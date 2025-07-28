@@ -27,7 +27,9 @@ class NotifyBonus(commands.Cog):
         cog = self.bot.get_cog("GoogleSheets")
 
         for game, game_details in GAMES.items():
-            if not game_details["bonusSpreadsheet"]:
+            # if not game_details["bonusSpreadsheet"]:
+            #     continue
+            if game != "SC":
                 continue
 
             timezone = game_details["timezone"]
@@ -273,32 +275,32 @@ class NotifyBonus(commands.Cog):
                         except discord.NotFound:
                             continue
 
-                        try:
-                            if not game_ping_dict[user_id]:
-                                game_ping_dict[user_id] = True
-                                await user.send(initial_msg)
+                        # try:
+                        if not game_ping_dict[user_id]:
+                            game_ping_dict[user_id] = True
+                            await user.send(initial_msg)
 
-                            await user.send(embed=embed, silent=True)
-                        except discord.Forbidden:
-                            channel = self.bot.get_channel(
-                                STATUS_CHANNEL
-                            ) or await self.bot.fetch_channel(STATUS_CHANNEL)
-                            assert isinstance(channel, discord.TextChannel)
-                            await channel.send(
-                                f"<@{OWNER_ID}> Failed to send bonus ping to "
-                                f"{user.name} ({user.id}) for {game_name} - {artist}."
-                            )
-                        except discord.HTTPException:
-                            channel = self.bot.get_channel(
-                                STATUS_CHANNEL
-                            ) or await self.bot.fetch_channel(STATUS_CHANNEL)
-                            assert isinstance(channel, discord.TextChannel)
-                            await channel.send(
-                                f"<@{OWNER_ID}> Failed to send bonus ping "
-                                f"for {game_name} - {artist}."
-                            )
-                            await channel.send(str(embed.fields))
-                            break
+                        await user.send(embed=embed, silent=True)
+                        # except discord.Forbidden:
+                        #     channel = self.bot.get_channel(
+                        #         STATUS_CHANNEL
+                        #     ) or await self.bot.fetch_channel(STATUS_CHANNEL)
+                        #     assert isinstance(channel, discord.TextChannel)
+                        #     await channel.send(
+                        #         f"<@{OWNER_ID}> Failed to send bonus ping to "
+                        #         f"{user.name} ({user.id}) for {game_name} - {artist}."
+                        #     )
+                        # except discord.HTTPException:
+                        #     channel = self.bot.get_channel(
+                        #         STATUS_CHANNEL
+                        #     ) or await self.bot.fetch_channel(STATUS_CHANNEL)
+                        #     assert isinstance(channel, discord.TextChannel)
+                        #     await channel.send(
+                        #         f"<@{OWNER_ID}> Failed to send bonus ping "
+                        #         f"for {game_name} - {artist}."
+                        #     )
+                        #     await channel.send(str(embed.fields))
+                        #     break
 
     @notify_bonus.before_loop
     async def before_notify_bonus(self) -> None:
