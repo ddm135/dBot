@@ -58,7 +58,7 @@ class SSLeagueEmbed(discord.Embed):
             inline=False,
         )
 
-        # self.set_thumbnail(url=image_url)
+        self.set_thumbnail(url=image_url)
         self.set_footer(
             text=(
                 f"{current_time.strftime("%A, %B %d, %Y").replace(" 0", " ")}"
