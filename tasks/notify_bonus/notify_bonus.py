@@ -22,13 +22,12 @@ class NotifyBonus(commands.Cog):
     async def cog_unload(self) -> None:
         self.notify_bonus.cancel()
 
-    @tasks.loop(time=[time(hour=h, minute=46) for h in range(24)])
+    @tasks.loop(time=[time(hour=h) for h in range(24)])
     async def notify_bonus(self) -> None:
         cog = self.bot.get_cog("GoogleSheets")
 
         for game, game_details in GAMES.items():
-            # if not game_details["bonusSpreadsheet"]:
-            if game != "SC":
+            if not game_details["bonusSpreadsheet"]:
                 continue
 
             timezone = game_details["timezone"]
