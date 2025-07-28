@@ -13,7 +13,7 @@ from google.auth.transport import requests
 from google.oauth2.service_account import IDTokenCredentials
 from packaging.version import Version
 
-from .types import SSLeagueEmbed as _SSLeagueEmbed
+from .embeds import SSLeagueEmbed as _SSLeagueEmbed
 from .types import SuperStarHeaders
 
 if TYPE_CHECKING:

@@ -18,7 +18,7 @@ class NotifyBonusEmbed(discord.Embed):
         super().__init__(color=color)
         self.set_author(
             name=artist.replace(r"*", r"\*").replace(r"_", r"\_"),
-            icon_url=icon_url,
+            # icon_url=icon_url,
         )
 
         started = False
