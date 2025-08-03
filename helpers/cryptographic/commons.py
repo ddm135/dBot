@@ -1,1 +1,3 @@
-AES_KEY = b"WnFKN1v_gUcgmUVZnjjjGXGwk557zBSO"
+import os
+
+AES_KEY = os.getenv("AES_KEY").encode()  # type: ignore[union-attr]
