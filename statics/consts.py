@@ -1,4 +1,5 @@
 from datetime import timedelta
+from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING
 from zoneinfo import ZoneInfo
@@ -58,6 +59,13 @@ EXTENSIONS = (
     "events.on_message",
     "events.on_ready",
 )
+
+
+class AssetScheme(Enum):
+    JSON = 1
+    DIRECT = 2
+    BUNDLE = 3
+
 
 GAMES: dict[str, "GameDetails"] = {
     "SM": {
@@ -122,7 +130,7 @@ GAMES: dict[str, "GameDetails"] = {
         "api": "https://smtown-api-https.dalcomsoft.net",
         "authorization": "SFFINkh6ckdwRkZiRmlYeis1Mi86U1cwU0JxdWg1dw==",
         "target_audience": "864447301209-h0hsb0denh03td7sgoelh5lmdvv79f9h",
-        "legacyUrlScheme": False,
+        "assetScheme": AssetScheme.DIRECT,
     },
     "JYP": {
         "name": "SUPERSTAR JYP",
@@ -187,7 +195,7 @@ GAMES: dict[str, "GameDetails"] = {
         "api": "https://jypnation-api-https.dalcomsoft.net",
         "authorization": "MHhYTEhMQnV1aGpqY3ZRd1JHbUY6SlE0VFZZaVhXYw==",
         "target_audience": "506321732908-4u8t2uk3888gm8087i7lcpi97ff6ld4a",
-        "legacyUrlScheme": False,
+        "assetScheme": AssetScheme.DIRECT,
     },
     "SS": {
         "name": "SUPERSTAR STARSHIP",
@@ -247,7 +255,7 @@ GAMES: dict[str, "GameDetails"] = {
         "api": "https://sss-api-https.dalcomsoft.net",
         "authorization": "bnZQb1RweVg4WVlyUlZERE85Zkc6WVBrQklrNFdhcQ==",
         "target_audience": "42043845970-4hm4teclds9q4pji2on6f8o35n4ji6ac",
-        "legacyUrlScheme": False,
+        "assetScheme": AssetScheme.DIRECT,
     },
     "KD": {
         "name": "SuperStar KANGDANIEL",
@@ -282,7 +290,7 @@ GAMES: dict[str, "GameDetails"] = {
         "api": "",
         "authorization": "",
         "target_audience": "",
-        "legacyUrlScheme": True,
+        "assetScheme": AssetScheme.JSON,
     },
     "ATZ": {
         "name": "SUPERSTAR ATEEZ",
@@ -340,7 +348,7 @@ GAMES: dict[str, "GameDetails"] = {
         "api": "https://ssat-api-https.dalcomsoft.net",
         "authorization": "QWVob3JZcmxGanJ2dmRtTXY4S0w6SVJLR0lqTlRyRw==",
         "target_audience": "832096356756-6nust6ofm2hfoima94nd93uakqq44ev8",
-        "legacyUrlScheme": False,
+        "assetScheme": AssetScheme.BUNDLE,
     },
     "SC": {
         "name": "SUPERSTAR STAYC",
@@ -398,7 +406,7 @@ GAMES: dict[str, "GameDetails"] = {
         "api": "https://api-https.sssc.dalcomsoft.net",
         "authorization": "WW5yI0VCPmlKM182fG5qXllrMzQ6THpULVQ3UF9dfg==",
         "target_audience": "154091709836-q1sk7hq02vi16f3v0q88uvuf6op5lenv",
-        "legacyUrlScheme": False,
+        "assetScheme": AssetScheme.BUNDLE,
     },
     "W1": {
         "name": "SUPERSTAR WAKEONE",
@@ -432,7 +440,7 @@ GAMES: dict[str, "GameDetails"] = {
         "api": "https://sswo-api-https.dalcomsoft.net",
         "authorization": "",
         "target_audience": "259379396797-tfc19vpi39fosa2sic420po6l67p9ltu",
-        "legacyUrlScheme": False,
+        "assetScheme": AssetScheme.BUNDLE,
     },
     "SMTOWN": {
         "name": "SUPERSTAR SMTOWN (JP/TW)",
@@ -495,7 +503,7 @@ GAMES: dict[str, "GameDetails"] = {
         "api": "http://ss-sm-api-real.superstarsmtown.jp",
         "authorization": "",
         "target_audience": "28835016655-choauh766oss3ht8ddqiamavvtfm05ur",
-        "legacyUrlScheme": False,
+        "assetScheme": AssetScheme.DIRECT,
     },
     "JYPNATION": {
         "name": "SUPERSTAR JYPNATION (JP)",
@@ -560,7 +568,7 @@ GAMES: dict[str, "GameDetails"] = {
         "api": "https://ss-jyp-api-real.superstarjyp.jp",
         "authorization": "",
         "target_audience": "776124120237-r7q2lcrob52mp0asch12hbmkd52elej5",
-        "legacyUrlScheme": True,
+        "assetScheme": AssetScheme.JSON,
     },
     "LP": {
         "name": "SUPERSTAR LAPONE",
@@ -625,7 +633,7 @@ GAMES: dict[str, "GameDetails"] = {
         "api": "https://ss-lapone-api-real.superstarlapone.jp",
         "authorization": "",
         "target_audience": "668693032380-fmhat079lhao0o335ov5uk4jkl6kget6",
-        "legacyUrlScheme": True,
+        "assetScheme": AssetScheme.JSON,
     },
     "EB": {
         "name": "SUPERSTAR EBiDAN",
@@ -681,7 +689,7 @@ GAMES: dict[str, "GameDetails"] = {
         "api": "https://ss-ebidan-api-real.superstarebidan.jp",
         "authorization": "",
         "target_audience": "1006848262784-luosgb8o1hrjvbu6v8mjgh35b5oiimli",
-        "legacyUrlScheme": True,
+        "assetScheme": AssetScheme.JSON,
     },
     "PH": {
         "name": "SuperStar Philippines",
@@ -737,7 +745,7 @@ GAMES: dict[str, "GameDetails"] = {
         "api": "https://ssph-api-https.dalcomsoft.net",
         "authorization": "WWFeNnhxVldSJWFkVWp4Z3ViOFY6WmJRcy1uZ1YyQQ==",
         "target_audience": "234980834479-creie63p99odjttcv9pvifjelsuf983i",
-        "legacyUrlScheme": True,
+        "assetScheme": AssetScheme.JSON,
     },
 }
 

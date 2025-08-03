@@ -1,6 +1,8 @@
 from typing import TypedDict
 from zoneinfo import ZoneInfo
 
+from statics.consts import AssetScheme
+
 
 class GameDetails(TypedDict):
     name: str
@@ -26,7 +28,7 @@ class GameDetails(TypedDict):
     api: str
     authorization: str
     target_audience: str
-    legacyUrlScheme: bool
+    assetScheme: AssetScheme
 
 
 class LastAppearance(TypedDict):

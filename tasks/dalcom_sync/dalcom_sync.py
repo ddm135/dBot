@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 from discord.ext import commands, tasks
 
-from statics.consts import GAMES
+from statics.consts import GAMES, AssetScheme
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -61,7 +61,7 @@ class DalcomSync(commands.Cog):
             self.bot.grd[game] = await cog.get_data(
                 ajs["result"]["context"]["GroupData"]["file"]
             )
-            if game_details["legacyUrlScheme"]:
+            if game_details["assetScheme"] == AssetScheme.JSON:
                 self.bot.url[game].clear()
                 self.bot.url[game] = await cog.get_data(
                     ajs["result"]["context"]["URLs"]["file"]

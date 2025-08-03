@@ -8,7 +8,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from statics.consts import GAMES, RESET_OFFSET
+from statics.consts import GAMES, RESET_OFFSET, AssetScheme
 
 from .autocompletes import (
     artist_autocomplete,
@@ -162,6 +162,8 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         )
 
         msd_data = self.bot.msd[game]
+        url_data = self.bot.url[game]
+        grd_data = self.bot.grd[game]
         for song in msd_data:
             if song["code"] == song_id:
                 color = int(song["albumBgColor"][:-2], 16)
@@ -173,15 +175,17 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             image_url = None
             group_code = None
 
-        if game_details["legacyUrlScheme"] and image_url:
-            url_data = self.bot.url[game]
+        if game_details["assetScheme"] == AssetScheme.BUNDLE:
+            image_url = None
+            group_code = None
+
+        if game_details["assetScheme"] == AssetScheme.JSON and image_url:
             for url in url_data:
                 if url["code"] == image_url:
                     image_url = url["url"]
                     break
 
         if group_code:
-            grd_data = self.bot.grd[game]
             for group in grd_data:
                 if group["code"] == group_code:
                     icon_url = group["emblemImage"]
@@ -189,8 +193,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             else:
                 icon_url = None
 
-            if game_details["legacyUrlScheme"] and icon_url:
-                url_data = self.bot.url[game]
+            if game_details["assetScheme"] == AssetScheme.JSON and icon_url:
                 for url in url_data:
                     if url["code"] == icon_url:
                         icon_url = url["url"]

@@ -19,12 +19,12 @@ class SSLeagueEmbed(discord.Embed):
         song_last: datetime | None = None,
     ) -> None:
         super().__init__(
-            color=color,
             title=f"SSL #{current_time.strftime("%u")}",
             description=(
                 f"**{artist_name.replace(r"*", r"\*").replace(r"_", r"\_")} - "
                 f"{song_name.replace(r"*", r"\*").replace(r"_", r"\_")}**"
             ),
+            color=color,
         )
 
         self.add_field(

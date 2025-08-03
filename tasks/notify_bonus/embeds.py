@@ -15,11 +15,14 @@ class NotifyBonusEmbed(discord.Embed):
         ends: list[str],
         color: int,
     ) -> None:
-        super().__init__(color=color)
-        self.set_author(
-            name=artist.replace(r"*", r"\*").replace(r"_", r"\_"),
-            # icon_url=icon_url,
+        super().__init__(
+            title=artist.replace(r"*", r"\*").replace(r"_", r"\_"),
+            color=color,
         )
+        # self.set_author(
+        #     name=artist.replace(r"*", r"\*").replace(r"_", r"\_"),
+        #     icon_url=icon_url,
+        # )
 
         started = False
         while starts:

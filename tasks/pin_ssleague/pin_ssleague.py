@@ -11,7 +11,7 @@ import discord
 import discord.backoff
 from discord.ext import commands, tasks
 
-from statics.consts import GAMES, RESET_OFFSET
+from statics.consts import GAMES, RESET_OFFSET, AssetScheme
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -99,6 +99,8 @@ class PinSSLeague(commands.Cog):
         skills = ssl_song[skills_index] if skills_index is not None else None
 
         msd_data = self.bot.msd[game]
+        url_data = self.bot.url[game]
+        grd_data = self.bot.grd[game]
         for song in msd_data:
             if song["code"] == song_id:
                 color = int(song["albumBgColor"][:-2], 16)
@@ -110,15 +112,17 @@ class PinSSLeague(commands.Cog):
             image_url = None
             group_code = None
 
-        if game_details["legacyUrlScheme"] and image_url:
-            url_data = self.bot.url[game]
+        if game_details["assetScheme"] == AssetScheme.BUNDLE:
+            image_url = None
+            group_code = None
+
+        if game_details["assetScheme"] == AssetScheme.JSON and image_url:
             for url in url_data:
                 if url["code"] == image_url:
                     image_url = url["url"]
                     break
 
         if group_code:
-            grd_data = self.bot.grd[game]
             for group in grd_data:
                 if group["code"] == group_code:
                     icon_url = group["emblemImage"]
@@ -126,8 +130,7 @@ class PinSSLeague(commands.Cog):
             else:
                 icon_url = None
 
-            if game_details["legacyUrlScheme"] and icon_url:
-                url_data = self.bot.url[game]
+            if game_details["assetScheme"] == AssetScheme.JSON and icon_url:
                 for url in url_data:
                     if url["code"] == icon_url:
                         icon_url = url["url"]
