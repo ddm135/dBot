@@ -69,6 +69,7 @@ class BonusSync(commands.Cog):
                 else (
                     raw_row[duration_index]
                     if ":" in raw_row[duration_index]
+                    or "N/A" in raw_row[duration_index]
                     else f"{int(raw_row[duration_index]) // 60}:"
                     f"{int(raw_row[duration_index]) % 60:02d}"
                 )
