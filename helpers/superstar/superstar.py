@@ -25,19 +25,21 @@ class SuperStar(commands.Cog):
         self.bot = bot
 
     @staticmethod
-    async def get_active_version(manifest_url: str, credentials: dict) -> str:
+    async def get_versions(manifest_url: str, credentials: dict) -> tuple[str, str]:
         async with aiohttp.ClientSession() as session:
             async with session.get(
                 url=manifest_url.format(version=credentials["version"]),
             ) as r:
                 manifest = await r.json(content_type=None)
-                return str(
+                active_version = str(
                     max(
                         Version(credentials["version"]),
                         Version(manifest["ActiveVersion_Android"]),
                         Version(manifest["ActiveVersion_IOS"]),
                     )
                 )
+                resource_version = manifest.get("ResourceVersion", "0")
+        return active_version, resource_version
 
     async def get_a_json(self, api_url: str) -> dict:
         headers = SuperStarHeaders()

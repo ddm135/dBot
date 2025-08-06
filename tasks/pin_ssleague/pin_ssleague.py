@@ -56,7 +56,7 @@ class PinSSLeague(commands.Cog):
 
         while True:
             try:
-                credentials["version"] = await cog.get_active_version(
+                credentials["version"], _ = await cog.get_versions(
                     game_details["manifest"], credentials
                 )
                 match credentials["provider"]:
@@ -112,11 +112,14 @@ class PinSSLeague(commands.Cog):
             image_url = None
             group_code = None
 
-        if game_details["assetScheme"] == AssetScheme.BUNDLE:
+        if game_details["assetScheme"] in (
+            AssetScheme.JSON_CATALOG,
+            AssetScheme.BINARY_CATALOG,
+        ):
             image_url = None
             group_code = None
 
-        if game_details["assetScheme"] == AssetScheme.JSON and image_url:
+        if game_details["assetScheme"] == AssetScheme.JSON_URL and image_url:
             for url in url_data:
                 if url["code"] == image_url:
                     image_url = url["url"]
@@ -130,7 +133,7 @@ class PinSSLeague(commands.Cog):
             else:
                 icon_url = None
 
-            if game_details["assetScheme"] == AssetScheme.JSON and icon_url:
+            if game_details["assetScheme"] == AssetScheme.JSON_URL and icon_url:
                 for url in url_data:
                     if url["code"] == icon_url:
                         icon_url = url["url"]

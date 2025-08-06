@@ -253,7 +253,10 @@ class NotifyBonus(commands.Cog):
                         else:
                             icon_url = None
 
-                        if game_details["assetScheme"] == AssetScheme.JSON and icon_url:
+                        if (
+                            game_details["assetScheme"] == AssetScheme.JSON_URL
+                            and icon_url
+                        ):
                             url_data = self.bot.url[game]
                             for url in url_data:
                                 if url["code"] == icon_url:
@@ -262,7 +265,10 @@ class NotifyBonus(commands.Cog):
                     except ValueError:
                         icon_url = artist_pings[ping_emblem_index] or None
 
-                    if game_details["assetScheme"] == AssetScheme.BUNDLE:
+                    if game_details["assetScheme"] in (
+                        AssetScheme.JSON_CATALOG,
+                        AssetScheme.BINARY_CATALOG,
+                    ):
                         icon_url = None
 
                     embed = NotifyBonusEmbed(

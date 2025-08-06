@@ -175,11 +175,14 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             image_url = None
             group_code = None
 
-        if game_details["assetScheme"] == AssetScheme.BUNDLE:
+        if game_details["assetScheme"] in (
+            AssetScheme.JSON_CATALOG,
+            AssetScheme.BINARY_CATALOG,
+        ):
             image_url = None
             group_code = None
 
-        if game_details["assetScheme"] == AssetScheme.JSON and image_url:
+        if game_details["assetScheme"] == AssetScheme.JSON_URL and image_url:
             for url in url_data:
                 if url["code"] == image_url:
                     image_url = url["url"]
@@ -193,7 +196,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             else:
                 icon_url = None
 
-            if game_details["assetScheme"] == AssetScheme.JSON and icon_url:
+            if game_details["assetScheme"] == AssetScheme.JSON_URL and icon_url:
                 for url in url_data:
                     if url["code"] == icon_url:
                         icon_url = url["url"]

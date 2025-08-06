@@ -62,9 +62,10 @@ EXTENSIONS = (
 
 
 class AssetScheme(Enum):
-    JSON = 1
-    DIRECT = 2
-    BUNDLE = 3
+    JSON_URL = 1
+    DIRECT_URL = 2
+    JSON_CATALOG = 3
+    BINARY_CATALOG = 4
 
 
 GAMES: dict[str, "GameDetails"] = {
@@ -128,9 +129,10 @@ GAMES: dict[str, "GameDetails"] = {
         "timezone": TIMEZONES["KST"],
         "manifest": "https://super-star.s3.amazonaws.com/version/{version}.txt",
         "api": "https://smtown-api-https.dalcomsoft.net",
+        "assetScheme": AssetScheme.DIRECT_URL,
+        "catalog": "",
         "authorization": "SFFINkh6ckdwRkZiRmlYeis1Mi86U1cwU0JxdWg1dw==",
         "target_audience": "864447301209-h0hsb0denh03td7sgoelh5lmdvv79f9h",
-        "assetScheme": AssetScheme.DIRECT,
     },
     "JYP": {
         "name": "SUPERSTAR JYP",
@@ -193,9 +195,10 @@ GAMES: dict[str, "GameDetails"] = {
             "https://superstar-jyp-resource.s3.amazonaws.com/version/j_{version}.txt"
         ),
         "api": "https://jypnation-api-https.dalcomsoft.net",
+        "assetScheme": AssetScheme.DIRECT_URL,
+        "catalog": "",
         "authorization": "MHhYTEhMQnV1aGpqY3ZRd1JHbUY6SlE0VFZZaVhXYw==",
         "target_audience": "506321732908-4u8t2uk3888gm8087i7lcpi97ff6ld4a",
-        "assetScheme": AssetScheme.DIRECT,
     },
     "SS": {
         "name": "SUPERSTAR STARSHIP",
@@ -253,9 +256,10 @@ GAMES: dict[str, "GameDetails"] = {
             "/version/real/manifest/{version}.txt"
         ),
         "api": "https://sss-api-https.dalcomsoft.net",
+        "assetScheme": AssetScheme.DIRECT_URL,
+        "catalog": "",
         "authorization": "bnZQb1RweVg4WVlyUlZERE85Zkc6WVBrQklrNFdhcQ==",
         "target_audience": "42043845970-4hm4teclds9q4pji2on6f8o35n4ji6ac",
-        "assetScheme": AssetScheme.DIRECT,
     },
     "KD": {
         "name": "SuperStar KANGDANIEL",
@@ -287,10 +291,11 @@ GAMES: dict[str, "GameDetails"] = {
             "https://superstar-kangdaniel.s3.amazonaws.com"
             "/version/real/manifest/{version}.txt"
         ),
+        "assetScheme": AssetScheme.JSON_URL,
+        "catalog": "",
         "api": "",
         "authorization": "",
         "target_audience": "",
-        "assetScheme": AssetScheme.JSON,
     },
     "ATZ": {
         "name": "SUPERSTAR ATEEZ",
@@ -346,9 +351,13 @@ GAMES: dict[str, "GameDetails"] = {
             "/version/real/manifest/{version}.txt"
         ),
         "api": "https://ssat-api-https.dalcomsoft.net",
+        "assetScheme": AssetScheme.BINARY_CATALOG,
+        "catalog": (
+            "http://d3kmsky8b54x07.cloudfront.net/assets"
+            "/LIVE/iOS/catalog_{version}.bin"
+        ),
         "authorization": "QWVob3JZcmxGanJ2dmRtTXY4S0w6SVJLR0lqTlRyRw==",
         "target_audience": "832096356756-6nust6ofm2hfoima94nd93uakqq44ev8",
-        "assetScheme": AssetScheme.BUNDLE,
     },
     "SC": {
         "name": "SUPERSTAR STAYC",
@@ -404,9 +413,13 @@ GAMES: dict[str, "GameDetails"] = {
             "/version/real/manifest/{version}.txt"
         ),
         "api": "https://api-https.sssc.dalcomsoft.net",
+        "assetScheme": AssetScheme.BINARY_CATALOG,
+        "catalog": (
+            "https://d4ybtwjh1nw39.cloudfront.net/assets"
+            "/LIVE/iOS/catalog_{version}.bin"
+        ),
         "authorization": "WW5yI0VCPmlKM182fG5qXllrMzQ6THpULVQ3UF9dfg==",
         "target_audience": "154091709836-q1sk7hq02vi16f3v0q88uvuf6op5lenv",
-        "assetScheme": AssetScheme.BUNDLE,
     },
     "W1": {
         "name": "SUPERSTAR WAKEONE",
@@ -438,9 +451,12 @@ GAMES: dict[str, "GameDetails"] = {
             "/version/real/manifest/{version}.txt"
         ),
         "api": "https://sswo-api-https.dalcomsoft.net",
+        "assetScheme": AssetScheme.JSON_CATALOG,
+        "catalog": (
+            "https://d189x7hw581nsg.cloudfront.net/assets" "/iOS/catalog_{version}.json"
+        ),
         "authorization": "",
         "target_audience": "259379396797-tfc19vpi39fosa2sic420po6l67p9ltu",
-        "assetScheme": AssetScheme.BUNDLE,
     },
     "SMTOWN": {
         "name": "SUPERSTAR SMTOWN (JP/TW)",
@@ -501,9 +517,10 @@ GAMES: dict[str, "GameDetails"] = {
             "https://superstar-smtown-real.s3.amazonaws.com/version/{version}.txt"
         ),
         "api": "http://ss-sm-api-real.superstarsmtown.jp",
+        "assetScheme": AssetScheme.DIRECT_URL,
+        "catalog": "",
         "authorization": "",
         "target_audience": "28835016655-choauh766oss3ht8ddqiamavvtfm05ur",
-        "assetScheme": AssetScheme.DIRECT,
     },
     "JYPNATION": {
         "name": "SUPERSTAR JYPNATION (JP)",
@@ -566,9 +583,10 @@ GAMES: dict[str, "GameDetails"] = {
             "/version/manifest/{version}.txt"
         ),
         "api": "https://ss-jyp-api-real.superstarjyp.jp",
+        "assetScheme": AssetScheme.JSON_URL,
+        "catalog": "",
         "authorization": "",
         "target_audience": "776124120237-r7q2lcrob52mp0asch12hbmkd52elej5",
-        "assetScheme": AssetScheme.JSON,
     },
     "LP": {
         "name": "SUPERSTAR LAPONE",
@@ -631,9 +649,10 @@ GAMES: dict[str, "GameDetails"] = {
             "/version/manifest/{version}.txt"
         ),
         "api": "https://ss-lapone-api-real.superstarlapone.jp",
+        "assetScheme": AssetScheme.JSON_URL,
+        "catalog": "",
         "authorization": "",
         "target_audience": "668693032380-fmhat079lhao0o335ov5uk4jkl6kget6",
-        "assetScheme": AssetScheme.JSON,
     },
     "EB": {
         "name": "SUPERSTAR EBiDAN",
@@ -687,9 +706,10 @@ GAMES: dict[str, "GameDetails"] = {
             "/version/manifest/{version}.txt"
         ),
         "api": "https://ss-ebidan-api-real.superstarebidan.jp",
+        "assetScheme": AssetScheme.JSON_URL,
+        "catalog": "",
         "authorization": "",
         "target_audience": "1006848262784-luosgb8o1hrjvbu6v8mjgh35b5oiimli",
-        "assetScheme": AssetScheme.JSON,
     },
     "PH": {
         "name": "SuperStar Philippines",
@@ -743,9 +763,10 @@ GAMES: dict[str, "GameDetails"] = {
             "/version/real/manifest/{version}.txt"
         ),
         "api": "https://ssph-api-https.dalcomsoft.net",
+        "assetScheme": AssetScheme.JSON_URL,
+        "catalog": "",
         "authorization": "WWFeNnhxVldSJWFkVWp4Z3ViOFY6WmJRcy1uZ1YyQQ==",
         "target_audience": "234980834479-creie63p99odjttcv9pvifjelsuf983i",
-        "assetScheme": AssetScheme.JSON,
     },
 }
 

@@ -61,7 +61,7 @@ class DalcomSync(commands.Cog):
             self.bot.grd[game] = await cog.get_data(
                 ajs["result"]["context"]["GroupData"]["file"]
             )
-            if game_details["assetScheme"] == AssetScheme.JSON:
+            if game_details["assetScheme"] == AssetScheme.JSON_URL:
                 self.bot.url[game].clear()
                 self.bot.url[game] = await cog.get_data(
                     ajs["result"]["context"]["URLs"]["file"]

@@ -26,9 +26,10 @@ class GameDetails(TypedDict):
     timezone: ZoneInfo
     manifest: str
     api: str
+    assetScheme: AssetScheme
+    catalog: str
     authorization: str
     target_audience: str
-    assetScheme: AssetScheme
 
 
 class LastAppearance(TypedDict):
