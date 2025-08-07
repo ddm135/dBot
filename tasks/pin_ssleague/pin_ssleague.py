@@ -29,7 +29,7 @@ class PinSSLeague(commands.Cog):
     async def cog_unload(self) -> None:
         self.pin_ssls.cancel()
 
-    @tasks.loop(time=[time(hour=h) for h in range(24)])
+    @tasks.loop(time=[time(hour=h, minute=44) for h in range(24)])
     async def pin_ssls(self) -> None:
         cog = self.bot.get_cog("DataSync")
         cog.save_last_appearance()
@@ -38,6 +38,7 @@ class PinSSLeague(commands.Cog):
             self.pin_ssl(game, self.bot.credentials[game])
             for game, game_details in GAMES.items()
             if game_details["pinChannelIds"] and game in self.bot.credentials
+            and game in ["LP", "JYPNATION"]
         ]
         await asyncio.gather(*pin_tasks, return_exceptions=True)
 
@@ -60,21 +61,25 @@ class PinSSLeague(commands.Cog):
                         oid, key = await cog.login_classic(
                             self.bot.basic[game], credentials
                         )
+                        print("classic")
                     case 0 if credentials["isSNS"] and (
                         target_audience := game_details.get("target_audience")
                     ):
                         oid, key = await cog.login_google(
                             self.bot.basic[game], credentials, target_audience
                         )
+                        print("google")
                     case 3 if credentials["isSNS"] and (
                         authorization := game_details.get("authorization")
                     ):
                         oid, key = await cog.login_dalcom_id(
                             self.bot.basic[game], credentials, authorization
                         )
+                        print("dalcom")
                     case _:
                         return
                 ssleague = await cog.get_ssleague(self.bot.basic[game], oid, key)
+                print(ssleague)
             except aiohttp.ClientError as e:
                 self.LOGGER.exception(str(e))
                 await asyncio.sleep(backoff.delay())

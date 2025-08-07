@@ -63,7 +63,6 @@ class BasicSync(commands.Cog):
                 catalog_json_path = catalog_folder_path / f"{resource_version}.json"
 
                 if not catalog_json_path.exists():
-                    self.bot.basic[game]["catalog"] = {}
                     if not catalog_bin_path.exists():
                         for file in catalog_folder_path.iterdir():
                             if file.is_file():
@@ -83,6 +82,7 @@ class BasicSync(commands.Cog):
                         stderr=asyncio.subprocess.PIPE,
                     )
                     await process.communicate()
+                    self.bot.basic[game]["catalog"] = {}
 
                 if not self.bot.basic[game].get("catalog"):
                     with open(catalog_json_path, "r", encoding="utf-8") as f:
