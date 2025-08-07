@@ -24,7 +24,7 @@ class SuperStar(commands.Cog):
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
 
-    async def get_a_json(self, api_url: str) -> dict:
+    async def get_a_json(self, basic_details: "BasicDetails") -> dict:
         headers = SuperStarHeaders()
         iv = headers["X-SuperStar-AES-IV"]
 
@@ -32,7 +32,7 @@ class SuperStar(commands.Cog):
             cog = self.bot.get_cog("Cryptographic")
 
             async with session.post(
-                url=api_url,
+                url=basic_details["manifest"]["ServerUrl"],
                 headers=headers,
                 data=cog.encrypt_cbc(
                     '{"class":"Platform","method":"checkAssetBundle","params":[0]}', iv

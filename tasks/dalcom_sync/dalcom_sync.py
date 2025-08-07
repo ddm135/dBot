@@ -41,7 +41,7 @@ class DalcomSync(commands.Cog):
 
         self.LOGGER.info("Downloading Dalcom data: %s...", game_details["name"])
         cog = self.bot.get_cog("SuperStar")
-        ajs = await cog.get_a_json(basic_details["manifest"]["ServerUrl"])
+        ajs = await cog.get_a_json(basic_details)
 
         if ajs["code"] == 1000:
             self.bot.ajs[game].clear()
