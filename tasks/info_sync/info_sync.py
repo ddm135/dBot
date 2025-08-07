@@ -52,10 +52,10 @@ class InfoSync(commands.Cog):
         )
 
         info_columns = game_details["infoColumns"]
-        artist_name_index = info_columns.index("artist_name")
-        song_name_index = info_columns.index("song_name")
-        song_id_index = info_columns.index("song_id")
-        duration_index = info_columns.index("duration")
+        artist_name_index = info_columns.value.index("artist_name")
+        song_name_index = info_columns.value.index("song_name")
+        song_id_index = info_columns.value.index("song_id")
+        duration_index = info_columns.value.index("duration")
 
         for row in info:
             if not row or len(row) < len(info_columns):
