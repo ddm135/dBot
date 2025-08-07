@@ -36,12 +36,12 @@ class DalcomSync(commands.Cog):
             await self.get_dalcom_data(game, game_details)
 
     async def get_dalcom_data(self, game: str, game_details: "GameDetails") -> None:
-        if not game_details["api"]:
+        if not (basic_details := self.bot.basic.get(game)):
             return
 
         self.LOGGER.info("Downloading Dalcom data: %s...", game_details["name"])
         cog = self.bot.get_cog("SuperStar")
-        ajs = await cog.get_a_json(game_details["api"])
+        ajs = await cog.get_a_json(basic_details["manifest"]["ServerUrl"])
 
         if ajs["code"] == 1000:
             self.bot.ajs[game].clear()

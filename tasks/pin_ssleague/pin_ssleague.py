@@ -50,33 +50,31 @@ class PinSSLeague(commands.Cog):
         current_time = datetime.now(tz=timezone) - RESET_OFFSET
         if current_time.hour:
             return
-        api_url = game_details["api"]
         backoff = discord.backoff.ExponentialBackoff()
         cog = self.bot.get_cog("SuperStar")
 
         while True:
             try:
-                credentials["version"], _ = await cog.get_versions(
-                    game_details["manifest"], credentials
-                )
                 match credentials["provider"]:
                     case 0 | 1 if not credentials["isSNS"]:
-                        oid, key = await cog.login_classic(api_url, credentials)
+                        oid, key = await cog.login_classic(
+                            self.bot.basic[game], credentials
+                        )
                     case 0 if credentials["isSNS"] and (
                         target_audience := game_details.get("target_audience")
                     ):
                         oid, key = await cog.login_google(
-                            api_url, credentials, target_audience
+                            self.bot.basic[game], credentials, target_audience
                         )
                     case 3 if credentials["isSNS"] and (
                         authorization := game_details.get("authorization")
                     ):
                         oid, key = await cog.login_dalcom_id(
-                            api_url, credentials, authorization
+                            self.bot.basic[game], credentials, authorization
                         )
                     case _:
                         return
-                ssleague = await cog.get_ssleague(api_url, oid, key)
+                ssleague = await cog.get_ssleague(self.bot.basic[game], oid, key)
             except aiohttp.ClientError as e:
                 self.LOGGER.exception(str(e))
                 await asyncio.sleep(backoff.delay())

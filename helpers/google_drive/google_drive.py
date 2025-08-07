@@ -42,7 +42,7 @@ class GoogleDrive(commands.Cog):
             ),
             num_retries=MAX_RETRIES,
             static_discovery=STATIC_DISCOVERY,
-        ).files()
+        ).files()  # pyright: ignore[reportAttributeAccessIssue]
 
     async def create_drive_file(
         self, data: "MediaFileUpload", metadata: "File"

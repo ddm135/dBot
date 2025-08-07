@@ -6,7 +6,6 @@ google-api-python-client-stubs>=1.30.0
 google-auth-httplib2>=0.2.0
 google-auth-oauthlib>=1.2.2
 numpy>=2.3.2
-packaging>=25.0
 pycryptodomex>=3.23.0
 python-dotenv>=1.1.1
 tzdata>=2025.2

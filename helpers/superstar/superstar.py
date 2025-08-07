@@ -11,35 +11,18 @@ import discord
 from discord.ext import commands
 from google.auth.transport import requests
 from google.oauth2.service_account import IDTokenCredentials
-from packaging.version import Version
 
 from .embeds import SSLeagueEmbed as _SSLeagueEmbed
 from .types import SuperStarHeaders
 
 if TYPE_CHECKING:
     from dBot import dBot
+    from statics.types import BasicDetails
 
 
 class SuperStar(commands.Cog):
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
-
-    @staticmethod
-    async def get_versions(manifest_url: str, credentials: dict) -> tuple[str, str]:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                url=manifest_url.format(version=credentials["version"]),
-            ) as r:
-                manifest = await r.json(content_type=None)
-                active_version = str(
-                    max(
-                        Version(credentials["version"]),
-                        Version(manifest["ActiveVersion_Android"]),
-                        Version(manifest["ActiveVersion_IOS"]),
-                    )
-                )
-                resource_version = manifest.get("ResourceVersion", "0")
-        return active_version, resource_version
 
     async def get_a_json(self, api_url: str) -> dict:
         headers = SuperStarHeaders()
@@ -55,10 +38,12 @@ class SuperStar(commands.Cog):
                     '{"class":"Platform","method":"checkAssetBundle","params":[0]}', iv
                 ),
             ) as r:
-                ajs = await self.read_json(r, iv)
+                ajs = await self.read_dalcom_json(r, iv)
         return ajs
 
-    async def login_classic(self, api_url: str, credentials: dict) -> tuple[int, str]:
+    async def login_classic(
+        self, basic_details: "BasicDetails", credentials: dict
+    ) -> tuple[int, str]:
         headers = SuperStarHeaders()
         iv = headers["X-SuperStar-AES-IV"]
 
@@ -66,18 +51,24 @@ class SuperStar(commands.Cog):
             cog = self.bot.get_cog("Cryptographic")
 
             async with session.post(
-                url=api_url,
+                url=basic_details["manifest"]["ServerUrl"],
                 headers=headers,
-                data=cog.encrypt_cbc(credentials["account"].format(**credentials), iv),
+                data=cog.encrypt_cbc(
+                    credentials["account"].format(
+                        version=basic_details["version"],
+                        **credentials,
+                    ),
+                    iv,
+                ),
             ) as r:
-                account = await self.read_json(r, iv)
+                account = await self.read_dalcom_json(r, iv)
 
         oid = account["result"]["user"]["objectID"]
         key = account["invoke"][0]["params"][0]
         return oid, key
 
     async def login_google(
-        self, api_url: str, credentials: dict, target_audience: str
+        self, basic_details: "BasicDetails", credentials: dict, target_audience: str
     ) -> tuple[int, str]:
         gredentials = IDTokenCredentials.from_service_account_file(
             filename=credentials["service_account"],
@@ -93,20 +84,25 @@ class SuperStar(commands.Cog):
             cog = self.bot.get_cog("Cryptographic")
 
             async with session.post(
-                url=api_url,
+                url=basic_details["manifest"]["ServerUrl"],
                 headers=headers,
                 data=cog.encrypt_cbc(
-                    credentials["account"].format(id_token=id_token, **credentials), iv
+                    credentials["account"].format(
+                        version=basic_details["version"],
+                        id_token=id_token,
+                        **credentials,
+                    ),
+                    iv,
                 ),
             ) as r:
-                account = await self.read_json(r, iv)
+                account = await self.read_dalcom_json(r, iv)
 
         oid = account["result"]["user"]["objectID"]
         key = account["invoke"][0]["params"][0]
         return oid, key
 
     async def login_dalcom_id(
-        self, api_url: str, credentials: dict, authorization: str
+        self, basic_details: "BasicDetails", credentials: dict, authorization: str
     ) -> tuple[int, str]:
         headers = SuperStarHeaders()
         iv = headers["X-SuperStar-AES-IV"]
@@ -130,16 +126,18 @@ class SuperStar(commands.Cog):
             cog = self.bot.get_cog("Cryptographic")
 
             async with session.post(
-                url=api_url,
+                url=basic_details["manifest"]["ServerUrl"],
                 headers=headers,
                 data=cog.encrypt_cbc(
                     credentials["account"].format(
-                        access_token=access_token, **credentials
+                        version=basic_details["version"],
+                        access_token=access_token,
+                        **credentials,
                     ),
                     iv,
                 ),
             ) as r:
-                account = await self.read_json(r, iv)
+                account = await self.read_dalcom_json(r, iv)
 
         oid = account["result"]["user"]["objectID"]
         key = account["invoke"][0]["params"][0]
@@ -162,10 +160,10 @@ class SuperStar(commands.Cog):
                     iv,
                 ),
             ) as r:
-                ssleague = await self.read_json(r, iv)
+                ssleague = await self.read_dalcom_json(r, iv)
         return ssleague
 
-    async def read_json(
+    async def read_dalcom_json(
         self, response: aiohttp.ClientResponse, iv: str | bytes
     ) -> dict:
         try:

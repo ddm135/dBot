@@ -7,7 +7,6 @@ from discord.ext import commands, tasks
 from statics.consts import (
     BONUS_OFFSET,
     GAMES,
-    OWNER_ID,
     STATUS_CHANNEL,
     TIMEZONES,
     AssetScheme,
@@ -301,8 +300,8 @@ class NotifyBonus(commands.Cog):
                             ) or await self.bot.fetch_channel(STATUS_CHANNEL)
                             assert isinstance(channel, discord.TextChannel)
                             await channel.send(
-                                f"<@{OWNER_ID}> Failed to send bonus ping to "
-                                f"{user.name} ({user.id}) for {game_name} - {artist}."
+                                f"<@{self.bot.owner_id}> Failed to send bonus ping to"
+                                f" {user.name} ({user.id}) for {game_name} - {artist}."
                             )
                         except discord.HTTPException as e:
                             channel = self.bot.get_channel(
@@ -310,8 +309,8 @@ class NotifyBonus(commands.Cog):
                             ) or await self.bot.fetch_channel(STATUS_CHANNEL)
                             assert isinstance(channel, discord.TextChannel)
                             await channel.send(
-                                f"<@{OWNER_ID}> Failed to send bonus ping for "
-                                f"{game_name} - {artist}. Check console for details."
+                                f"<@{self.bot.owner_id}> Failed to send bonus ping for"
+                                f" {game_name} - {artist}. Check console for details."
                             )
                             print(e)
                             break

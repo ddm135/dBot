@@ -38,12 +38,18 @@ class GameDetails(TypedDict):
     pinRoles: dict[int, int | None]
     dateFormat: str
     timezone: ZoneInfo
-    manifest: str
-    api: str
+    lookupQuery: NotRequired[str]
+    manifestUrl: NotRequired[str]
     assetScheme: "AssetScheme"
-    catalog: NotRequired[str]
+    catalogUrl: NotRequired[str]
     authorization: NotRequired[str]
     target_audience: NotRequired[str]
+
+
+class BasicDetails(TypedDict):
+    version: str
+    manifest: dict[str, str]
+    catalog: NotRequired[dict[str, dict[str, str]]]
 
 
 class LastAppearance(TypedDict):

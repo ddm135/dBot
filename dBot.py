@@ -1,5 +1,3 @@
-# pylint: disable=invalid-name
-
 import logging
 import os
 from collections import defaultdict
@@ -9,11 +7,15 @@ from discord.ext import commands
 from dotenv import load_dotenv
 
 from statics.consts import EXTENSIONS, LOCK, STATUS_CHANNEL
-from statics.types import LastAppearance
+from statics.types import BasicDetails, LastAppearance
 
 
 class dBot(commands.Bot):
     LOGGER = logging.getLogger("dBot")
+
+    basic: defaultdict[str, BasicDetails] = defaultdict(
+        lambda: BasicDetails(version="", manifest={})
+    )
 
     ajs: defaultdict[str, dict] = defaultdict(dict)
     grd: defaultdict[str, list[dict]] = defaultdict(list[dict])
@@ -73,6 +75,7 @@ bot = dBot(
     activity=discord.CustomActivity("Waiting for clock..."),
     member_cache_flags=discord.MemberCacheFlags.all(),
 )
+bot.owner_id = 180925261531840512
 
 load_dotenv()
 bot.run(
