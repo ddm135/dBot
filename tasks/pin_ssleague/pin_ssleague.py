@@ -29,7 +29,7 @@ class PinSSLeague(commands.Cog):
     async def cog_unload(self) -> None:
         self.pin_ssls.cancel()
 
-    @tasks.loop(time=[time(hour=h, minute=44) for h in range(24)])
+    @tasks.loop(time=[time(hour=h, minute=45) for h in range(24)])
     async def pin_ssls(self) -> None:
         cog = self.bot.get_cog("DataSync")
         cog.save_last_appearance()
