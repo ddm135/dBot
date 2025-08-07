@@ -34,19 +34,19 @@ class BonusSync(commands.Cog):
         self.bot.bonus_ready = True
 
     async def get_bonus_data(self, game: str, game_details: "GameDetails") -> None:
-        if not game_details["bonusSpreadsheet"]:
+        if not (bonus_details := game_details.get("bonus")):
             return
         self.LOGGER.info("Downloading bonus data: %s...", game_details["name"])
         self.bot.bonus[game].clear()
 
         cog = self.bot.get_cog("GoogleSheets")
         bonus = await cog.get_sheet_data(  # type: ignore[union-attr]
-            game_details["bonusSpreadsheet"],
-            game_details["bonusRange"],
+            bonus_details["spreadsheetId"],
+            bonus_details["range"],
             "kr" if game_details["timezone"] == TIMEZONES["KST"] else None,
         )
 
-        bonus_columns = game_details["bonusColumns"]
+        bonus_columns = bonus_details["columns"]
         artist_name_index = bonus_columns.index("artist_name")
         bonus_start_index = bonus_columns.index("bonus_start")
         bonus_end_index = bonus_columns.index("bonus_end")

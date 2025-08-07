@@ -10,6 +10,7 @@ from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 
 from statics.consts import MAX_RETRIES
+from statics.types import GridRange
 
 from .commons import SCOPES, SERVICE_NAME, STATIC_DISCOVERY, VERSION
 
@@ -89,7 +90,7 @@ class GoogleSheets(commands.Cog):
     async def find_replace_sheet_data(
         self,
         spreadsheet_id: str,
-        range_grid: dict[str, int | str],
+        range_grid: GridRange,
         find: str,
         replace: str,
         instance: str | None = None,
@@ -111,7 +112,7 @@ class GoogleSheets(commands.Cog):
                                 "matchEntireCell": True,
                                 "searchByRegex": False,
                                 "includeFormulas": False,
-                                "range": range_grid,  # type: ignore[typeddict-item]
+                                "range": range_grid,
                             }
                         }
                     ],

@@ -1,7 +1,24 @@
-from typing import TypedDict
+from typing import TYPE_CHECKING, NotRequired, TypedDict
 from zoneinfo import ZoneInfo
 
-from statics.consts import AssetScheme
+if TYPE_CHECKING:
+    from statics.consts import AssetScheme, InfoColumns
+
+
+class GridRange(TypedDict, total=False):
+    endColumnIndex: int
+    endRowIndex: int
+    sheetId: int
+    startColumnIndex: int
+    startRowIndex: int
+
+
+class SpreadsheetDetails(TypedDict):
+    spreadsheetId: str
+    range: str
+    columns: tuple[str, ...]
+    replaceGrid: GridRange
+    write: NotRequired[str]
 
 
 class GameDetails(TypedDict):
@@ -9,16 +26,13 @@ class GameDetails(TypedDict):
     infoSpreadsheet: str
     infoReplaceGrid: dict[str, int | str]
     infoRange: str
-    infoColumns: tuple[str, ...]
+    infoColumns: "InfoColumns"
     pingSpreadsheet: str
     pingReplaceGrid: dict[str, int | str]
     pingRange: str
     pingUsers: str
     pingColumns: tuple[str, ...]
-    bonusSpreadsheet: str
-    bonusReplaceGrid: dict[str, int | str]
-    bonusRange: str
-    bonusColumns: tuple[str, ...]
+    bonus: NotRequired[SpreadsheetDetails]
     color: int
     pinChannelIds: dict[int, int | None]
     pinRoles: dict[int, int | None]
@@ -26,10 +40,10 @@ class GameDetails(TypedDict):
     timezone: ZoneInfo
     manifest: str
     api: str
-    assetScheme: AssetScheme
-    catalog: str
-    authorization: str
-    target_audience: str
+    assetScheme: "AssetScheme"
+    catalog: NotRequired[str]
+    authorization: NotRequired[str]
+    target_audience: NotRequired[str]
 
 
 class LastAppearance(TypedDict):

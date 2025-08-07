@@ -8,7 +8,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from statics.consts import GAMES, RESET_OFFSET, AssetScheme
+from statics.consts import GAMES, RESET_OFFSET, AssetScheme, InfoColumns
 
 from .autocompletes import (
     artist_autocomplete,
@@ -150,15 +150,17 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
 
         info_columns = game_details["infoColumns"]
         if artist_name is None:
-            artist_name = ssl_song[info_columns.index("artist_name")]
+            artist_name = ssl_song[info_columns.value.index("artist_name")]
         if song_name is None:
-            song_name = ssl_song[info_columns.index("song_name")]
+            song_name = ssl_song[info_columns.value.index("song_name")]
         if song_id is None:
-            song_id = int(ssl_song[info_columns.index("song_id")])
+            song_id = int(ssl_song[info_columns.value.index("song_id")])
 
-        duration = ssl_song[info_columns.index("duration")]
+        duration = ssl_song[info_columns.value.index("duration")]
         skills = (
-            ssl_song[info_columns.index("skills")] if "skills" in info_columns else None
+            info_columns.value.index("skills")
+            if info_columns == InfoColumns.SSL_WITH_SKILLS
+            else None
         )
 
         msd_data = self.bot.msd[game]

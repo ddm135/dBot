@@ -11,7 +11,7 @@ import discord
 import discord.backoff
 from discord.ext import commands, tasks
 
-from statics.consts import GAMES, RESET_OFFSET, AssetScheme
+from statics.consts import GAMES, RESET_OFFSET, AssetScheme, InfoColumns
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -62,13 +62,17 @@ class PinSSLeague(commands.Cog):
                 match credentials["provider"]:
                     case 0 | 1 if not credentials["isSNS"]:
                         oid, key = await cog.login_classic(api_url, credentials)
-                    case 0 if credentials["isSNS"]:
+                    case 0 if credentials["isSNS"] and (
+                        target_audience := game_details.get("target_audience")
+                    ):
                         oid, key = await cog.login_google(
-                            api_url, credentials, game_details["target_audience"]
+                            api_url, credentials, target_audience
                         )
-                    case 3 if credentials["isSNS"]:
+                    case 3 if credentials["isSNS"] and (
+                        authorization := game_details.get("authorization")
+                    ):
                         oid, key = await cog.login_dalcom_id(
-                            api_url, credentials, game_details["authorization"]
+                            api_url, credentials, authorization
                         )
                     case _:
                         return
@@ -86,11 +90,13 @@ class PinSSLeague(commands.Cog):
         ssl_song = self.bot.info_by_id[game][str(song_id)]
 
         info_columns = game_details["infoColumns"]
-        artist_name_index = info_columns.index("artist_name")
-        song_name_index = info_columns.index("song_name")
-        duration_index = info_columns.index("duration")
+        artist_name_index = info_columns.value.index("artist_name")
+        song_name_index = info_columns.value.index("song_name")
+        duration_index = info_columns.value.index("duration")
         skills_index = (
-            info_columns.index("skills") if "skills" in info_columns else None
+            info_columns.value.index("skills")
+            if info_columns == InfoColumns.SSL_WITH_SKILLS
+            else None
         )
 
         artist_name = ssl_song[artist_name_index]

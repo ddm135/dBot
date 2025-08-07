@@ -226,11 +226,11 @@ class Administrative(commands.Cog):
                 new_name,
                 "kr" if game_details["timezone"] == TIMEZONES["KST"] else None,
             )
-        if game_details["bonusReplaceGrid"]:
+        if (bonus_details := game_details.get("bonus")):
             await msg.edit(content=f"{text}\nEditing bonus sheet...")
             await cog.find_replace_sheet_data(
-                game_details["bonusSpreadsheet"],
-                game_details["bonusReplaceGrid"],
+                bonus_details["spreadsheetId"],
+                bonus_details["replaceGrid"],
                 old_name,
                 new_name,
                 "kr" if game_details["timezone"] == TIMEZONES["KST"] else None,

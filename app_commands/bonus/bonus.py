@@ -21,7 +21,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
     GAME_CHOICES = [
         app_commands.Choice(name=game["name"], value=key)
         for key, game in GAMES.items()
-        if game["pingSpreadsheet"]
+        if {"bonus"} <= set(game)
     ]
 
     def __init__(self, bot: "dBot") -> None:
@@ -58,7 +58,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
 
         game_details = GAMES[game_choice.value]
         timezone = game_details["timezone"]
-        bonus_columns = game_details["bonusColumns"]
+        bonus_columns = game_details["bonus"]["columns"]
 
         current_date = datetime.now(tz=timezone).replace(
             hour=0,

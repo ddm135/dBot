@@ -1,7 +1,7 @@
 aiohttp>=3.12.15
 asteval>=1.0.6
 discord.py>=2.5.2
-google-api-python-client>=2.177.0
+google-api-python-client>=2.178.0
 google-api-python-client-stubs>=1.30.0
 google-auth-httplib2>=0.2.0
 google-auth-oauthlib>=1.2.2

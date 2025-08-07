@@ -34,7 +34,7 @@ class NotifyBonus(commands.Cog):
         cog = self.bot.get_cog("GoogleSheets")
 
         for game, game_details in GAMES.items():
-            if not game_details["bonusSpreadsheet"]:
+            if not (bonus_details := game_details.get("bonus")):
                 continue
 
             timezone = game_details["timezone"]
@@ -79,7 +79,7 @@ class NotifyBonus(commands.Cog):
             if not game_ping_dict:
                 continue
 
-            bonus_columns = game_details["bonusColumns"]
+            bonus_columns = bonus_details["columns"]
             member_name_index = bonus_columns.index("member_name")
             album_name_index = bonus_columns.index("album_name")
             song_name_index = bonus_columns.index("song_name")
