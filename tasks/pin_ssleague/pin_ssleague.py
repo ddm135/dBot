@@ -29,7 +29,7 @@ class PinSSLeague(commands.Cog):
     async def cog_unload(self) -> None:
         self.pin_ssls.cancel()
 
-    @tasks.loop(time=[time(hour=h, minute=3) for h in range(24)])
+    @tasks.loop(time=[time(hour=h, minute=7) for h in range(24)])
     async def pin_ssls(self) -> None:
         cog = self.bot.get_cog("DataSync")
         cog.save_last_appearance()
@@ -57,20 +57,24 @@ class PinSSLeague(commands.Cog):
 
         while True:
             try:
+                print("hello")
                 match credentials["provider"]:
                     case 0 | 1 if not credentials["isSNS"]:
+                        print("classic")
                         oid, key = await cog.login_classic(
                             self.bot.basic[game], credentials
                         )
                     case 0 if credentials["isSNS"] and (
                         target_audience := game_details.get("target_audience")
                     ):
+                        print("google")
                         oid, key = await cog.login_google(
                             self.bot.basic[game], credentials, target_audience
                         )
                     case 3 if credentials["isSNS"] and (
                         authorization := game_details.get("authorization")
                     ):
+                        print("dalcom")
                         oid, key = await cog.login_dalcom_id(
                             self.bot.basic[game], credentials, authorization
                         )
@@ -78,9 +82,13 @@ class PinSSLeague(commands.Cog):
                         print("how did you get here?")
                         return
                 ssleague = await cog.get_ssleague(self.bot.basic[game], oid, key)
+                print(ssleague)
             except aiohttp.ClientError as e:
                 self.LOGGER.exception(str(e))
                 await asyncio.sleep(backoff.delay())
+            except Exception as e:
+                self.LOGGER.exception("Failed to pin SSL: %s", str(e))
+                return
             else:
                 break
 
