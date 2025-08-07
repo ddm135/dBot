@@ -143,7 +143,9 @@ class SuperStar(commands.Cog):
         key = account["invoke"][0]["params"][0]
         return oid, key
 
-    async def get_ssleague(self, api_url: str, oid: int, key: str) -> dict:
+    async def get_ssleague(
+        self, basic_details: "BasicDetails", oid: int, key: str
+    ) -> dict:
         headers = SuperStarHeaders()
         iv = headers["X-SuperStar-AES-IV"]
 
@@ -151,7 +153,7 @@ class SuperStar(commands.Cog):
             cog = self.bot.get_cog("Cryptographic")
 
             async with session.post(
-                url=api_url,
+                url=basic_details["manifest"]["ServerUrl"],
                 headers=headers,
                 data=cog.encrypt_cbc(
                     f'{{"class":"StarLeague",'
