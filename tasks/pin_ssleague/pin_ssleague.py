@@ -89,13 +89,13 @@ class PinSSLeague(commands.Cog):
         song_id = music["music"]
         ssl_song = self.bot.info_by_id[game][str(song_id)]
 
-        info_columns = game_details["infoColumns"]
-        artist_name_index = info_columns.value.index("artist_name")
-        song_name_index = info_columns.value.index("song_name")
-        duration_index = info_columns.value.index("duration")
+        info_columns = game_details["infoColumns"].value
+        artist_name_index = info_columns.index("artist_name")
+        song_name_index = info_columns.index("song_name")
+        duration_index = info_columns.index("duration")
         skills_index = (
-            info_columns.value.index("skills")
-            if info_columns == InfoColumns.SSL_WITH_SKILLS
+            info_columns.index("skills")
+            if game_details["infoColumns"] == InfoColumns.SSL_WITH_SKILLS
             else None
         )
 

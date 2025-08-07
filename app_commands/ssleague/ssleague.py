@@ -148,18 +148,18 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             return False
         pin_role = game_details["pinRoles"].get(guild_id)
 
-        info_columns = game_details["infoColumns"]
+        info_columns = game_details["infoColumns"].value
         if artist_name is None:
-            artist_name = ssl_song[info_columns.value.index("artist_name")]
+            artist_name = ssl_song[info_columns.index("artist_name")]
         if song_name is None:
-            song_name = ssl_song[info_columns.value.index("song_name")]
+            song_name = ssl_song[info_columns.index("song_name")]
         if song_id is None:
-            song_id = int(ssl_song[info_columns.value.index("song_id")])
+            song_id = int(ssl_song[info_columns.index("song_id")])
 
-        duration = ssl_song[info_columns.value.index("duration")]
+        duration = ssl_song[info_columns.index("duration")]
         skills = (
-            info_columns.value.index("skills")
-            if info_columns == InfoColumns.SSL_WITH_SKILLS
+            info_columns.index("skills")
+            if game_details["infoColumns"] == InfoColumns.SSL_WITH_SKILLS
             else None
         )
 

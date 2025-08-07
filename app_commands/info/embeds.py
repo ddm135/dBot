@@ -21,10 +21,10 @@ class InfoEmbed(discord.Embed):
         end = current_page * STEP
         start = end - STEP
         filtered_songs = songs[start:end]
-        info_columns = game_details["infoColumns"]
-        duration_index = info_columns.value.index("duration")
-        artist_name_index = info_columns.value.index("artist_name")
-        song_name_index = info_columns.value.index("song_name")
+        info_columns = game_details["infoColumns"].value
+        duration_index = info_columns.index("duration")
+        artist_name_index = info_columns.index("artist_name")
+        song_name_index = info_columns.index("song_name")
 
         super().__init__(
             title=f"{game_details["name"]}{f" - {artist}" if artist else ""} Songs",
