@@ -32,7 +32,7 @@ async def song_autocomplete(
     if not (game := itr.namespace.game) or not itr.client.info_ready:
         return []
 
-    search_term_index = GAMES[game]["infoColumns"].index("search_term")
+    search_term_index = GAMES[game]["infoColumns"].value.index("search_term")
     songs = itr.client.info_by_name[game][itr.namespace.artist]
     if not songs:
         return []

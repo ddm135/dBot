@@ -51,7 +51,7 @@ class Info(commands.Cog):
             )
 
         game_details = GAMES[game_choice.value]
-        duration_index = game_details["infoColumns"].index("duration")
+        duration_index = game_details["infoColumns"].value.index("duration")
 
         if not artist_choice:
             songs = self.bot.info_by_id[game_choice.value].values()
