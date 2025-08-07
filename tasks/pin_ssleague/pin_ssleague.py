@@ -29,7 +29,7 @@ class PinSSLeague(commands.Cog):
     async def cog_unload(self) -> None:
         self.pin_ssls.cancel()
 
-    @tasks.loop(time=[time(hour=h, minute=50) for h in range(24)])
+    @tasks.loop(time=[time(hour=h, minute=53) for h in range(24)])
     async def pin_ssls(self) -> None:
         cog = self.bot.get_cog("DataSync")
         cog.save_last_appearance()
@@ -40,7 +40,6 @@ class PinSSLeague(commands.Cog):
             if game_details["pinChannelIds"] and game in self.bot.credentials
             and game in ["LP", "JYPNATION"]
         ]
-        print(pin_tasks)
         await asyncio.gather(*pin_tasks, return_exceptions=True)
 
         cog.save_credential_data()
@@ -50,7 +49,9 @@ class PinSSLeague(commands.Cog):
         game_details = GAMES[game]
         timezone = game_details["timezone"]
         current_time = datetime.now(tz=timezone) - RESET_OFFSET
+        print("here")
         if current_time.hour:
+            print("there")
             return
         backoff = discord.backoff.ExponentialBackoff()
         cog = self.bot.get_cog("SuperStar")
