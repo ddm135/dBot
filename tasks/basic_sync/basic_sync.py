@@ -86,7 +86,7 @@ class BasicSync(commands.Cog):
 
                 if not self.bot.basic[game].get("catalog"):
                     with open(catalog_json_path, "r", encoding="utf-8") as f:
-                        self.bot.basic[game]["catalog"] = await json.load(f)
+                        self.bot.basic[game]["catalog"] = json.load(f)
 
 
 async def setup(bot: "dBot") -> None:
