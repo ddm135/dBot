@@ -11,7 +11,6 @@ from statics.types import BasicDetails, LastAppearance
 
 
 class dBot(commands.Bot):
-    # test
     LOGGER = logging.getLogger("dBot")
 
     basic: defaultdict[str, BasicDetails] = defaultdict(
