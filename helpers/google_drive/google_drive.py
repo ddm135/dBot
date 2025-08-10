@@ -44,9 +44,7 @@ class GoogleDrive(commands.Cog):
             static_discovery=STATIC_DISCOVERY,
         ).files()  # pyright: ignore[reportAttributeAccessIssue]
 
-    async def create_drive_file(
-        self, data: "MediaFileUpload", metadata: "File"
-    ) -> datetime:
+    async def create_file(self, data: "MediaFileUpload", metadata: "File") -> datetime:
         metadata["parents"] = [DATA_FOLDER]
         result = await asyncio.to_thread(
             self.service.create(
@@ -59,7 +57,7 @@ class GoogleDrive(commands.Cog):
             TIME_FORMAT,
         )
 
-    async def get_drive_file_list(self) -> "FileList":
+    async def get_file_list(self) -> "FileList":
         return await asyncio.to_thread(
             self.service.list(
                 q=f"'{DATA_FOLDER}' in parents and trashed=False"
@@ -67,7 +65,7 @@ class GoogleDrive(commands.Cog):
             num_retries=MAX_RETRIES,
         )
 
-    async def get_drive_file(self, file_id: str, path: Path) -> None:
+    async def get_file(self, file_id: str, path: Path) -> None:
         request = self.service.get_media(fileId=file_id)
         file = BytesIO()
         downloader = MediaIoBaseDownload(file, request)
@@ -81,7 +79,7 @@ class GoogleDrive(commands.Cog):
             f.write(file.getbuffer())
         file.close()
 
-    async def get_drive_file_last_modified(self, file_id: str) -> datetime:
+    async def get_file_last_modified(self, file_id: str) -> datetime:
         result = await asyncio.to_thread(
             self.service.get(fileId=file_id, fields="modifiedTime").execute,
             num_retries=MAX_RETRIES,

@@ -1,6 +1,3 @@
-# mypy: disable-error-code="union-attr"
-# pyright: reportAttributeAccessIssue=false, reportOptionalMemberAccess=false
-
 import asyncio
 import gzip
 import json
@@ -34,7 +31,7 @@ class SuperStar(commands.Cog):
             async with session.post(
                 url=basic_details["manifest"]["ServerUrl"],
                 headers=headers,
-                data=cog.encrypt_cbc(
+                data=cog.encrypt_cbc(  # type: ignore[union-attr]
                     '{"class":"Platform","method":"checkAssetBundle","params":[0]}', iv
                 ),
             ) as r:
@@ -53,7 +50,7 @@ class SuperStar(commands.Cog):
             async with session.post(
                 url=basic_details["manifest"]["ServerUrl"],
                 headers=headers,
-                data=cog.encrypt_cbc(
+                data=cog.encrypt_cbc(  # type: ignore[union-attr]
                     credentials["account"].format(
                         version=basic_details["version"],
                         **credentials,
@@ -86,7 +83,7 @@ class SuperStar(commands.Cog):
             async with session.post(
                 url=basic_details["manifest"]["ServerUrl"],
                 headers=headers,
-                data=cog.encrypt_cbc(
+                data=cog.encrypt_cbc(  # type: ignore[union-attr]
                     credentials["account"].format(
                         version=basic_details["version"],
                         id_token=id_token,
@@ -101,7 +98,7 @@ class SuperStar(commands.Cog):
         key = account["invoke"][0]["params"][0]
         return oid, key
 
-    async def login_dalcom_id(
+    async def login_dalcom(
         self, basic_details: "BasicDetails", credentials: dict, authorization: str
     ) -> tuple[int, str]:
         headers = SuperStarHeaders()
@@ -128,7 +125,7 @@ class SuperStar(commands.Cog):
             async with session.post(
                 url=basic_details["manifest"]["ServerUrl"],
                 headers=headers,
-                data=cog.encrypt_cbc(
+                data=cog.encrypt_cbc(  # type: ignore[union-attr]
                     credentials["account"].format(
                         version=basic_details["version"],
                         access_token=access_token,
@@ -155,7 +152,7 @@ class SuperStar(commands.Cog):
             async with session.post(
                 url=basic_details["manifest"]["ServerUrl"],
                 headers=headers,
-                data=cog.encrypt_cbc(
+                data=cog.encrypt_cbc(  # type: ignore[union-attr]
                     f'{{"class":"StarLeague",'
                     f'"method":"getWeekPlayMusic",'
                     f'"params":[{oid},"{key}"]}}',
@@ -172,7 +169,12 @@ class SuperStar(commands.Cog):
             result = await response.json(content_type=None)
         except json.JSONDecodeError:
             cog = self.bot.get_cog("Cryptographic")
-            result = json.loads(cog.decrypt_cbc(await response.text(), iv))
+            result = json.loads(
+                cog.decrypt_cbc(  # type: ignore[union-attr]
+                    await response.text(),
+                    iv,
+                )
+            )
         return result
 
     async def get_data(self, url: str) -> list[dict]:
@@ -182,7 +184,9 @@ class SuperStar(commands.Cog):
 
         cog = self.bot.get_cog("Cryptographic")
         return json.loads(
-            cog.decrypt_ecb(gzip.decompress(content)).replace(rb"\/", rb"/")
+            cog.decrypt_ecb(  # type: ignore[union-attr]
+                gzip.decompress(content)
+            ).replace(rb"\/", rb"/")
         )
 
     @staticmethod

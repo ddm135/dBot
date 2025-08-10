@@ -1,3 +1,6 @@
+# pyright: reportTypedDictNotRequiredAccess=false
+
+import logging
 from typing import TYPE_CHECKING
 
 import discord
@@ -16,13 +19,14 @@ if TYPE_CHECKING:
 
 class Info(commands.Cog):
     GAME_CHOICES = [
-        app_commands.Choice(name=game["name"], value=key)
-        for key, game in GAMES.items()
-        if game["infoSpreadsheet"]
+        app_commands.Choice(name=game_details["name"], value=game)
+        for game, game_details in GAMES.items()
+        if {"info"} <= set(game_details)
     ]
 
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
+        logging.getLogger(__name__).info(self.GAME_CHOICES)
 
     @app_commands.command()
     @app_commands.choices(game_choice=GAME_CHOICES)
@@ -51,7 +55,7 @@ class Info(commands.Cog):
             )
 
         game_details = GAMES[game_choice.value]
-        duration_index = game_details["infoColumns"].value.index("duration")
+        duration_index = game_details["info"]["columns"].index("duration")
 
         if not artist_choice:
             songs = self.bot.info_by_id[game_choice.value].values()

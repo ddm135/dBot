@@ -1,6 +1,3 @@
-# mypy: disable-error-code="union-attr"
-# pyright: reportAttributeAccessIssue=false, reportOptionalMemberAccess=false
-
 import logging
 from datetime import time
 from typing import TYPE_CHECKING
@@ -41,7 +38,7 @@ class DalcomSync(commands.Cog):
 
         self.LOGGER.info("Downloading Dalcom data: %s...", game_details["name"])
         cog = self.bot.get_cog("SuperStar")
-        ajs = await cog.get_a_json(basic_details)
+        ajs = await cog.get_a_json(basic_details)  # type: ignore[union-attr]
 
         if ajs["code"] == 1000:
             self.bot.ajs[game].clear()
@@ -54,16 +51,16 @@ class DalcomSync(commands.Cog):
 
         if ajs:
             self.bot.msd[game].clear()
-            self.bot.msd[game] = await cog.get_data(
+            self.bot.msd[game] = await cog.get_data(  # type: ignore[union-attr]
                 ajs["result"]["context"]["MusicData"]["file"]
             )
             self.bot.grd[game].clear()
-            self.bot.grd[game] = await cog.get_data(
+            self.bot.grd[game] = await cog.get_data(  # type: ignore[union-attr]
                 ajs["result"]["context"]["GroupData"]["file"]
             )
             if game_details["assetScheme"] == AssetScheme.JSON_URL:
                 self.bot.url[game].clear()
-                self.bot.url[game] = await cog.get_data(
+                self.bot.url[game] = await cog.get_data(  # type: ignore[union-attr]
                     ajs["result"]["context"]["URLs"]["file"]
                 )
 

@@ -4,6 +4,8 @@ from typing import TYPE_CHECKING
 import discord
 from discord.ext import commands
 
+from statics.consts import Data
+
 from .embeds import WordPingEmbed
 
 if TYPE_CHECKING:
@@ -51,7 +53,7 @@ class OnMessage(commands.Cog):
 
                 self.bot.pings[guild_id][word][user_id]["count"] += 1
                 cog = self.bot.get_cog("DataSync")
-                cog.save_ping_data()  # type: ignore[union-attr]
+                cog.save_data(Data.PINGS)  # type: ignore[union-attr]
 
 
 async def setup(bot: "dBot") -> None:

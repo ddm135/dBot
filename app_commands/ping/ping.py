@@ -1,11 +1,10 @@
-# mypy: disable-error-code="union-attr"
-# pyright: reportAttributeAccessIssue=false, reportOptionalMemberAccess=false
-
 from typing import TYPE_CHECKING
 
 import discord
 from discord import app_commands
 from discord.ext import commands
+
+from statics.consts import Data
 
 from .autocompletes import word_autocomplete
 from .embeds import WordPingsEmbed
@@ -46,7 +45,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
         }
 
         cog = self.bot.get_cog("DataSync")
-        cog.save_ping_data()
+        cog.save_data(Data.PINGS)  # type: ignore[union-attr]
         return await itr.followup.send(
             f"Added to the ping list for `{word}` in this server!"
         )
@@ -75,7 +74,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
         self.bot.pings[guild_id][word][user_id].clear()
 
         cog = self.bot.get_cog("DataSync")
-        cog.save_ping_data()
+        cog.save_data(Data.PINGS)  # type: ignore[union-attr]
         return await itr.followup.send(
             f"Removed from the ping list for `{word}` in this server!"
         )
@@ -137,7 +136,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
             self.bot.pings[guild_id][word][user_id]["users"].append(user.id)
 
             cog = self.bot.get_cog("DataSync")
-            cog.save_ping_data()
+            cog.save_data(Data.PINGS)  # type: ignore[union-attr]
             return await itr.followup.send(
                 f"Added {user.mention} to the ignore list "
                 f"for `{word}` in this server!"
@@ -153,7 +152,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
                 self.bot.pings[guild_id][word][user_id]["users"].append(user.id)
 
             cog = self.bot.get_cog("DataSync")
-            cog.save_ping_data()
+            cog.save_data(Data.PINGS)  # type: ignore[union-attr]
             return await itr.followup.send(
                 f"Added {user.mention} to the ignore list "
                 f"for all current word pings in this server!"
@@ -193,7 +192,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
             self.bot.pings[guild_id][word][user_id]["channels"].append(channel.id)
 
             cog = self.bot.get_cog("DataSync")
-            cog.save_ping_data()
+            cog.save_data(Data.PINGS)  # type: ignore[union-attr]
             return await itr.followup.send(
                 f"Added {channel.mention} to the ignore list "
                 f"for `{word}` in this server!"
@@ -209,7 +208,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
                 self.bot.pings[guild_id][word][user_id]["channels"].append(channel.id)
 
             cog = self.bot.get_cog("DataSync")
-            cog.save_ping_data()
+            cog.save_data(Data.PINGS)  # type: ignore[union-attr]
             return await itr.followup.send(
                 f"Added {channel.mention} to the ignore list "
                 f"for all current word pings in this server!"
@@ -256,7 +255,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
             self.bot.pings[guild_id][word][user_id]["users"].remove(user.id)
 
             cog = self.bot.get_cog("DataSync")
-            cog.save_ping_data()
+            cog.save_data(Data.PINGS)  # type: ignore[union-attr]
             return await itr.followup.send(
                 f"Removed {user.mention} from the ignore list "
                 f"for `{word}` in this server!"
@@ -272,7 +271,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
                 self.bot.pings[guild_id][word][user_id]["users"].remove(user.id)
 
             cog = self.bot.get_cog("DataSync")
-            cog.save_ping_data()
+            cog.save_data(Data.PINGS)  # type: ignore[union-attr]
             return await itr.followup.send(
                 f"Removed {user.mention} from the ignore list "
                 f"for all current word pings in this server!"
@@ -312,7 +311,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
             self.bot.pings[guild_id][word][user_id]["channels"].remove(channel.id)
 
             cog = self.bot.get_cog("DataSync")
-            cog.save_ping_data()
+            cog.save_data(Data.PINGS)  # type: ignore[union-attr]
             return await itr.followup.send(
                 f"Removed {channel.mention} from the ignore list "
                 f"for `{word}` in this server!"
@@ -331,7 +330,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
                 self.bot.pings[guild_id][word][user_id]["channels"].remove(channel.id)
 
             cog = self.bot.get_cog("DataSync")
-            cog.save_ping_data()
+            cog.save_data(Data.PINGS)  # type: ignore[union-attr]
             return await itr.followup.send(
                 f"Removed {channel.mention} from the ignore list "
                 f"for all current word pings in this server!"

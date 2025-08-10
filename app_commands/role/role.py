@@ -1,13 +1,10 @@
-# mypy: disable-error-code="union-attr"
-# pyright: reportAttributeAccessIssue=false, reportOptionalMemberAccess=false
-
 from typing import TYPE_CHECKING
 
 import discord
 from discord import app_commands
 from discord.ext import commands
 
-from statics.consts import ROLES
+from statics.consts import ROLES, Data
 
 from .autocompletes import (
     role_add_autocomplete,
@@ -65,7 +62,7 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
         await itr.user.add_roles(target_role)
 
         cog = self.bot.get_cog("DataSync")
-        cog.save_role_data()
+        cog.save_data(Data.ROLES)  # type: ignore[union-attr]
         await itr.followup.send(
             f"Added {target_role.mention}!\n-# {NOTICE}",
             allowed_mentions=discord.AllowedMentions.none(),
@@ -111,7 +108,7 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
         await itr.user.remove_roles(target_role)
 
         cog = self.bot.get_cog("DataSync")
-        cog.save_role_data()
+        cog.save_data(Data.ROLES)  # type: ignore[union-attr]
         await itr.followup.send(
             f"Removed {target_role.mention}!\n-# {NOTICE}",
             allowed_mentions=discord.AllowedMentions.none(),
@@ -180,7 +177,7 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
         await itr.user.remove_roles(*remove_roles)
 
         cog = self.bot.get_cog("DataSync")
-        cog.save_role_data()
+        cog.save_data(Data.ROLES)  # type: ignore[union-attr]
         await itr.followup.send(
             f"Set to {target_role.mention}!",
             embed=RoleSetEmbed(target_role, add_roles, remove_roles),

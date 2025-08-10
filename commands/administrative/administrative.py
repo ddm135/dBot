@@ -1,6 +1,3 @@
-# mypy: disable-error-code="union-attr"
-# pyright: reportAttributeAccessIssue=false, reportOptionalMemberAccess=false
-
 import asyncio
 import importlib
 import logging
@@ -18,6 +15,7 @@ from statics.consts import (
     STATIC_MODULES,
     STATUS_CHANNEL,
     TIMEZONES,
+    Data,
 )
 
 if TYPE_CHECKING:
@@ -208,37 +206,22 @@ class Administrative(commands.Cog):
         msg = await ctx.send(text)
         cog = self.bot.get_cog("GoogleSheets")
 
-        if game_details["infoReplaceGrid"]:
-            await msg.edit(content=f"{text}\nEditing info sheet...")
-            await cog.find_replace_sheet_data(
-                game_details["infoSpreadsheet"],
-                game_details["infoReplaceGrid"],
-                old_name,
-                new_name,
-                "kr" if game_details["timezone"] == TIMEZONES["KST"] else None,
-            )
-        if game_details["pingReplaceGrid"]:
-            await msg.edit(content=f"{text}\nEditing ping sheet...")
-            await cog.find_replace_sheet_data(
-                game_details["pingSpreadsheet"],
-                game_details["pingReplaceGrid"],
-                old_name,
-                new_name,
-                "kr" if game_details["timezone"] == TIMEZONES["KST"] else None,
-            )
-        if (bonus_details := game_details.get("bonus")):
-            await msg.edit(content=f"{text}\nEditing bonus sheet...")
-            await cog.find_replace_sheet_data(
-                bonus_details["spreadsheetId"],
-                bonus_details["replaceGrid"],
-                old_name,
-                new_name,
-                "kr" if game_details["timezone"] == TIMEZONES["KST"] else None,
-            )
+        for data in ("info", "ping", "bonus"):
+            if (details := game_details.get(data)) and (
+                replace_grid := details["replaceGrid"]  # type: ignore[index]
+            ):
+                await msg.edit(content=f"{text}\nEditing {data} sheet...")
+                await cog.find_replace_sheet_data(  # type: ignore[union-attr]
+                    details["spreadsheetId"],  # type: ignore[index]
+                    replace_grid,
+                    old_name,
+                    new_name,
+                    "kr" if game_details["timezone"] == TIMEZONES["KST"] else None,
+                )
         if game_details["pinChannelIds"]:
             await msg.edit(content=f"{text}\nEditing last appearance data...")
-            if old_name in self.bot.ssleague[game]:
-                self.bot.ssleague[game][new_name] = self.bot.ssleague[game].pop(
+            if old_name in self.bot.ssleagues[game]:
+                self.bot.ssleagues[game][new_name] = self.bot.ssleagues[game].pop(
                     old_name
                 )
             if (
@@ -248,18 +231,18 @@ class Administrative(commands.Cog):
                 self.bot.ssleague_manual[game]["artist"] = new_name
 
                 cog = self.bot.get_cog("DataSync")
-                cog.save_ssleague_data()
+                cog.save_data(Data.SSLEAGUES)  # type: ignore[union-attr]
 
         await msg.edit(content=f"{text}\nDownloading info data...")
         self.bot.info_ready = False
         cog = self.bot.get_cog("InfoSync")
-        await cog.get_info_data(game, game_details)
+        await cog.get_info_data(game, game_details)  # type: ignore[union-attr]
         self.bot.info_ready = True
 
         await msg.edit(content=f"{text}\nDownloading bonus data...")
         self.bot.bonus_ready = False
         cog = self.bot.get_cog("BonusSync")
-        await cog.get_bonus_data(game, game_details)
+        await cog.get_bonus_data(game, game_details)  # type: ignore[union-attr]
         self.bot.bonus_ready = True
 
         await msg.edit(

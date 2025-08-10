@@ -1,3 +1,5 @@
+# pyright: reportTypedDictNotRequiredAccess=false
+
 import math
 from typing import TYPE_CHECKING
 
@@ -21,13 +23,13 @@ class InfoEmbed(discord.Embed):
         end = current_page * STEP
         start = end - STEP
         filtered_songs = songs[start:end]
-        info_columns = game_details["infoColumns"].value
+        info_columns = game_details["info"]["columns"]
         duration_index = info_columns.index("duration")
         artist_name_index = info_columns.index("artist_name")
         song_name_index = info_columns.index("song_name")
 
         super().__init__(
-            title=f"{game_details["name"]}{f" - {artist}" if artist else ""} Songs",
+            title="Songs",
             description="\n".join(
                 f"({song[duration_index]}) "
                 f"{(f"{song[artist_name_index].replace(r"*", r"\*")
@@ -36,6 +38,9 @@ class InfoEmbed(discord.Embed):
                 for song in filtered_songs
             ),
             color=game_details["color"],
+        )
+        self.set_author(
+            name=f"{game_details["name"]}{f" - {artist}" if artist else ""}"
         )
         self.set_footer(
             text=f"Page {current_page}/{max_page or math.ceil(len(songs) / STEP)}",

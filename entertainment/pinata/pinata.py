@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 import discord
 from discord.ext import commands, tasks
 
-from statics.consts import ROLES, TIMEZONES
+from statics.consts import ROLES, TIMEZONES, Data
 
 from .commons import PINATA_REWARDS, PINATA_TEST_CHANNEL
 
@@ -228,7 +228,7 @@ class Pinata(commands.Cog):
                         self.bot.roles[str(winner.id)].append(reward["role"].id)
 
                     cog = self.bot.get_cog("DataSync")
-                    cog.save_role_data()  # type: ignore[union-attr]
+                    cog.save_data(Data.ROLES)  # type: ignore[union-attr]
 
                     _message += "The role has been added to your inventory."
                 elif is_member:

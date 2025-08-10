@@ -1,6 +1,6 @@
-# mypy: disable-error-code="union-attr"
-# pyright: reportAttributeAccessIssue=false, reportOptionalMemberAccess=false
+# pyright: reportTypedDictNotRequiredAccess=false
 
+import logging
 from datetime import datetime
 from typing import TYPE_CHECKING
 
@@ -23,13 +23,14 @@ if TYPE_CHECKING:
 @app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)
 class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the day"):
     GAME_CHOICES = [
-        app_commands.Choice(name=game["name"], value=key)
-        for key, game in GAMES.items()
-        if game["pinChannelIds"]
+        app_commands.Choice(name=game_details["name"], value=game)
+        for game, game_details in GAMES.items()
+        if {"info", "pinChannelIds"} <= set(game_details)
     ]
 
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
+        logging.getLogger(__name__).info(self.GAME_CHOICES)
 
     @app_commands.command()
     @app_commands.choices(game_choice=GAME_CHOICES)
@@ -148,7 +149,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             return False
         pin_role = game_details["pinRoles"].get(guild_id)
 
-        info_columns = game_details["infoColumns"].value
+        info_columns = game_details["info"]["columns"]
         if artist_name is None:
             artist_name = ssl_song[info_columns.index("artist_name")]
         if song_name is None:
@@ -159,7 +160,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         duration = ssl_song[info_columns.index("duration")]
         skills = (
             info_columns.index("skills")
-            if game_details["infoColumns"] == InfoColumns.SSL_WITH_SKILLS
+            if game_details["info"]["columns"] == InfoColumns.SSL_WITH_SKILLS.value
             else None
         )
 
@@ -209,7 +210,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         timezone = game_details["timezone"]
         current_time = datetime.now(tz=timezone) - RESET_OFFSET
 
-        artist_last_str = self.bot.ssleague[game][artist_name]["date"]
+        artist_last_str = self.bot.ssleagues[game][artist_name]["date"]
         if artist_last_str:
             artist_last = datetime.strptime(artist_last_str, game_details["dateFormat"])
             artist_last = artist_last.replace(
@@ -218,7 +219,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         else:
             artist_last = None
 
-        song_last_str = self.bot.ssleague[game][artist_name]["songs"][str(song_id)]
+        song_last_str = self.bot.ssleagues[game][artist_name]["songs"][str(song_id)]
         if song_last_str:
             song_last = datetime.strptime(song_last_str, game_details["dateFormat"])
             song_last = song_last.replace(
@@ -228,7 +229,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             song_last = None
 
         cog = self.bot.get_cog("SuperStar")
-        embed = cog.SSLeagueEmbed(
+        embed = cog.SSLeagueEmbed(  # type: ignore[union-attr]
             artist_name,
             song_name,
             duration,
@@ -247,14 +248,14 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         ) or await self.bot.fetch_channel(pin_channel_id)
         assert isinstance(pin_channel, discord.TextChannel)
         cog = self.bot.get_cog("SuperStar")
-        new_pin = await cog.pin_new_ssl(embed, pin_channel)
+        new_pin = await cog.pin_new_ssl(embed, pin_channel)  # type: ignore[union-attr]
         topic = f"[{current_time.strftime("%m.%d.%y")}] {artist_name} - {song_name}"
         if pin_role:
             await pin_channel.send(f"<@&{pin_role}> {topic}")
         else:
             await pin_channel.send(topic)
         await pin_channel.edit(topic=topic)
-        await cog.unpin_old_ssl(
+        await cog.unpin_old_ssl(  # type: ignore[union-attr]
             embed.title,
             pin_channel,
             new_pin,

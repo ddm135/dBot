@@ -51,19 +51,29 @@ class BasicSync(commands.Cog):
                 ) as r:
                     self.bot.basic[game]["manifest"] = await r.json(content_type=None)
 
-                if game_details["assetScheme"] != AssetScheme.BINARY_CATALOG or not (
-                    catalog_url := game_details.get("catalogUrl")
-                ):
+                if not game_details["assetScheme"] in (
+                    AssetScheme.BINARY_CATALOG,
+                    AssetScheme.JSON_CATALOG,
+                ) or not (catalog_url := game_details.get("catalogUrl")):
                     continue
 
                 resource_version = self.bot.basic[game]["manifest"]["ResourceVersion"]
                 catalog_folder_path = Path(f"data/catalogs/{game}")
                 catalog_folder_path.mkdir(parents=True, exist_ok=True)
-                catalog_bin_path = catalog_folder_path / f"{resource_version}.bin"
-                catalog_json_path = catalog_folder_path / f"{resource_version}.json"
+                extension = (
+                    "bin"
+                    if game_details["assetScheme"] == AssetScheme.BINARY_CATALOG
+                    else "json"
+                )
+                catalog_packaged_path = (
+                    catalog_folder_path / f"{resource_version}.{extension}"
+                )
+                catalog_extracted_path = (
+                    catalog_folder_path / f"{resource_version}_extracted.json"
+                )
 
-                if not catalog_json_path.exists():
-                    if not catalog_bin_path.exists():
+                if not catalog_extracted_path.exists():
+                    if not catalog_packaged_path.exists():
                         for file in catalog_folder_path.iterdir():
                             if file.is_file():
                                 file.unlink()
@@ -71,13 +81,13 @@ class BasicSync(commands.Cog):
                         async with session.get(
                             catalog_url.format(version=resource_version)
                         ) as r:
-                            with open(catalog_bin_path, "wb") as f:
+                            with open(catalog_packaged_path, "wb") as f:
                                 f.write(await r.read())
 
                     process = await asyncio.create_subprocess_exec(
-                        "utils/catalog",
-                        str(catalog_bin_path),
-                        str(catalog_json_path),
+                        f"utils/catalog-{extension}",
+                        str(catalog_packaged_path),
+                        str(catalog_extracted_path),
                         stdout=asyncio.subprocess.PIPE,
                         stderr=asyncio.subprocess.PIPE,
                     )
@@ -85,7 +95,7 @@ class BasicSync(commands.Cog):
                     self.bot.basic[game]["catalog"] = {}
 
                 if not self.bot.basic[game].get("catalog"):
-                    with open(catalog_json_path, "r", encoding="utf-8") as f:
+                    with open(catalog_extracted_path, "r", encoding="utf-8") as f:
                         self.bot.basic[game]["catalog"] = json.load(f)
 
 

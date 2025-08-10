@@ -1,4 +1,8 @@
+# pyright: reportTypedDictNotRequiredAccess=false
+
+import logging
 import math
+import re
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Iterable, Literal
 
@@ -19,13 +23,14 @@ if TYPE_CHECKING:
 
 class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings"):
     GAME_CHOICES = [
-        app_commands.Choice(name=game["name"], value=key)
-        for key, game in GAMES.items()
-        if {"bonus"} <= set(game)
+        app_commands.Choice(name=game_details["name"], value=game)
+        for game, game_details in GAMES.items()
+        if {"bonus", "ping"} <= set(game_details)
     ]
 
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
+        logging.getLogger(__name__).info(self.GAME_CHOICES)
 
     @app_commands.command()
     @app_commands.choices(game_choice=GAME_CHOICES)
@@ -419,8 +424,8 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
             if not message_prefix.startswith("Already"):
                 cog = self.bot.get_cog("GoogleSheets")
                 await cog.update_sheet_data(  # type: ignore[union-attr]
-                    game_details["pingSpreadsheet"],
-                    f"{game_details["pingUsers"]}{i}",
+                    game_details["ping"]["spreadsheetId"],
+                    f"{re.split(r"\d+:", game_details["ping"]["range"])[0]}{i}",
                     [[",".join(users)]],
                     "kr" if game_details["timezone"] == TIMEZONES["KST"] else None,
                 )

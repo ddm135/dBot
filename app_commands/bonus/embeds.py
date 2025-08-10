@@ -60,11 +60,14 @@ class BonusesEmbed(discord.Embed):
 
         super().__init__(
             title=(
-                f"{game_details["name"]}{f" - {artist}" if artist else ""} Bonuses "
-                f"({first_date.strftime("%B %d")} - {last_date.strftime("%B %d")})"
+                f"{first_date.strftime("%B %d")} - {last_date.strftime("%B %d")}"
+                f" Bonuses"
             ).replace(" 0", " "),
             description="None" if not filtered_bonuses else None,
             color=game_details["color"],
+        )
+        self.set_author(
+            name=f"{game_details["name"]}{f" - {artist}" if artist else ""}"
         )
         self.set_footer(text=f"Page {current_page}/{max_page}")
 

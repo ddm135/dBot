@@ -61,6 +61,14 @@ EXTENSIONS = (
 )
 
 
+class Data(Enum):
+    CREDENTIALS = Path("data/credentials.json")
+    PINGS = Path("data/pings.json")
+    ROLES = Path("data/roles.json")
+    SSLEAGUES = Path("data/ssleague.json")
+    LAST_MODIFIED = Path("data/last_modified.json")
+
+
 class InfoColumns(Enum):
     SSL = (
         "song_id",
@@ -94,7 +102,6 @@ class InfoColumns(Enum):
     )
 
 
-PING_COLUMNS = ("emblem", "users", "artist_name")
 BONUS_COLUMNS = (
     "song_id",
     "bonus_amount",
@@ -107,6 +114,8 @@ BONUS_COLUMNS = (
     "bonus_start",
     "bonus_end",
 )
+PING_COLUMNS = ("users", "artist_name")
+EMBLEM_COLUMNS = ("artist_name", "emblem")
 
 
 class AssetScheme(Enum):
@@ -119,25 +128,18 @@ class AssetScheme(Enum):
 GAMES: dict[str, "GameDetails"] = {
     "SM": {
         "name": "SUPERSTAR SM",
-        "infoSpreadsheet": "1dX_5lWxenT7CDVXpgyScTHDiwazUZIO3441RaNpN55g",
-        "infoReplaceGrid": {
-            "sheetId": 0,
-            "startRowIndex": 1,
-            "startColumnIndex": 1,
-            "endColumnIndex": 2,
+        "color": 0xE204DD,
+        "info": {
+            "spreadsheetId": "1dX_5lWxenT7CDVXpgyScTHDiwazUZIO3441RaNpN55g",
+            "replaceGrid": {
+                "sheetId": 0,
+                "startRowIndex": 1,
+                "startColumnIndex": 1,
+                "endColumnIndex": 2,
+            },
+            "range": "Songs!A2:E",
+            "columns": InfoColumns.SSL.value,
         },
-        "infoRange": "Songs!A2:E",
-        "infoColumns": InfoColumns.SSL,
-        "pingSpreadsheet": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-        "pingReplaceGrid": {
-            "sheetId": 2033296248,
-            "startRowIndex": 0,
-            "startColumnIndex": 3,
-            "endColumnIndex": 4,
-        },
-        "pingRange": "SM!B1:D",
-        "pingUsers": "SM!C",
-        "pingColumns": PING_COLUMNS,
         "bonus": {
             "spreadsheetId": "1dX_5lWxenT7CDVXpgyScTHDiwazUZIO3441RaNpN55g",
             "range": "dBonuses!A2:J",
@@ -149,7 +151,23 @@ GAMES: dict[str, "GameDetails"] = {
                 "endColumnIndex": 3,
             },
         },
-        "color": 0xE204DD,
+        "ping": {
+            "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
+            "range": "SM!C1:D",
+            "columns": PING_COLUMNS,
+            "replaceGrid": {
+                "sheetId": 2033296248,
+                "startRowIndex": 0,
+                "startColumnIndex": 3,
+                "endColumnIndex": 4,
+            },
+        },
+        "emblem": {
+            "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
+            "range": "SM!A1:B",
+            "columns": EMBLEM_COLUMNS,
+            "replaceGrid": {},
+        },
         "pinChannelIds": {
             SSRG_GUILD: 401291379810107394,
             TEST_GUILD: 1336210286289616917,
@@ -168,25 +186,18 @@ GAMES: dict[str, "GameDetails"] = {
     },
     "JYP": {
         "name": "SUPERSTAR JYP",
-        "infoSpreadsheet": "1XgaSMje3TKa1bnekWzmpLRjr81QWoag_6w9SlzSwN0g",
-        "infoReplaceGrid": {
-            "sheetId": 0,
-            "startRowIndex": 1,
-            "startColumnIndex": 1,
-            "endColumnIndex": 2,
+        "color": 0x4977FB,
+        "info": {
+            "spreadsheetId": "1XgaSMje3TKa1bnekWzmpLRjr81QWoag_6w9SlzSwN0g",
+            "replaceGrid": {
+                "sheetId": 0,
+                "startRowIndex": 1,
+                "startColumnIndex": 1,
+                "endColumnIndex": 2,
+            },
+            "range": "Songs!A2:E",
+            "columns": InfoColumns.SSL.value,
         },
-        "infoRange": "Songs!A2:E",
-        "infoColumns": InfoColumns.SSL,
-        "pingSpreadsheet": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-        "pingReplaceGrid": {
-            "sheetId": 138125467,
-            "startRowIndex": 0,
-            "startColumnIndex": 3,
-            "endColumnIndex": 4,
-        },
-        "pingRange": "JYP!B1:D",
-        "pingUsers": "JYP!C",
-        "pingColumns": PING_COLUMNS,
         "bonus": {
             "spreadsheetId": "1XgaSMje3TKa1bnekWzmpLRjr81QWoag_6w9SlzSwN0g",
             "range": "dBonuses!A2:J",
@@ -198,7 +209,23 @@ GAMES: dict[str, "GameDetails"] = {
                 "endColumnIndex": 3,
             },
         },
-        "color": 0x4977FB,
+        "ping": {
+            "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
+            "range": "JYP!C1:D",
+            "columns": PING_COLUMNS,
+            "replaceGrid": {
+                "sheetId": 138125467,
+                "startRowIndex": 0,
+                "startColumnIndex": 3,
+                "endColumnIndex": 4,
+            },
+        },
+        "emblem": {
+            "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
+            "range": "JYP!A1:B",
+            "columns": EMBLEM_COLUMNS,
+            "replaceGrid": {},
+        },
         "pinChannelIds": {
             SSRG_GUILD: 360109303199432705,
             TEST_GUILD: 1354222667384885329,
@@ -218,25 +245,18 @@ GAMES: dict[str, "GameDetails"] = {
     },
     "SS": {
         "name": "SUPERSTAR STARSHIP",
-        "infoSpreadsheet": "13MYqeey_Pd8_5vXsEQe94usC517WaMEduPte19xtQiU",
-        "infoReplaceGrid": {
-            "sheetId": 0,
-            "startRowIndex": 1,
-            "startColumnIndex": 1,
-            "endColumnIndex": 2,
+        "color": 0x484E8A,
+        "info": {
+            "spreadsheetId": "13MYqeey_Pd8_5vXsEQe94usC517WaMEduPte19xtQiU",
+            "replaceGrid": {
+                "sheetId": 0,
+                "startRowIndex": 1,
+                "startColumnIndex": 1,
+                "endColumnIndex": 2,
+            },
+            "range": "Songs!A2:D",
+            "columns": InfoColumns.NO_SSL.value,
         },
-        "infoRange": "Songs!A2:D",
-        "infoColumns": InfoColumns.NO_SSL,
-        "pingSpreadsheet": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-        "pingReplaceGrid": {
-            "sheetId": 2107313752,
-            "startRowIndex": 0,
-            "startColumnIndex": 3,
-            "endColumnIndex": 4,
-        },
-        "pingRange": "STARSHIP!B1:D",
-        "pingUsers": "STARSHIP!C",
-        "pingColumns": PING_COLUMNS,
         "bonus": {
             "spreadsheetId": "13MYqeey_Pd8_5vXsEQe94usC517WaMEduPte19xtQiU",
             "range": "Bonuses!A2:J",
@@ -248,7 +268,23 @@ GAMES: dict[str, "GameDetails"] = {
                 "endColumnIndex": 3,
             },
         },
-        "color": 0x484E8A,
+        "ping": {
+            "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
+            "range": "STARSHIP!C1:D",
+            "columns": PING_COLUMNS,
+            "replaceGrid": {
+                "sheetId": 2107313752,
+                "startRowIndex": 0,
+                "startColumnIndex": 3,
+                "endColumnIndex": 4,
+            },
+        },
+        "emblem": {
+            "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
+            "range": "STARSHIP!A1:B",
+            "columns": EMBLEM_COLUMNS,
+            "replaceGrid": {},
+        },
         "pinChannelIds": {},
         "pinRoles": {},
         "dateFormat": "%Y-%m-%d",
@@ -264,16 +300,19 @@ GAMES: dict[str, "GameDetails"] = {
     },
     "KD": {
         "name": "SuperStar KANGDANIEL",
-        "infoSpreadsheet": "1QSCRXKtiwoMTLV8knHC_o4NwV3UZM6ZvL-l9ZCPxoRM",
-        "infoReplaceGrid": {},
-        "infoRange": "Official Local Version!A2:E",
-        "infoColumns": InfoColumns.SSL,
-        "pingSpreadsheet": "",
-        "pingReplaceGrid": {},
-        "pingRange": "",
-        "pingUsers": "",
-        "pingColumns": (),
         "color": 0xB72476,
+        "info": {
+            "spreadsheetId": "1QSCRXKtiwoMTLV8knHC_o4NwV3UZM6ZvL-l9ZCPxoRM",
+            "replaceGrid": {},
+            "range": "Official Local Version!A2:E",
+            "columns": InfoColumns.SSL.value,
+        },
+        "emblem": {
+            "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
+            "range": "KD!A1:B",
+            "columns": EMBLEM_COLUMNS,
+            "replaceGrid": {},
+        },
         "pinChannelIds": {},
         "pinRoles": {},
         "dateFormat": "%Y-%m-%d",
@@ -282,20 +321,13 @@ GAMES: dict[str, "GameDetails"] = {
     },
     "ATZ": {
         "name": "SUPERSTAR ATEEZ",
-        "infoSpreadsheet": "1ZRfm1D2sxV183umOvK4hdWUXIVWvd-Gc8nmRbnsmajY",
-        "infoReplaceGrid": {},
-        "infoRange": "Info!A2:G",
-        "infoColumns": InfoColumns.SHARED,
-        "pingSpreadsheet": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-        "pingReplaceGrid": {
-            "sheetId": 1373177550,
-            "startRowIndex": 0,
-            "startColumnIndex": 3,
-            "endColumnIndex": 4,
+        "color": 0xDB811C,
+        "info": {
+            "spreadsheetId": "1ZRfm1D2sxV183umOvK4hdWUXIVWvd-Gc8nmRbnsmajY",
+            "replaceGrid": {},
+            "range": "Info!A2:G",
+            "columns": InfoColumns.SHARED.value,
         },
-        "pingRange": "ATEEZ!B1:D",
-        "pingUsers": "ATEEZ!C",
-        "pingColumns": PING_COLUMNS,
         "bonus": {
             "spreadsheetId": "1ZRfm1D2sxV183umOvK4hdWUXIVWvd-Gc8nmRbnsmajY",
             "range": "Info!A2:J",
@@ -307,7 +339,23 @@ GAMES: dict[str, "GameDetails"] = {
                 "endColumnIndex": 3,
             },
         },
-        "color": 0xDB811C,
+        "ping": {
+            "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
+            "range": "ATEEZ!C1:D",
+            "columns": PING_COLUMNS,
+            "replaceGrid": {
+                "sheetId": 1373177550,
+                "startRowIndex": 0,
+                "startColumnIndex": 3,
+                "endColumnIndex": 4,
+            },
+        },
+        "emblem": {
+            "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
+            "range": "ATEEZ!A1:B",
+            "columns": EMBLEM_COLUMNS,
+            "replaceGrid": {},
+        },
         "pinChannelIds": {},
         "pinRoles": {},
         "dateFormat": "%Y-%m-%d",
@@ -327,20 +375,13 @@ GAMES: dict[str, "GameDetails"] = {
     },
     "SC": {
         "name": "SUPERSTAR STAYC",
-        "infoSpreadsheet": "1zEBkb3oAqP_VkilWfJt6x0nfcrweVn7Ray--wNHqxjg",
-        "infoReplaceGrid": {},
-        "infoRange": "Info!A2:G",
-        "infoColumns": InfoColumns.SHARED,
-        "pingSpreadsheet": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-        "pingReplaceGrid": {
-            "sheetId": 1795572100,
-            "startRowIndex": 0,
-            "startColumnIndex": 3,
-            "endColumnIndex": 4,
+        "color": 0x210630,
+        "info": {
+            "spreadsheetId": "1zEBkb3oAqP_VkilWfJt6x0nfcrweVn7Ray--wNHqxjg",
+            "replaceGrid": {},
+            "range": "Info!A2:G",
+            "columns": InfoColumns.SHARED.value,
         },
-        "pingRange": "STAYC!B1:D",
-        "pingUsers": "STAYC!C",
-        "pingColumns": PING_COLUMNS,
         "bonus": {
             "spreadsheetId": "1zEBkb3oAqP_VkilWfJt6x0nfcrweVn7Ray--wNHqxjg",
             "range": "Info!A2:J",
@@ -352,7 +393,23 @@ GAMES: dict[str, "GameDetails"] = {
                 "endColumnIndex": 3,
             },
         },
-        "color": 0x210630,
+        "ping": {
+            "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
+            "range": "STAYC!C1:D",
+            "columns": PING_COLUMNS,
+            "replaceGrid": {
+                "sheetId": 1795572100,
+                "startRowIndex": 0,
+                "startColumnIndex": 3,
+                "endColumnIndex": 4,
+            },
+        },
+        "emblem": {
+            "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
+            "range": "STAYC!A1:B",
+            "columns": EMBLEM_COLUMNS,
+            "replaceGrid": {},
+        },
         "pinChannelIds": {},
         "pinRoles": {},
         "dateFormat": "%Y-%m-%d",
@@ -372,16 +429,19 @@ GAMES: dict[str, "GameDetails"] = {
     },
     "W1": {
         "name": "SUPERSTAR WAKEONE",
-        "infoSpreadsheet": "1HHBluEEcWmZMHjq3WlLbS9TeLfPktQ3WrfxpcgReWF0",
-        "infoReplaceGrid": {},
-        "infoRange": "Songs (Note Count)!A2:D",
-        "infoColumns": InfoColumns.NO_SSL,
-        "pingSpreadsheet": "",
-        "pingReplaceGrid": {},
-        "pingRange": "",
-        "pingUsers": "",
-        "pingColumns": (),
         "color": 0x4E25D1,
+        "info": {
+            "spreadsheetId": "1HHBluEEcWmZMHjq3WlLbS9TeLfPktQ3WrfxpcgReWF0",
+            "replaceGrid": {},
+            "range": "Songs (Note Count)!A2:D",
+            "columns": InfoColumns.NO_SSL.value,
+        },
+        "emblem": {
+            "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
+            "range": "W1!A1:B",
+            "columns": EMBLEM_COLUMNS,
+            "replaceGrid": {},
+        },
         "pinChannelIds": {},
         "pinRoles": {},
         "dateFormat": "%Y-%m-%d",
@@ -399,25 +459,18 @@ GAMES: dict[str, "GameDetails"] = {
     },
     "SMTOWN": {
         "name": "SUPERSTAR SMTOWN (JP/TW)",
-        "infoSpreadsheet": "1kC38CLFd6xkDXD9qLHgnnv3s3jmM_4vf4RLsWuXs9NU",
-        "infoReplaceGrid": {
-            "sheetId": 0,
-            "startRowIndex": 1,
-            "startColumnIndex": 1,
-            "endColumnIndex": 2,
+        "color": 0xE10989,
+        "info": {
+            "spreadsheetId": "1kC38CLFd6xkDXD9qLHgnnv3s3jmM_4vf4RLsWuXs9NU",
+            "replaceGrid": {
+                "sheetId": 0,
+                "startRowIndex": 1,
+                "startColumnIndex": 1,
+                "endColumnIndex": 2,
+            },
+            "range": "Songs!A2:E",
+            "columns": InfoColumns.SSL.value,
         },
-        "infoRange": "Songs!A2:E",
-        "infoColumns": InfoColumns.SSL,
-        "pingSpreadsheet": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-        "pingReplaceGrid": {
-            "sheetId": 755434019,
-            "startRowIndex": 0,
-            "startColumnIndex": 3,
-            "endColumnIndex": 4,
-        },
-        "pingRange": "SMTOWN!B1:D",
-        "pingUsers": "SMTOWN!C",
-        "pingColumns": PING_COLUMNS,
         "bonus": {
             "spreadsheetId": "1kC38CLFd6xkDXD9qLHgnnv3s3jmM_4vf4RLsWuXs9NU",
             "range": "Bonuses!A2:J",
@@ -429,7 +482,23 @@ GAMES: dict[str, "GameDetails"] = {
                 "endColumnIndex": 3,
             },
         },
-        "color": 0xE10989,
+        "ping": {
+            "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
+            "range": "SMTOWN!C1:D",
+            "columns": PING_COLUMNS,
+            "replaceGrid": {
+                "sheetId": 755434019,
+                "startRowIndex": 0,
+                "startColumnIndex": 3,
+                "endColumnIndex": 4,
+            },
+        },
+        "emblem": {
+            "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
+            "range": "SMTOWN!A1:B",
+            "columns": EMBLEM_COLUMNS,
+            "replaceGrid": {},
+        },
         "pinChannelIds": {
             SSRG_GUILD: 481907573948153857,
             TEST_GUILD: 1343840449357418516,
@@ -446,25 +515,18 @@ GAMES: dict[str, "GameDetails"] = {
     },
     "JYPNATION": {
         "name": "SUPERSTAR JYPNATION (JP)",
-        "infoSpreadsheet": "1eVjwi0GudyMixnZtam8TeupRd3DQ6mheyRKp2lDA6qw",
-        "infoReplaceGrid": {
-            "sheetId": 1514100857,
-            "startRowIndex": 1,
-            "startColumnIndex": 1,
-            "endColumnIndex": 2,
+        "color": 0x2377E4,
+        "info": {
+            "spreadsheetId": "1eVjwi0GudyMixnZtam8TeupRd3DQ6mheyRKp2lDA6qw",
+            "replaceGrid": {
+                "sheetId": 1514100857,
+                "startRowIndex": 1,
+                "startColumnIndex": 1,
+                "endColumnIndex": 2,
+            },
+            "range": "Songs!A2:F",
+            "columns": InfoColumns.SSL_WITH_SKILLS.value,
         },
-        "infoRange": "Songs!A2:F",
-        "infoColumns": InfoColumns.SSL_WITH_SKILLS,
-        "pingSpreadsheet": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-        "pingReplaceGrid": {
-            "sheetId": 735198271,
-            "startRowIndex": 0,
-            "startColumnIndex": 3,
-            "endColumnIndex": 4,
-        },
-        "pingRange": "JYPNATION!B1:D",
-        "pingUsers": "JYPNATION!C",
-        "pingColumns": PING_COLUMNS,
         "bonus": {
             "spreadsheetId": "1eVjwi0GudyMixnZtam8TeupRd3DQ6mheyRKp2lDA6qw",
             "range": "Bonuses!A2:J",
@@ -476,7 +538,23 @@ GAMES: dict[str, "GameDetails"] = {
                 "endColumnIndex": 3,
             },
         },
-        "color": 0x2377E4,
+        "ping": {
+            "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
+            "range": "JYPNATION!C1:D",
+            "columns": PING_COLUMNS,
+            "replaceGrid": {
+                "sheetId": 735198271,
+                "startRowIndex": 0,
+                "startColumnIndex": 3,
+                "endColumnIndex": 4,
+            },
+        },
+        "emblem": {
+            "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
+            "range": "JYPNATION!A1:B",
+            "columns": EMBLEM_COLUMNS,
+            "replaceGrid": {},
+        },
         "pinChannelIds": {
             SSRG_GUILD: 951350075190313010,
             TEST_GUILD: 1335936325685084242,
@@ -494,25 +572,18 @@ GAMES: dict[str, "GameDetails"] = {
     },
     "LP": {
         "name": "SUPERSTAR LAPONE",
-        "infoSpreadsheet": "1Ng57BGCDj025bxwCBbQulYFhRjS5runy5HnbStY_xSw",
-        "infoReplaceGrid": {
-            "sheetId": 0,
-            "startRowIndex": 1,
-            "startColumnIndex": 1,
-            "endColumnIndex": 2,
+        "color": 0xEAA715,
+        "info": {
+            "spreadsheetId": "1Ng57BGCDj025bxwCBbQulYFhRjS5runy5HnbStY_xSw",
+            "replaceGrid": {
+                "sheetId": 0,
+                "startRowIndex": 1,
+                "startColumnIndex": 1,
+                "endColumnIndex": 2,
+            },
+            "range": "Songs!A2:F",
+            "columns": InfoColumns.SSL_WITH_SKILLS.value,
         },
-        "infoRange": "Songs!A2:F",
-        "infoColumns": InfoColumns.SSL_WITH_SKILLS,
-        "pingSpreadsheet": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-        "pingReplaceGrid": {
-            "sheetId": 0,
-            "startRowIndex": 0,
-            "startColumnIndex": 3,
-            "endColumnIndex": 4,
-        },
-        "pingRange": "LAPONE!B1:D",
-        "pingUsers": "LAPONE!C",
-        "pingColumns": PING_COLUMNS,
         "bonus": {
             "spreadsheetId": "1Ng57BGCDj025bxwCBbQulYFhRjS5runy5HnbStY_xSw",
             "range": "Bonuses!A2:J",
@@ -524,7 +595,23 @@ GAMES: dict[str, "GameDetails"] = {
                 "endColumnIndex": 3,
             },
         },
-        "color": 0xEAA715,
+        "ping": {
+            "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
+            "range": "LAPONE!C1:D",
+            "columns": PING_COLUMNS,
+            "replaceGrid": {
+                "sheetId": 0,
+                "startRowIndex": 0,
+                "startColumnIndex": 3,
+                "endColumnIndex": 4,
+            },
+        },
+        "emblem": {
+            "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
+            "range": "LAPONE!A1:B",
+            "columns": EMBLEM_COLUMNS,
+            "replaceGrid": {},
+        },
         "pinChannelIds": {
             SSRG_GUILD: 1039132737979813908,
             TEST_GUILD: 1340868523957813348,
@@ -542,20 +629,13 @@ GAMES: dict[str, "GameDetails"] = {
     },
     "EB": {
         "name": "SUPERSTAR EBiDAN",
-        "infoSpreadsheet": "1uwLl0MQM895xI4iBmdP-eVVn7HKOBisFaQCCjzJL4GQ",
-        "infoReplaceGrid": {},
-        "infoRange": "Songs!A2:E",
-        "infoColumns": InfoColumns.NO_SSL,
-        "pingSpreadsheet": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-        "pingReplaceGrid": {
-            "sheetId": 1872493199,
-            "startRowIndex": 0,
-            "startColumnIndex": 3,
-            "endColumnIndex": 4,
+        "color": 0xC71D1B,
+        "info": {
+            "spreadsheetId": "1uwLl0MQM895xI4iBmdP-eVVn7HKOBisFaQCCjzJL4GQ",
+            "replaceGrid": {},
+            "range": "Songs!A2:E",
+            "columns": InfoColumns.NO_SSL.value,
         },
-        "pingRange": "EBiDAN!B1:D",
-        "pingUsers": "EBiDAN!C",
-        "pingColumns": PING_COLUMNS,
         "bonus": {
             "spreadsheetId": "1uwLl0MQM895xI4iBmdP-eVVn7HKOBisFaQCCjzJL4GQ",
             "range": "Bonuses!A2:J",
@@ -567,7 +647,23 @@ GAMES: dict[str, "GameDetails"] = {
                 "endColumnIndex": 3,
             },
         },
-        "color": 0xC71D1B,
+        "ping": {
+            "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
+            "range": "EBiDAN!C1:D",
+            "columns": PING_COLUMNS,
+            "replaceGrid": {
+                "sheetId": 1872493199,
+                "startRowIndex": 0,
+                "startColumnIndex": 3,
+                "endColumnIndex": 4,
+            },
+        },
+        "emblem": {
+            "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
+            "range": "EBiDAN!A1:B",
+            "columns": EMBLEM_COLUMNS,
+            "replaceGrid": {},
+        },
         "pinChannelIds": {},
         "pinRoles": {},
         "dateFormat": "%Y-%m-%d",
@@ -582,20 +678,13 @@ GAMES: dict[str, "GameDetails"] = {
     },
     "PH": {
         "name": "SuperStar Philippines",
-        "infoSpreadsheet": "1Fz71pl3YCUIbCRcZRuKBjsDT4JEW0m9Uoj8wyJhUMOc",
-        "infoReplaceGrid": {},
-        "infoRange": "Songs!A2:E",
-        "infoColumns": InfoColumns.NO_SSL,
-        "pingSpreadsheet": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-        "pingReplaceGrid": {
-            "sheetId": 564410793,
-            "startRowIndex": 0,
-            "startColumnIndex": 3,
-            "endColumnIndex": 4,
+        "color": 0x04102D,
+        "info": {
+            "spreadsheetId": "1Fz71pl3YCUIbCRcZRuKBjsDT4JEW0m9Uoj8wyJhUMOc",
+            "replaceGrid": {},
+            "range": "Songs!A2:E",
+            "columns": InfoColumns.NO_SSL.value,
         },
-        "pingRange": "Philippines!B1:D",
-        "pingUsers": "Philippines!C",
-        "pingColumns": PING_COLUMNS,
         "bonus": {
             "spreadsheetId": "1Fz71pl3YCUIbCRcZRuKBjsDT4JEW0m9Uoj8wyJhUMOc",
             "range": "Bonuses!A2:J",
@@ -607,7 +696,23 @@ GAMES: dict[str, "GameDetails"] = {
                 "endColumnIndex": 3,
             },
         },
-        "color": 0x04102D,
+        "ping": {
+            "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
+            "range": "Philippines!C1:D",
+            "columns": PING_COLUMNS,
+            "replaceGrid": {
+                "sheetId": 564410793,
+                "startRowIndex": 0,
+                "startColumnIndex": 3,
+                "endColumnIndex": 4,
+            },
+        },
+        "emblem": {
+            "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
+            "range": "Philippines!A1:B",
+            "columns": EMBLEM_COLUMNS,
+            "replaceGrid": {},
+        },
         "pinChannelIds": {},
         "pinRoles": {},
         "dateFormat": "%d-%m-%Y",

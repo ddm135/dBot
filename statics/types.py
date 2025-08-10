@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING, NotRequired, TypedDict
 from zoneinfo import ZoneInfo
 
 if TYPE_CHECKING:
-    from statics.consts import AssetScheme, InfoColumns
+    from statics.consts import AssetScheme
 
 
 class GridRange(TypedDict, total=False):
@@ -18,22 +18,15 @@ class SpreadsheetDetails(TypedDict):
     range: str
     columns: tuple[str, ...]
     replaceGrid: GridRange
-    write: NotRequired[str]
 
 
 class GameDetails(TypedDict):
     name: str
-    infoSpreadsheet: str
-    infoReplaceGrid: dict[str, int | str]
-    infoRange: str
-    infoColumns: "InfoColumns"
-    pingSpreadsheet: str
-    pingReplaceGrid: dict[str, int | str]
-    pingRange: str
-    pingUsers: str
-    pingColumns: tuple[str, ...]
-    bonus: NotRequired[SpreadsheetDetails]
     color: int
+    info: NotRequired[SpreadsheetDetails]
+    bonus: NotRequired[SpreadsheetDetails]
+    ping: NotRequired[SpreadsheetDetails]
+    emblem: NotRequired[SpreadsheetDetails]
     pinChannelIds: dict[int, int | None]
     pinRoles: dict[int, int | None]
     dateFormat: str

@@ -1,6 +1,3 @@
-# mypy: disable-error-code="union-attr"
-# pyright: reportAttributeAccessIssue=false, reportOptionalMemberAccess=false
-
 import logging
 from datetime import time
 from typing import TYPE_CHECKING
@@ -41,17 +38,17 @@ class InfoSync(commands.Cog):
         self.LOGGER.info("Downloading info data: %s...", game_details["name"])
         self.bot.info_by_name[game].clear()
         self.bot.info_by_id[game].clear()
-        if not game_details["infoSpreadsheet"]:
+        if not (info_details := game_details.get("info")):
             return
 
         cog = self.bot.get_cog("GoogleSheets")
         info = await cog.get_sheet_data(  # type: ignore[union-attr]
-            game_details["infoSpreadsheet"],
-            game_details["infoRange"],
+            info_details["spreadsheetId"],
+            info_details["range"],
             "kr" if game_details["timezone"] == TIMEZONES["KST"] else None,
         )
 
-        info_columns = game_details["infoColumns"].value
+        info_columns = info_details["columns"]
         artist_name_index = info_columns.index("artist_name")
         song_name_index = info_columns.index("song_name")
         song_id_index = info_columns.index("song_id")

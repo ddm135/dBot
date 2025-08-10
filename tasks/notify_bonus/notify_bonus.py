@@ -9,7 +9,6 @@ from statics.consts import (
     GAMES,
     STATUS_CHANNEL,
     TIMEZONES,
-    AssetScheme,
 )
 
 from .embeds import NotifyBonusEmbed
@@ -33,7 +32,9 @@ class NotifyBonus(commands.Cog):
         cog = self.bot.get_cog("GoogleSheets")
 
         for game, game_details in GAMES.items():
-            if not (bonus_details := game_details.get("bonus")):
+            if not (bonus_details := game_details.get("bonus")) or not (
+                ping_details := game_details.get("ping")
+            ):
                 continue
 
             timezone = game_details["timezone"]
@@ -56,14 +57,13 @@ class NotifyBonus(commands.Cog):
                 f"<t:{int(current_date.timestamp())}:f>"
             )
 
-            ping_columns = game_details["pingColumns"]
+            ping_columns = ping_details["columns"]
             ping_users_index = ping_columns.index("users")
             ping_artist_index = ping_columns.index("artist_name")
-            ping_emblem_index = ping_columns.index("emblem")
 
             ping_data = await cog.get_sheet_data(  # type: ignore[union-attr]
-                game_details["pingSpreadsheet"],
-                game_details["pingRange"],
+                ping_details["spreadsheetId"],
+                ping_details["range"],
                 "kr" if game_details["timezone"] == TIMEZONES["KST"] else None,
             )
             game_ping_dict = dict.fromkeys(
@@ -242,37 +242,9 @@ class NotifyBonus(commands.Cog):
                             notify_start.append(msg)
 
                 if notify_start or notify_end:
-                    try:
-                        group_code = int(artist_pings[ping_emblem_index])
-                        grd_data = self.bot.grd[game]
-                        for group in grd_data:
-                            if group["code"] == group_code:
-                                icon_url = group["emblemImage"]
-                                break
-                        else:
-                            icon_url = None
-
-                        if (
-                            game_details["assetScheme"] == AssetScheme.JSON_URL
-                            and icon_url
-                        ):
-                            url_data = self.bot.url[game]
-                            for url in url_data:
-                                if url["code"] == icon_url:
-                                    icon_url = url["url"]
-                                    break
-                    except ValueError:
-                        icon_url = artist_pings[ping_emblem_index] or None
-
-                    if game_details["assetScheme"] in (
-                        AssetScheme.JSON_CATALOG,
-                        AssetScheme.BINARY_CATALOG,
-                    ):
-                        icon_url = None
-
                     embed = NotifyBonusEmbed(
                         artist,
-                        icon_url,
+                        None,
                         current_date,
                         notify_start,
                         notify_end,

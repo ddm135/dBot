@@ -40,7 +40,7 @@ class dBot(commands.Bot):
         lambda: defaultdict(lambda: defaultdict(dict))
     )
     roles: defaultdict[str, list[int]] = defaultdict(list[int])
-    ssleague: defaultdict[str, defaultdict[str, LastAppearance]] = defaultdict(
+    ssleagues: defaultdict[str, defaultdict[str, LastAppearance]] = defaultdict(
         lambda: defaultdict(
             lambda: LastAppearance(songs=defaultdict(lambda: None), date=None)
         )

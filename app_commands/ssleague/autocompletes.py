@@ -1,3 +1,5 @@
+# pyright: reportTypedDictNotRequiredAccess=false
+
 from itertools import islice
 from typing import TYPE_CHECKING
 
@@ -32,7 +34,7 @@ async def song_autocomplete(
     if not (game := itr.namespace.game) or not itr.client.info_ready:
         return []
 
-    search_term_index = GAMES[game]["infoColumns"].value.index("search_term")
+    search_term_index = GAMES[game]["info"]["columns"].index("search_term")
     songs = itr.client.info_by_name[game][itr.namespace.artist]
     if not songs:
         return []
@@ -52,7 +54,7 @@ async def song_id_autocomplete(
 ) -> list[app_commands.Choice[str]]:
     if not (game := itr.namespace.game) or not itr.client.info_ready:
         return []
-    info_columns = GAMES[game]["infoColumns"].value
+    info_columns = GAMES[game]["info"]["columns"]
     artist_name_index = info_columns.index("artist_name")
     song_name_index = info_columns.index("song_name")
 
