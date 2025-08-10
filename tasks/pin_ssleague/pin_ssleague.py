@@ -41,7 +41,6 @@ class PinSSLeague(commands.Cog):
         ]
         await asyncio.gather(*pin_tasks, return_exceptions=True)
 
-        cog.save_data(Data.CREDENTIALS)  # type: ignore[union-attr]
         cog.save_data(Data.SSLEAGUES)  # type: ignore[union-attr]
 
     async def pin_ssl(self, game: str, credentials: dict) -> None:
