@@ -25,7 +25,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
     GAME_CHOICES = [
         app_commands.Choice(name=game_details["name"], value=game)
         for game, game_details in GAMES.items()
-        if {"info", "pinChannelIds"} <= set(game_details)
+        if {"info"} <= set(game_details) and game_details["pinChannelIds"]
     ]
 
     def __init__(self, bot: "dBot") -> None:
