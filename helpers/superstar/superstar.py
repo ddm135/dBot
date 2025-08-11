@@ -243,7 +243,7 @@ class SuperStar(commands.Cog):
                     )
                     await process.communicate()
 
-                file_extract_path = bundle_extract_path / "Assets" / file_url
+                file_extract_path = bundle_extract_path / "Assets" / file_path.name
                 shutil.copyfile(file_extract_path, file_path)
 
             return discord.File(file_path)
