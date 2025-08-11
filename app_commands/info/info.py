@@ -74,6 +74,7 @@ class Info(commands.Cog):
         msg = await itr.followup.send(
             embed=InfoEmbed(game_details, artist_choice, sorted_songs, icon),
             wait=True,
+            files=[icon] if isinstance(icon, discord.File) else [],
         )
         view = InfoView(msg, game_details, artist_choice, sorted_songs, itr.user, icon)
         await msg.edit(view=view)
