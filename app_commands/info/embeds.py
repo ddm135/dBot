@@ -42,7 +42,11 @@ class InfoEmbed(discord.Embed):
         )
         self.set_author(
             name=f"{game_details["name"]}{f" - {artist}" if artist else ""}",
-            icon_url=icon.filename if isinstance(icon, discord.File) else icon,
+            icon_url=(
+                f"attachment://{icon.filename}"
+                if isinstance(icon, discord.File)
+                else icon
+            ),
         )
         self.set_footer(
             text=f"Page {current_page}/{max_page or math.ceil(len(songs) / STEP)}",
