@@ -8,7 +8,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from statics.consts import GAMES, RESET_OFFSET, AssetScheme, InfoColumns
+from statics.consts import GAMES, RESET_OFFSET, InfoColumns
 
 from .autocompletes import (
     artist_autocomplete,
@@ -155,46 +155,29 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             else None
         )
 
-        msd_data = self.bot.msd[game]
-        url_data = self.bot.url[game]
-        grd_data = self.bot.grd[game]
-        for song in msd_data:
-            if song["code"] == song_id:
-                color = int(song["albumBgColor"][:-2], 16)
-                image_url = song["album"]
-                group_code = song["groupData"]
-                break
-        else:
-            color = game_details["color"]
-            image_url = None
-            group_code = None
-
-        if game_details["assetScheme"] in (
-            AssetScheme.JSON_CATALOG,
-            AssetScheme.BINARY_CATALOG,
-        ):
-            image_url = None
-            group_code = None
-
-        if game_details["assetScheme"] == AssetScheme.JSON_URL and image_url:
-            for url in url_data:
-                if url["code"] == image_url:
-                    image_url = url["url"]
-                    break
+        cog = self.bot.get_cog("SuperStar")
+        results = await cog.get_attributes(  # type: ignore[union-attr]
+            game,
+            "msd",
+            song_id,
+            {"albumBgColor": False, "album": True, "groupData": False},
+        )
+        color = (
+            int(results["albumBgColor"][:-2], 16)
+            if results["albumBgColor"]
+            else game_details["color"]
+        )
+        image_url = results["album"]
+        group_code = results["groupData"]
 
         if group_code:
-            for group in grd_data:
-                if group["code"] == group_code:
-                    icon_url = group["emblemImage"]
-                    break
-            else:
-                icon_url = None
-
-            if game_details["assetScheme"] == AssetScheme.JSON_URL and icon_url:
-                for url in url_data:
-                    if url["code"] == icon_url:
-                        icon_url = url["url"]
-                        break
+            results = await cog.get_attributes(  # type: ignore[union-attr]
+                game,
+                "grd",
+                group_code,
+                {"emblemImage": True},
+            )
+            icon_url = results["emblemImage"]
         else:
             icon_url = None
 
@@ -219,7 +202,6 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         else:
             song_last = None
 
-        cog = self.bot.get_cog("SuperStar")
         embed = cog.SSLeagueEmbed(  # type: ignore[union-attr]
             artist_name,
             song_name,
@@ -238,7 +220,6 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             pin_channel_id
         ) or await self.bot.fetch_channel(pin_channel_id)
         assert isinstance(pin_channel, discord.TextChannel)
-        cog = self.bot.get_cog("SuperStar")
         new_pin = await cog.pin_new_ssl(embed, pin_channel)  # type: ignore[union-attr]
         topic = f"[{current_time.strftime("%m.%d.%y")}] {artist_name} - {song_name}"
         if pin_role:
