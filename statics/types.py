@@ -22,11 +22,12 @@ class SpreadsheetDetails(TypedDict):
 
 class GameDetails(TypedDict):
     name: str
+    iconUrl: NotRequired[str]
     color: int
     info: NotRequired[SpreadsheetDetails]
     bonus: NotRequired[SpreadsheetDetails]
     ping: NotRequired[SpreadsheetDetails]
-    emblem: NotRequired[SpreadsheetDetails]
+    emblem: SpreadsheetDetails
     pinChannelIds: dict[int, int | None]
     pinRoles: dict[int, int | None]
     dateFormat: str
@@ -41,8 +42,9 @@ class GameDetails(TypedDict):
 
 class BasicDetails(TypedDict):
     version: str
+    iconUrl: str
     manifest: dict[str, str]
-    catalog: NotRequired[dict[str, dict[str, str]]]
+    catalog: NotRequired[dict[str, dict[str, str | None]]]
 
 
 class LastAppearance(TypedDict):

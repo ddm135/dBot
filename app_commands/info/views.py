@@ -19,14 +19,16 @@ class InfoView(discord.ui.View):
         artist: str | None,
         songs: list[list[str]],
         user: discord.User | discord.Member,
+        icon: str | discord.File | None
     ) -> None:
         self.message = message_id
         self.game_details = game_details
         self.artist = artist
         self.songs = songs
+        self.user = user
+        self.icon = icon
         self.current = 1
         self.max = math.ceil(len(songs) / STEP) or 1
-        self.user = user
         super().__init__()
 
     async def on_timeout(self) -> None:
@@ -42,6 +44,7 @@ class InfoView(discord.ui.View):
                 self.game_details,
                 self.artist,
                 self.songs,
+                self.icon,
                 self.current,
                 self.max,
             ),

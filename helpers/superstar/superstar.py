@@ -1,13 +1,19 @@
+# pyright: reportTypedDictNotRequiredAccess=false
+
 import asyncio
 import gzip
 import json
-from typing import TYPE_CHECKING
+import shutil
+from pathlib import Path
+from typing import TYPE_CHECKING, Literal
 
 import aiohttp
 import discord
 from discord.ext import commands
 from google.auth.transport import requests
 from google.oauth2.service_account import IDTokenCredentials
+
+from statics.consts import GAMES, AssetScheme
 
 from .embeds import SSLeagueEmbed as _SSLeagueEmbed
 from .types import SuperStarHeaders
@@ -188,6 +194,59 @@ class SuperStar(commands.Cog):
                 gzip.decompress(content)
             ).replace(rb"\/", rb"/")
         )
+
+    async def get_file(
+        self, game: str, data_type: Literal["grd", "msd"], item_id: str, file_key: str
+    ) -> str | discord.File | None:
+        data = getattr(self.bot, f"{data_type}").get(game, [])
+        for item in data:
+            if item["code"] == item_id:
+                file_url = item[file_key]
+                break
+        else:
+            return None
+
+        if GAMES[game]["assetScheme"] == AssetScheme.JSON_URL:
+            url_data = self.bot.url[game]
+            for url in url_data:
+                if url["code"] == file_url:
+                    return url["url"]
+            return None
+        elif GAMES[game]["assetScheme"] in (
+            AssetScheme.BINARY_CATALOG,
+            AssetScheme.JSON_CATALOG,
+        ) and (catalog := self.bot.basic[game].get("catalog")):
+            catalog_key = file_url
+            file_path = Path(f"data/assets/{game}/{file_url}")
+            if not file_path.exists():
+                file_path.parent.mkdir(parents=True, exist_ok=True)
+                while dependency := catalog[catalog_key]["dependency"]:
+                    catalog_key = dependency
+                bundle_path = Path(f"data/bundles/{game}/{catalog_key}")
+                bundle_extract_path = bundle_path.with_suffix("")
+                bundle_extract_path.mkdir(parents=True, exist_ok=True)
+
+                if not any(bundle_extract_path.iterdir()):
+                    if not bundle_path.exists():
+                        async with aiohttp.ClientSession() as session:
+                            async with session.get(catalog_key) as r:
+                                with open(bundle_path, "wb") as f:
+                                    f.write(await r.read())
+                    process = await asyncio.create_subprocess_exec(
+                        "utils/bundle",
+                        str(bundle_path),
+                        str(bundle_extract_path),
+                        stdout=asyncio.subprocess.PIPE,
+                        stderr=asyncio.subprocess.PIPE,
+                    )
+                    await process.communicate()
+
+                file_extract_path = bundle_extract_path / "Assets" / file_url
+                shutil.copyfile(file_extract_path, file_path)
+
+            return discord.File(file_path)
+
+        return file_url
 
     @staticmethod
     async def pin_new_ssl(

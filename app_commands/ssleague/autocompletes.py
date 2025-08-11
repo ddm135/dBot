@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 async def artist_autocomplete(
     itr: discord.Interaction["dBot"], current: str
 ) -> list[app_commands.Choice[str]]:
-    if not (game := itr.namespace.game) or not itr.client.info_ready:
+    if not (game := itr.namespace.game):
         return []
 
     artists = itr.client.info_by_name[game].keys()
@@ -31,12 +31,11 @@ async def artist_autocomplete(
 async def song_autocomplete(
     itr: discord.Interaction["dBot"], current: str
 ) -> list[app_commands.Choice[str]]:
-    if not (game := itr.namespace.game) or not itr.client.info_ready:
+    if not (game := itr.namespace.game):
         return []
 
     search_term_index = GAMES[game]["info"]["columns"].index("search_term")
-    songs = itr.client.info_by_name[game][itr.namespace.artist]
-    if not songs:
+    if not (songs := itr.client.info_by_name[game].get(itr.namespace.artist, {})):
         return []
 
     song_choices = (
@@ -52,14 +51,13 @@ async def song_autocomplete(
 async def song_id_autocomplete(
     itr: discord.Interaction["dBot"], current: str
 ) -> list[app_commands.Choice[str]]:
-    if not (game := itr.namespace.game) or not itr.client.info_ready:
+    if not (game := itr.namespace.game):
         return []
     info_columns = GAMES[game]["info"]["columns"]
     artist_name_index = info_columns.index("artist_name")
     song_name_index = info_columns.index("song_name")
 
-    song = itr.client.info_by_id[game][current]
-    if not song:
+    if not (song := itr.client.info_by_id[game].get(current)):
         return []
 
     return [

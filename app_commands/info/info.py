@@ -49,28 +49,33 @@ class Info(commands.Cog):
         """
 
         await itr.response.defer()
-        if not self.bot.info_ready:
-            return await itr.followup.send(
-                "Song data synchronization in progress, feature unavailable."
-            )
-
         game_details = GAMES[game_choice.value]
         duration_index = game_details["info"]["columns"].index("duration")
 
+        icon: str | discord.File | None = None
         if not artist_choice:
             songs = self.bot.info_by_id[game_choice.value].values()
+            icon = (
+                game_details.get("iconUrl")
+                or self.bot.basic[game_choice.value]["iconUrl"]
+            )
         else:
-            if artist_choice not in self.bot.info_by_name[game_choice.value]:
+            if not (
+                songs := (
+                    self.bot.info_by_name[game_choice.value]
+                    .get(artist_choice, {})
+                    .values()
+                )
+            ):
                 return await itr.followup.send("Artist not found.")
-
-            songs = self.bot.info_by_name[game_choice.value][artist_choice].values()
+            icon = self.bot.emblem[game_choice.value][artist_choice]
 
         sorted_songs = sorted(songs, key=lambda x: x[duration_index])
         msg = await itr.followup.send(
-            embed=InfoEmbed(game_details, artist_choice, sorted_songs),
+            embed=InfoEmbed(game_details, artist_choice, sorted_songs, icon),
             wait=True,
         )
-        view = InfoView(msg, game_details, artist_choice, sorted_songs, itr.user)
+        view = InfoView(msg, game_details, artist_choice, sorted_songs, itr.user, icon)
         await msg.edit(view=view)
 
 

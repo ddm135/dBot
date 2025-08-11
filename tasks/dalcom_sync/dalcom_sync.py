@@ -25,6 +25,7 @@ class DalcomSync(commands.Cog):
         self.dalcom_sync.cancel()
         self.bot.ajs.clear()
         self.bot.msd.clear()
+        self.bot.grd.clear()
         self.bot.url.clear()
 
     @tasks.loop(time=[time(hour=h, minute=10) for h in range(24)])
@@ -41,7 +42,6 @@ class DalcomSync(commands.Cog):
         ajs = await cog.get_a_json(basic_details)  # type: ignore[union-attr]
 
         if ajs["code"] == 1000:
-            self.bot.ajs[game].clear()
             self.bot.ajs[game] = ajs
         else:
             self.LOGGER.info(
@@ -50,16 +50,13 @@ class DalcomSync(commands.Cog):
             ajs = self.bot.ajs[game]
 
         if ajs:
-            self.bot.msd[game].clear()
             self.bot.msd[game] = await cog.get_data(  # type: ignore[union-attr]
                 ajs["result"]["context"]["MusicData"]["file"]
             )
-            self.bot.grd[game].clear()
             self.bot.grd[game] = await cog.get_data(  # type: ignore[union-attr]
                 ajs["result"]["context"]["GroupData"]["file"]
             )
             if game_details["assetScheme"] == AssetScheme.JSON_URL:
-                self.bot.url[game].clear()
                 self.bot.url[game] = await cog.get_data(  # type: ignore[union-attr]
                     ajs["result"]["context"]["URLs"]["file"]
                 )

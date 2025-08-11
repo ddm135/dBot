@@ -56,22 +56,24 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         """
 
         await itr.response.defer()
-        if not self.bot.bonus_ready:
-            return await itr.followup.send(
-                "Bonus data synchronization in progress, feature unavailable."
-            )
+        bonus_data = self.bot.bonus[game_choice.value]
+        artists: Iterable[str]
+        if not artist_choice:
+            artists = bonus_data.keys()
+        else:
+            if artist_choice not in bonus_data:
+                return await itr.followup.send("Artist not found.")
+            artists = [artist_choice]
 
         game_details = GAMES[game_choice.value]
         timezone = game_details["timezone"]
         bonus_columns = game_details["bonus"]["columns"]
-
         current_date = datetime.now(tz=timezone).replace(
             hour=0,
             minute=0,
             second=0,
             microsecond=0,
         )
-
         match time:
             case None:
                 first_date = current_date.replace(day=1, month=1)
@@ -102,16 +104,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         bonus_start_index = bonus_columns.index("bonus_start")
         bonus_end_index = bonus_columns.index("bonus_end")
         bonus_amount_index = bonus_columns.index("bonus_amount")
-
-        bonus_data = self.bot.bonus[game_choice.value]
-        week_bonuses = []
-        artists: Iterable[str]
-        if not artist_choice:
-            artists = bonus_data.keys()
-        else:
-            if artist_choice not in bonus_data:
-                return await itr.followup.send("Artist not found.")
-            artists = [artist_choice]
+        period_bonuses = []
 
         while tracking_date <= last_date:
             for artist in artists:
@@ -213,8 +206,8 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                         "bonus_end": birthday_end,
                         "bonus_amount": birthday_total,
                     }
-                    if bonus_dict not in week_bonuses:
-                        week_bonuses.append(bonus_dict)
+                    if bonus_dict not in period_bonuses:
+                        period_bonuses.append(bonus_dict)
 
                 for bonus in album_bonuses:
                     start_date = bonus[bonus_start_index]
@@ -240,26 +233,26 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                         "bonus_end": song_end,
                         "bonus_amount": song_total,
                     }
-                    if bonus_dict not in week_bonuses:
-                        week_bonuses.append(bonus_dict)
+                    if bonus_dict not in period_bonuses:
+                        period_bonuses.append(bonus_dict)
 
             tracking_date += BONUS_OFFSET
 
-        week_bonuses.sort(key=lambda x: (x["bonus_end"], x["bonus_start"]))
+        period_bonuses.sort(key=lambda x: (x["bonus_end"], x["bonus_start"]))
         first_available_index = 0
-        for i, _bonus in enumerate(week_bonuses):
+        for i, _bonus in enumerate(period_bonuses):
             if _bonus["bonus_end"] >= current_date:
                 first_available_index = i
                 break
 
         default_page = first_available_index // STEP + 1
-        max_page = math.ceil(len(week_bonuses) / STEP) or 1
+        max_page = math.ceil(len(period_bonuses) / STEP) or 1
 
         msg = await itr.followup.send(
             embed=BonusesEmbed(
                 game_details,
                 artist_choice,
-                week_bonuses,
+                period_bonuses,
                 first_date,
                 last_date,
                 current_date,
@@ -275,7 +268,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
             first_date,
             last_date,
             current_date,
-            week_bonuses,
+            period_bonuses,
             itr.user,
             default_page,
             max_page,

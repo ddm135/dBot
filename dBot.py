@@ -13,27 +13,19 @@ from statics.types import BasicDetails, LastAppearance
 class dBot(commands.Bot):
     LOGGER = logging.getLogger("dBot")
 
-    basic: defaultdict[str, BasicDetails] = defaultdict(
-        lambda: BasicDetails(version="", manifest={})
-    )
+    basic: dict[str, BasicDetails] = {}
 
     ajs: defaultdict[str, dict] = defaultdict(dict)
     grd: defaultdict[str, list[dict]] = defaultdict(list[dict])
     msd: defaultdict[str, list[dict]] = defaultdict(list[dict])
     url: defaultdict[str, list[dict]] = defaultdict(list[dict])
 
-    info_by_name: defaultdict[str, defaultdict[str, defaultdict[str, list[str]]]] = (
-        defaultdict(lambda: defaultdict(lambda: defaultdict(list[str])))
-    )
-    info_by_id: defaultdict[str, defaultdict[str, list[str]]] = defaultdict(
-        lambda: defaultdict(list[str])
-    )
-    info_ready = False
+    info_by_name: dict[str, dict[str, dict[str, list[str]]]] = {}
+    info_by_id: dict[str, dict[str, list[str]]] = {}
 
-    bonus: defaultdict[str, defaultdict[str, list[list]]] = defaultdict(
-        lambda: defaultdict(list[list])
-    )
-    bonus_ready = False
+    bonus: dict[str, dict[str, list[list]]] = {}
+
+    emblem: dict[str, dict[str, str | discord.File | None]] = {}
 
     credentials: dict = {}
     pings: defaultdict[str, defaultdict[str, defaultdict[str, dict]]] = defaultdict(

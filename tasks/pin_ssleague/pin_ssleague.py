@@ -86,7 +86,8 @@ class PinSSLeague(commands.Cog):
         music_list = ssleague["result"]["musicList"]
         music = next(music for music in music_list if music["day"] == curday)
         song_id = music["music"]
-        ssl_song = self.bot.info_by_id[game][str(song_id)]
+        if not (ssl_song := self.bot.info_by_id[game].get(str(song_id))):
+            return
 
         info_columns = game_details["info"]["columns"]
         artist_name_index = info_columns.index("artist_name")

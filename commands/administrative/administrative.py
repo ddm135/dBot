@@ -195,18 +195,17 @@ class Administrative(commands.Cog):
     ) -> None:
         if (
             ctx.channel.id != STATUS_CHANNEL
-            or game not in GAMES
             or not old_name
             or not new_name
+            or not (game_details := GAMES.get(game))
         ):
             return
 
-        game_details = GAMES[game]
         text = f"Renaming {old_name} to {new_name} in {game_details["name"]}..."
         msg = await ctx.send(text)
         cog = self.bot.get_cog("GoogleSheets")
 
-        for data in ("info", "ping", "bonus"):
+        for data in ("info", "bonus", "ping", "emblem"):
             if (details := game_details.get(data)) and (
                 replace_grid := details["replaceGrid"]  # type: ignore[index]
             ):
@@ -234,16 +233,16 @@ class Administrative(commands.Cog):
                 cog.save_data(Data.SSLEAGUES)  # type: ignore[union-attr]
 
         await msg.edit(content=f"{text}\nDownloading info data...")
-        self.bot.info_ready = False
         cog = self.bot.get_cog("InfoSync")
         await cog.get_info_data(game, game_details)  # type: ignore[union-attr]
-        self.bot.info_ready = True
 
         await msg.edit(content=f"{text}\nDownloading bonus data...")
-        self.bot.bonus_ready = False
         cog = self.bot.get_cog("BonusSync")
         await cog.get_bonus_data(game, game_details)  # type: ignore[union-attr]
-        self.bot.bonus_ready = True
+
+        await msg.edit(content=f"{text}\nDownloading emblem data...")
+        cog = self.bot.get_cog("EmblemSync")
+        await cog.get_emblem_data(game, game_details)  # type: ignore[union-attr]
 
         await msg.edit(
             content=f"Renamed {old_name} to {new_name} in {game_details["name"]}!"

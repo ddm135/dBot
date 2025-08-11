@@ -1,2 +1,8 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+utils/bundle filter=lfs diff=lfs merge=lfs -text
+utils/bundle.exe filter=lfs diff=lfs merge=lfs -text
+utils/catalog-json filter=lfs diff=lfs merge=lfs -text
+utils/catalog-bin filter=lfs diff=lfs merge=lfs -text
+utils/catalog-json.exe filter=lfs diff=lfs merge=lfs -text
+utils/catalog-bin.exe filter=lfs diff=lfs merge=lfs -text

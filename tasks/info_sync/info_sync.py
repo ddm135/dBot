@@ -22,22 +22,17 @@ class InfoSync(commands.Cog):
         self.info_sync.start()
 
     async def cog_unload(self) -> None:
-        self.bot.info_ready = False
         self.info_sync.cancel()
         self.bot.info_by_name.clear()
         self.bot.info_by_id.clear()
 
     @tasks.loop(time=[time(hour=h, minute=15) for h in range(24)])
     async def info_sync(self) -> None:
-        self.bot.info_ready = False
         for game, game_details in GAMES.items():
             await self.get_info_data(game, game_details)
-        self.bot.info_ready = True
 
     async def get_info_data(self, game: str, game_details: "GameDetails") -> None:
         self.LOGGER.info("Downloading info data: %s...", game_details["name"])
-        self.bot.info_by_name[game].clear()
-        self.bot.info_by_id[game].clear()
         if not (info_details := game_details.get("info")):
             return
 
@@ -54,6 +49,8 @@ class InfoSync(commands.Cog):
         song_id_index = info_columns.index("song_id")
         duration_index = info_columns.index("duration")
 
+        info_by_name: dict[str, dict[str, list[str]]] = {}
+        info_by_id: dict[str, list[str]] = {}
         for row in info:
             if not row or len(row) < len(info_columns):
                 continue
@@ -65,10 +62,13 @@ class InfoSync(commands.Cog):
                 f"{int(row[duration_index]) % 60:02d}"
             )
 
-            self.bot.info_by_name[game][row[artist_name_index]][
+            info_by_name.setdefault(row[artist_name_index], {})[
                 row[song_name_index]
             ] = row
-            self.bot.info_by_id[game][row[song_id_index]] = row
+            info_by_id[row[song_id_index]] = row
+
+        self.bot.info_by_name[game] = info_by_name
+        self.bot.info_by_id[game] = info_by_id
 
 
 async def setup(bot: "dBot") -> None:

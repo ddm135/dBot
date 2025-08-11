@@ -9,6 +9,7 @@ import aiohttp
 from discord.ext import commands, tasks
 
 from statics.consts import GAMES, AssetScheme
+from statics.types import BasicDetails
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -26,7 +27,7 @@ class BasicSync(commands.Cog):
 
     async def cog_unload(self) -> None:
         self.basic_sync.cancel()
-        self.bot.bonus.clear()
+        self.bot.basic.clear()
 
     @tasks.loop(time=[time(hour=h, minute=5) for h in range(24)])
     async def basic_sync(self) -> None:
@@ -39,25 +40,27 @@ class BasicSync(commands.Cog):
 
             async with aiohttp.ClientSession() as session:
                 async with session.get(f"https://itunes.apple.com/lookup?{query}") as r:
-                    result = await r.text()
-                    encoded_result = result.replace("\n", "")
-                    new_result = json.loads(encoded_result)
-                    self.bot.basic[game]["version"] = new_result["results"][0][
-                        "version"
-                    ]
+                    weird_result = await r.text()
+                    text_result = weird_result.replace("\n", "")
+                    json_result = json.loads(text_result)
+                    version = json_result["results"][0]["version"]
+                    iconUrl = json_result["results"][0]["artworkUrl100"]
 
-                async with session.get(
-                    manifest_url.format(version=self.bot.basic[game]["version"])
-                ) as r:
-                    self.bot.basic[game]["manifest"] = await r.json(content_type=None)
+                async with session.get(manifest_url.format(version=version)) as r:
+                    manifest = await r.json(content_type=None)
 
-                if not game_details["assetScheme"] in (
+                self.bot.basic[game] = BasicDetails(
+                    version=version,
+                    iconUrl=iconUrl,
+                    manifest=manifest,
+                )
+                if game_details["assetScheme"] not in (
                     AssetScheme.BINARY_CATALOG,
                     AssetScheme.JSON_CATALOG,
                 ) or not (catalog_url := game_details.get("catalogUrl")):
                     continue
 
-                resource_version = self.bot.basic[game]["manifest"]["ResourceVersion"]
+                resource_version = manifest["ResourceVersion"]
                 catalog_folder_path = Path(f"data/catalogs/{game}")
                 catalog_folder_path.mkdir(parents=True, exist_ok=True)
                 extension = (
@@ -72,7 +75,10 @@ class BasicSync(commands.Cog):
                     catalog_folder_path / f"{resource_version}_extracted.json"
                 )
 
-                if not catalog_extracted_path.exists():
+                if (
+                    not catalog_extracted_path.exists()
+                    or "catalog" not in self.bot.basic[game]
+                ):
                     if not catalog_packaged_path.exists():
                         for file in catalog_folder_path.iterdir():
                             if file.is_file():
@@ -84,17 +90,15 @@ class BasicSync(commands.Cog):
                             with open(catalog_packaged_path, "wb") as f:
                                 f.write(await r.read())
 
-                    process = await asyncio.create_subprocess_exec(
-                        f"utils/catalog-{extension}",
-                        str(catalog_packaged_path),
-                        str(catalog_extracted_path),
-                        stdout=asyncio.subprocess.PIPE,
-                        stderr=asyncio.subprocess.PIPE,
-                    )
-                    await process.communicate()
-                    self.bot.basic[game]["catalog"] = {}
+                        process = await asyncio.create_subprocess_exec(
+                            f"utils/catalog-{extension}",
+                            str(catalog_packaged_path),
+                            str(catalog_extracted_path),
+                            stdout=asyncio.subprocess.PIPE,
+                            stderr=asyncio.subprocess.PIPE,
+                        )
+                        await process.communicate()
 
-                if not self.bot.basic[game].get("catalog"):
                     with open(catalog_extracted_path, "r", encoding="utf-8") as f:
                         self.bot.basic[game]["catalog"] = json.load(f)
 

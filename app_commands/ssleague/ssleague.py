@@ -57,16 +57,13 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         """
 
         await itr.response.defer(ephemeral=True)
-        if not self.bot.info_ready:
-            return await itr.followup.send(
-                "Song data synchronization in progress, feature unavailable.",
-            )
-
         game = game_choice.value
         assert (guild_id := itr.guild_id)
-
-        ssl_song = self.bot.info_by_name[game][artist_choice][song_name]
-        if not ssl_song:
+        if not (
+            ssl_song := self.bot.info_by_name[game]
+            .get(artist_choice, {})
+            .get(song_name)
+        ):
             return await itr.followup.send("Song not found.")
 
         pinned = await self.handle_ssl_command(
@@ -105,16 +102,10 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         """
 
         await itr.response.defer(ephemeral=True)
-        if not self.bot.info_ready:
-            return await itr.followup.send(
-                "Song data synchronization in progress, feature unavailable.",
-            )
-
         game = game_choice.value
         assert (guild_id := itr.guild_id)
 
-        ssl_song = self.bot.info_by_id[game][song_id]
-        if not ssl_song:
+        if not (ssl_song := self.bot.info_by_id[game].get(song_id)):
             return await itr.followup.send("Song not found.")
 
         pinned = await self.handle_ssl_command(

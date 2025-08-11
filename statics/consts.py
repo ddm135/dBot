@@ -49,6 +49,7 @@ EXTENSIONS = (
     "tasks.bonus_sync",
     "tasks.notify_bonus",
     "app_commands.bonus",
+    "tasks.emblem_sync",
     "tasks.data_sync",
     "app_commands.ping",
     "app_commands.role",
@@ -300,6 +301,31 @@ GAMES: dict[str, "GameDetails"] = {
     },
     "KD": {
         "name": "SuperStar KANGDANIEL",
+        "iconUrl": "https://lh3.googleusercontent.com/fife/ALs6j_F5p1r_gQeZEflvr7IT"
+        "q6WPNV3baQB9c3WRnoXMU1tVyBWdls2WF17Fi-gRYlKERFF-RYmbP_tHqoWUdw-Qe8UQcl120g"
+        "ropBajFxrOWfJDrP-6MzB_-CQpMIQMYEro_xafihKHHUS4P3nOhPaQBM1flRiQD0Rg5dw4E0fU"
+        "iXNUy7chCIzPiTh7VZLF6zGlrB-uz9fMYKg_35JS_yCQv_ysZwBjmWtDmVI6Gh3sjc0EPppijC"
+        "sFAXlKdLAZLm0blHtfqmxhafKVrhmq0XyHCjQ04pxw8CGOMNNTpSvd9MYQELPiPTZt2QykEj21"
+        "hJ9rYzWCpyHVA3meJpeKQS7OZllbDgfh3nHlylTeq6LrWiZbaatznSbXPhEKYx2gSztUdPccsP"
+        "TYr9X3c3J5HjHIhtsovYH-4LhIhO1P767BQGtflPzzZMIRvG54ARL_2THgxphjJYxILk-etoFA"
+        "e35SW18w49gAporBqvcBodObPURcrB8C6jyFWZLhMCERu2jjdgDEXnYZ2n5iSy6Q04cPYYVOjI"
+        "X9EDrkg18kg0vvMnkQ2VcK3kUbdqcEbi5x_-T13Uw8GDWcCyDuEe09Vmw9tMxL5N7wVyOyx9qX"
+        "EYvpAp9LRS1mxRveGt-LG-pNH0EEMdGOgcMoVdEBMzWi0gJ2Zc9H82J9PXD7Zd68xZPUhiOuVE"
+        "BwMbVOwKPNsR3nLAgVtUMhMNqOBWRpdWRHLd7kRo08MltORdIa4QWWJeWDHsqGmK3vb_UewDE8"
+        "t2iHCCK3cPKQ5L2m9vZ1pQCln5upBHilk7-L6Oj-bpTJRDIMV78BKsSAaFyXlE_HOE28KFf4Qv"
+        "7frYvm1dI6ptXc9J6dv_P-s_M6dGawGT7KY6u4rDcrhg4taiWNWTH-5qbNh6-xWpepeQ0wbMtu"
+        "YPyVZV_i_BVNrMJAPl8P9UjVoEWweAlPX5uUV5nyCymDSOGU5-m1mpQi-bjSlkuFCg_0E6uy_S"
+        "AD_P0SVbwFFMzNLPKps-iV0RTq-PmPHgT1OJGZ3ENQgiMa7hWW5Ef4Lv9GAfBeX7-syMJtoTO3"
+        "-aboiGkauVWidEtuJItsdzqW5_4ve4kNt4SuH97EheoX2fmNcX6Z_fDILAbNkPvY3ktc8-MoqM"
+        "k8zup4oFlcDK1CQwsgkiMStwPiuCkRJccPPGfyAS1za2RKsWzsU5s67L_eDE_bpSzCkMs23BXe"
+        "dgjC2U_HXqOd-QPRho6c5E_-Iym46uGcAYG0ZvozetFlmnmY3VT5HjyJ34WTDKL4B4sOF2Eni2"
+        "WkTKgaBAqfoXhVIO82D1fGdn_XPKPK2EOQKtAUnEzFQyTtYTFs06BeNzcn6-IQsA5Fx8kbxsZn"
+        "upeo9T8IQjJ2QOxVUPgZEdpKQIi9ivV-aURpHC07F9F62kjr-ukyKwMmsOBnbNZ2ofvLyFmV33"
+        "ZwrqnxzL16QskEWfWBLKx6IzxweJormHpnp1mZFQjIRDFfNhYeFBOFgfaoQ7R05i_I8haNNhcX"
+        "qtqqFO_eX8fMfSGV4IWE8IBcy1v6JaLe-aDj1ceuSQ0uNqj8FNThw3PPQmC-N7RLg2PPvnkEW8"
+        "T1Rt_bDVv3FBWAuHAWTsFCQB4nrBKcUkeKHD2Bsoa5BnH4KAqIPBpR0BG344aWzaL6HJdVbSsG"
+        "Cb-7GDlZLRqLX-TbDgqdLdRHk1UKEy0PXpVGOI2CrTkYWztMWlFA8UktLarSPA=w1920-h943?"
+        "auditContext=prefetch",
         "color": 0xB72476,
         "info": {
             "spreadsheetId": "1QSCRXKtiwoMTLV8knHC_o4NwV3UZM6ZvL-l9ZCPxoRM",
@@ -311,7 +337,12 @@ GAMES: dict[str, "GameDetails"] = {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
             "range": "KD!A1:B",
             "columns": EMBLEM_COLUMNS,
-            "replaceGrid": {},
+            "replaceGrid": {
+                "sheetId": 1200216146,
+                "startRowIndex": 0,
+                "startColumnIndex": 0,
+                "endColumnIndex": 1,
+            },
         },
         "pinChannelIds": {},
         "pinRoles": {},
@@ -432,7 +463,12 @@ GAMES: dict[str, "GameDetails"] = {
         "color": 0x4E25D1,
         "info": {
             "spreadsheetId": "1HHBluEEcWmZMHjq3WlLbS9TeLfPktQ3WrfxpcgReWF0",
-            "replaceGrid": {},
+            "replaceGrid": {
+                "sheetId": 0,
+                "startRowIndex": 1,
+                "startColumnIndex": 1,
+                "endColumnIndex": 2,
+            },
             "range": "Songs (Note Count)!A2:D",
             "columns": InfoColumns.NO_SSL.value,
         },
@@ -440,7 +476,12 @@ GAMES: dict[str, "GameDetails"] = {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
             "range": "W1!A1:B",
             "columns": EMBLEM_COLUMNS,
-            "replaceGrid": {},
+            "replaceGrid": {
+                "sheetId": 1164880075,
+                "startRowIndex": 0,
+                "startColumnIndex": 0,
+                "endColumnIndex": 1,
+            },
         },
         "pinChannelIds": {},
         "pinRoles": {},

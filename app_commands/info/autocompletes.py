@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 async def artist_autocomplete(
     itr: discord.Interaction["dBot"], current: str
 ) -> list[app_commands.Choice[str]]:
-    if not (game := itr.namespace.game) or not itr.client.info_ready:
+    if not (game := itr.namespace.game):
         return []
 
     artists = itr.client.info_by_name[game].keys()
