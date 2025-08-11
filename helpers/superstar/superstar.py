@@ -229,7 +229,9 @@ class SuperStar(commands.Cog):
                 if not any(bundle_extract_path.iterdir()):
                     if not bundle_path.exists():
                         async with aiohttp.ClientSession() as session:
-                            async with session.get(catalog_key) as r:
+                            async with session.get(
+                                catalog[catalog_key]["internalId"]
+                            ) as r:
                                 with open(bundle_path, "wb") as f:
                                     f.write(await r.read())
                     process = await asyncio.create_subprocess_exec(

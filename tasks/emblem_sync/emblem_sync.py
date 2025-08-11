@@ -58,8 +58,7 @@ class EmblemSync(commands.Cog):
                 emblem_final = await cog.get_file(  # type: ignore[union-attr]
                     game, "grd", emblem_value, "emblemImage"
                 )
-            except ValueError as e:
-                print(e)
+            except ValueError:
                 emblem_final = str(emblem_value)
             data[artist_name] = emblem_final
 

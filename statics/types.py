@@ -40,11 +40,16 @@ class GameDetails(TypedDict):
     target_audience: NotRequired[str]
 
 
+class CatalogDetails(TypedDict):
+    internalId: str
+    dependency: str | None
+
+
 class BasicDetails(TypedDict):
     version: str
     iconUrl: str
     manifest: dict[str, str]
-    catalog: NotRequired[dict[str, dict[str, str | None]]]
+    catalog: NotRequired[dict[str, CatalogDetails]]
 
 
 class LastAppearance(TypedDict):
