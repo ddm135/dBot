@@ -15,6 +15,7 @@ from statics.consts import BONUS_OFFSET, GAMES, TIMEZONES
 from .autocompletes import artist_autocomplete
 from .commons import STEP, ping_preprocess
 from .embeds import BonusesEmbed, BonusPingsEmbed
+from .types import BonusDict
 from .views import BonusView
 
 if TYPE_CHECKING:
@@ -56,23 +57,26 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         """
 
         await itr.response.defer()
+        game_details = GAMES[game_choice.value]
         bonus_data = self.bot.bonus[game_choice.value]
         artists: Iterable[str]
+        icon: str | discord.File | None
         if not artist_choice:
             artists = bonus_data.keys()
+            icon = (
+                game_details.get("iconUrl")
+                or self.bot.basic[game_choice.value]["iconUrl"]
+            )
         else:
             if artist_choice not in bonus_data:
                 return await itr.followup.send("Artist not found.")
             artists = [artist_choice]
+            icon = self.bot.emblem[game_choice.value][artist_choice]
 
-        game_details = GAMES[game_choice.value]
         timezone = game_details["timezone"]
         bonus_columns = game_details["bonus"]["columns"]
         current_date = datetime.now(tz=timezone).replace(
-            hour=0,
-            minute=0,
-            second=0,
-            microsecond=0,
+            hour=0, minute=0, second=0, microsecond=0
         )
         match time:
             case None:
@@ -198,14 +202,14 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                         birthday_end == tracking_date or birthday_start == tracking_date
                     )
                 ):
-                    bonus_dict = {
-                        "artist": artist_name,
-                        "members": birthday_members,
-                        "song": None,
-                        "bonus_start": birthday_start,
-                        "bonus_end": birthday_end,
-                        "bonus_amount": birthday_total,
-                    }
+                    bonus_dict = BonusDict(
+                        artist=artist_name,
+                        members=birthday_members,
+                        song=None,
+                        bonusStart=birthday_start,
+                        bonusEnd=birthday_end,
+                        bonusAmount=birthday_total,
+                    )
                     if bonus_dict not in period_bonuses:
                         period_bonuses.append(bonus_dict)
 
@@ -225,23 +229,23 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                         .replace(r"*", r"\*")
                         .replace(r"_", r"\_")
                     )
-                    bonus_dict = {
-                        "artist": artist_name,
-                        "members": None,
-                        "song": song_name,
-                        "bonus_start": song_start,
-                        "bonus_end": song_end,
-                        "bonus_amount": song_total,
-                    }
+                    bonus_dict = BonusDict(
+                        artist=artist_name,
+                        members=None,
+                        song=song_name,
+                        bonusStart=song_start,
+                        bonusEnd=song_end,
+                        bonusAmount=song_total,
+                    )
                     if bonus_dict not in period_bonuses:
                         period_bonuses.append(bonus_dict)
 
             tracking_date += BONUS_OFFSET
 
-        period_bonuses.sort(key=lambda x: (x["bonus_end"], x["bonus_start"]))
+        period_bonuses.sort(key=lambda x: (x["bonusEnd"], x["bonusStart"]))
         first_available_index = 0
         for i, _bonus in enumerate(period_bonuses):
-            if _bonus["bonus_end"] >= current_date:
+            if _bonus["bonusEnd"] >= current_date:
                 first_available_index = i
                 break
 
@@ -256,9 +260,11 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                 first_date,
                 last_date,
                 current_date,
+                icon,
                 default_page,
                 max_page,
             ),
+            files=[icon] if isinstance(icon, discord.File) else [],
             wait=True,
         )
         view = BonusView(
@@ -270,6 +276,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
             current_date,
             period_bonuses,
             itr.user,
+            icon,
             default_page,
             max_page,
         )
@@ -353,12 +360,9 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
 
         await itr.user.send("## Bonus Ping List")
         for game in games:
-            (
-                game_details,
-                ping_data,
-                artist_name_index,
-                users_index,
-            ) = await ping_preprocess(game.value, self.bot)
+            (game_details, ping_data, artist_name_index, users_index) = (
+                await ping_preprocess(game.value, self.bot)
+            )
             embed = BonusPingsEmbed(
                 game_details,
                 ping_data,
@@ -381,12 +385,9 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
     ) -> None:
         await itr.response.defer(ephemeral=True)
         user_id = str(itr.user.id)
-        (
-            game_details,
-            ping_data,
-            artist_name_index,
-            users_index,
-        ) = await ping_preprocess(game_key, self.bot)
+        (game_details, ping_data, artist_name_index, users_index) = (
+            await ping_preprocess(game_key, self.bot)
+        )
 
         for i, row in enumerate(ping_data, start=1):
             _artist_name = row[artist_name_index]

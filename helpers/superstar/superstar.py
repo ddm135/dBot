@@ -176,10 +176,7 @@ class SuperStar(commands.Cog):
         except json.JSONDecodeError:
             cog = self.bot.get_cog("Cryptographic")
             result = json.loads(
-                cog.decrypt_cbc(  # type: ignore[union-attr]
-                    await response.text(),
-                    iv,
-                )
+                cog.decrypt_cbc(await response.text(), iv)  # type: ignore[union-attr]
             )
         return result
 
@@ -268,8 +265,9 @@ class SuperStar(commands.Cog):
     async def pin_new_ssl(
         embed: discord.Embed,
         pin_channel: discord.TextChannel,
+        files: list[discord.File],
     ) -> int:
-        msg = await pin_channel.send(embed=embed)
+        msg = await pin_channel.send(embed=embed, files=files)
         await asyncio.sleep(1)
         await msg.pin()
         return msg.id

@@ -44,12 +44,7 @@ class NotifyBonus(commands.Cog):
 
             game_name = game_details["name"]
             current_date = (
-                current_date.replace(
-                    hour=0,
-                    minute=0,
-                    second=0,
-                    microsecond=0,
-                )
+                current_date.replace(hour=0, minute=0, second=0, microsecond=0)
                 + BONUS_OFFSET
             )
             initial_msg = (
@@ -242,9 +237,10 @@ class NotifyBonus(commands.Cog):
                             notify_start.append(msg)
 
                 if notify_start or notify_end:
+                    icon = self.bot.emblem[game][artist]
                     embed = NotifyBonusEmbed(
                         artist,
-                        None,
+                        icon,
                         current_date,
                         notify_start,
                         notify_end,
@@ -265,7 +261,11 @@ class NotifyBonus(commands.Cog):
                                 game_ping_dict[user_id] = True
                                 await user.send(initial_msg)
 
-                            await user.send(embed=embed, silent=True)
+                            await user.send(
+                                embed=embed,
+                                files=[icon] if isinstance(icon, discord.File) else [],
+                                silent=True,
+                            )
                         except discord.Forbidden:
                             channel = self.bot.get_channel(
                                 STATUS_CHANNEL

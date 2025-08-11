@@ -21,25 +21,21 @@ class Miscellaneous(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    @commands.is_owner()
     async def mots7(self, ctx: commands.Context) -> None:
         diff = self.days_since(self.MOTS7_RELEASE)
         await ctx.send(f"It has been {diff} days since Map of The Soul: 7's release.")
 
     @commands.command()
-    @commands.is_owner()
     async def got7(self, ctx: commands.Context) -> None:
         diff = self.days_since(self.LP_RELEASE)
         await ctx.send(f"It has been {diff} days since Last Piece's release.")
 
     @commands.command()
-    @commands.is_owner()
     async def baemon(self, ctx: commands.Context) -> None:
         diff = self.days_since(self.BAEMON_DEBUT)
         await ctx.send(f"It has been {diff} days since BABYMONSTER's official debut.")
 
     @commands.command()
-    @commands.is_owner()
     async def bonusbot(self, ctx: commands.Context) -> None:
         diff = self.days_since(self.BONUSBOT_DEATH)
         await ctx.send(f"It has been {diff} days since bonusBot's death.")

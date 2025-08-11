@@ -16,10 +16,7 @@ class WordPingEmbed(discord.Embed):
         )
         if len(description) > 4096:
             description = description[:4093] + "..."
-        super().__init__(
-            description=description,
-            color=message.author.color,
-        )
+        super().__init__(description=description, color=message.author.color)
         self.set_author(
             name=f"Word Ping in {message.guild.name}",
             url=message.jump_url,

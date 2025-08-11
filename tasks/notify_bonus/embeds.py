@@ -9,20 +9,23 @@ class NotifyBonusEmbed(discord.Embed):
     def __init__(
         self,
         artist: str,
-        icon_url: str | None,
+        icon: str | discord.File | None,
         current_date: datetime,
         starts: list[str],
         ends: list[str],
         color: int,
     ) -> None:
         super().__init__(
-            title=artist.replace(r"*", r"\*").replace(r"_", r"\_"),
             color=color,
         )
-        # self.set_author(
-        #     name=artist.replace(r"*", r"\*").replace(r"_", r"\_"),
-        #     icon_url=icon_url,
-        # )
+        self.set_author(
+            name=artist.replace(r"*", r"\*").replace(r"_", r"\_"),
+            icon_url=(
+                f"attachment://{icon.filename}"
+                if isinstance(icon, discord.File)
+                else icon
+            ),
+        )
 
         started = False
         while starts:

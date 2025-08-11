@@ -108,26 +108,15 @@ class PinSSLeague(commands.Cog):
             game,
             "msd",
             song_id,
-            {"albumBgColor": False, "album": True, "groupData": False},
+            {"albumBgColor": False, "album": True},
         )
         color = (
             int(results["albumBgColor"][:-2], 16)
             if results["albumBgColor"]
             else game_details["color"]
         )
-        image_url = results["album"]
-        group_code = results["groupData"]
-
-        if group_code:
-            results = await cog.get_attributes(  # type: ignore[union-attr]
-                game,
-                "grd",
-                group_code,
-                {"emblemImage": True},
-            )
-            icon_url = results["emblemImage"]
-        else:
-            icon_url = None
+        album = results["album"]
+        icon = self.bot.emblem[game][artist_name]
 
         artist_last_str = self.bot.ssleagues[game][artist_name]["date"]
         if artist_last_str:
@@ -151,8 +140,8 @@ class PinSSLeague(commands.Cog):
             artist_name,
             song_name,
             duration,
-            image_url,
-            icon_url,
+            album,
+            icon,
             color,
             skills,
             current_time,
@@ -161,6 +150,10 @@ class PinSSLeague(commands.Cog):
             song_last,
         )
 
+        files = []
+        for image in (album, icon):
+            if isinstance(image, discord.File):
+                files.append(image)
         pin_channels = game_details["pinChannelIds"]
         pin_roles = game_details["pinRoles"]
         for guild_id, channel_id in pin_channels.items():
@@ -172,7 +165,7 @@ class PinSSLeague(commands.Cog):
             ) or await self.bot.fetch_channel(channel_id)
             assert isinstance(pin_channel, discord.TextChannel)
             new_pin = await cog.pin_new_ssl(  # type: ignore[union-attr]
-                embed, pin_channel
+                embed, pin_channel, files
             )
             topic = f"[{current_time.strftime("%m.%d.%y")}] {artist_name} - {song_name}"
             if pin_role := pin_roles.get(guild_id):
@@ -181,9 +174,7 @@ class PinSSLeague(commands.Cog):
                 await pin_channel.send(topic)
             await pin_channel.edit(topic=topic)
             await cog.unpin_old_ssl(  # type: ignore[union-attr]
-                embed.title,
-                pin_channel,
-                new_pin,
+                embed.title, pin_channel, new_pin
             )
 
         self.bot.ssleagues[game][artist_name]["date"] = current_time.strftime(

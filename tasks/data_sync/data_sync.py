@@ -59,7 +59,7 @@ class DataSync(commands.Cog):
                     last_modified_local = last_modified.get(data.name, 0)
                     last_modified_drive = (
                         await cog.get_file_last_modified(  # type: ignore[union-attr]
-                            file["id"],
+                            file["id"]
                         )
                     ).timestamp()
 
@@ -89,13 +89,11 @@ class DataSync(commands.Cog):
             )
             for key in self.bot.pings:
                 self.bot.pings[key] = defaultdict(
-                    lambda: defaultdict(dict),
-                    self.bot.pings[key],
+                    lambda: defaultdict(dict), self.bot.pings[key]
                 )
                 for subkey in self.bot.pings[key]:
                     self.bot.pings[key][subkey] = defaultdict(
-                        dict,
-                        self.bot.pings[key][subkey],
+                        dict, self.bot.pings[key][subkey]
                     )
         else:
             Data.PINGS.value.parent.mkdir(parents=True, exist_ok=True)
@@ -130,8 +128,7 @@ class DataSync(commands.Cog):
                 for subkey in self.bot.ssleagues[key]:
                     if "songs" in self.bot.ssleagues[key][subkey]:
                         self.bot.ssleagues[key][subkey]["songs"] = defaultdict(
-                            lambda: None,
-                            self.bot.ssleagues[key][subkey]["songs"],
+                            lambda: None, self.bot.ssleagues[key][subkey]["songs"]
                         )
         else:
             Data.SSLEAGUES.value.parent.mkdir(parents=True, exist_ok=True)
@@ -152,20 +149,14 @@ class DataSync(commands.Cog):
                 if file["name"] == data.name:
                     last_modified[data.name] = (
                         await cog.update_drive_file(  # type: ignore[union-attr]
-                            file["id"],
-                            media,
+                            file["id"], media
                         )
                     ).timestamp()
                     break
             else:
-                metadata = {
-                    "name": data.name,
-                }
+                metadata = {"name": data.name}
                 last_modified[data.name] = (
-                    await cog.create_file(  # type: ignore[union-attr]
-                        media,
-                        metadata,
-                    )
+                    await cog.create_file(media, metadata)  # type: ignore[union-attr]
                 ).timestamp()
             data.touch(exist_ok=True)
 

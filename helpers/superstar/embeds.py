@@ -9,8 +9,8 @@ class SSLeagueEmbed(discord.Embed):
         artist_name: str,
         song_name: str,
         duration: str,
-        image_url: str | None,
-        icon_url: str | None,
+        album: str | discord.File | None,
+        icon: str | discord.File | None,
         color: int,
         skills: str | None,
         current_time: datetime,
@@ -27,15 +27,9 @@ class SSLeagueEmbed(discord.Embed):
             color=color,
         )
 
-        self.add_field(
-            name="Duration",
-            value=duration,
-        )
+        self.add_field(name="Duration", value=duration)
         if skills:
-            self.add_field(
-                name="Skill Order",
-                value=skills,
-            )
+            self.add_field(name="Skill Order", value=skills)
 
         self.add_field(
             name="Artist Last Appearance",
@@ -58,11 +52,21 @@ class SSLeagueEmbed(discord.Embed):
             inline=False,
         )
 
-        self.set_thumbnail(url=image_url)
+        self.set_thumbnail(
+            url=(
+                f"attachment://{album.filename}"
+                if isinstance(album, discord.File)
+                else album
+            )
+        )
         self.set_footer(
             text=(
                 f"{current_time.strftime("%A, %B %d, %Y").replace(" 0", " ")}"
                 f" · Pinned by {user_name}"
             ),
-            # icon_url=icon_url,
+            icon_url=(
+                f"attachment://{icon.filename}"
+                if isinstance(icon, discord.File)
+                else icon
+            ),
         )

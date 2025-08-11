@@ -160,26 +160,15 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             game,
             "msd",
             song_id,
-            {"albumBgColor": False, "album": True, "groupData": False},
+            {"albumBgColor": False, "album": True},
         )
         color = (
             int(results["albumBgColor"][:-2], 16)
             if results["albumBgColor"]
             else game_details["color"]
         )
-        image_url = results["album"]
-        group_code = results["groupData"]
-
-        if group_code:
-            results = await cog.get_attributes(  # type: ignore[union-attr]
-                game,
-                "grd",
-                group_code,
-                {"emblemImage": True},
-            )
-            icon_url = results["emblemImage"]
-        else:
-            icon_url = None
+        album = results["album"]
+        icon = self.bot.emblem[game][artist_name]
 
         timezone = game_details["timezone"]
         current_time = datetime.now(tz=timezone) - RESET_OFFSET
@@ -206,8 +195,8 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             artist_name,
             song_name,
             duration,
-            image_url,
-            icon_url,
+            album,
+            icon,
             color,
             skills,
             current_time,
@@ -216,11 +205,17 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             song_last,
         )
 
+        files = []
+        for image in (album, icon):
+            if isinstance(image, discord.File):
+                files.append(image)
         pin_channel = self.bot.get_channel(
             pin_channel_id
         ) or await self.bot.fetch_channel(pin_channel_id)
         assert isinstance(pin_channel, discord.TextChannel)
-        new_pin = await cog.pin_new_ssl(embed, pin_channel)  # type: ignore[union-attr]
+        new_pin = await cog.pin_new_ssl(  # type: ignore[union-attr]
+            embed, pin_channel, files
+        )
         topic = f"[{current_time.strftime("%m.%d.%y")}] {artist_name} - {song_name}"
         if pin_role:
             await pin_channel.send(f"<@&{pin_role}> {topic}")
@@ -228,9 +223,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             await pin_channel.send(topic)
         await pin_channel.edit(topic=topic)
         await cog.unpin_old_ssl(  # type: ignore[union-attr]
-            embed.title,
-            pin_channel,
-            new_pin,
+            embed.title, pin_channel, new_pin
         )
 
         self.bot.ssleague_manual[game] = {

@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 import discord
 
 from .embeds import BonusesEmbed
+from .types import BonusDict
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -19,8 +20,9 @@ class BonusView(discord.ui.View):
         first_date: datetime,
         last_date: datetime,
         current_date: datetime,
-        bonuses: list[dict],
+        bonuses: list[BonusDict],
         user: discord.User | discord.Member,
+        icon: str | discord.File | None,
         current_page: int,
         max_page: int,
     ) -> None:
@@ -32,6 +34,7 @@ class BonusView(discord.ui.View):
         self.last_date = last_date
         self.current_date = current_date
         self.user = user
+        self.icon = icon
         self.current_page = current_page
         self.max_page = max_page
         super().__init__()
@@ -52,6 +55,7 @@ class BonusView(discord.ui.View):
                 self.first_date,
                 self.last_date,
                 self.current_date,
+                self.icon,
                 self.current_page,
                 self.max_page,
             ),
