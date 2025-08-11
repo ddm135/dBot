@@ -55,7 +55,7 @@ class EmblemSync(commands.Cog):
             emblem_value = row[emblem_index]
             try:
                 emblem_value = int(emblem_value)
-                emblem_final = cog.get_file(  # type: ignore[union-attr]
+                emblem_final = await cog.get_file(  # type: ignore[union-attr]
                     game, "grd", emblem_value, "emblemImage"
                 )
             except ValueError:
