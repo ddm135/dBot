@@ -52,7 +52,7 @@ class dBot(commands.Bot):
             )
             assert isinstance(channel, discord.TextChannel)
             await channel.send("Shutting down...")
-        except Exception:  # pylint: disable=broad-exception-caught
+        except Exception:
             pass
         finally:
             await super().close()

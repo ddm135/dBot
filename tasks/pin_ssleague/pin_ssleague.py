@@ -79,6 +79,9 @@ class PinSSLeague(commands.Cog):
             except aiohttp.ClientError as e:
                 self.LOGGER.exception(str(e))
                 await asyncio.sleep(backoff.delay())
+            except Exception as e:
+                self.LOGGER.exception(str(e))
+                return
             else:
                 break
 
@@ -126,7 +129,6 @@ class PinSSLeague(commands.Cog):
             )
         else:
             artist_last = None
-
         song_last_str = self.bot.ssleagues[game][artist_name]["songs"][str(song_id)]
         if song_last_str:
             song_last = datetime.strptime(song_last_str, game_details["dateFormat"])
@@ -145,7 +147,7 @@ class PinSSLeague(commands.Cog):
             color,
             skills,
             current_time,
-            self.bot.user.name,  # type: ignore[union-attr]
+            self.bot.user.name if self.bot.user else self.bot.__class__.__name__,
             artist_last,
             song_last,
         )
