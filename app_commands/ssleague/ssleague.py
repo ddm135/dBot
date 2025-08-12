@@ -1,5 +1,6 @@
 # pyright: reportTypedDictNotRequiredAccess=false
 
+import asyncio
 import logging
 from datetime import datetime
 from typing import TYPE_CHECKING
@@ -133,8 +134,14 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         song_name: str | None = None,
         song_id: int | None = None,
     ) -> bool:
-        game_details = GAMES[game]
+        cog = self.bot.get_cog("SuperStar")
+        task = asyncio.create_task(
+            cog.get_attributes(  # type: ignore[union-attr]
+                game, "msd", song_id, {"albumBgColor": False, "album": True}
+            )
+        )
 
+        game_details = GAMES[game]
         pin_channel_id = game_details["pinChannelIds"].get(guild_id)
         if not pin_channel_id:
             return False
@@ -155,19 +162,6 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             else None
         )
 
-        cog = self.bot.get_cog("SuperStar")
-        results = await cog.get_attributes(  # type: ignore[union-attr]
-            game,
-            "msd",
-            song_id,
-            {"albumBgColor": False, "album": True},
-        )
-        color = (
-            int(results["albumBgColor"][:-2], 16)
-            if results["albumBgColor"]
-            else game_details["color"]
-        )
-        album = results["album"]
         icon = self.bot.emblem[game][artist_name]
 
         timezone = game_details["timezone"]
@@ -190,6 +184,20 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             )
         else:
             song_last = None
+
+        if not task.done():
+            print("tiny wait")
+            await asyncio.sleep(1)
+        if not task.done():
+            print("just wait")
+            await task
+        result = task.result()
+        color = (
+            int(result["albumBgColor"][:-2], 16)
+            if result["albumBgColor"]
+            else game_details["color"]
+        )
+        album = result["album"]
 
         embed = cog.SSLeagueEmbed(  # type: ignore[union-attr]
             artist_name,
