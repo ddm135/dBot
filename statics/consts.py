@@ -66,7 +66,7 @@ class Data(Enum):
     CREDENTIALS = Path("data/credentials.json")
     PINGS = Path("data/pings.json")
     ROLES = Path("data/roles.json")
-    SSLEAGUES = Path("data/ssleague.json")
+    SSLEAGUES = Path("data/ssleagues.json")
     LAST_MODIFIED = Path("data/last_modified.json")
 
 
