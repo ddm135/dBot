@@ -75,31 +75,30 @@ class BasicSync(commands.Cog):
                     catalog_folder_path / f"{resource_version}_extracted.json"
                 )
 
-                if (
-                    not catalog_extracted_path.exists()
-                    or "catalog" not in self.bot.basic[game]
-                ):
-                    if not catalog_packaged_path.exists():
-                        for file in catalog_folder_path.iterdir():
-                            if file.is_file():
-                                file.unlink()
+                if not catalog_extracted_path.exists():
+                    for file in catalog_folder_path.iterdir():
+                        if file.is_file():
+                            file.unlink()
 
-                        async with session.get(
-                            catalog_url.format(version=resource_version)
-                        ) as r:
-                            with open(catalog_packaged_path, "wb") as f:
-                                f.write(await r.read())
+                    async with session.get(
+                        catalog_url.format(version=resource_version)
+                    ) as r:
+                        with open(catalog_packaged_path, "wb") as f:
+                            f.write(await r.read())
 
-                    if not catalog_extracted_path.exists():
-                        process = await asyncio.create_subprocess_exec(
-                            f"utils/catalog-{extension}",
-                            str(catalog_packaged_path),
-                            str(catalog_extracted_path),
-                            stdout=asyncio.subprocess.PIPE,
-                            stderr=asyncio.subprocess.PIPE,
-                        )
-                        await process.communicate()
+                    process = await asyncio.create_subprocess_exec(
+                        f"utils/catalog-{extension}",
+                        str(catalog_packaged_path),
+                        str(catalog_extracted_path),
+                        stdout=asyncio.subprocess.PIPE,
+                        stderr=asyncio.subprocess.PIPE,
+                    )
+                    await process.communicate()
 
+                    with open(catalog_extracted_path, "r", encoding="utf-8") as f:
+                        self.bot.basic[game]["catalog"] = json.load(f)
+
+                if "catalog" not in self.bot.basic[game]:
                     with open(catalog_extracted_path, "r", encoding="utf-8") as f:
                         self.bot.basic[game]["catalog"] = json.load(f)
 
