@@ -90,6 +90,7 @@ class BasicSync(commands.Cog):
                             with open(catalog_packaged_path, "wb") as f:
                                 f.write(await r.read())
 
+                    if not catalog_extracted_path.exists():
                         process = await asyncio.create_subprocess_exec(
                             f"utils/catalog-{extension}",
                             str(catalog_packaged_path),
