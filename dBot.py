@@ -7,7 +7,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 
 from statics.consts import EXTENSIONS, LOCK, STATUS_CHANNEL
-from statics.types import BasicDetails, LastAppearance
+from statics.types import BasicDetails, LastAppearance, LastAppearanceManual
 
 
 class dBot(commands.Bot):
@@ -15,10 +15,10 @@ class dBot(commands.Bot):
 
     basic: dict[str, BasicDetails] = {}
 
-    ajs: defaultdict[str, dict] = defaultdict(dict)
-    grd: defaultdict[str, list[dict]] = defaultdict(list[dict])
-    msd: defaultdict[str, list[dict]] = defaultdict(list[dict])
-    url: defaultdict[str, list[dict]] = defaultdict(list[dict])
+    ajs: dict[str, dict] = {}
+    grd: dict[str, list[dict]] = {}
+    msd: dict[str, list[dict]] = {}
+    url: dict[str, list[dict]] = {}
 
     info_by_name: dict[str, dict[str, dict[str, list[str]]]] = {}
     info_by_id: dict[str, dict[str, list[str]]] = {}
@@ -37,7 +37,7 @@ class dBot(commands.Bot):
             lambda: LastAppearance(songs=defaultdict(lambda: None), date=None)
         )
     )
-    ssleague_manual: dict[str, dict[str, str]] = {}
+    ssleague_manual: dict[str, LastAppearanceManual] = {}
 
     async def setup_hook(self) -> None:
         for ext in EXTENSIONS:

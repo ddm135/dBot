@@ -9,6 +9,7 @@ from discord import app_commands
 from discord.ext import commands
 
 from statics.consts import GAMES, RESET_OFFSET, InfoColumns
+from statics.types import LastAppearanceManual
 
 from .autocompletes import (
     artist_autocomplete,
@@ -222,11 +223,11 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             embed.title, pin_channel, new_pin
         )
 
-        self.bot.ssleague_manual[game] = {
-            "artist": artist_name,
-            "song_id": str(song_id),
-            "date": current_time.strftime(game_details["dateFormat"]),
-        }
+        self.bot.ssleague_manual[game] = LastAppearanceManual(
+            artist=artist_name,
+            songId=str(song_id),
+            date=current_time.strftime(game_details["dateFormat"]),
+        )
 
         return True
 

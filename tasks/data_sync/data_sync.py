@@ -171,9 +171,9 @@ class DataSync(commands.Cog):
     def save_last_appearance(self) -> None:
         for game in self.bot.ssleague_manual:
             target = self.bot.ssleagues[game][self.bot.ssleague_manual[game]["artist"]]
-            date = self.bot.ssleague_manual[game]["date"]
-            target["songs"][self.bot.ssleague_manual[game]["song_id"]] = date
-            target["date"] = date
+            target["songs"][self.bot.ssleague_manual[game]["songId"]] = target[
+                "date"
+            ] = self.bot.ssleague_manual[game]["date"]
         self.bot.ssleague_manual.clear()
 
 

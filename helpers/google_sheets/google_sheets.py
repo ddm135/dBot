@@ -1,6 +1,6 @@
 # mypy: disable-error-code="attr-defined"
 # pylint: disable=no-member
-# pyright: reportAttributeAccessIssue=false, reportMissingModuleSource=false
+# pyright: reportAttributeAccessIssue=false
 
 import asyncio
 from typing import TYPE_CHECKING

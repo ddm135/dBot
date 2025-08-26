@@ -55,3 +55,9 @@ class BasicDetails(TypedDict):
 class LastAppearance(TypedDict):
     songs: dict[str, str | None]
     date: str | None
+
+
+class LastAppearanceManual(TypedDict):
+    artist: str
+    songId: str
+    date: str

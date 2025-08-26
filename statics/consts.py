@@ -295,7 +295,11 @@ GAMES: dict[str, "GameDetails"] = {
             "https://superstar-starship.s3.amazonaws.com"
             "/version/real/manifest/{version}.txt"
         ),
-        "assetScheme": AssetScheme.DIRECT_URL,
+        "assetScheme": AssetScheme.BINARY_CATALOG,
+        "catalogUrl": (
+            "http://d1869m1xmsv4ed.cloudfront.net/assets"
+            "/LIVE/iOS/catalog_{version}.bin"
+        ),
         "authorization": "bnZQb1RweVg4WVlyUlZERE85Zkc6WVBrQklrNFdhcQ==",
         "target_audience": "42043845970-4hm4teclds9q4pji2on6f8o35n4ji6ac",
     },
@@ -332,6 +336,12 @@ GAMES: dict[str, "GameDetails"] = {
             "replaceGrid": {},
             "range": "Official Local Version!A2:E",
             "columns": InfoColumns.SSL.value,
+            "replaceGrid": {
+                "sheetId": 0,
+                "startRowIndex": 1,
+                "startColumnIndex": 1,
+                "endColumnIndex": 2,
+            },
         },
         "emblem": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
