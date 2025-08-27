@@ -5,6 +5,7 @@ from discord import app_commands
 from discord.ext import commands
 
 from statics.consts import Data
+from statics.types import PingData
 
 from .autocompletes import word_autocomplete
 from .embeds import WordPingsEmbed
@@ -34,18 +35,16 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
         await itr.response.defer(ephemeral=True)
         guild_id = str(itr.guild_id)
         user_id = str(itr.user.id)
-        if self.bot.pings[guild_id][word][user_id]:
+        if self.bot.word_pings[guild_id][word][user_id]:
             return await itr.followup.send(
                 f"You are already pinged for `{word}` in this server."
             )
-        self.bot.pings[guild_id][word][user_id] = {
-            "users": [],
-            "channels": [],
-            "count": 0,
-        }
+        self.bot.word_pings[guild_id][word][user_id] = PingData(
+            users=[], channels=[], count=0
+        )
 
         cog = self.bot.get_cog("DataSync")
-        cog.save_data(Data.PINGS)  # type: ignore[union-attr]
+        cog.save_data(Data.WORD_PINGS)  # type: ignore[union-attr]
         return await itr.followup.send(
             f"Added to the ping list for `{word}` in this server!"
         )
@@ -67,14 +66,14 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
         await itr.response.defer(ephemeral=True)
         guild_id = str(itr.guild_id)
         user_id = str(itr.user.id)
-        if not self.bot.pings[guild_id][word][user_id]:
+        if not self.bot.word_pings[guild_id][word][user_id]:
             return await itr.followup.send(
                 f"You are not pinged for `{word}` in this server."
             )
-        self.bot.pings[guild_id][word][user_id].clear()
+        self.bot.word_pings[guild_id][word].pop(user_id)
 
         cog = self.bot.get_cog("DataSync")
-        cog.save_data(Data.PINGS)  # type: ignore[union-attr]
+        cog.save_data(Data.WORD_PINGS)  # type: ignore[union-attr]
         return await itr.followup.send(
             f"Removed from the ping list for `{word}` in this server!"
         )
@@ -89,7 +88,9 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
 
         assert itr.guild
         await itr.user.send(
-            embed=WordPingsEmbed(itr.user, itr.guild, self.bot.pings[str(itr.guild_id)])
+            embed=WordPingsEmbed(
+                itr.user, itr.guild, self.bot.word_pings[str(itr.guild_id)]
+            )
         )
         return await itr.followup.send(
             "Check your DMs for the list of words you are pinged for!"
@@ -124,35 +125,35 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
         if word is not None:
             if user.id == itr.user.id:
                 return await itr.followup.send("You cannot ignore yourself.")
-            if not self.bot.pings[guild_id][word][user_id]:
+            if not self.bot.word_pings[guild_id][word][user_id]:
                 return await itr.followup.send(
                     f"You are not pinged for `{word}` in this server."
                 )
-            if user.id in self.bot.pings[guild_id][word][user_id]["users"]:
+            if user.id in self.bot.word_pings[guild_id][word][user_id]["users"]:
                 return await itr.followup.send(
                     f"You are already ignoring {user.mention} "
                     f"for `{word}` in this server."
                 )
-            self.bot.pings[guild_id][word][user_id]["users"].append(user.id)
+            self.bot.word_pings[guild_id][word][user_id]["users"].append(user.id)
 
             cog = self.bot.get_cog("DataSync")
-            cog.save_data(Data.PINGS)  # type: ignore[union-attr]
+            cog.save_data(Data.WORD_PINGS)  # type: ignore[union-attr]
             return await itr.followup.send(
                 f"Added {user.mention} to the ignore list "
                 f"for `{word}` in this server!"
             )
         else:
-            for word in self.bot.pings[guild_id]:
-                if not self.bot.pings[guild_id][word][user_id]:
+            for word in self.bot.word_pings[guild_id]:
+                if not self.bot.word_pings[guild_id][word][user_id]:
                     continue
 
-                if user.id in self.bot.pings[guild_id][word][user_id]["users"]:
+                if user.id in self.bot.word_pings[guild_id][word][user_id]["users"]:
                     continue
 
-                self.bot.pings[guild_id][word][user_id]["users"].append(user.id)
+                self.bot.word_pings[guild_id][word][user_id]["users"].append(user.id)
 
             cog = self.bot.get_cog("DataSync")
-            cog.save_data(Data.PINGS)  # type: ignore[union-attr]
+            cog.save_data(Data.WORD_PINGS)  # type: ignore[union-attr]
             return await itr.followup.send(
                 f"Added {user.mention} to the ignore list "
                 f"for all current word pings in this server!"
@@ -180,35 +181,40 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
         guild_id = str(itr.guild_id)
         user_id = str(itr.user.id)
         if word is not None:
-            if not self.bot.pings[guild_id][word][user_id]:
+            if not self.bot.word_pings[guild_id][word][user_id]:
                 return await itr.followup.send(
                     f"You are not pinged for `{word}` in this server."
                 )
-            if channel.id in self.bot.pings[guild_id][word][user_id]["channels"]:
+            if channel.id in self.bot.word_pings[guild_id][word][user_id]["channels"]:
                 return await itr.followup.send(
                     f"You are already ignoring {channel.mention} "
                     f"for `{word}` in this server."
                 )
-            self.bot.pings[guild_id][word][user_id]["channels"].append(channel.id)
+            self.bot.word_pings[guild_id][word][user_id]["channels"].append(channel.id)
 
             cog = self.bot.get_cog("DataSync")
-            cog.save_data(Data.PINGS)  # type: ignore[union-attr]
+            cog.save_data(Data.WORD_PINGS)  # type: ignore[union-attr]
             return await itr.followup.send(
                 f"Added {channel.mention} to the ignore list "
                 f"for `{word}` in this server!"
             )
         else:
-            for word in self.bot.pings[guild_id]:
-                if not self.bot.pings[guild_id][word][user_id]:
+            for word in self.bot.word_pings[guild_id]:
+                if not self.bot.word_pings[guild_id][word][user_id]:
                     continue
 
-                if channel.id in self.bot.pings[guild_id][word][user_id]["channels"]:
+                if (
+                    channel.id
+                    in self.bot.word_pings[guild_id][word][user_id]["channels"]
+                ):
                     continue
 
-                self.bot.pings[guild_id][word][user_id]["channels"].append(channel.id)
+                self.bot.word_pings[guild_id][word][user_id]["channels"].append(
+                    channel.id
+                )
 
             cog = self.bot.get_cog("DataSync")
-            cog.save_data(Data.PINGS)  # type: ignore[union-attr]
+            cog.save_data(Data.WORD_PINGS)  # type: ignore[union-attr]
             return await itr.followup.send(
                 f"Added {channel.mention} to the ignore list "
                 f"for all current word pings in this server!"
@@ -243,35 +249,35 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
         if word is not None:
             if user.id == itr.user.id:
                 return await itr.followup.send("You cannot unignore yourself.")
-            if not self.bot.pings[guild_id][word][user_id]:
+            if not self.bot.word_pings[guild_id][word][user_id]:
                 return await itr.followup.send(
                     f"You are not pinged for `{word}` in this server."
                 )
-            if user.id not in self.bot.pings[guild_id][word][user_id]["users"]:
+            if user.id not in self.bot.word_pings[guild_id][word][user_id]["users"]:
                 return await itr.followup.send(
                     f"You are not ignoring {user.mention} "
                     f"for `{word}` in this server."
                 )
-            self.bot.pings[guild_id][word][user_id]["users"].remove(user.id)
+            self.bot.word_pings[guild_id][word][user_id]["users"].remove(user.id)
 
             cog = self.bot.get_cog("DataSync")
-            cog.save_data(Data.PINGS)  # type: ignore[union-attr]
+            cog.save_data(Data.WORD_PINGS)  # type: ignore[union-attr]
             return await itr.followup.send(
                 f"Removed {user.mention} from the ignore list "
                 f"for `{word}` in this server!"
             )
         else:
-            for word in self.bot.pings[guild_id]:
-                if not self.bot.pings[guild_id][word][user_id]:
+            for word in self.bot.word_pings[guild_id]:
+                if not self.bot.word_pings[guild_id][word][user_id]:
                     continue
 
-                if user.id not in self.bot.pings[guild_id][word][user_id]["users"]:
+                if user.id not in self.bot.word_pings[guild_id][word][user_id]["users"]:
                     continue
 
-                self.bot.pings[guild_id][word][user_id]["users"].remove(user.id)
+                self.bot.word_pings[guild_id][word][user_id]["users"].remove(user.id)
 
             cog = self.bot.get_cog("DataSync")
-            cog.save_data(Data.PINGS)  # type: ignore[union-attr]
+            cog.save_data(Data.WORD_PINGS)  # type: ignore[union-attr]
             return await itr.followup.send(
                 f"Removed {user.mention} from the ignore list "
                 f"for all current word pings in this server!"
@@ -299,38 +305,43 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
         guild_id = str(itr.guild_id)
         user_id = str(itr.user.id)
         if word is not None:
-            if not self.bot.pings[guild_id][word][user_id]:
+            if not self.bot.word_pings[guild_id][word][user_id]:
                 return await itr.followup.send(
                     f"You are not pinged for `{word}` in this server."
                 )
-            if channel.id not in self.bot.pings[guild_id][word][user_id]["channels"]:
+            if (
+                channel.id
+                not in self.bot.word_pings[guild_id][word][user_id]["channels"]
+            ):
                 return await itr.followup.send(
                     f"You are not ignoring {channel.mention} "
                     f"for `{word}` in this server."
                 )
-            self.bot.pings[guild_id][word][user_id]["channels"].remove(channel.id)
+            self.bot.word_pings[guild_id][word][user_id]["channels"].remove(channel.id)
 
             cog = self.bot.get_cog("DataSync")
-            cog.save_data(Data.PINGS)  # type: ignore[union-attr]
+            cog.save_data(Data.WORD_PINGS)  # type: ignore[union-attr]
             return await itr.followup.send(
                 f"Removed {channel.mention} from the ignore list "
                 f"for `{word}` in this server!"
             )
         else:
-            for word in self.bot.pings[guild_id]:
-                if not self.bot.pings[guild_id][word][user_id]:
+            for word in self.bot.word_pings[guild_id]:
+                if not self.bot.word_pings[guild_id][word][user_id]:
                     continue
 
                 if (
                     channel.id
-                    not in self.bot.pings[guild_id][word][user_id]["channels"]
+                    not in self.bot.word_pings[guild_id][word][user_id]["channels"]
                 ):
                     continue
 
-                self.bot.pings[guild_id][word][user_id]["channels"].remove(channel.id)
+                self.bot.word_pings[guild_id][word][user_id]["channels"].remove(
+                    channel.id
+                )
 
             cog = self.bot.get_cog("DataSync")
-            cog.save_data(Data.PINGS)  # type: ignore[union-attr]
+            cog.save_data(Data.WORD_PINGS)  # type: ignore[union-attr]
             return await itr.followup.send(
                 f"Removed {channel.mention} from the ignore list "
                 f"for all current word pings in this server!"

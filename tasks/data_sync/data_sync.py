@@ -76,28 +76,28 @@ class DataSync(commands.Cog):
             with open(Data.CREDENTIALS.value, "r", encoding="utf-8") as f:
                 self.bot.credentials = json.load(f)
 
-        if Data.PINGS.value.exists():
-            self.bot.pings.clear()
-            with open(Data.PINGS.value, "r", encoding="utf-8") as f:
-                self.bot.pings = json.load(f)
+        if Data.WORD_PINGS.value.exists():
+            self.bot.word_pings.clear()
+            with open(Data.WORD_PINGS.value, "r", encoding="utf-8") as f:
+                self.bot.word_pings = json.load(f)
 
-            self.bot.pings = defaultdict(
+            self.bot.word_pings = defaultdict(
                 lambda: defaultdict(
                     lambda: defaultdict(dict),
                 ),
-                self.bot.pings,
+                self.bot.word_pings,
             )
-            for key in self.bot.pings:
-                self.bot.pings[key] = defaultdict(
-                    lambda: defaultdict(dict), self.bot.pings[key]
+            for key in self.bot.word_pings:
+                self.bot.word_pings[key] = defaultdict(
+                    lambda: defaultdict(dict), self.bot.word_pings[key]
                 )
-                for subkey in self.bot.pings[key]:
-                    self.bot.pings[key][subkey] = defaultdict(
-                        dict, self.bot.pings[key][subkey]
+                for subkey in self.bot.word_pings[key]:
+                    self.bot.word_pings[key][subkey] = defaultdict(
+                        dict, self.bot.word_pings[key][subkey]
                     )
         else:
-            Data.PINGS.value.parent.mkdir(parents=True, exist_ok=True)
-            self.save_data(Data.PINGS)
+            Data.WORD_PINGS.value.parent.mkdir(parents=True, exist_ok=True)
+            self.save_data(Data.WORD_PINGS)
 
         if Data.ROLES.value.exists():
             self.bot.roles.clear()

@@ -2,13 +2,15 @@ from collections import defaultdict
 
 import discord
 
+from statics.types import PingData
+
 
 class WordPingsEmbed(discord.Embed):
     def __init__(
         self,
         user: discord.User | discord.Member,
         guild: discord.Guild,
-        pings: defaultdict[str, defaultdict[str, dict]],
+        pings: defaultdict[str, defaultdict[str, PingData]],
     ) -> None:
         user_id = str(user.id)
         description = ""

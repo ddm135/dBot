@@ -64,7 +64,7 @@ EXTENSIONS = (
 
 class Data(Enum):
     CREDENTIALS = Path("data/credentials.json")
-    PINGS = Path("data/pings.json")
+    WORD_PINGS = Path("data/word_pings.json")
     ROLES = Path("data/roles.json")
     SSLEAGUES = Path("data/ssleagues.json")
     LAST_MODIFIED = Path("data/last_modified.json")
@@ -333,7 +333,6 @@ GAMES: dict[str, "GameDetails"] = {
         "color": 0xB72476,
         "info": {
             "spreadsheetId": "1QSCRXKtiwoMTLV8knHC_o4NwV3UZM6ZvL-l9ZCPxoRM",
-            "replaceGrid": {},
             "range": "Official Local Version!A2:E",
             "columns": InfoColumns.SSL.value,
             "replaceGrid": {

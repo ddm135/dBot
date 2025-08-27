@@ -22,7 +22,7 @@ class OnMessage(commands.Cog):
             return
 
         guild_id = str(message.guild.id)
-        for word in self.bot.pings[guild_id]:
+        for word in self.bot.word_pings[guild_id]:
             regexp = (
                 rf"(?:(?:[\s!@#\$%\^&\*\(\)\-_=\+\[{{\]}}\\\\\|;:'\",<\.>\/\?])+|^)"
                 rf"{re.escape(word)}"
@@ -31,15 +31,13 @@ class OnMessage(commands.Cog):
             if not re.search(regexp, message.content, flags=re.IGNORECASE):
                 continue
 
-            for user_id in self.bot.pings[guild_id][word]:
+            for user_id, user_ping_data in self.bot.word_pings[guild_id][word].items():
                 user_id_int = int(user_id)
                 if (
                     message.author.id == user_id_int
-                    or not self.bot.pings[guild_id][word][user_id]
-                    or message.author.id
-                    in self.bot.pings[guild_id][word][user_id]["users"]
-                    or message.channel.id
-                    in self.bot.pings[guild_id][word][user_id]["channels"]
+                    or not user_ping_data
+                    or message.author.id in user_ping_data["users"]
+                    or message.channel.id in user_ping_data["channels"]
                 ):
                     continue
 
@@ -51,9 +49,9 @@ class OnMessage(commands.Cog):
                 except (discord.NotFound, discord.Forbidden):
                     continue
 
-                self.bot.pings[guild_id][word][user_id]["count"] += 1
+                user_ping_data["count"] += 1
                 cog = self.bot.get_cog("DataSync")
-                cog.save_data(Data.PINGS)  # type: ignore[union-attr]
+                cog.save_data(Data.WORD_PINGS)  # type: ignore[union-attr]
 
 
 async def setup(bot: "dBot") -> None:
