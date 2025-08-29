@@ -22,6 +22,7 @@ if TYPE_CHECKING:
 
 
 @app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)
+@app_commands.allowed_installs(guilds=True, users=False)
 class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the day"):
     GAME_CHOICES = [
         app_commands.Choice(name=game_details["name"], value=game)

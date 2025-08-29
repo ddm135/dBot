@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 
 
 @app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)
+@app_commands.allowed_installs(guilds=True, users=False)
 class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot

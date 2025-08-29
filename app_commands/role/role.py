@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 
 
 @app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)
+@app_commands.allowed_installs(guilds=True, users=False)
 class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles"):
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
