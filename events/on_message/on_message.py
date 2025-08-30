@@ -23,12 +23,12 @@ class OnMessage(commands.Cog):
 
         guild_id = str(message.guild.id)
         for word in self.bot.word_pings[guild_id]:
-            regexp = (
+            reg_exp = (
                 rf"(?:(?:[\s!@#\$%\^&\*\(\)\-_=\+\[{{\]}}\\\\\|;:'\",<\.>\/\?])+|^)"
                 rf"{re.escape(word)}"
                 rf"(?:(?:[\s!@#\$%\^&\*\(\)\-_=\+\[{{\]}}\\\\\|;:'\",<\.>\/\?])+|$)"
             )
-            if not re.search(regexp, message.content, flags=re.IGNORECASE):
+            if not re.search(reg_exp, message.content, flags=re.IGNORECASE):
                 continue
 
             for user_id, user_ping_data in self.bot.word_pings[guild_id][word].items():
