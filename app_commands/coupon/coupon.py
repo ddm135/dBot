@@ -27,14 +27,18 @@ class Coupon(commands.Cog):
         """
 
         await itr.response.defer()
-        async with aiohttp.ClientSession() as session:
-            async with session.get(link, headers={"User-Agent": USER_AGENT}) as r:
-                code = parse_qs(
-                    urlsplit(
-                        REG_EXP.search(await r.text()).group(1)  # type: ignore
-                    ).query
-                )["deep_link_sub1"][0]
-        await itr.followup.send(code)
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(link, headers={"User-Agent": USER_AGENT}) as r:
+                    code = parse_qs(
+                        urlsplit(
+                            REG_EXP.search(await r.text()).group(1)  # type: ignore
+                        ).query
+                    )["deep_link_sub1"][0]
+            await itr.followup.send(code)
+        except Exception as e:
+            await itr.followup.send("Failed to extract coupon code.")
+            print(e)
 
 
 async def setup(bot: "dBot") -> None:
