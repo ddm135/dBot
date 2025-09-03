@@ -37,7 +37,7 @@ class Coupon(commands.Cog):
                     )["deep_link_sub1"][0]
             await itr.followup.send(code)
         except Exception as e:
-            await itr.followup.send("Failed to extract coupon code.")
+            await itr.followup.send("Failed to extract coupon code.", ephemeral=True)
             print(e)
 
 
