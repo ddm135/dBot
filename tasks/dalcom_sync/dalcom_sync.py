@@ -1,3 +1,6 @@
+import base64
+import binascii
+import json
 import logging
 from datetime import time
 from typing import TYPE_CHECKING
@@ -34,32 +37,38 @@ class DalcomSync(commands.Cog):
             await self.get_dalcom_data(game, game_details)
 
     async def get_dalcom_data(self, game: str, game_details: "GameDetails") -> None:
-        if not (basic_details := self.bot.basic.get(game)):
-            return
+        try:
+            if not (basic_details := self.bot.basic.get(game)):
+                return
 
-        self.LOGGER.info("Downloading Dalcom data: %s...", game_details["name"])
-        cog = self.bot.get_cog("SuperStar")
-        ajs = await cog.get_a_json(basic_details)  # type: ignore[union-attr]
+            self.LOGGER.info("Downloading Dalcom data: %s...", game_details["name"])
+            cog = self.bot.get_cog("SuperStar")
+            ajs = await cog.get_a_json(basic_details)  # type: ignore[union-attr]
 
-        if ajs["code"] == 1000:
-            self.bot.ajs[game] = ajs
-        else:
-            self.LOGGER.info(
-                "%s server is unavailable. Skipping...", game_details["name"]
-            )
-            ajs = self.bot.ajs[game]
-
-        if ajs:
-            self.bot.msd[game] = await cog.get_data(  # type: ignore[union-attr]
-                ajs["result"]["context"]["MusicData"]["file"]
-            )
-            self.bot.grd[game] = await cog.get_data(  # type: ignore[union-attr]
-                ajs["result"]["context"]["GroupData"]["file"]
-            )
-            if game_details["assetScheme"] == AssetScheme.JSON_URL:
-                self.bot.url[game] = await cog.get_data(  # type: ignore[union-attr]
-                    ajs["result"]["context"]["URLs"]["file"]
+            if ajs["code"] == 1000:
+                self.bot.ajs[game] = ajs
+            else:
+                self.LOGGER.info(
+                    "%s server is unavailable. Skipping...", game_details["name"]
                 )
+                ajs = self.bot.ajs[game]
+
+            if ajs:
+                self.bot.msd[game] = await cog.get_data(  # type: ignore[union-attr]
+                    ajs["result"]["context"]["MusicData"]["file"]
+                )
+                self.bot.grd[game] = await cog.get_data(  # type: ignore[union-attr]
+                    ajs["result"]["context"]["GroupData"]["file"]
+                )
+                if game_details["assetScheme"] == AssetScheme.JSON_URL:
+                    self.bot.url[game] = await cog.get_data(  # type: ignore[union-attr]
+                        ajs["result"]["context"]["URLs"]["file"]
+                    )
+        except (json.JSONDecodeError, binascii.Error):
+            return
+        except Exception as e:
+            self.LOGGER.exception(str(e))
+            return
 
 
 async def setup(bot: "dBot") -> None:
