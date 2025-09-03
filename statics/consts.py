@@ -183,6 +183,10 @@ GAMES: dict[str, "GameDetails"] = {
         "lookupQuery": "id=890937532&country=kr",
         "manifestUrl": "https://super-star.s3.amazonaws.com/version/{version}.txt",
         "assetScheme": AssetScheme.DIRECT_URL,
+        "catalogUrl": (
+            "https://d13i7sjdvvio90.cloudfront.net/assets"
+            "/LIVE/iOS/catalog_{version}.bin"
+        ),
         "authorization": "SFFINkh6ckdwRkZiRmlYeis1Mi86U1cwU0JxdWg1dw==",
         "target_audience": "864447301209-h0hsb0denh03td7sgoelh5lmdvv79f9h",
     },
@@ -242,6 +246,10 @@ GAMES: dict[str, "GameDetails"] = {
             "https://superstar-jyp-resource.s3.amazonaws.com/version/j_{version}.txt"
         ),
         "assetScheme": AssetScheme.DIRECT_URL,
+        "catalogUrl": (
+            "https://d2hl696dqqmbgp.cloudfront.net/live/assets"
+            "/LIVE/iOS/catalog_{version}.bin"
+        ),
         "authorization": "MHhYTEhMQnV1aGpqY3ZRd1JHbUY6SlE0VFZZaVhXYw==",
         "target_audience": "506321732908-4u8t2uk3888gm8087i7lcpi97ff6ld4a",
     },
