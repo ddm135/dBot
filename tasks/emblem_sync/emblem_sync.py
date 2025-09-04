@@ -60,8 +60,7 @@ class EmblemSync(commands.Cog):
                         game, "grd", emblem_value, {"emblemImage": True}
                     )
                 )["emblemImage"]
-            except Exception as e:
-                self.LOGGER.exception(e)
+            except ValueError:
                 emblem_final = str(emblem_value)
             data[artist_name] = emblem_final
 
