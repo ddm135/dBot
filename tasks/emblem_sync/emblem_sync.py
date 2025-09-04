@@ -24,8 +24,7 @@ class EmblemSync(commands.Cog):
 
     async def cog_unload(self) -> None:
         self.emblem_sync.cancel()
-        self.bot.info_by_name.clear()
-        self.bot.info_by_id.clear()
+        self.bot.emblem.clear()
 
     @tasks.loop(time=[time(hour=h, minute=25) for h in range(24)])
     async def emblem_sync(self) -> None:
