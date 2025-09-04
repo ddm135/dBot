@@ -62,6 +62,9 @@ class EmblemSync(commands.Cog):
                 )["emblemImage"]
             except ValueError:
                 emblem_final = str(emblem_value)
+            except Exception as e:
+                self.LOGGER.exception(e)
+                emblem_final = str(emblem_value)
             data[artist_name] = emblem_final
 
         self.bot.emblem[game] = data
