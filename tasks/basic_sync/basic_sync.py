@@ -39,7 +39,10 @@ class BasicSync(commands.Cog):
             self.LOGGER.info("Downloading basic data: %s...", game_details["name"])
 
             async with aiohttp.ClientSession() as session:
-                async with session.get(f"https://itunes.apple.com/lookup?{query}") as r:
+                async with session.get(
+                    f"https://itunes.apple.com/lookup?{query}",
+                    headers={"Cache-Control": "no-cache"},
+                ) as r:
                     weird_result = await r.text()
                     text_result = weird_result.replace("\n", "")
                     json_result = json.loads(text_result)
