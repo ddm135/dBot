@@ -52,6 +52,8 @@ class SSLeagueEmbed(discord.Embed):
             inline=False,
         )
 
+        print(album, icon)
+
         self.set_thumbnail(
             url=(
                 f"attachment://{album.filename}"
