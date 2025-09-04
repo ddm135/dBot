@@ -245,7 +245,7 @@ GAMES: dict[str, "GameDetails"] = {
         "manifestUrl": (
             "https://superstar-jyp-resource.s3.amazonaws.com/version/j_{version}.txt"
         ),
-        "assetScheme": AssetScheme.DIRECT_URL,
+        "assetScheme": AssetScheme.BINARY_CATALOG,
         "catalogUrl": (
             "https://d2hl696dqqmbgp.cloudfront.net/live/assets"
             "/LIVE/iOS/catalog_{version}.bin"
