@@ -41,7 +41,7 @@ class BasicSync(commands.Cog):
             async with aiohttp.ClientSession() as session:
                 async with session.get(
                     f"https://itunes.apple.com/lookup?{query}",
-                    headers={"Cache-Control": "no-cache"},
+                    headers={"Cache-Control": "max-age=0"},
                 ) as r:
                     weird_result = await r.text()
                     text_result = weird_result.replace("\n", "")
