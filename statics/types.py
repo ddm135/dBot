@@ -20,6 +20,11 @@ class SpreadsheetDetails(TypedDict):
     replaceGrid: GridRange
 
 
+class ForwardUpdateDetails(TypedDict):
+    source: int
+    target: dict[int, int | None]
+
+
 class GameDetails(TypedDict):
     name: str
     iconUrl: NotRequired[str]
@@ -30,6 +35,7 @@ class GameDetails(TypedDict):
     emblem: SpreadsheetDetails
     pinChannelIds: dict[int, int | None]
     pinRoles: dict[int, int | None]
+    forward: NotRequired[ForwardUpdateDetails]
     dateFormat: str
     timezone: ZoneInfo
     lookupQuery: NotRequired[str]

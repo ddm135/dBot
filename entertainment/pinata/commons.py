@@ -1,6 +1,6 @@
 from statics.consts import SSRG_GUILD, TEST_GUILD
 
-PINATA_TEST_CHANNEL = 1354222667384885329
+PINATA_TEST_CHANNEL = 1413700092418068585
 
 PINATA_REWARDS: dict[str, list[dict[str, int | str]]] = {
     "0101": [],

@@ -33,10 +33,8 @@ class EmblemSync(commands.Cog):
 
     async def get_emblem_data(self, game: str, game_details: "GameDetails") -> None:
         self.LOGGER.info("Downloading emblem data: %s...", game_details["name"])
-        if not (emblem_details := game_details.get("emblem")):
-            return
-
         cog = self.bot.get_cog("GoogleSheets")
+        emblem_details = game_details["emblem"]
         emblem = await cog.get_sheet_data(  # type: ignore[union-attr]
             emblem_details["spreadsheetId"],
             emblem_details["range"],
