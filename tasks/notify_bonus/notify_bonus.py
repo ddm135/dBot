@@ -145,6 +145,7 @@ class NotifyBonus(commands.Cog):
                         " + ".join(birthday_zip[member_name_index])
                         .replace(r"*", r"\*")
                         .replace(r"_", r"\_")
+                        .replace(r"`", r"\`")
                     )
                     birthday_amounts = birthday_zip[bonus_amount_index]
                     for amt in birthday_amounts:
@@ -211,11 +212,13 @@ class NotifyBonus(commands.Cog):
                             bonus[album_name_index]
                             .replace(r"*", r"\*")
                             .replace(r"_", r"\_")
+                            .replace(r"`", r"\`")
                         )
                         song_name = (
                             bonus[song_name_index]
                             .replace(r"*", r"\*")
                             .replace(r"_", r"\_")
+                            .replace(r"`", r"\`")
                         )
                         song_duration = bonus[duration_index]
 

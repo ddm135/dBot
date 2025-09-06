@@ -21,8 +21,10 @@ class SSLeagueEmbed(discord.Embed):
         super().__init__(
             title=f"SSL #{current_time.strftime("%u")}",
             description=(
-                f"**{artist_name.replace(r"*", r"\*").replace(r"_", r"\_")} - "
-                f"{song_name.replace(r"*", r"\*").replace(r"_", r"\_")}**"
+                f"**{(artist_name.replace(r"*", r"\*").replace(r"_", r"\_")
+                      .replace(r"`", r"\`"))} - "
+                f"{(song_name.replace(r"*", r"\*").replace(r"_", r"\_")
+                    .replace(r"`", r"\`"))}**"
             ),
             color=color,
         )

@@ -19,7 +19,7 @@ class NotifyBonusEmbed(discord.Embed):
             color=color,
         )
         self.set_author(
-            name=artist.replace(r"*", r"\*").replace(r"_", r"\_"),
+            name=artist.replace(r"*", r"\*").replace(r"_", r"\_").replace(r"`", r"\`"),
             icon_url=(
                 f"attachment://{icon.filename}"
                 if isinstance(icon, discord.File)

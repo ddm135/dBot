@@ -33,9 +33,10 @@ class InfoEmbed(discord.Embed):
             title="Songs",
             description="\n".join(
                 f"({song[duration_index]}) "
-                f"{(f"{song[artist_name_index].replace(r"*", r"\*")
-                    .replace(r"_", r"\_")} - " if not artist else "")}"
-                f"**{song[song_name_index].replace(r"*", r"\*").replace(r"_", r"\_")}**"
+                f"{(f"{song[artist_name_index].replace(r"*", r"\*").replace(r"_", r"\_")
+                    .replace(r"`", r"\`")} - " if not artist else "")}"
+                f"**{(song[song_name_index].replace(r"*", r"\*").replace(r"_", r"\_")
+                      .replace(r"`", r"\`"))}**"
                 for song in filtered_songs
             ),
             color=game_details["color"],

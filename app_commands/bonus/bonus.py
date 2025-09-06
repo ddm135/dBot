@@ -112,7 +112,11 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
 
         while tracking_date <= last_date:
             for artist in artists:
-                artist_name = artist.replace(r"*", r"\*").replace(r"_", r"\_")
+                artist_name = (
+                    artist.replace(r"*", r"\*")
+                    .replace(r"_", r"\_")
+                    .replace(r"`", r"\`")
+                )
                 birthday_bonuses = []
                 album_bonuses = []
                 last_birthday_start = None
@@ -159,6 +163,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                         " + ".join(birthday_zip[member_name_index])
                         .replace(r"*", r"\*")
                         .replace(r"_", r"\_")
+                        .replace(r"`", r"\`")
                     )
                     birthday_amounts = birthday_zip[bonus_amount_index]
                     for amt in birthday_amounts:
@@ -228,6 +233,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                         bonus[bonus_columns.index("song_name")]
                         .replace(r"*", r"\*")
                         .replace(r"_", r"\_")
+                        .replace(r"`", r"\`")
                     )
                     bonus_dict = BonusDict(
                         artist=artist_name,
