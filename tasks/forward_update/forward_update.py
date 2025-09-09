@@ -4,6 +4,7 @@ import json
 from datetime import time
 from typing import TYPE_CHECKING
 
+import aiohttp
 import discord
 from discord.ext import commands, tasks
 
@@ -52,7 +53,11 @@ class ForwardUpdate(commands.Cog):
                 )
                 if ajs["code"] == 1000:
                     break
-            except (json.JSONDecodeError, binascii.Error):
+            except (
+                json.JSONDecodeError,
+                binascii.Error,
+                aiohttp.ConnectionTimeoutError,
+            ):
                 pass
 
         target_channels = []
@@ -78,7 +83,7 @@ class ForwardUpdate(commands.Cog):
                 except discord.HTTPException:
                     pass
 
-        await source_channel.purge(limit=2)
+        await source_channel.purge()
         self.queue.pop(game, None)
 
 
