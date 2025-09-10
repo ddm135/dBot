@@ -4,6 +4,7 @@ import logging
 import math
 import re
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import TYPE_CHECKING, Iterable, Literal
 
 import discord
@@ -60,7 +61,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         game_details = GAMES[game_choice.value]
         bonus_data = self.bot.bonus[game_choice.value]
         artists: Iterable[str]
-        icon: str | discord.File | None
+        icon: str | Path | None
         if not artist_choice:
             artists = bonus_data.keys()
             icon = (
@@ -270,7 +271,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                 default_page,
                 max_page,
             ),
-            files=[icon] if isinstance(icon, discord.File) else [],
+            files=[discord.File(icon)] if isinstance(icon, Path) else [],
             wait=True,
         )
         view = BonusView(

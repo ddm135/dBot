@@ -1,4 +1,5 @@
 from datetime import datetime, time
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import discord
@@ -266,7 +267,11 @@ class NotifyBonus(commands.Cog):
 
                             await user.send(
                                 embed=embed,
-                                files=[icon] if isinstance(icon, discord.File) else [],
+                                files=(
+                                    [discord.File(icon)]
+                                    if isinstance(icon, Path)
+                                    else []
+                                ),
                                 silent=True,
                             )
                         except discord.Forbidden:

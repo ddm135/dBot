@@ -2,6 +2,7 @@
 
 import logging
 from datetime import datetime
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import discord
@@ -205,7 +206,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
 
         files = []
         for image in (album, icon):
-            if isinstance(image, discord.File):
+            if isinstance(image, Path):
                 files.append(image)
         pin_channel = self.bot.get_channel(
             pin_channel_id

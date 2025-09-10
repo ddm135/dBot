@@ -1,6 +1,7 @@
 import logging
 import os
 from collections import defaultdict
+from pathlib import Path
 
 import discord
 from discord.ext import commands
@@ -25,7 +26,7 @@ class dBot(commands.Bot):
 
     bonus: dict[str, dict[str, list[list]]] = {}
 
-    emblem: dict[str, dict[str, str | discord.File | None]] = {}
+    emblem: dict[str, dict[str, str | Path | None]] = {}
 
     credentials: dict = {}
     word_pings: defaultdict[

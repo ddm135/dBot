@@ -3,6 +3,7 @@
 import asyncio
 import logging
 from datetime import datetime, time
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import aiohttp
@@ -154,7 +155,7 @@ class PinSSLeague(commands.Cog):
 
         files = []
         for image in (album, icon):
-            if isinstance(image, discord.File):
+            if isinstance(image, Path):
                 files.append(image)
         pin_channels = game_details["pinChannelIds"]
         pin_roles = game_details["pinRoles"]

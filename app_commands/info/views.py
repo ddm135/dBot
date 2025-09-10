@@ -1,4 +1,5 @@
 import math
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import discord
@@ -19,7 +20,7 @@ class InfoView(discord.ui.View):
         artist: str | None,
         songs: list[list[str]],
         user: discord.User | discord.Member,
-        icon: str | discord.File | None,
+        icon: str | Path | None,
     ) -> None:
         self.message = message_id
         self.game_details = game_details

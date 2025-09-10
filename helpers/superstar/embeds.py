@@ -1,4 +1,5 @@
 from datetime import datetime
+from pathlib import Path
 
 import discord
 
@@ -9,8 +10,8 @@ class SSLeagueEmbed(discord.Embed):
         artist_name: str,
         song_name: str,
         duration: str,
-        album: str | discord.File | None,
-        icon: str | discord.File | None,
+        album: str | Path | None,
+        icon: str | Path | None,
         color: int,
         skills: str | None,
         current_time: datetime,
@@ -55,20 +56,12 @@ class SSLeagueEmbed(discord.Embed):
         )
 
         self.set_thumbnail(
-            url=(
-                f"attachment://{album.filename}"
-                if isinstance(album, discord.File)
-                else album
-            )
+            url=(f"attachment://{album.name}" if isinstance(album, Path) else album)
         )
         self.set_footer(
             text=(
                 f"{current_time.strftime("%A, %B %d, %Y").replace(" 0", " ")}"
                 f" · Pinned by {user_name}"
             ),
-            icon_url=(
-                f"attachment://{icon.filename}"
-                if isinstance(icon, discord.File)
-                else icon
-            ),
+            icon_url=(f"attachment://{icon.name}" if isinstance(icon, Path) else icon),
         )

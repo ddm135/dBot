@@ -1,8 +1,8 @@
 import logging
 from datetime import time
+from pathlib import Path
 from typing import TYPE_CHECKING
 
-import discord
 from discord.ext import commands, tasks
 
 from statics.consts import GAMES, TIMEZONES
@@ -45,7 +45,7 @@ class EmblemSync(commands.Cog):
         artist_name_index = emblem_columns.index("artist_name")
         emblem_index = emblem_columns.index("emblem")
 
-        data: dict[str, str | discord.File | None] = {}
+        data: dict[str, str | Path | None] = {}
         cog = self.bot.get_cog("SuperStar")
         for row in emblem:
             artist_name = row[artist_name_index]

@@ -1,6 +1,7 @@
 # pyright: reportTypedDictNotRequiredAccess=false
 
 import logging
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import discord
@@ -52,7 +53,7 @@ class Info(commands.Cog):
         game_details = GAMES[game_choice.value]
         duration_index = game_details["info"]["columns"].index("duration")
 
-        icon: str | discord.File | None
+        icon: str | Path | None
         if not artist_choice:
             songs = self.bot.info_by_id[game_choice.value].values()
             icon = (
@@ -73,7 +74,7 @@ class Info(commands.Cog):
         sorted_songs = sorted(songs, key=lambda x: x[duration_index])
         msg = await itr.followup.send(
             embed=InfoEmbed(game_details, artist_choice, sorted_songs, icon),
-            files=[icon] if isinstance(icon, discord.File) else [],
+            files=[discord.File(icon)] if isinstance(icon, Path) else [],
             wait=True,
         )
         view = InfoView(msg, game_details, artist_choice, sorted_songs, itr.user, icon)

@@ -1,4 +1,5 @@
 from datetime import datetime
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import discord
@@ -22,7 +23,7 @@ class BonusView(discord.ui.View):
         current_date: datetime,
         bonuses: list[BonusDict],
         user: discord.User | discord.Member,
-        icon: str | discord.File | None,
+        icon: str | Path | None,
         current_page: int,
         max_page: int,
     ) -> None:

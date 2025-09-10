@@ -257,7 +257,7 @@ class SuperStar(commands.Cog):
                     file_extract_path = bundle_extract_path / "Assets" / file_path.name
                     shutil.copyfile(file_extract_path, file_path)
 
-                found_data[attribute] = discord.File(file_path)
+                found_data[attribute] = file_path
 
         return found_data
 
@@ -265,9 +265,10 @@ class SuperStar(commands.Cog):
     async def pin_new_ssl(
         embed: discord.Embed,
         pin_channel: discord.TextChannel,
-        files: list[discord.File],
+        files: list[Path],
     ) -> int:
-        msg = await pin_channel.send(embed=embed, files=files)
+        discord_files = [discord.File(file) for file in files]
+        msg = await pin_channel.send(embed=embed, files=discord_files)
         await asyncio.sleep(1)
         await msg.pin()
         return msg.id

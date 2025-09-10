@@ -1,4 +1,5 @@
 from datetime import datetime
+from pathlib import Path
 
 import discord
 
@@ -9,7 +10,7 @@ class NotifyBonusEmbed(discord.Embed):
     def __init__(
         self,
         artist: str,
-        icon: str | discord.File | None,
+        icon: str | Path | None,
         current_date: datetime,
         starts: list[str],
         ends: list[str],
@@ -20,11 +21,7 @@ class NotifyBonusEmbed(discord.Embed):
         )
         self.set_author(
             name=artist.replace(r"*", r"\*").replace(r"_", r"\_").replace(r"`", r"\`"),
-            icon_url=(
-                f"attachment://{icon.filename}"
-                if isinstance(icon, discord.File)
-                else icon
-            ),
+            icon_url=(f"attachment://{icon.name}" if isinstance(icon, Path) else icon),
         )
 
         started = False
