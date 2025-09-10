@@ -50,7 +50,7 @@ class DalcomSync(commands.Cog):
                 self.LOGGER.info(
                     "%s server is unavailable. Skipping...", game_details["name"]
                 )
-                ajs = self.bot.ajs[game]
+                ajs = self.bot.ajs.get(game)
 
             if ajs:
                 self.bot.msd[game] = await cog.get_data(  # type: ignore[union-attr]
@@ -63,7 +63,7 @@ class DalcomSync(commands.Cog):
                     self.bot.url[game] = await cog.get_data(  # type: ignore[union-attr]
                         ajs["result"]["context"]["URLs"]["file"]
                     )
-        except (json.JSONDecodeError, binascii.Error):
+        except (json.JSONDecodeError, binascii.Error, ValueError):
             return
         except Exception as e:
             self.LOGGER.exception(str(e))

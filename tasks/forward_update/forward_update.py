@@ -42,23 +42,35 @@ class ForwardUpdate(commands.Cog):
         if not (forward_details := game_details.get("forward")):
             self.queue.pop(game, None)
             return
+        if not (manifestUrl := game_details.get("manifestUrl")):
+            self.queue.pop(game, None)
+            return
 
         ss_cog = self.bot.get_cog("SuperStar")
         # basic_cog = self.bot.get_cog("BasicSync")
-        while True:
-            await asyncio.sleep(60)
-            try:
-                ajs = await ss_cog.get_a_json(  # type: ignore[union-attr]
-                    self.bot.basic[game]
-                )
-                if ajs["code"] == 1000:
-                    break
-            except (
-                json.JSONDecodeError,
-                binascii.Error,
-                aiohttp.ConnectionTimeoutError,
-            ):
-                pass
+        async with aiohttp.ClientSession() as session:
+            while True:
+                await asyncio.sleep(60)
+                async with session.get(
+                    manifestUrl.format(version=self.bot.basic[game]["version"])
+                ) as r:
+                    manifest = await r.json(content_type=None)
+                if manifest["MaintenanceUrl"]:
+                    continue
+
+                try:
+                    ajs = await ss_cog.get_a_json(  # type: ignore[union-attr]
+                        self.bot.basic[game]
+                    )
+                    if ajs["code"] == 1000:
+                        break
+                except (
+                    aiohttp.ConnectionTimeoutError,
+                    json.JSONDecodeError,
+                    binascii.Error,
+                    ValueError,
+                ):
+                    continue
 
         target_channels = []
         for channel_id in forward_details["target"].values():

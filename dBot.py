@@ -48,11 +48,6 @@ class dBot(commands.Bot):
         self.LOGGER.info("Ready!")
 
     async def close(self) -> None:
-        channel = self.get_channel(872044312731484200) or await self.fetch_channel(
-            872044312731484200
-        )
-        message = await channel.fetch_message(1415202884408053801)
-        await message.delete()
         try:
             channel = self.get_channel(STATUS_CHANNEL) or await self.fetch_channel(
                 STATUS_CHANNEL

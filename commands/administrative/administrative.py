@@ -57,6 +57,24 @@ class Administrative(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
+    async def delete(
+        self, ctx: commands.Context, channel_id: int, message_id: int
+    ) -> None:
+        if ctx.channel.id != STATUS_CHANNEL:
+            return
+
+        try:
+            channel = self.bot.get_channel(channel_id) or await self.bot.fetch_channel(
+                channel_id
+            )
+            assert isinstance(channel, discord.TextChannel)
+            message = await channel.fetch_message(message_id)
+            await message.delete()
+        except Exception:
+            pass
+
+    @commands.command()
+    @commands.is_owner()
     async def sync(self, ctx: commands.Context) -> None:
         if ctx.channel.id != STATUS_CHANNEL:
             return
