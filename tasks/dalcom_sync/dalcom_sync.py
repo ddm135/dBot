@@ -64,6 +64,9 @@ class DalcomSync(commands.Cog):
                         ajs["result"]["context"]["URLs"]["file"]
                     )
         except (json.JSONDecodeError, binascii.Error, ValueError):
+            self.LOGGER.info(
+                "%s server is unavailable. Skipping...", game_details["name"]
+            )
             return
         except Exception as e:
             self.LOGGER.exception(str(e))
