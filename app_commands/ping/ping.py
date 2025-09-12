@@ -5,7 +5,6 @@ from discord import app_commands
 from discord.ext import commands
 
 from statics.consts import Data
-from statics.types import PingData
 
 from .autocompletes import word_autocomplete
 from .embeds import WordPingsEmbed
@@ -40,9 +39,11 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
             return await itr.followup.send(
                 f"You are already pinged for `{word}` in this server."
             )
-        self.bot.word_pings[guild_id][word][user_id] = PingData(
-            users=[], channels=[], count=0
-        )
+        self.bot.word_pings[guild_id][word][user_id] = {
+            "users": [],
+            "channels": [],
+            "count": 0,
+        }
 
         cog = self.bot.get_cog("DataSync")
         cog.save_data(Data.WORD_PINGS)  # type: ignore[union-attr]

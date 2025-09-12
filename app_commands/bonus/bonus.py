@@ -1,6 +1,5 @@
 # pyright: reportTypedDictNotRequiredAccess=false
 
-import logging
 import math
 import re
 from datetime import datetime, timedelta
@@ -32,7 +31,6 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
 
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
-        logging.getLogger(__name__).info(self.GAME_CHOICES)
 
     @app_commands.command()
     @app_commands.choices(game_choice=GAME_CHOICES)

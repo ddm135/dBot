@@ -67,9 +67,3 @@ class LastAppearanceManual(TypedDict):
     artist: str
     songId: str
     date: str
-
-
-class PingData(TypedDict):
-    users: list[int]
-    channels: list[int]
-    count: int

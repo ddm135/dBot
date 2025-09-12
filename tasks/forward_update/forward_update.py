@@ -1,7 +1,7 @@
 import asyncio
 import binascii
 import json
-from datetime import time
+from datetime import datetime, time
 from typing import TYPE_CHECKING
 
 import aiohttp
@@ -12,6 +12,7 @@ from statics.consts import GAMES
 
 if TYPE_CHECKING:
     from dBot import dBot
+    from statics.types import ForwardUpdateDetails, GameDetails
 
 
 class ForwardUpdate(commands.Cog):
@@ -32,45 +33,71 @@ class ForwardUpdate(commands.Cog):
 
     @tasks.loop(time=[time(hour=h, minute=10) for h in range(24)])
     async def queue_update(self) -> None:
-        for game, basic_details in self.bot.basic.items():
-            if basic_details["manifest"]["MaintenanceUrl"] and game not in self.queue:
-                task = asyncio.create_task(self.forward_update(game))
+        for game, game_details in GAMES.items():
+            if (
+                not (forward_details := game_details.get("forward"))
+                or game in self.queue
+            ):
+                continue
+
+            basic_details = self.bot.basic[game]
+            if basic_details["manifest"]["MaintenanceUrl"]:
+                task = asyncio.create_task(
+                    self.forward_update(game, forward_details, game_details)
+                )
                 self.queue[game] = task
+            else:
+                for song in self.bot.msd[game]:
+                    if (start_time := song["displayStartAt"]) and (
+                        datetime.fromtimestamp(start_time) > datetime.now()
+                    ):
+                        task = asyncio.create_task(
+                            self.forward_update(game, forward_details, start_time)
+                        )
+                        self.queue[game] = task
+                        break
 
-    async def forward_update(self, game: str) -> None:
-        game_details = GAMES[game]
-        if not (forward_details := game_details.get("forward")):
-            self.queue.pop(game, None)
-            return
-        if not (manifestUrl := game_details.get("manifestUrl")):
-            self.queue.pop(game, None)
-            return
-
-        ss_cog = self.bot.get_cog("SuperStar")
-        # basic_cog = self.bot.get_cog("BasicSync")
-        async with aiohttp.ClientSession() as session:
+    async def forward_update(
+        self,
+        game: str,
+        forward_details: "ForwardUpdateDetails",
+        thing: "int | GameDetails",
+    ):
+        if isinstance(thing, int):
+            start_time = datetime.fromtimestamp(thing / 1_000)
             while True:
                 await asyncio.sleep(60)
-                async with session.get(
-                    manifestUrl.format(version=self.bot.basic[game]["version"])
-                ) as r:
-                    manifest = await r.json(content_type=None)
-                if manifest["MaintenanceUrl"]:
-                    continue
+                if datetime.now() >= start_time:
+                    break
+        else:
+            if not (manifestUrl := thing.get("manifestUrl")):
+                self.queue.pop(game, None)
+                return
 
-                try:
-                    ajs = await ss_cog.get_a_json(  # type: ignore[union-attr]
-                        self.bot.basic[game]
-                    )
-                    if ajs["code"] == 1000:
-                        break
-                except (
-                    aiohttp.ConnectionTimeoutError,
-                    json.JSONDecodeError,
-                    binascii.Error,
-                    ValueError,
-                ):
-                    continue
+            ss_cog = self.bot.get_cog("SuperStar")
+            async with aiohttp.ClientSession() as session:
+                while True:
+                    await asyncio.sleep(60)
+                    async with session.get(
+                        manifestUrl.format(version=self.bot.basic[game]["version"])
+                    ) as r:
+                        manifest = await r.json(content_type=None)
+                    if manifest["MaintenanceUrl"]:
+                        continue
+
+                    try:
+                        ajs = await ss_cog.get_a_json(  # type: ignore[union-attr]
+                            self.bot.basic[game]
+                        )
+                        if ajs["code"] == 1000:
+                            break
+                    except (
+                        aiohttp.ConnectionTimeoutError,
+                        json.JSONDecodeError,
+                        binascii.Error,
+                        ValueError,
+                    ):
+                        continue
 
         target_channels = []
         for channel_id in forward_details["target"].values():

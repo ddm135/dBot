@@ -82,10 +82,7 @@ class DataSync(commands.Cog):
                 self.bot.word_pings = json.load(f)
 
             self.bot.word_pings = defaultdict(
-                lambda: defaultdict(
-                    lambda: defaultdict(dict),
-                ),
-                self.bot.word_pings,
+                lambda: defaultdict(lambda: defaultdict(dict)), self.bot.word_pings
             )
             for key in self.bot.word_pings:
                 self.bot.word_pings[key] = defaultdict(

@@ -1,8 +1,6 @@
-from collections import defaultdict
+from typing import Mapping
 
 import discord
-
-from statics.types import PingData
 
 
 class WordPingsEmbed(discord.Embed):
@@ -10,7 +8,7 @@ class WordPingsEmbed(discord.Embed):
         self,
         user: discord.User | discord.Member,
         guild: discord.Guild,
-        pings: defaultdict[str, defaultdict[str, PingData]],
+        pings: Mapping[str, dict[str, dict]],
     ) -> None:
         user_id = str(user.id)
         description = ""
@@ -18,9 +16,9 @@ class WordPingsEmbed(discord.Embed):
             if not pings[word][user_id]:
                 continue
 
+            count = pings[word][user_id]["count"]
             description += (
-                f"`{word}` - pinged `{pings[word][user_id].setdefault("count", 0)}`"
-                f" {("times" if pings[word][user_id]["count"] > 1 else "time")}\n"
+                f"`{word}` - pinged `{count}` {("times" if count > 1 else "time")}\n"
             )
 
         if not description:

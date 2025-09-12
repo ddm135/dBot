@@ -8,7 +8,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 
 from statics.consts import EXTENSIONS, LOCK, STATUS_CHANNEL
-from statics.types import BasicDetails, LastAppearance, LastAppearanceManual, PingData
+from statics.types import BasicDetails, LastAppearance, LastAppearanceManual
 
 
 class dBot(commands.Bot):
@@ -29,10 +29,8 @@ class dBot(commands.Bot):
     emblem: dict[str, dict[str, str | Path | None]] = {}
 
     credentials: dict = {}
-    word_pings: defaultdict[
-        str, defaultdict[str, defaultdict[str, PingData]]
-    ] = defaultdict(
-        lambda: defaultdict(lambda: defaultdict(dict))  # type: ignore[arg-type]
+    word_pings: defaultdict[str, defaultdict[str, defaultdict[str, dict]]] = (
+        defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
     )
     roles: defaultdict[str, list[int]] = defaultdict(list[int])
     ssleagues: defaultdict[str, defaultdict[str, LastAppearance]] = defaultdict(

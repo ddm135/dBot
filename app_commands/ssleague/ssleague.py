@@ -1,6 +1,5 @@
 # pyright: reportTypedDictNotRequiredAccess=false
 
-import logging
 from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -33,7 +32,6 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
 
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
-        logging.getLogger(__name__).info(self.GAME_CHOICES)
 
     @app_commands.command()
     @app_commands.choices(game_choice=GAME_CHOICES)
