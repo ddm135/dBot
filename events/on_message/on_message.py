@@ -36,8 +36,8 @@ class OnMessage(commands.Cog):
                 if (
                     message.author.id == user_id_int
                     or not user_ping_data
-                    or message.author.id in user_ping_data.setdefault("users", [])
-                    or message.channel.id in user_ping_data.setdefault("channels", [])
+                    or message.author.id in user_ping_data["users"]
+                    or message.channel.id in user_ping_data["channels"]
                 ):
                     continue
 
@@ -49,7 +49,7 @@ class OnMessage(commands.Cog):
                 except (discord.NotFound, discord.Forbidden):
                     continue
 
-                user_ping_data["count"] = user_ping_data.setdefault("count", 0) + 1
+                user_ping_data["count"] += 1
                 cog = self.bot.get_cog("DataSync")
                 cog.save_data(Data.WORD_PINGS)  # type: ignore[union-attr]
 
