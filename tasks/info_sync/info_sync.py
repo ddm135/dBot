@@ -52,7 +52,7 @@ class InfoSync(commands.Cog):
         info_by_name: dict[str, dict[str, list[str]]] = {}
         info_by_id: dict[str, list[str]] = {}
         for row in info:
-            if not row or len(row) < len(info_columns):
+            if len(row) < len(info_columns):
                 continue
 
             row[duration_index] = (

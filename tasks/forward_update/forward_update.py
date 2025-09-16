@@ -48,8 +48,9 @@ class ForwardUpdate(commands.Cog):
                 self.queue[game] = task
             else:
                 for song in self.bot.msd[game]:
-                    if (start_time := song["displayStartAt"]) and (
-                        datetime.fromtimestamp(start_time / 1_000) > datetime.now()
+                    if (display_start := song["displayStartAt"]) and (
+                        (start_time := datetime.fromtimestamp(display_start / 1000))
+                        > datetime.now()
                     ):
                         task = asyncio.create_task(
                             self.forward_update(game, forward_details, start_time)
@@ -61,16 +62,15 @@ class ForwardUpdate(commands.Cog):
         self,
         game: str,
         forward_details: "ForwardUpdateDetails",
-        thing: "int | GameDetails",
+        arg: "datetime | GameDetails",
     ):
-        if isinstance(thing, int):
-            start_time = datetime.fromtimestamp(thing / 1_000)
+        if isinstance(arg, datetime):
             while True:
                 await asyncio.sleep(60)
-                if datetime.now() >= start_time:
+                if datetime.now() >= arg:
                     break
         else:
-            if not (manifestUrl := thing.get("manifestUrl")):
+            if not (manifestUrl := arg.get("manifestUrl")):
                 self.queue.pop(game, None)
                 return
 

@@ -53,6 +53,9 @@ class BonusSync(commands.Cog):
 
         data: dict[str, list[list]] = {}
         for raw_row in bonus:
+            if len(raw_row) < len(bonus_columns):
+                continue
+
             row: list = raw_row
             row[bonus_start_index] = datetime.strptime(
                 raw_row[bonus_start_index], date_format
