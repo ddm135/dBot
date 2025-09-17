@@ -190,7 +190,7 @@ GAMES: dict[str, "GameDetails"] = {
         "timezone": TIMEZONES["KST"],
         "lookupQuery": "id=890937532&country=kr",
         "manifestUrl": "https://super-star.s3.amazonaws.com/version/{version}.txt",
-        "assetScheme": AssetScheme.DIRECT_URL,
+        "assetScheme": AssetScheme.BINARY_CATALOG,
         "catalogUrl": (
             "https://d13i7sjdvvio90.cloudfront.net/assets"
             "/LIVE/iOS/catalog_{version}.bin"
