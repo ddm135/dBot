@@ -254,7 +254,9 @@ class SuperStar(commands.Cog):
                         )
                         await process.communicate()
 
-                    file_extract_path = bundle_extract_path / "Assets" / file_path.name
+                    file_extract_path = list(
+                        (bundle_extract_path / "Assets").rglob(file_path.name)
+                    )[0]
                     shutil.copyfile(file_extract_path, file_path)
 
                 found_data[attribute] = file_path
