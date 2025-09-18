@@ -51,15 +51,16 @@ class ForwardUpdate(commands.Cog):
                     if (display_start := song["displayStartAt"]) and (
                         (
                             start_time := datetime.fromtimestamp(
-                                display_start / 1000,
-                                game_details["timezone"],
+                                display_start / 1000, tz=game_details["timezone"]
                             )
                         )
-                        > datetime.now()
+                        > datetime.now(tz=game_details["timezone"])
                     ):
                         print(start_time)
                         task = asyncio.create_task(
-                            self.forward_update(game, forward_details, start_time)
+                            self.forward_update(
+                                game, forward_details, game_details, start_time
+                            )
                         )
                         self.queue[game] = task
                         break
@@ -68,15 +69,16 @@ class ForwardUpdate(commands.Cog):
         self,
         game: str,
         forward_details: "ForwardUpdateDetails",
-        arg: "datetime | GameDetails",
+        game_details: "GameDetails",
+        start_time: datetime | None = None,
     ):
-        if isinstance(arg, datetime):
+        if start_time:
             while True:
                 await asyncio.sleep(60)
-                if datetime.now() >= arg:
+                if datetime.now(tz=game_details["timezone"]) >= start_time:
                     break
         else:
-            if not (manifestUrl := arg.get("manifestUrl")):
+            if not (manifestUrl := game_details.get("manifestUrl")):
                 self.queue.pop(game, None)
                 return
 
