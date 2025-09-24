@@ -8,9 +8,9 @@ if LOCK.exists():
     for module in (autocompletes, embeds, ping):
         importlib.reload(module)
 
-from .ping import setup
+from .ping import Ping, setup
 
 del importlib, autocompletes, embeds, ping, LOCK
 
-__all__ = ("setup",)
+__all__ = ("setup", "Ping")
 __author__ = "ddm135 | Aut"

@@ -2,22 +2,16 @@ from typing import TYPE_CHECKING, NotRequired, TypedDict
 from zoneinfo import ZoneInfo
 
 if TYPE_CHECKING:
+    from googleapiclient._apis.sheets.v4 import GridRange
+
     from statics.consts import AssetScheme
-
-
-class GridRange(TypedDict, total=False):
-    endColumnIndex: int
-    endRowIndex: int
-    sheetId: int
-    startColumnIndex: int
-    startRowIndex: int
 
 
 class SpreadsheetDetails(TypedDict):
     spreadsheetId: str
     range: str
     columns: tuple[str, ...]
-    replaceGrid: GridRange
+    replaceGrid: "GridRange"
 
 
 class ForwardUpdateDetails(TypedDict):

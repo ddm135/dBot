@@ -7,9 +7,9 @@ from . import administrative
 if LOCK.exists():
     importlib.reload(administrative)
 
-from .administrative import setup
+from .administrative import Administrative, setup
 
 del importlib, administrative, LOCK
 
-__all__ = ("setup",)
+__all__ = ("setup", "Administrative")
 __author__ = "ddm135 | Aut"

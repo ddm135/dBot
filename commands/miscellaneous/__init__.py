@@ -7,9 +7,9 @@ from . import miscellaneous
 if LOCK.exists():
     importlib.reload(miscellaneous)
 
-from .miscellaneous import setup
+from .miscellaneous import Miscellaneous, setup
 
 del importlib, miscellaneous, LOCK
 
-__all__ = ("setup",)
+__all__ = ("setup", "Miscellaneous")
 __author__ = "ddm135 | Aut"

@@ -8,9 +8,9 @@ if LOCK.exists():
     for module in (embeds, on_message):
         importlib.reload(module)
 
-from .on_message import setup
+from .on_message import OnMessage, setup
 
 del importlib, embeds, on_message, LOCK
 
-__all__ = ("setup",)
+__all__ = ("setup", "OnMessage")
 __author__ = "ddm135 | Aut"

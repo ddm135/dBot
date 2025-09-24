@@ -20,6 +20,11 @@ from statics.consts import (
 
 if TYPE_CHECKING:
     from dBot import dBot
+    from helpers.google_sheets import GoogleSheets
+    from tasks.bonus_sync import BonusSync
+    from tasks.data_sync import DataSync
+    from tasks.emblem_sync import EmblemSync
+    from tasks.info_sync import InfoSync
 
 
 class Administrative(commands.Cog):
@@ -221,14 +226,16 @@ class Administrative(commands.Cog):
 
         text = f"Renaming {old_name} to {new_name} in {game_details["name"]}..."
         msg = await ctx.send(text)
-        cog = self.bot.get_cog("GoogleSheets")
+        sheets_cog: "GoogleSheets" = self.bot.get_cog(
+            "GoogleSheets"
+        )  # type: ignore[assignment]
 
         for data in ("info", "bonus", "ping", "emblem"):
             if (details := game_details.get(data)) and (
                 replace_grid := details["replaceGrid"]  # type: ignore[index]
             ):
                 await msg.edit(content=f"{text}\nEditing {data} sheet...")
-                await cog.find_replace_sheet_data(  # type: ignore[union-attr]
+                await sheets_cog.find_replace_sheet_data(
                     details["spreadsheetId"],  # type: ignore[index]
                     replace_grid,
                     old_name,
@@ -247,20 +254,28 @@ class Administrative(commands.Cog):
             ):
                 self.bot.ssleague_manual[game]["artist"] = new_name
 
-                cog = self.bot.get_cog("DataSync")
-                cog.save_data(Data.SSLEAGUES)  # type: ignore[union-attr]
+                data_cog: "DataSync" = self.bot.get_cog(
+                    "DataSync"
+                )  # type: ignore[assignment]
+                data_cog.save_data(Data.SSLEAGUES)
 
         await msg.edit(content=f"{text}\nDownloading info data...")
-        cog = self.bot.get_cog("InfoSync")
-        await cog.get_info_data(game, game_details)  # type: ignore[union-attr]
+        info_cog: "InfoSync" = self.bot.get_cog(
+            "InfoSync"
+        )  # type: ignore[assignment]
+        await info_cog.get_info_data(game, game_details)
 
         await msg.edit(content=f"{text}\nDownloading bonus data...")
-        cog = self.bot.get_cog("BonusSync")
-        await cog.get_bonus_data(game, game_details)  # type: ignore[union-attr]
+        bonus_cog: "BonusSync" = self.bot.get_cog(
+            "BonusSync"
+        )  # type: ignore[assignment]
+        await bonus_cog.get_bonus_data(game, game_details)
 
         await msg.edit(content=f"{text}\nDownloading emblem data...")
-        cog = self.bot.get_cog("EmblemSync")
-        await cog.get_emblem_data(game, game_details)  # type: ignore[union-attr]
+        emblem_cog: "EmblemSync" = self.bot.get_cog(
+            "EmblemSync"
+        )  # type: ignore[assignment]
+        await emblem_cog.get_emblem_data(game, game_details)
 
         await msg.edit(
             content=f"Renamed {old_name} to {new_name} in {game_details["name"]}!"

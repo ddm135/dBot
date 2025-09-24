@@ -15,6 +15,8 @@ from statics.consts import GAMES, RESET_OFFSET, Data, InfoColumns
 
 if TYPE_CHECKING:
     from dBot import dBot
+    from helpers.superstar import SuperStar
+    from tasks.data_sync import DataSync
 
 
 class PinSSLeague(commands.Cog):
@@ -31,8 +33,8 @@ class PinSSLeague(commands.Cog):
 
     @tasks.loop(time=[time(hour=h) for h in range(24)])
     async def pin_ssls(self) -> None:
-        cog = self.bot.get_cog("DataSync")
-        cog.save_last_appearance()  # type: ignore[union-attr]
+        cog: "DataSync" = self.bot.get_cog("DataSync")  # type: ignore[assignment]
+        cog.save_last_appearance()
 
         pin_tasks = [
             self.pin_ssl(game, self.bot.credentials[game])
@@ -42,7 +44,7 @@ class PinSSLeague(commands.Cog):
         ]
         await asyncio.gather(*pin_tasks, return_exceptions=True)
 
-        cog.save_data(Data.SSLEAGUES)  # type: ignore[union-attr]
+        cog.save_data(Data.SSLEAGUES)
 
     async def pin_ssl(self, game: str, credentials: dict) -> None:
         game_details = GAMES[game]
@@ -51,32 +53,30 @@ class PinSSLeague(commands.Cog):
         if current_time.hour:
             return
         backoff = discord.backoff.ExponentialBackoff()
-        cog = self.bot.get_cog("SuperStar")
+        cog: "SuperStar" = self.bot.get_cog("SuperStar")  # type: ignore[assignment]
 
         while True:
             try:
                 match credentials["provider"]:
                     case 0 | 1 if not credentials["isSNS"]:
-                        oid, key = await cog.login_classic(  # type: ignore[union-attr]
+                        oid, key = await cog.login_classic(
                             self.bot.basic[game], credentials
                         )
                     case 0 if credentials["isSNS"] and (
                         target_audience := game_details.get("target_audience")
                     ):
-                        oid, key = await cog.login_google(  # type: ignore[union-attr]
+                        oid, key = await cog.login_google(
                             self.bot.basic[game], credentials, target_audience
                         )
                     case 3 if credentials["isSNS"] and (
                         authorization := game_details.get("authorization")
                     ):
-                        oid, key = await cog.login_dalcom(  # type: ignore[union-attr]
+                        oid, key = await cog.login_dalcom(
                             self.bot.basic[game], credentials, authorization
                         )
                     case _:
                         return
-                ssleague = await cog.get_ssleague(  # type: ignore[union-attr]
-                    self.bot.basic[game], oid, key
-                )
+                ssleague = await cog.get_ssleague(self.bot.basic[game], oid, key)
             except aiohttp.ClientError as e:
                 self.LOGGER.exception(str(e))
                 await asyncio.sleep(backoff.delay())
@@ -108,7 +108,7 @@ class PinSSLeague(commands.Cog):
         duration = ssl_song[duration_index]
         skills = ssl_song[skills_index] if skills_index is not None else None
 
-        results = await cog.get_attributes(  # type: ignore[union-attr]
+        results = await cog.get_attributes(
             game,
             "msd",
             song_id,
@@ -139,7 +139,7 @@ class PinSSLeague(commands.Cog):
         else:
             song_last = None
 
-        embed = cog.SSLeagueEmbed(  # type: ignore[union-attr]
+        embed = cog.SSLeagueEmbed(
             artist_name,
             song_name,
             duration,
@@ -172,9 +172,7 @@ class PinSSLeague(commands.Cog):
             assert isinstance(pin_channel, discord.TextChannel)
             if game == "JYP":
                 print(pin_channel)
-            new_pin = await cog.pin_new_ssl(  # type: ignore[union-attr]
-                embed, pin_channel, files
-            )
+            new_pin = await cog.pin_new_ssl(embed, pin_channel, files)
             if game == "JYP":
                 print(new_pin)
             if pin_role := pin_roles.get(guild_id):
@@ -186,9 +184,7 @@ class PinSSLeague(commands.Cog):
             await pin_channel.edit(topic=topic)
             if game == "JYP":
                 print(topic)
-            await cog.unpin_old_ssl(  # type: ignore[union-attr]
-                embed.title, pin_channel, new_pin
-            )
+            await cog.unpin_old_ssl(embed.title, pin_channel, new_pin)
 
         self.bot.ssleagues[game][artist_name]["date"] = current_time.strftime(
             game_details["dateFormat"]

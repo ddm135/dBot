@@ -16,6 +16,7 @@ from .embeds import RoleInventoryEmbed, RoleSetEmbed
 
 if TYPE_CHECKING:
     from dBot import dBot
+    from tasks.data_sync import DataSync
 
 
 @app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)
@@ -57,8 +58,8 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
         self.bot.roles[user_id].remove(target_role.id)
         await itr.user.add_roles(target_role)
 
-        cog = self.bot.get_cog("DataSync")
-        cog.save_data(Data.ROLES)  # type: ignore[union-attr]
+        cog: "DataSync" = self.bot.get_cog("DataSync")  # type: ignore[assignment]
+        cog.save_data(Data.ROLES)
         await itr.followup.send(
             f"Added {target_role.mention}!\n-# {NOTICE}",
             allowed_mentions=discord.AllowedMentions.none(),
@@ -98,8 +99,8 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
         self.bot.roles[user_id].append(target_role.id)
         await itr.user.remove_roles(target_role)
 
-        cog = self.bot.get_cog("DataSync")
-        cog.save_data(Data.ROLES)  # type: ignore[union-attr]
+        cog: "DataSync" = self.bot.get_cog("DataSync")  # type: ignore[assignment]
+        cog.save_data(Data.ROLES)
         await itr.followup.send(
             f"Removed {target_role.mention}!\n-# {NOTICE}",
             allowed_mentions=discord.AllowedMentions.none(),
@@ -162,8 +163,8 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
         await itr.user.add_roles(*add_roles)
         await itr.user.remove_roles(*remove_roles)
 
-        cog = self.bot.get_cog("DataSync")
-        cog.save_data(Data.ROLES)  # type: ignore[union-attr]
+        cog: "DataSync" = self.bot.get_cog("DataSync")  # type: ignore[assignment]
+        cog.save_data(Data.ROLES)
         await itr.followup.send(
             f"Set to {target_role.mention}!",
             embed=RoleSetEmbed(target_role, add_roles, remove_roles),

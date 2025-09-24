@@ -20,6 +20,7 @@ from .views import BonusView
 
 if TYPE_CHECKING:
     from dBot import dBot
+    from helpers.google_sheets import GoogleSheets
 
 
 class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings"):
@@ -421,8 +422,10 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                 return await itr.followup.send("Internal error.")
 
             if not message_prefix.startswith("Already"):
-                cog = self.bot.get_cog("GoogleSheets")
-                await cog.update_sheet_data(  # type: ignore[union-attr]
+                cog: "GoogleSheets" = self.bot.get_cog(
+                    "GoogleSheets"  # type: ignore[assignment]
+                )
+                await cog.update_sheet_data(
                     game_details["ping"]["spreadsheetId"],
                     f"{re.split(r"\d+:", game_details["ping"]["range"])[0]}{i}",
                     [[",".join(users)]],

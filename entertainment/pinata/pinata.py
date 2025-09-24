@@ -13,6 +13,7 @@ from .commons import PINATA_REWARDS, PINATA_TEST_CHANNEL
 
 if TYPE_CHECKING:
     from dBot import dBot
+    from tasks.data_sync import DataSync
 
     from .types import PinataDetails
 
@@ -227,8 +228,10 @@ class Pinata(commands.Cog):
                     if reward["role"].id not in self.bot.roles[str(winner.id)]:
                         self.bot.roles[str(winner.id)].append(reward["role"].id)
 
-                    cog = self.bot.get_cog("DataSync")
-                    cog.save_data(Data.ROLES)  # type: ignore[union-attr]
+                    cog: "DataSync" = self.bot.get_cog(
+                        "DataSync"
+                    )  # type: ignore[assignment]
+                    cog.save_data(Data.ROLES)
 
                     _message += "The role has been added to your inventory."
                 elif is_member:

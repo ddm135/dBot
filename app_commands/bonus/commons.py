@@ -6,6 +6,7 @@ from statics.consts import GAMES, TIMEZONES
 
 if TYPE_CHECKING:
     from dBot import dBot
+    from helpers.google_sheets import GoogleSheets
     from statics.types import GameDetails
 
 
@@ -17,10 +18,10 @@ async def ping_preprocess(
 ) -> tuple["GameDetails", list[list[str]], int, int]:
     game_details = GAMES[game]
     ping_columns = game_details["ping"]["columns"]
-    cog = bot.get_cog("GoogleSheets")
+    cog: "GoogleSheets" = bot.get_cog("GoogleSheets")  # type: ignore[assignment]
     return (
         game_details,
-        await cog.get_sheet_data(  # type: ignore[union-attr]
+        await cog.get_sheet_data(
             game_details["ping"]["spreadsheetId"],
             game_details["ping"]["range"],
             "kr" if game_details["timezone"] == TIMEZONES["KST"] else None,

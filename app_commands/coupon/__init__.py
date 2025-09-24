@@ -8,9 +8,9 @@ if LOCK.exists():
     for module in (commons, coupon):
         importlib.reload(module)
 
-from .coupon import setup
+from .coupon import Coupon, setup
 
 del importlib, commons, coupon, LOCK
 
-__all__ = ("setup",)
+__all__ = ("setup", "Coupon")
 __author__ = "ddm135 | Aut"

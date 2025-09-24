@@ -20,6 +20,7 @@ from .types import SuperStarHeaders
 
 if TYPE_CHECKING:
     from dBot import dBot
+    from helpers.cryptographic import Cryptographic
     from statics.types import BasicDetails
 
 
@@ -32,12 +33,14 @@ class SuperStar(commands.Cog):
         iv = headers["X-SuperStar-AES-IV"]
 
         async with aiohttp.ClientSession() as session:
-            cog = self.bot.get_cog("Cryptographic")
+            cog: "Cryptographic" = self.bot.get_cog(
+                "Cryptographic"
+            )  # type: ignore[assignment]
 
             async with session.post(
                 url=basic_details["manifest"]["ServerUrl"],
                 headers=headers,
-                data=cog.encrypt_cbc(  # type: ignore[union-attr]
+                data=cog.encrypt_cbc(
                     '{"class":"Platform","method":"checkAssetBundle","params":[0]}', iv
                 ),
             ) as r:
@@ -51,12 +54,14 @@ class SuperStar(commands.Cog):
         iv = headers["X-SuperStar-AES-IV"]
 
         async with aiohttp.ClientSession() as session:
-            cog = self.bot.get_cog("Cryptographic")
+            cog: "Cryptographic" = self.bot.get_cog(
+                "Cryptographic"
+            )  # type: ignore[assignment]
 
             async with session.post(
                 url=basic_details["manifest"]["ServerUrl"],
                 headers=headers,
-                data=cog.encrypt_cbc(  # type: ignore[union-attr]
+                data=cog.encrypt_cbc(
                     credentials["account"].format(
                         version=basic_details["version"],
                         **credentials,
@@ -84,12 +89,14 @@ class SuperStar(commands.Cog):
         iv = headers["X-SuperStar-AES-IV"]
 
         async with aiohttp.ClientSession() as session:
-            cog = self.bot.get_cog("Cryptographic")
+            cog: "Cryptographic" = self.bot.get_cog(
+                "Cryptographic"
+            )  # type: ignore[assignment]
 
             async with session.post(
                 url=basic_details["manifest"]["ServerUrl"],
                 headers=headers,
-                data=cog.encrypt_cbc(  # type: ignore[union-attr]
+                data=cog.encrypt_cbc(
                     credentials["account"].format(
                         version=basic_details["version"],
                         id_token=id_token,
@@ -126,12 +133,14 @@ class SuperStar(commands.Cog):
                 dalcom_id = await r.json(content_type=None)
                 access_token = dalcom_id["data"]["access_token"]
 
-            cog = self.bot.get_cog("Cryptographic")
+            cog: "Cryptographic" = self.bot.get_cog(
+                "Cryptographic"
+            )  # type: ignore[assignment]
 
             async with session.post(
                 url=basic_details["manifest"]["ServerUrl"],
                 headers=headers,
-                data=cog.encrypt_cbc(  # type: ignore[union-attr]
+                data=cog.encrypt_cbc(
                     credentials["account"].format(
                         version=basic_details["version"],
                         access_token=access_token,
@@ -153,12 +162,14 @@ class SuperStar(commands.Cog):
         iv = headers["X-SuperStar-AES-IV"]
 
         async with aiohttp.ClientSession() as session:
-            cog = self.bot.get_cog("Cryptographic")
+            cog: "Cryptographic" = self.bot.get_cog(
+                "Cryptographic"
+            )  # type: ignore[assignment]
 
             async with session.post(
                 url=basic_details["manifest"]["ServerUrl"],
                 headers=headers,
-                data=cog.encrypt_cbc(  # type: ignore[union-attr]
+                data=cog.encrypt_cbc(
                     f'{{"class":"StarLeague",'
                     f'"method":"getWeekPlayMusic",'
                     f'"params":[{oid},"{key}"]}}',
@@ -174,9 +185,11 @@ class SuperStar(commands.Cog):
         try:
             result = await response.json(content_type=None)
         except json.JSONDecodeError:
-            cog = self.bot.get_cog("Cryptographic")
+            cog: "Cryptographic" = self.bot.get_cog(
+                "Cryptographic"
+            )  # type: ignore[assignment]
             result = json.loads(
-                cog.decrypt_cbc(await response.text(), iv)  # type: ignore[union-attr]
+                cog.decrypt_cbc(await response.text(), iv)
             )
         return result
 
@@ -185,9 +198,11 @@ class SuperStar(commands.Cog):
             async with session.get(url=url) as r:
                 content = await r.read()
 
-        cog = self.bot.get_cog("Cryptographic")
+        cog: "Cryptographic" = self.bot.get_cog(
+            "Cryptographic"
+        )  # type: ignore[assignment]
         return json.loads(
-            cog.decrypt_ecb(  # type: ignore[union-attr]
+            cog.decrypt_ecb(
                 gzip.decompress(content)
             ).replace(rb"\/", rb"/")
         )
@@ -254,13 +269,14 @@ class SuperStar(commands.Cog):
                         )
                         await process.communicate()
 
-                    file_extract_path = (list(
-                        (bundle_extract_path / "Assets").rglob(file_path.name)
-                    ) or list(
-                        (bundle_extract_path / "Assets").rglob(
-                            file_path.name.replace(",", "_")
+                    file_extract_path = (
+                        list((bundle_extract_path / "Assets").rglob(file_path.name))
+                        or list(
+                            (bundle_extract_path / "Assets").rglob(
+                                file_path.name.replace(",", "_")
+                            )
                         )
-                    ))[0]
+                    )[0]
                     shutil.copyfile(file_extract_path, file_path)
 
                 found_data[attribute] = file_path

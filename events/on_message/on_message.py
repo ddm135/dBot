@@ -10,6 +10,7 @@ from .embeds import WordPingEmbed
 
 if TYPE_CHECKING:
     from dBot import dBot
+    from tasks.data_sync import DataSync
 
 
 class OnMessage(commands.Cog):
@@ -50,8 +51,10 @@ class OnMessage(commands.Cog):
                     continue
 
                 user_ping_data["count"] += 1
-                cog = self.bot.get_cog("DataSync")
-                cog.save_data(Data.WORD_PINGS)  # type: ignore[union-attr]
+                cog: "DataSync" = self.bot.get_cog(
+                    "DataSync"
+                )  # type: ignore[assignment]
+                cog.save_data(Data.WORD_PINGS)
 
 
 async def setup(bot: "dBot") -> None:

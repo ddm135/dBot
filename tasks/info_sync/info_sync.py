@@ -8,6 +8,7 @@ from statics.consts import GAMES, TIMEZONES
 
 if TYPE_CHECKING:
     from dBot import dBot
+    from helpers.google_sheets import GoogleSheets
     from statics.types import GameDetails
 
 
@@ -36,8 +37,10 @@ class InfoSync(commands.Cog):
         if not (info_details := game_details.get("info")):
             return
 
-        cog = self.bot.get_cog("GoogleSheets")
-        info = await cog.get_sheet_data(  # type: ignore[union-attr]
+        cog: "GoogleSheets" = self.bot.get_cog(
+            "GoogleSheets"
+        )  # type: ignore[assignment]
+        info = await cog.get_sheet_data(
             info_details["spreadsheetId"],
             info_details["range"],
             "kr" if game_details["timezone"] == TIMEZONES["KST"] else None,

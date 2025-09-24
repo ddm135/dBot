@@ -16,6 +16,7 @@ from .embeds import NotifyBonusEmbed
 
 if TYPE_CHECKING:
     from dBot import dBot
+    from helpers.google_sheets import GoogleSheets
 
 
 class NotifyBonus(commands.Cog):
@@ -30,7 +31,9 @@ class NotifyBonus(commands.Cog):
 
     @tasks.loop(time=[time(hour=h) for h in range(24)])
     async def notify_bonus(self) -> None:
-        cog = self.bot.get_cog("GoogleSheets")
+        cog: "GoogleSheets" = self.bot.get_cog(
+            "GoogleSheets"
+        )  # type: ignore[assignment]
 
         for game, game_details in GAMES.items():
             if not (bonus_details := game_details.get("bonus")) or not (
@@ -57,7 +60,7 @@ class NotifyBonus(commands.Cog):
             ping_users_index = ping_columns.index("users")
             ping_artist_index = ping_columns.index("artist_name")
 
-            ping_data = await cog.get_sheet_data(  # type: ignore[union-attr]
+            ping_data = await cog.get_sheet_data(
                 ping_details["spreadsheetId"],
                 ping_details["range"],
                 "kr" if game_details["timezone"] == TIMEZONES["KST"] else None,

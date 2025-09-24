@@ -8,9 +8,9 @@ if LOCK.exists():
     for module in (commons, types, pinata):
         importlib.reload(module)
 
-from .pinata import setup
+from .pinata import Pinata, setup
 
 del importlib, commons, types, pinata, LOCK
 
-__all__ = ("setup",)
+__all__ = ("setup", "Pinata")
 __author__ = "ddm135 | Aut"

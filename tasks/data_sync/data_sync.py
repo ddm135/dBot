@@ -1,3 +1,5 @@
+# pyright: reportTypedDictNotRequiredAccess=false
+
 import json
 import logging
 from collections import defaultdict
@@ -11,7 +13,10 @@ from statics.consts import Data
 from statics.types import LastAppearance
 
 if TYPE_CHECKING:
+    from googleapiclient._apis.drive.v3 import File
+
     from dBot import dBot
+    from helpers.google_drive import GoogleDrive
 
 
 class DataSync(commands.Cog):
@@ -40,8 +45,8 @@ class DataSync(commands.Cog):
         await self.bot.unload_extension("helpers.google_drive")
 
     async def data_download(self) -> None:
-        cog = self.bot.get_cog("GoogleDrive")
-        drive_files = await cog.get_file_list()  # type: ignore[union-attr]
+        cog: "GoogleDrive" = self.bot.get_cog("GoogleDrive")  # type: ignore[assignment]
+        drive_files = await cog.get_file_list()
         if Data.LAST_MODIFIED.value.exists():
             with open(Data.LAST_MODIFIED.value, "r", encoding="utf-8") as f:
                 last_modified = json.load(f)
@@ -133,8 +138,8 @@ class DataSync(commands.Cog):
 
     @tasks.loop(time=[time(hour=h, minute=30) for h in range(24)])
     async def data_upload(self) -> None:
-        cog = self.bot.get_cog("GoogleDrive")
-        drive_files = await cog.get_file_list()  # type: ignore[union-attr]
+        cog: "GoogleDrive" = self.bot.get_cog("GoogleDrive")  # type: ignore[assignment]
+        drive_files = await cog.get_file_list()
         last_modified = {}
 
         for data_name in Data:
@@ -145,15 +150,13 @@ class DataSync(commands.Cog):
             for file in drive_files["files"]:
                 if file["name"] == data.name:
                     last_modified[data.name] = (
-                        await cog.update_drive_file(  # type: ignore[union-attr]
-                            file["id"], media
-                        )
+                        await cog.update_drive_file(file["id"], media)
                     ).timestamp()
                     break
             else:
-                metadata = {"name": data.name}
+                metadata: "File" = {"name": data.name}
                 last_modified[data.name] = (
-                    await cog.create_file(media, metadata)  # type: ignore[union-attr]
+                    await cog.create_file(media, metadata)
                 ).timestamp()
             data.touch(exist_ok=True)
 

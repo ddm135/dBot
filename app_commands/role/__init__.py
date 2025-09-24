@@ -8,9 +8,9 @@ if LOCK.exists():
     for module in (autocompletes, commons, embeds, role):
         importlib.reload(module)
 
-from .role import setup
+from .role import Role, setup
 
 del importlib, autocompletes, commons, embeds, role, LOCK
 
-__all__ = ("setup",)
+__all__ = ("setup", "Role")
 __author__ = "ddm135 | Aut"

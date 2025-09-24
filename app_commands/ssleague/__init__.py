@@ -8,9 +8,9 @@ if LOCK.exists():
     for module in (autocompletes, ssleague):
         importlib.reload(module)
 
-from .ssleague import setup
+from .ssleague import SSLeague, setup
 
 del importlib, autocompletes, ssleague, LOCK
 
-__all__ = ("setup",)
+__all__ = ("setup", "SSLeague")
 __author__ = "ddm135 | Aut"

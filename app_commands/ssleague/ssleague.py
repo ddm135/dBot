@@ -19,6 +19,7 @@ from .autocompletes import (
 
 if TYPE_CHECKING:
     from dBot import dBot
+    from helpers.superstar import SuperStar
 
 
 @app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)
@@ -150,13 +151,13 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
 
         duration = ssl_song[info_columns.index("duration")]
         skills = (
-            info_columns.index("skills")
+            ssl_song[info_columns.index("skills")]
             if game_details["info"]["columns"] == InfoColumns.SSL_WITH_SKILLS.value
             else None
         )
 
-        cog = self.bot.get_cog("SuperStar")
-        results = await cog.get_attributes(  # type: ignore[union-attr]
+        cog: "SuperStar" = self.bot.get_cog("SuperStar")  # type: ignore[assignment]
+        results = await cog.get_attributes(
             game, "msd", song_id, {"albumBgColor": False, "album": True}
         )
         color = (
@@ -188,7 +189,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         else:
             song_last = None
 
-        embed = cog.SSLeagueEmbed(  # type: ignore[union-attr]
+        embed = cog.SSLeagueEmbed(
             artist_name,
             song_name,
             duration,
@@ -210,18 +211,14 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             pin_channel_id
         ) or await self.bot.fetch_channel(pin_channel_id)
         assert isinstance(pin_channel, discord.TextChannel)
-        new_pin = await cog.pin_new_ssl(  # type: ignore[union-attr]
-            embed, pin_channel, files
-        )
+        new_pin = await cog.pin_new_ssl(embed, pin_channel, files)
         topic = f"[{current_time.strftime("%m.%d.%y")}] {artist_name} - {song_name}"
         if pin_role:
             await pin_channel.send(f"<@&{pin_role}> {topic}")
         else:
             await pin_channel.send(topic)
         await pin_channel.edit(topic=topic)
-        await cog.unpin_old_ssl(  # type: ignore[union-attr]
-            embed.title, pin_channel, new_pin
-        )
+        await cog.unpin_old_ssl(embed.title, pin_channel, new_pin)
 
         self.bot.ssleague_manual[game] = LastAppearanceManual(
             artist=artist_name,

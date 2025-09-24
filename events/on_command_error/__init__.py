@@ -7,9 +7,9 @@ from . import on_command_error
 if LOCK.exists():
     importlib.reload(on_command_error)
 
-from .on_command_error import setup
+from .on_command_error import OnCommandError, setup
 
 del importlib, on_command_error, LOCK
 
-__all__ = ("setup",)
+__all__ = ("setup", "OnCommandError")
 __author__ = "ddm135 | Aut"

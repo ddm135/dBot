@@ -12,6 +12,7 @@ from statics.consts import GAMES
 
 if TYPE_CHECKING:
     from dBot import dBot
+    from helpers.superstar import SuperStar
     from statics.types import ForwardUpdateDetails, GameDetails
 
 
@@ -85,7 +86,7 @@ class ForwardUpdate(commands.Cog):
                 self.queue.pop(game, None)
                 return
 
-            ss_cog = self.bot.get_cog("SuperStar")
+            cog: "SuperStar" = self.bot.get_cog("SuperStar")  # type: ignore[assignment]
             async with aiohttp.ClientSession() as session:
                 while True:
                     await asyncio.sleep(60)
@@ -97,9 +98,7 @@ class ForwardUpdate(commands.Cog):
                         continue
 
                     try:
-                        ajs = await ss_cog.get_a_json(  # type: ignore[union-attr]
-                            self.bot.basic[game]
-                        )
+                        ajs = await cog.get_a_json(self.bot.basic[game])
                         if ajs["code"] == 1000:
                             source_id = forward_details["source_maint"]
                             break

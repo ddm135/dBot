@@ -8,9 +8,9 @@ if LOCK.exists():
     for module in (commons, google_drive):
         importlib.reload(module)
 
-from .google_drive import setup
+from .google_drive import GoogleDrive, setup
 
 del importlib, commons, google_drive, LOCK
 
-__all__ = ("setup",)
+__all__ = ("setup", "GoogleDrive")
 __author__ = "ddm135 | Aut"

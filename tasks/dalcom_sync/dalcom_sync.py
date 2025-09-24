@@ -11,6 +11,7 @@ from statics.consts import GAMES, AssetScheme
 
 if TYPE_CHECKING:
     from dBot import dBot
+    from helpers.superstar import SuperStar
     from statics.types import GameDetails
 
 
@@ -47,8 +48,8 @@ class DalcomSync(commands.Cog):
                 stored_ajs = None
 
             self.LOGGER.info("Downloading Dalcom data: %s...", game_details["name"])
-            cog = self.bot.get_cog("SuperStar")
-            ajs = await cog.get_a_json(basic_details)  # type: ignore[union-attr]
+            cog: "SuperStar" = self.bot.get_cog("SuperStar")  # type: ignore[assignment]
+            ajs = await cog.get_a_json(basic_details)
             refresh = True
 
             if ajs["code"] == 1000:
@@ -67,17 +68,17 @@ class DalcomSync(commands.Cog):
 
             if ajs:
                 if game not in self.bot.msd or refresh:
-                    self.bot.msd[game] = await cog.get_data(  # type: ignore[union-attr]
+                    self.bot.msd[game] = await cog.get_data(
                         ajs["result"]["context"]["MusicData"]["file"]
                     )
                 if game not in self.bot.grd or refresh:
-                    self.bot.grd[game] = await cog.get_data(  # type: ignore[union-attr]
+                    self.bot.grd[game] = await cog.get_data(
                         ajs["result"]["context"]["GroupData"]["file"]
                     )
                 if game_details["assetScheme"] == AssetScheme.JSON_URL and (
                     game not in self.bot.url or refresh
                 ):
-                    self.bot.url[game] = await cog.get_data(  # type: ignore[union-attr]
+                    self.bot.url[game] = await cog.get_data(
                         ajs["result"]["context"]["URLs"]["file"]
                     )
         except (json.JSONDecodeError, binascii.Error, ValueError):
