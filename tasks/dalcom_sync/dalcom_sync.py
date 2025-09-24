@@ -49,6 +49,7 @@ class DalcomSync(commands.Cog):
             self.LOGGER.info("Downloading Dalcom data: %s...", game_details["name"])
             cog = self.bot.get_cog("SuperStar")
             ajs = await cog.get_a_json(basic_details)  # type: ignore[union-attr]
+            refresh = True
 
             if ajs["code"] == 1000:
                 if (
@@ -58,25 +59,30 @@ class DalcomSync(commands.Cog):
                     self.LOGGER.info(
                         "%s data is up-to-date. Skipping...", game_details["name"]
                     )
-                    return
-
-                ajs_path.parent.mkdir(parents=True, exist_ok=True)
-                with open(ajs_path, "w", encoding="utf-8") as f:
-                    json.dump(ajs, f, indent=4)
+                    refresh = False
+                else:
+                    ajs_path.parent.mkdir(parents=True, exist_ok=True)
+                    with open(ajs_path, "w", encoding="utf-8") as f:
+                        json.dump(ajs, f, indent=4)
             else:
                 self.LOGGER.info(
                     "%s server is unavailable. Skipping...", game_details["name"]
                 )
                 ajs = stored_ajs
+                refresh = False
 
             if ajs:
-                self.bot.msd[game] = await cog.get_data(  # type: ignore[union-attr]
-                    ajs["result"]["context"]["MusicData"]["file"]
-                )
-                self.bot.grd[game] = await cog.get_data(  # type: ignore[union-attr]
-                    ajs["result"]["context"]["GroupData"]["file"]
-                )
-                if game_details["assetScheme"] == AssetScheme.JSON_URL:
+                if game not in self.bot.msd or refresh:
+                    self.bot.msd[game] = await cog.get_data(  # type: ignore[union-attr]
+                        ajs["result"]["context"]["MusicData"]["file"]
+                    )
+                if game not in self.bot.grd or refresh:
+                    self.bot.grd[game] = await cog.get_data(  # type: ignore[union-attr]
+                        ajs["result"]["context"]["GroupData"]["file"]
+                    )
+                if game_details["assetScheme"] == AssetScheme.JSON_URL and (
+                    game not in self.bot.url or refresh
+                ):
                     self.bot.url[game] = await cog.get_data(  # type: ignore[union-attr]
                         ajs["result"]["context"]["URLs"]["file"]
                     )
