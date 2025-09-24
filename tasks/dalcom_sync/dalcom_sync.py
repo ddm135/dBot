@@ -56,18 +56,12 @@ class DalcomSync(commands.Cog):
                     stored_ajs
                     and ajs["result"]["version"] == stored_ajs["result"]["version"]
                 ):
-                    self.LOGGER.info(
-                        "%s data is up-to-date. Skipping...", game_details["name"]
-                    )
                     refresh = False
                 else:
                     ajs_path.parent.mkdir(parents=True, exist_ok=True)
                     with open(ajs_path, "w", encoding="utf-8") as f:
                         json.dump(ajs, f, indent=4)
             else:
-                self.LOGGER.info(
-                    "%s server is unavailable. Skipping...", game_details["name"]
-                )
                 ajs = stored_ajs
                 refresh = False
 

@@ -47,7 +47,6 @@ class ForwardUpdate(commands.Cog):
                 )
                 self.queue[game] = task
             elif game in self.bot.msd:
-                print(game)
                 for song in self.bot.msd[game]:
                     if (display_start := song.get("displayStartAt")) and (
                         (
