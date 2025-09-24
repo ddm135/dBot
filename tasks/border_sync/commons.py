@@ -1,2 +1,3 @@
 BORDER_FOLDER = "1FgZltBhxE0G2R93VnEhtNqSC_HtOmA-g"
 FOLDER_MIME = "application/vnd.google-apps.folder"
+BORDER_CHANNEL = 1420456673964982372

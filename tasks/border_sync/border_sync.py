@@ -6,11 +6,12 @@ from datetime import time
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import discord
 from discord.ext import commands, tasks
 from googleapiclient.http import MediaFileUpload
 
 from statics.consts import GAMES, AssetScheme
-from tasks.border_sync.commons import BORDER_FOLDER, FOLDER_MIME
+from tasks.border_sync.commons import BORDER_CHANNEL, BORDER_FOLDER, FOLDER_MIME
 
 if TYPE_CHECKING:
     from googleapiclient._apis.drive.v3 import File
@@ -38,6 +39,10 @@ class BorderSync(commands.Cog):
             "GoogleDrive"
         )  # type: ignore[assignment]
         ss_cog: "SuperStar" = self.bot.get_cog("SuperStar")  # type: ignore[assignment]
+        border_channel = self.bot.get_channel(
+            BORDER_CHANNEL
+        ) or await self.bot.fetch_channel(BORDER_CHANNEL)
+        assert isinstance(border_channel, discord.TextChannel)
         drive_folders = await drive_cog.get_file_list(BORDER_FOLDER, FOLDER_MIME)
         counter = 0
 
@@ -111,7 +116,10 @@ class BorderSync(commands.Cog):
                     "name": border_name,
                     "parents": [border_folder],
                 }
-                await drive_cog.create_file(metadata, border_media)
+                link = (await drive_cog.create_file(metadata, border_media))[2]
+                await border_channel.send(
+                    f"{game_details["name"]}: {border_name}\n{link}"
+                )
                 counter += 1
 
                 if counter > 900:
