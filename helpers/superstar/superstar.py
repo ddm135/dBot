@@ -206,7 +206,13 @@ class SuperStar(commands.Cog):
     async def get_attributes(
         self,
         game: str,
-        search: Literal["Group", "Locale", "Music", "Theme", "ThemeType"],
+        search: Literal[
+            "GroupData",
+            "LocaleData",
+            "MusicData",
+            "ThemeData",
+            "ThemeTypeData",
+        ],
         item_id: int,
         attributes: dict[str, bool],
     ) -> dict:
