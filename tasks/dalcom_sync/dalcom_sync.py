@@ -63,13 +63,7 @@ class DalcomSync(commands.Cog):
                 ajs = stored_ajs
                 refresh = False
 
-            data_files = [
-                "GroupData",
-                "LocaleData",
-                "MusicData",
-                "ThemeData",
-                "ThemeTypeData",
-            ]
+            data_files = ["Group", "Locale", "Music", "Theme", "ThemeType"]
             if game_details["assetScheme"] == AssetScheme.JSON_URL:
                 data_files.append("URLs")
             if ajs:
