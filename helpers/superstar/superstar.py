@@ -258,6 +258,7 @@ class SuperStar(commands.Cog):
         game: str,
         catalog_key: str,
     ) -> Path:
+        _catalog_key = catalog_key
         catalog = self.bot.basic[game]["catalog"]
         file_path = Path(f"data/assets/{game}/{catalog_key}")
         if not file_path.exists():
@@ -285,11 +286,11 @@ class SuperStar(commands.Cog):
 
             file_extract_paths = (
                 bundle_extract_path / "Assets" / file_path.name,
-                bundle_extract_path / "Assets" / "UploadFiles" / catalog_key,
+                bundle_extract_path / "Assets" / "UploadFiles" / _catalog_key,
                 bundle_extract_path
                 / "Assets"
                 / "UploadFiles"
-                / catalog_key.replace(",", "_"),
+                / _catalog_key.replace(",", "_"),
                 bundle_extract_path / "Assets" / file_path.name.replace(",", "_"),
             )
             for file_extract_path in file_extract_paths:
