@@ -118,7 +118,7 @@ class BorderSync(commands.Cog):
                 }
                 link = (await drive_cog.create_file(metadata, border_media))[2]
                 await border_channel.send(
-                    f"{game_details["name"]}: {border_name}\n{link}"
+                    f"{game_details["name"]}: {border_name}\n<{link}>"
                 )
                 counter += 1
 
