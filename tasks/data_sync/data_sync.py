@@ -76,11 +76,6 @@ class DataSync(commands.Cog):
                 await cog.get_file(file["id"], data)  # type: ignore[union-attr]
                 break
 
-        if Data.CREDENTIALS.value.exists():
-            self.bot.credentials.clear()
-            with open(Data.CREDENTIALS.value, "r", encoding="utf-8") as f:
-                self.bot.credentials = json.load(f)
-
         if Data.WORD_PINGS.value.exists():
             self.bot.word_pings.clear()
             with open(Data.WORD_PINGS.value, "r", encoding="utf-8") as f:
