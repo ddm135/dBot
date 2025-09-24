@@ -554,9 +554,10 @@ GAMES: dict[str, "GameDetails"] = {
             "https://superstar-wakeone.s3.amazonaws.com"
             "/version/real/manifest/{version}.txt"
         ),
-        "assetScheme": AssetScheme.JSON_CATALOG,
+        "assetScheme": AssetScheme.BINARY_CATALOG,
         "catalogUrl": (
-            "https://d189x7hw581nsg.cloudfront.net/assets/iOS/catalog_{version}.json"
+            "https://d189x7hw581nsg.cloudfront.net/assets"
+            "/LIVE/iOS/catalog_{version}.bin"
         ),
         "target_audience": "259379396797-tfc19vpi39fosa2sic420po6l67p9ltu",
     },

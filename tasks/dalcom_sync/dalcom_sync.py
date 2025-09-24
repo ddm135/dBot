@@ -39,7 +39,7 @@ class DalcomSync(commands.Cog):
         try:
             if not (basic_details := self.bot.basic.get(game)):
                 return
-            ajs_path = Path(f"data/a.json/{game}.json")
+            ajs_path = Path(f"data/dalcom/{game}/a.json")
             if ajs_path.exists():
                 with open(ajs_path, "r", encoding="utf-8") as f:
                     stored_ajs = json.load(f)
