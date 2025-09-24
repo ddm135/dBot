@@ -283,15 +283,20 @@ class SuperStar(commands.Cog):
                 )
                 await process.communicate()
 
-            file_extract_path = (
-                list((bundle_extract_path / "Assets").rglob(file_path.name))
-                or list(
-                    (bundle_extract_path / "Assets").rglob(
-                        file_path.name.replace(",", "_")
-                    )
-                )
-            )[0]
-            shutil.copyfile(file_extract_path, file_path)
+            file_extract_paths = (
+                bundle_extract_path / "Assets" / file_path.name,
+                bundle_extract_path / "Assets" / "UploadFiles" / file_path.name,
+                bundle_extract_path
+                / "Assets"
+                / "UploadFiles"
+                / file_path.name.replace(",", "_"),
+                bundle_extract_path / "Assets" / file_path.name.replace(",", "_"),
+            )
+            for file_extract_path in file_extract_paths:
+                if file_extract_path.exists():
+                    shutil.copyfile(file_extract_path, file_path)
+                    break
+
         return file_path
 
     @staticmethod
