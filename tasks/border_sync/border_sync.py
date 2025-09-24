@@ -109,7 +109,7 @@ class BorderSync(commands.Cog):
                 }
                 border_folder = (await drive_cog.create_file(metadata))[0]
 
-            next_page = None
+            next_page = ""
             while True:
                 border_files = await drive_cog.get_file_list(
                     border_folder, next_page=next_page
@@ -120,9 +120,15 @@ class BorderSync(commands.Cog):
                     break
 
             for border_name, catalog_key in borders.items():
-                border_media = MediaFileUpload(
-                    await ss_cog.extract_file_from_bundle(game, catalog_key)
-                )
+                try:
+                    border_media = MediaFileUpload(
+                        await ss_cog.extract_file_from_bundle(game, catalog_key)
+                    )
+                except KeyError:
+                    await border_channel.send(
+                        f"{game_details["name"]}: {border_name} (?)"
+                    )
+                    continue
                 metadata: "File" = {
                     "name": border_name,
                     "parents": [border_folder],
