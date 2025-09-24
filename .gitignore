@@ -560,5 +560,6 @@ cython_debug/
 
 data/
 dBot*.json
-test*.*
+**/test*
+**/test*.*
 .dBot

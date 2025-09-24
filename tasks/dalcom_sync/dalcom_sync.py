@@ -2,6 +2,7 @@ import binascii
 import json
 import logging
 from datetime import time
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from discord.ext import commands, tasks
@@ -25,7 +26,6 @@ class DalcomSync(commands.Cog):
 
     async def cog_unload(self) -> None:
         self.dalcom_sync.cancel()
-        self.bot.ajs.clear()
         self.bot.msd.clear()
         self.bot.grd.clear()
         self.bot.url.clear()
@@ -39,18 +39,35 @@ class DalcomSync(commands.Cog):
         try:
             if not (basic_details := self.bot.basic.get(game)):
                 return
+            ajs_path = Path(f"data/a.json/{game}.json")
+            if ajs_path.exists():
+                with open(ajs_path, "r", encoding="utf-8") as f:
+                    stored_ajs = json.load(f)
+            else:
+                stored_ajs = None
 
             self.LOGGER.info("Downloading Dalcom data: %s...", game_details["name"])
             cog = self.bot.get_cog("SuperStar")
             ajs = await cog.get_a_json(basic_details)  # type: ignore[union-attr]
 
             if ajs["code"] == 1000:
-                self.bot.ajs[game] = ajs
+                if (
+                    stored_ajs
+                    and ajs["result"]["version"] == stored_ajs["result"]["version"]
+                ):
+                    self.LOGGER.info(
+                        "%s data is up-to-date. Skipping...", game_details["name"]
+                    )
+                    return
+
+                ajs_path.parent.mkdir(parents=True, exist_ok=True)
+                with open(ajs_path, "w", encoding="utf-8") as f:
+                    json.dump(ajs, f, indent=4)
             else:
                 self.LOGGER.info(
                     "%s server is unavailable. Skipping...", game_details["name"]
                 )
-                ajs = self.bot.ajs.get(game)
+                ajs = stored_ajs
 
             if ajs:
                 self.bot.msd[game] = await cog.get_data(  # type: ignore[union-attr]

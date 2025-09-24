@@ -16,7 +16,7 @@ class dBot(commands.Bot):
 
     basic: dict[str, BasicDetails] = {}
 
-    ajs: dict[str, dict] = {}
+    # ajs: dict[str, dict] = {}
     grd: dict[str, list[dict]] = {}
     msd: dict[str, list[dict]] = {}
     url: dict[str, list[dict]] = {}

@@ -21,7 +21,8 @@ class SpreadsheetDetails(TypedDict):
 
 
 class ForwardUpdateDetails(TypedDict):
-    source: int
+    source_maint: int
+    source_msd: NotRequired[int]
     target: dict[int, int | None]
 
 

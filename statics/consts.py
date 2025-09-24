@@ -180,11 +180,11 @@ GAMES: dict[str, "GameDetails"] = {
             TEST_GUILD: 1350860245487845570,
         },
         "forward": {
-            "source": 1413706777375014943,
+            "source_maint": 1413706777375014943,
             "target": {
                 SSRG_GUILD: 401291379810107394,
                 TEST_GUILD: 1336210286289616917,
-            }
+            },
         },
         "dateFormat": "%Y-%m-%d",
         "timezone": TIMEZONES["KST"],
@@ -248,11 +248,11 @@ GAMES: dict[str, "GameDetails"] = {
             SSRG_GUILD: 420428238171668480,
         },
         "forward": {
-            "source": 1413706832953872414,
+            "source_maint": 1413706832953872414,
             "target": {
                 SSRG_GUILD: 360109303199432705,
                 TEST_GUILD: 1354222667384885329,
-            }
+            },
         },
         "dateFormat": "%Y-%m-%d",
         "timezone": TIMEZONES["KST"],
@@ -313,11 +313,11 @@ GAMES: dict[str, "GameDetails"] = {
         "pinChannelIds": {},
         "pinRoles": {},
         "forward": {
-            "source": 1413706721494438039,
+            "source_maint": 1413706721494438039,
             "target": {
                 SSRG_GUILD: 629497534804525066,
                 TEST_GUILD: 1413706247185633412,
-            }
+            },
         },
         "dateFormat": "%Y-%m-%d",
         "timezone": TIMEZONES["KST"],
@@ -430,11 +430,11 @@ GAMES: dict[str, "GameDetails"] = {
         "pinChannelIds": {},
         "pinRoles": {},
         "forward": {
-            "source": 1413706800049688647,
+            "source_maint": 1413706800049688647,
             "target": {
                 SSRG_GUILD: 872044312731484200,
                 TEST_GUILD: 1413706348469682187,
-            }
+            },
         },
         "dateFormat": "%Y-%m-%d",
         "timezone": TIMEZONES["KST"],
@@ -491,11 +491,12 @@ GAMES: dict[str, "GameDetails"] = {
         "pinChannelIds": {},
         "pinRoles": {},
         "forward": {
-            "source": 1413706850389725244,
+            "source_maint": 1413706850389725244,
+            "source_msd": 1418938625348997200,
             "target": {
                 SSRG_GUILD: 1104332747008389231,
                 TEST_GUILD: 1413706402790379520,
-            }
+            },
         },
         "dateFormat": "%Y-%m-%d",
         "timezone": TIMEZONES["KST"],
@@ -540,11 +541,11 @@ GAMES: dict[str, "GameDetails"] = {
         "pinChannelIds": {},
         "pinRoles": {},
         "forward": {
-            "source": 1413706817548189807,
+            "source_maint": 1413706817548189807,
             "target": {
                 SSRG_GUILD: 1291640600080289803,
                 TEST_GUILD: 1413706513561681930,
-            }
+            },
         },
         "dateFormat": "%Y-%m-%d",
         "timezone": TIMEZONES["KST"],
@@ -606,6 +607,13 @@ GAMES: dict[str, "GameDetails"] = {
             TEST_GUILD: 1343840449357418516,
         },
         "pinRoles": {},
+        "forward": {
+            "source_maint": 1415367073533657128,
+            "target": {
+                SSRG_GUILD: 481907573948153857,
+                TEST_GUILD: 1343840449357418516,
+            },
+        },
         "dateFormat": "%Y-%m-%d",
         "timezone": TIMEZONES["JST"],
         "lookupQuery": "id=1216136006&country=jp",
@@ -662,6 +670,13 @@ GAMES: dict[str, "GameDetails"] = {
             TEST_GUILD: 1335936325685084242,
         },
         "pinRoles": {},
+        "forward": {
+            "source_maint": 1415366656758255666,
+            "target": {
+                SSRG_GUILD: 951350075190313010,
+                TEST_GUILD: 1335936325685084242,
+            },
+        },
         "dateFormat": "%Y-%m-%d",
         "timezone": TIMEZONES["JST"],
         "lookupQuery": "id=1569554295&country=jp",
@@ -719,6 +734,13 @@ GAMES: dict[str, "GameDetails"] = {
             TEST_GUILD: 1340868523957813348,
         },
         "pinRoles": {},
+        "forward": {
+            "source_maint": 1415366726656458763,
+            "target": {
+                SSRG_GUILD: 1039132737979813908,
+                TEST_GUILD: 1340868523957813348,
+            },
+        },
         "dateFormat": "%Y-%m-%d",
         "timezone": TIMEZONES["JST"],
         "lookupQuery": "id=1642691486&country=jp",
@@ -768,6 +790,13 @@ GAMES: dict[str, "GameDetails"] = {
         },
         "pinChannelIds": {},
         "pinRoles": {},
+        "forward": {
+            "source_maint": 1415366753814577312,
+            "target": {
+                SSRG_GUILD: 1151895287158276166,
+                TEST_GUILD: 1413706609884008579,
+            },
+        },
         "dateFormat": "%Y-%m-%d",
         "timezone": TIMEZONES["JST"],
         "lookupQuery": "id=6450412255&country=jp",
@@ -818,11 +847,12 @@ GAMES: dict[str, "GameDetails"] = {
         "pinChannelIds": {},
         "pinRoles": {},
         "forward": {
-            "source": 1413706748833038498,
+            "source_maint": 1413706748833038498,
+            "source_msd": 1418938997165527171,
             "target": {
                 SSRG_GUILD: 1156462287943630930,
                 TEST_GUILD: 1413706686346301480,
-            }
+            },
         },
         "dateFormat": "%d-%m-%Y",
         "timezone": TIMEZONES["PHT"],

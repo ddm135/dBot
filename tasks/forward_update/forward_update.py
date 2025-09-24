@@ -76,6 +76,10 @@ class ForwardUpdate(commands.Cog):
             while True:
                 await asyncio.sleep(60)
                 if datetime.now(tz=game_details["timezone"]) >= start_time:
+                    source_id = (
+                        forward_details.get("source_msd")
+                        or forward_details["source_maint"]
+                    )
                     break
         else:
             if not (manifestUrl := game_details.get("manifestUrl")):
@@ -98,6 +102,7 @@ class ForwardUpdate(commands.Cog):
                             self.bot.basic[game]
                         )
                         if ajs["code"] == 1000:
+                            source_id = forward_details["source_maint"]
                             break
                     except (
                         aiohttp.ConnectionTimeoutError,
@@ -119,8 +124,8 @@ class ForwardUpdate(commands.Cog):
             target_channels.append(general_channel)
 
         source_channel = self.bot.get_channel(
-            forward_details["source"]
-        ) or await self.bot.fetch_channel(forward_details["source"])
+            source_id
+        ) or await self.bot.fetch_channel(source_id)
         assert isinstance(source_channel, discord.TextChannel)
 
         async for message in source_channel.history(oldest_first=True):
