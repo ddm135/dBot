@@ -296,6 +296,8 @@ class SuperStar(commands.Cog):
                 if file_extract_path.exists():
                     shutil.copyfile(file_extract_path, file_path)
                     break
+            else:
+                print(file_path)
 
         return file_path
 
