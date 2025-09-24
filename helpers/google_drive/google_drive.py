@@ -16,7 +16,6 @@ from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 from statics.consts import MAX_RETRIES
 
 from .commons import (
-    DATA_FOLDER,
     SCOPES,
     SERVICE_NAME,
     STATIC_DISCOVERY,
@@ -44,23 +43,33 @@ class GoogleDrive(commands.Cog):
             static_discovery=STATIC_DISCOVERY,
         ).files()  # pyright: ignore[reportAttributeAccessIssue]
 
-    async def create_file(self, data: "MediaFileUpload", metadata: "File") -> datetime:
-        metadata["parents"] = [DATA_FOLDER]
+    async def create_file(
+        self, metadata: "File", data: "MediaFileUpload | None" = None
+    ) -> tuple[str, datetime, str]:
         result = await asyncio.to_thread(
             self.service.create(
-                body=metadata, media_body=data, fields="modifiedTime"
+                body=metadata, media_body=data, fields="id,modifiedTime,webViewLink"
             ).execute,
             num_retries=MAX_RETRIES,
         )
-        return datetime.strptime(
-            result["modifiedTime"],
-            TIME_FORMAT,
+        return (
+            result["id"],
+            datetime.strptime(
+                result["modifiedTime"],
+                TIME_FORMAT,
+            ),
+            result["webViewLink"],
         )
 
-    async def get_file_list(self) -> "FileList":
+    async def get_file_list(
+        self, parent: str, mime_type: str | None = None
+    ) -> "FileList":
         return await asyncio.to_thread(
             self.service.list(
-                q=f"'{DATA_FOLDER}' in parents and trashed=False"
+                q=(
+                    f"'{parent}' in parents and trashed=False"
+                    f"{f" and mimeType='{mime_type}'" if mime_type else ""}"
+                )
             ).execute,
             num_retries=MAX_RETRIES,
         )

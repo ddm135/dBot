@@ -39,7 +39,7 @@ class EmblemSync(commands.Cog):
             "GoogleSheets"
         )  # type: ignore[assignment]
         emblem_details = game_details["emblem"]
-        emblem = await sheets_cog.get_sheet_data(  # type: ignore[union-attr]
+        emblem = await sheets_cog.get_sheet_data(
             emblem_details["spreadsheetId"],
             emblem_details["range"],
             "kr" if game_details["timezone"] == TIMEZONES["KST"] else None,

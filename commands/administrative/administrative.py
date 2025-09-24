@@ -260,9 +260,7 @@ class Administrative(commands.Cog):
                 data_cog.save_data(Data.SSLEAGUES)
 
         await msg.edit(content=f"{text}\nDownloading info data...")
-        info_cog: "InfoSync" = self.bot.get_cog(
-            "InfoSync"
-        )  # type: ignore[assignment]
+        info_cog: "InfoSync" = self.bot.get_cog("InfoSync")  # type: ignore[assignment]
         await info_cog.get_info_data(game, game_details)
 
         await msg.edit(content=f"{text}\nDownloading bonus data...")

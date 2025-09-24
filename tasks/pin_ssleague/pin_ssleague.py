@@ -160,8 +160,6 @@ class PinSSLeague(commands.Cog):
         pin_roles = game_details["pinRoles"]
         topic = f"[{current_time.strftime("%m.%d.%y")}] {artist_name} - {song_name}"
         for guild_id, channel_id in pin_channels.items():
-            if game == "JYP":
-                print(guild_id, channel_id)
             if not channel_id:
                 continue
 
@@ -169,20 +167,12 @@ class PinSSLeague(commands.Cog):
                 channel_id
             ) or await self.bot.fetch_channel(channel_id)
             assert isinstance(pin_channel, discord.TextChannel)
-            if game == "JYP":
-                print(pin_channel)
             new_pin = await cog.pin_new_ssl(embed, pin_channel, files)
-            if game == "JYP":
-                print(new_pin)
             if pin_role := pin_roles.get(guild_id):
                 await pin_channel.send(f"<@&{pin_role}> {topic}")
             else:
                 await pin_channel.send(topic)
-            if game == "JYP":
-                print(pin_role)
             await pin_channel.edit(topic=topic)
-            if game == "JYP":
-                print(topic)
             await cog.unpin_old_ssl(embed.title, pin_channel, new_pin)
 
         self.bot.ssleagues[game][artist_name]["date"] = current_time.strftime(

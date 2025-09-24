@@ -4,17 +4,13 @@ from typing import TYPE_CHECKING
 import discord
 from discord.ext import commands, tasks
 
-from statics.consts import TIMEZONES
+from .commons import STEP, TIMEZONE_COUNT, TIMEZONE_ITEMS
 
 if TYPE_CHECKING:
     from dBot import dBot
 
 
 class Clock(commands.Cog):
-    STEP = 1
-    TIMEZONE_ITEMS = tuple(TIMEZONES.items())
-    TIMEZONE_COUNT = len(TIMEZONES)
-
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
         self.counter = 0
@@ -27,7 +23,7 @@ class Clock(commands.Cog):
 
     @tasks.loop(time=[time(hour=h, minute=m) for h in range(24) for m in range(60)])
     async def clock(self) -> None:
-        short_name, timezone = self.TIMEZONE_ITEMS[self.counter]
+        short_name, timezone = TIMEZONE_ITEMS[self.counter]
         current_time = (
             datetime.now(tz=timezone)
             .strftime(f"%B %d %Y, %H:%M {short_name}")
@@ -37,7 +33,7 @@ class Clock(commands.Cog):
         await self.bot.change_presence(
             activity=discord.CustomActivity(f"{current_time}")
         )
-        self.counter = (self.counter + self.STEP) % self.TIMEZONE_COUNT
+        self.counter = (self.counter + STEP) % TIMEZONE_COUNT
 
     @clock.before_loop
     async def before_loop(self) -> None:

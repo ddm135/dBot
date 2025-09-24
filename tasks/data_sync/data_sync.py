@@ -12,6 +12,8 @@ from googleapiclient.http import MediaFileUpload
 from statics.consts import Data
 from statics.types import LastAppearance
 
+from .commons import DATA_FOLDER
+
 if TYPE_CHECKING:
     from googleapiclient._apis.drive.v3 import File
 
@@ -46,7 +48,7 @@ class DataSync(commands.Cog):
 
     async def data_download(self) -> None:
         cog: "GoogleDrive" = self.bot.get_cog("GoogleDrive")  # type: ignore[assignment]
-        drive_files = await cog.get_file_list()
+        drive_files = await cog.get_file_list(DATA_FOLDER)
         if Data.LAST_MODIFIED.value.exists():
             with open(Data.LAST_MODIFIED.value, "r", encoding="utf-8") as f:
                 last_modified = json.load(f)
@@ -63,9 +65,7 @@ class DataSync(commands.Cog):
                     self.LOGGER.info("Checking %s...", data.name)
                     last_modified_local = last_modified.get(data.name, 0)
                     last_modified_drive = (
-                        await cog.get_file_last_modified(  # type: ignore[union-attr]
-                            file["id"]
-                        )
+                        await cog.get_file_last_modified(file["id"])
                     ).timestamp()
 
                     if last_modified_local >= last_modified_drive:
@@ -73,7 +73,7 @@ class DataSync(commands.Cog):
 
                 self.LOGGER.info("Downloading %s...", data.name)
                 data.parent.mkdir(parents=True, exist_ok=True)
-                await cog.get_file(file["id"], data)  # type: ignore[union-attr]
+                await cog.get_file(file["id"], data)
                 break
 
         if Data.WORD_PINGS.value.exists():
@@ -134,7 +134,7 @@ class DataSync(commands.Cog):
     @tasks.loop(time=[time(hour=h, minute=30) for h in range(24)])
     async def data_upload(self) -> None:
         cog: "GoogleDrive" = self.bot.get_cog("GoogleDrive")  # type: ignore[assignment]
-        drive_files = await cog.get_file_list()
+        drive_files = await cog.get_file_list(DATA_FOLDER)
         last_modified = {}
 
         for data_name in Data:
@@ -149,10 +149,10 @@ class DataSync(commands.Cog):
                     ).timestamp()
                     break
             else:
-                metadata: "File" = {"name": data.name}
-                last_modified[data.name] = (
-                    await cog.create_file(media, metadata)
-                ).timestamp()
+                metadata: "File" = {"name": data.name, "parents": [DATA_FOLDER]}
+                last_modified[data.name] = (await cog.create_file(metadata, media))[
+                    1
+                ].timestamp()
             data.touch(exist_ok=True)
 
         self.save_data(Data.LAST_MODIFIED, last_modified)

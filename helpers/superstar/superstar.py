@@ -246,47 +246,53 @@ class SuperStar(commands.Cog):
             elif GAMES[game]["assetScheme"] in (
                 AssetScheme.BINARY_CATALOG,
                 AssetScheme.JSON_CATALOG,
-            ) and (catalog := self.bot.basic[game].get("catalog")):
-                catalog_key = found_data[attribute]
-                file_path = Path(f"data/assets/{game}/{catalog_key}")
-                if not file_path.exists():
-                    file_path.parent.mkdir(parents=True, exist_ok=True)
-                    while dependency := catalog[catalog_key]["dependency"]:
-                        catalog_key = dependency
-                    bundle_path = Path(f"data/bundles/{game}/{catalog_key}")
-                    bundle_extract_path = bundle_path.with_suffix("")
-                    bundle_extract_path.mkdir(parents=True, exist_ok=True)
-
-                    if not any(bundle_extract_path.iterdir()):
-                        if not bundle_path.exists():
-                            async with aiohttp.ClientSession() as session:
-                                async with session.get(
-                                    catalog[catalog_key]["internalId"]
-                                ) as r:
-                                    with open(bundle_path, "wb") as f:
-                                        f.write(await r.read())
-                        process = await asyncio.create_subprocess_exec(
-                            "utils/bundle",
-                            str(bundle_path),
-                            str(bundle_extract_path),
-                            stdout=asyncio.subprocess.PIPE,
-                            stderr=asyncio.subprocess.PIPE,
-                        )
-                        await process.communicate()
-
-                    file_extract_path = (
-                        list((bundle_extract_path / "Assets").rglob(file_path.name))
-                        or list(
-                            (bundle_extract_path / "Assets").rglob(
-                                file_path.name.replace(",", "_")
-                            )
-                        )
-                    )[0]
-                    shutil.copyfile(file_extract_path, file_path)
-
-                found_data[attribute] = file_path
+            ):
+                found_data[attribute] = self.extract_file_from_bundle(
+                    game, found_data[attribute]
+                )
 
         return found_data
+
+    async def extract_file_from_bundle(
+        self,
+        game: str,
+        catalog_key: str,
+    ) -> Path:
+        catalog = self.bot.basic[game]["catalog"]
+        file_path = Path(f"data/assets/{game}/{catalog_key}")
+        if not file_path.exists():
+            file_path.parent.mkdir(parents=True, exist_ok=True)
+            while dependency := catalog[catalog_key]["dependency"]:
+                catalog_key = dependency
+            bundle_path = Path(f"data/bundles/{game}/{catalog_key}")
+            bundle_extract_path = bundle_path.with_suffix("")
+            bundle_extract_path.mkdir(parents=True, exist_ok=True)
+
+            if not any(bundle_extract_path.iterdir()):
+                if not bundle_path.exists():
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get(catalog[catalog_key]["internalId"]) as r:
+                            with open(bundle_path, "wb") as f:
+                                f.write(await r.read())
+                process = await asyncio.create_subprocess_exec(
+                    "utils/bundle",
+                    str(bundle_path),
+                    str(bundle_extract_path),
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE,
+                )
+                await process.communicate()
+
+            file_extract_path = (
+                list((bundle_extract_path / "Assets").rglob(file_path.name))
+                or list(
+                    (bundle_extract_path / "Assets").rglob(
+                        file_path.name.replace(",", "_")
+                    )
+                )
+            )[0]
+            shutil.copyfile(file_extract_path, file_path)
+        return file_path
 
     @staticmethod
     async def pin_new_ssl(

@@ -16,9 +16,9 @@ class OnReady(commands.Cog):
 
     @commands.Cog.listener("on_ready")
     async def on_ready(self) -> None:
-        channel = self.bot.get_channel(
+        channel = self.bot.get_channel(STATUS_CHANNEL) or await self.bot.fetch_channel(
             STATUS_CHANNEL
-        ) or await self.bot.fetch_channel(STATUS_CHANNEL)
+        )
         assert isinstance(channel, discord.TextChannel)
         await channel.send(f"Successful start at {datetime.now()}")
 
