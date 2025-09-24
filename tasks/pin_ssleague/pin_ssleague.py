@@ -1,6 +1,7 @@
 # pyright: reportTypedDictNotRequiredAccess=false
 
 import asyncio
+import json
 import logging
 from datetime import datetime, time
 from pathlib import Path
@@ -36,11 +37,12 @@ class PinSSLeague(commands.Cog):
         cog: "DataSync" = self.bot.get_cog("DataSync")  # type: ignore[assignment]
         cog.save_last_appearance()
 
+        with open(Data.CREDENTIALS.value, "r", encoding="utf-8") as f:
+            credentials = json.load(f)
         pin_tasks = [
-            self.pin_ssl(game, self.bot.credentials[game])
+            self.pin_ssl(game, credentials[game])
             for game, game_details in GAMES.items()
-            if {"info", "pinChannelIds"} <= set(game_details)
-            and game in self.bot.credentials
+            if game in credentials and {"info", "pinChannelIds"} <= set(game_details)
         ]
         await asyncio.gather(*pin_tasks, return_exceptions=True)
 

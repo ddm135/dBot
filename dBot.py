@@ -23,7 +23,6 @@ class dBot(commands.Bot):
 
     emblem: dict[str, dict[str, str | Path | None]] = {}
 
-    credentials: dict = {}
     word_pings: defaultdict[str, defaultdict[str, defaultdict[str, dict]]] = (
         defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
     )
