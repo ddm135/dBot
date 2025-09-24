@@ -62,14 +62,15 @@ class GoogleDrive(commands.Cog):
         )
 
     async def get_file_list(
-        self, parent: str, mime_type: str | None = None
+        self, parent: str, *, mime_type: str | None = None, next_page: str = ""
     ) -> "FileList":
         return await asyncio.to_thread(
             self.service.list(
                 q=(
                     f"'{parent}' in parents and trashed=False"
                     f"{f" and mimeType='{mime_type}'" if mime_type else ""}"
-                )
+                ),
+                pageToken=next_page,
             ).execute,
             num_retries=MAX_RETRIES,
         )

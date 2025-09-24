@@ -43,7 +43,9 @@ class BorderSync(commands.Cog):
             BORDER_CHANNEL
         ) or await self.bot.fetch_channel(BORDER_CHANNEL)
         assert isinstance(border_channel, discord.TextChannel)
-        drive_folders = await drive_cog.get_file_list(BORDER_FOLDER, FOLDER_MIME)
+        drive_folders = await drive_cog.get_file_list(
+            BORDER_FOLDER, mime_type=FOLDER_MIME
+        )
         counter = 0
 
         for game, game_details in GAMES.items():
@@ -107,9 +109,15 @@ class BorderSync(commands.Cog):
                 }
                 border_folder = (await drive_cog.create_file(metadata))[0]
 
-            border_files = await drive_cog.get_file_list(border_folder)
-            for file in border_files["files"]:
-                borders.pop(file["name"], None)
+            next_page = None
+            while True:
+                border_files = await drive_cog.get_file_list(
+                    border_folder, next_page=next_page
+                )
+                for file in border_files["files"]:
+                    borders.pop(file["name"], None)
+                if not (next_page := border_files.get("nextPageToken")):
+                    break
 
             for border_name, catalog_key in borders.items():
                 border_media = MediaFileUpload(
