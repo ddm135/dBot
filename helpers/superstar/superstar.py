@@ -247,7 +247,7 @@ class SuperStar(commands.Cog):
                 AssetScheme.BINARY_CATALOG,
                 AssetScheme.JSON_CATALOG,
             ):
-                found_data[attribute] = self.extract_file_from_bundle(
+                found_data[attribute] = await self.extract_file_from_bundle(
                     game, found_data[attribute]
                 )
 
@@ -297,6 +297,7 @@ class SuperStar(commands.Cog):
                     shutil.copyfile(file_extract_path, file_path)
                     break
             else:
+                print(file_extract_paths)
                 print(file_path)
 
         return file_path
