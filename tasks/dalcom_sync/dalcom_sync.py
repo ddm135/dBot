@@ -27,9 +27,6 @@ class DalcomSync(commands.Cog):
 
     async def cog_unload(self) -> None:
         self.dalcom_sync.cancel()
-        self.bot.msd.clear()
-        self.bot.grd.clear()
-        self.bot.url.clear()
 
     @tasks.loop(time=[time(hour=h, minute=10) for h in range(24)])
     async def dalcom_sync(self) -> None:
@@ -66,21 +63,31 @@ class DalcomSync(commands.Cog):
                 ajs = stored_ajs
                 refresh = False
 
+            data_files = [
+                "GroupData",
+                "LocaleData",
+                "MusicData",
+                "ThemeData",
+                "ThemeTypeData",
+            ]
+            if game_details["assetScheme"] == AssetScheme.JSON_URL:
+                data_files.append("URLs")
             if ajs:
-                if game not in self.bot.msd or refresh:
-                    self.bot.msd[game] = await cog.get_data(
-                        ajs["result"]["context"]["MusicData"]["file"]
-                    )
-                if game not in self.bot.grd or refresh:
-                    self.bot.grd[game] = await cog.get_data(
-                        ajs["result"]["context"]["GroupData"]["file"]
-                    )
-                if game_details["assetScheme"] == AssetScheme.JSON_URL and (
-                    game not in self.bot.url or refresh
-                ):
-                    self.bot.url[game] = await cog.get_data(
-                        ajs["result"]["context"]["URLs"]["file"]
-                    )
+                for data_file in data_files:
+                    data_path = Path(f"data/dalcom/{game}/{data_file}.json")
+                    if (
+                        not stored_ajs
+                        or ajs["result"]["context"][data_file]["version"]
+                        != stored_ajs["result"]["context"][data_file]["version"]
+                        or refresh
+                        or not data_path.exists()
+                    ):
+                        data = await cog.get_data(
+                            ajs["result"]["context"][data_file]["file"]
+                        )
+                        data_path.parent.mkdir(parents=True, exist_ok=True)
+                        with open(data_path, "w", encoding="utf-8") as f:
+                            json.dump(data, f, indent=4)
         except (json.JSONDecodeError, binascii.Error, ValueError):
             self.LOGGER.info(
                 "%s server is unavailable. Skipping...", game_details["name"]

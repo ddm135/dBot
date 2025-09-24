@@ -110,7 +110,7 @@ class PinSSLeague(commands.Cog):
 
         results = await cog.get_attributes(
             game,
-            "msd",
+            "MusicData",
             song_id,
             {"albumBgColor": False, "album": True},
         )

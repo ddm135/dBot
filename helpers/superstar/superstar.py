@@ -188,9 +188,7 @@ class SuperStar(commands.Cog):
             cog: "Cryptographic" = self.bot.get_cog(
                 "Cryptographic"
             )  # type: ignore[assignment]
-            result = json.loads(
-                cog.decrypt_cbc(await response.text(), iv)
-            )
+            result = json.loads(cog.decrypt_cbc(await response.text(), iv))
         return result
 
     async def get_data(self, url: str) -> list[dict]:
@@ -202,19 +200,25 @@ class SuperStar(commands.Cog):
             "Cryptographic"
         )  # type: ignore[assignment]
         return json.loads(
-            cog.decrypt_ecb(
-                gzip.decompress(content)
-            ).replace(rb"\/", rb"/")
+            cog.decrypt_ecb(gzip.decompress(content)).replace(rb"\/", rb"/")
         )
 
     async def get_attributes(
         self,
         game: str,
-        search: Literal["grd", "msd"],
+        search: Literal[
+            "GroupData",
+            "LocaleData",
+            "MusicData",
+            "ThemeData",
+            "ThemeTypeData",
+        ],
         item_id: int,
         attributes: dict[str, bool],
     ) -> dict:
-        data = getattr(self.bot, f"{search}").get(game, [])
+        data_path = Path(f"data/dalcom/{game}/{search}.json")
+        with open(data_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
         found_data = {}
         for item in data:
             if item["code"] == item_id:
@@ -231,7 +235,8 @@ class SuperStar(commands.Cog):
                 continue
 
             if GAMES[game]["assetScheme"] == AssetScheme.JSON_URL:
-                url_data = self.bot.url[game]
+                with open(f"data/dalcom/{game}/URLs.json", "r", encoding="utf-8") as f:
+                    url_data = json.load(f)
                 for url in url_data:
                     if url["code"] == found_data[attribute]:
                         found_data[attribute] = url["url"]

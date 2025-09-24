@@ -2,6 +2,7 @@ import asyncio
 import binascii
 import json
 from datetime import datetime, time
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import aiohttp
@@ -47,8 +48,10 @@ class ForwardUpdate(commands.Cog):
                     self.forward_update(game, forward_details, game_details)
                 )
                 self.queue[game] = task
-            elif game in self.bot.msd:
-                for song in self.bot.msd[game]:
+            elif (msd_path := Path(f"data/dalcom/{game}/MusicData.json")).exists():
+                with open(msd_path, "r", encoding="utf-8") as f:
+                    msd = json.load(f)
+                for song in msd:
                     if (display_start := song.get("displayStartAt")) and (
                         (
                             start_time := datetime.fromtimestamp(

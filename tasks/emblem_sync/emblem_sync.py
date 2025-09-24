@@ -57,7 +57,7 @@ class EmblemSync(commands.Cog):
             try:
                 emblem_final = (
                     await ss_cog.get_attributes(
-                        game, "grd", int(emblem_value), {"emblemImage": True}
+                        game, "GroupData", int(emblem_value), {"emblemImage": True}
                     )
                 )["emblemImage"]
             except ValueError:
