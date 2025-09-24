@@ -47,6 +47,7 @@ class ForwardUpdate(commands.Cog):
                 )
                 self.queue[game] = task
             elif game in self.bot.msd:
+                print(game)
                 for song in self.bot.msd[game]:
                     if (display_start := song["displayStartAt"]) and (
                         (
@@ -56,7 +57,6 @@ class ForwardUpdate(commands.Cog):
                         )
                         > datetime.now(tz=game_details["timezone"])
                     ):
-                        print(start_time)
                         task = asyncio.create_task(
                             self.forward_update(
                                 game, forward_details, game_details, start_time
