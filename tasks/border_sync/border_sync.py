@@ -78,6 +78,9 @@ class BorderSync(commands.Cog):
                 else:
                     continue
 
+                if not theme["limitedType"]:
+                    continue
+
                 for locale in lcd:
                     if theme["localeName"] == locale["code"]:
                         name = locale["enUS"]
