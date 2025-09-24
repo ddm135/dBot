@@ -285,11 +285,11 @@ class SuperStar(commands.Cog):
 
             file_extract_paths = (
                 bundle_extract_path / "Assets" / file_path.name,
-                bundle_extract_path / "Assets" / "UploadFiles" / file_path.name,
+                bundle_extract_path / "Assets" / "UploadFiles" / catalog_key,
                 bundle_extract_path
                 / "Assets"
                 / "UploadFiles"
-                / file_path.name.replace(",", "_"),
+                / catalog_key.replace(",", "_"),
                 bundle_extract_path / "Assets" / file_path.name.replace(",", "_"),
             )
             for file_extract_path in file_extract_paths:
