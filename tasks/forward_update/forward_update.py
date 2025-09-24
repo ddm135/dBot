@@ -49,7 +49,7 @@ class ForwardUpdate(commands.Cog):
             elif game in self.bot.msd:
                 print(game)
                 for song in self.bot.msd[game]:
-                    if (display_start := song["displayStartAt"]) and (
+                    if (display_start := song.get("displayStartAt")) and (
                         (
                             start_time := datetime.fromtimestamp(
                                 display_start / 1000, tz=game_details["timezone"]
