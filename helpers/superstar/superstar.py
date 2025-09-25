@@ -268,11 +268,14 @@ class SuperStar(commands.Cog):
             bundle_path = Path(f"data/bundles/{game}/{catalog_key}")
             bundle_extract_path = bundle_path.with_suffix("")
             bundle_extract_path.mkdir(parents=True, exist_ok=True)
+            bundle_url = catalog[catalog_key]["internalId"]
+            if not bundle_url.startswith("http"):
+                print(bundle_url)
 
             if not any(bundle_extract_path.iterdir()):
                 if not bundle_path.exists():
                     async with aiohttp.ClientSession() as session:
-                        async with session.get(catalog[catalog_key]["internalId"]) as r:
+                        async with session.get(bundle_url) as r:
                             with open(bundle_path, "wb") as f:
                                 f.write(await r.read())
                 process = await asyncio.create_subprocess_exec(
@@ -296,6 +299,7 @@ class SuperStar(commands.Cog):
             for file_extract_path in file_extract_paths:
                 if file_extract_path.exists():
                     shutil.copyfile(file_extract_path, file_path)
+                    bundle_path.unlink(missing_ok=True)
                     break
             else:
                 print(file_extract_paths)
