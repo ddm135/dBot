@@ -1,6 +1,5 @@
 # pyright: reportTypedDictNotRequiredAccess=false
 
-import asyncio
 import json
 from datetime import time
 from pathlib import Path
@@ -46,7 +45,6 @@ class BorderSync(commands.Cog):
         drive_folders = await drive_cog.get_file_list(
             BORDER_FOLDER, mime_type=FOLDER_MIME
         )
-        counter = 0
 
         for game, game_details in GAMES.items():
             if game_details["assetScheme"] not in (
@@ -125,9 +123,6 @@ class BorderSync(commands.Cog):
                         await ss_cog.extract_file_from_bundle(game, catalog_key)
                     )
                 except KeyError:
-                    await border_channel.send(
-                        f"{game_details["name"]}: {border_name} (?)"
-                    )
                     continue
                 metadata: "File" = {
                     "name": border_name,
@@ -135,13 +130,9 @@ class BorderSync(commands.Cog):
                 }
                 link = (await drive_cog.create_file(metadata, border_media))[2]
                 await border_channel.send(
-                    f"{game_details["name"]}: {border_name}\n<{link}>"
+                    f"{game_details["name"]}: {border_name.replace(r"<", r"\<")}\n"
+                    f"<{link}>"
                 )
-                counter += 1
-
-                if counter > 900:
-                    await asyncio.sleep(100)
-                    counter = 0
 
 
 async def setup(bot: "dBot") -> None:
