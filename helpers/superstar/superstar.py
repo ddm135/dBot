@@ -269,17 +269,18 @@ class SuperStar(commands.Cog):
             bundle_extract_path = bundle_path.with_suffix("")
             bundle_extract_path.mkdir(parents=True, exist_ok=True)
             bundle_url = catalog[catalog_key]["internalId"]
-            if not bundle_url.startswith("http"):
-                channel = self.bot.get_channel(
-                    STATUS_CHANNEL
-                ) or await self.bot.fetch_channel(STATUS_CHANNEL)
-                assert isinstance(channel, discord.TextChannel)
-                await channel.send(
-                    f"<@{self.bot.owner_id}> Built-in bundle: `{bundle_url}`"
-                )
 
             if not any(bundle_extract_path.iterdir()):
                 if not bundle_path.exists():
+                    if not bundle_url.startswith("http"):
+                        channel = self.bot.get_channel(
+                            STATUS_CHANNEL
+                        ) or await self.bot.fetch_channel(STATUS_CHANNEL)
+                        assert isinstance(channel, discord.TextChannel)
+                        await channel.send(
+                            f"<@{self.bot.owner_id}> Built-in bundle: `{bundle_url}`"
+                        )
+
                     async with aiohttp.ClientSession() as session:
                         async with session.get(bundle_url) as r:
                             with open(bundle_path, "wb") as f:
