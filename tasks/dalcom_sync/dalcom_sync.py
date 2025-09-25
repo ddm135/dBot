@@ -36,7 +36,7 @@ class DalcomSync(commands.Cog):
     async def cog_unload(self) -> None:
         self.dalcom_sync.cancel()
 
-    @tasks.loop(time=[time(hour=h, minute=10) for h in range(24)])
+    @tasks.loop(time=[time(hour=h, minute=5) for h in range(24)])
     async def dalcom_sync(self) -> None:
         drive_cog: "GoogleDrive" = self.bot.get_cog(
             "GoogleDrive"
@@ -61,7 +61,7 @@ class DalcomSync(commands.Cog):
                 else:
                     stored_ajs = None
 
-                self.LOGGER.info("Checking Dalcom data: %s...", game_details["name"])
+                self.LOGGER.info("Downloading Dalcom data: %s...", game_details["name"])
                 ajs = await ss_cog.get_a_json(basic_details)
                 refresh = False
 
@@ -88,7 +88,6 @@ class DalcomSync(commands.Cog):
                 if game_details["assetScheme"] == AssetScheme.JSON_URL:
                     data_files.append("URLs")
                 lcd = tmd = ttd = None
-                self.LOGGER.info("Downloading Dalcom data: %s...", game_details["name"])
                 for data_file in data_files:
                     data_path = Path(f"data/dalcom/{game}/{data_file}.json")
                     if (
