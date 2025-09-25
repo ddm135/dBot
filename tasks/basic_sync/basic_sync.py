@@ -86,24 +86,29 @@ class BasicSync(commands.Cog):
                 for file in catalog_folder_path.iterdir():
                     if file.is_file():
                         file.unlink()
+                while True:
+                    try:
+                        async with session.get(
+                            catalog_url.format(version=resource_version)
+                        ) as r:
+                            with open(catalog_packaged_path, "wb") as f:
+                                f.write(await r.read())
 
-                async with session.get(
-                    catalog_url.format(version=resource_version)
-                ) as r:
-                    with open(catalog_packaged_path, "wb") as f:
-                        f.write(await r.read())
+                        process = await asyncio.create_subprocess_exec(
+                            f"utils/catalog-{extension}",
+                            str(catalog_packaged_path),
+                            str(catalog_extracted_path),
+                            stdout=asyncio.subprocess.PIPE,
+                            stderr=asyncio.subprocess.PIPE,
+                        )
+                        await process.communicate()
 
-                process = await asyncio.create_subprocess_exec(
-                    f"utils/catalog-{extension}",
-                    str(catalog_packaged_path),
-                    str(catalog_extracted_path),
-                    stdout=asyncio.subprocess.PIPE,
-                    stderr=asyncio.subprocess.PIPE,
-                )
-                await process.communicate()
-
-                with open(catalog_extracted_path, "r", encoding="utf-8") as f:
-                    self.bot.basic[game]["catalog"] = json.load(f)
+                        with open(catalog_extracted_path, "r", encoding="utf-8") as f:
+                            self.bot.basic[game]["catalog"] = json.load(f)
+                    except FileNotFoundError:
+                        resource_version = str(int(resource_version) - 1)
+                    else:
+                        break
 
         if "catalog" not in self.bot.basic[game]:
             with open(catalog_extracted_path, "r", encoding="utf-8") as f:
