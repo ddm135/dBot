@@ -107,6 +107,12 @@ class BasicSync(commands.Cog):
                             self.bot.basic[game]["catalog"] = json.load(f)
                     except FileNotFoundError:
                         resource_version = str(int(resource_version) - 1)
+                        catalog_packaged_path = (
+                            catalog_folder_path / f"{resource_version}.{extension}"
+                        )
+                        catalog_extracted_path = (
+                            catalog_folder_path / f"{resource_version}_extracted.json"
+                        )
                     else:
                         break
 
