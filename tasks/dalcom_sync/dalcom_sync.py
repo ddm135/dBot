@@ -53,7 +53,7 @@ class DalcomSync(commands.Cog):
         for game, game_details in GAMES.items():
             try:
                 if not (basic_details := self.bot.basic.get(game)):
-                    return
+                    continue
                 ajs_path = Path(f"data/dalcom/{game}/a.json")
                 if ajs_path.exists():
                     with open(ajs_path, "r", encoding="utf-8") as f:
@@ -76,7 +76,7 @@ class DalcomSync(commands.Cog):
                         json.dump(ajs, f, indent=4)
                     refresh = True
                 if not ajs:
-                    return
+                    continue
 
                 data_files = [
                     "GroupData",
@@ -118,7 +118,7 @@ class DalcomSync(commands.Cog):
                     AssetScheme.BINARY_CATALOG,
                     AssetScheme.JSON_CATALOG,
                 ):
-                    return
+                    continue
 
                 self.LOGGER.info("Uploading borders: %s...", game_details["name"])
                 borders = {}
@@ -196,10 +196,10 @@ class DalcomSync(commands.Cog):
                 self.LOGGER.info(
                     "%s server is unavailable. Skipping...", game_details["name"]
                 )
-                return
+                continue
             except Exception as e:
                 self.LOGGER.exception(str(e))
-                return
+                continue
 
 
 async def setup(bot: "dBot") -> None:
