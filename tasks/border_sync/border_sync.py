@@ -1,6 +1,7 @@
 # pyright: reportTypedDictNotRequiredAccess=false
 
 import json
+import logging
 from datetime import time
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -21,6 +22,8 @@ if TYPE_CHECKING:
 
 
 class BorderSync(commands.Cog):
+    LOGGER = logging.getLogger(__name__.rpartition(".")[0])
+
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
         self.counter = 0
@@ -47,6 +50,7 @@ class BorderSync(commands.Cog):
         )
 
         for game, game_details in GAMES.items():
+            self.LOGGER.info("Uploading borders: %s...", game_details["name"])
             if game_details["assetScheme"] not in (
                 AssetScheme.BINARY_CATALOG,
                 AssetScheme.JSON_CATALOG,

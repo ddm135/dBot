@@ -9,14 +9,7 @@ import discord
 from asteval import Interpreter  # type: ignore[import-untyped]
 from discord.ext import commands
 
-from statics.consts import (
-    EXTENSIONS,
-    GAMES,
-    STATIC_MODULES,
-    STATUS_CHANNEL,
-    TIMEZONES,
-    Data,
-)
+from statics.consts import EXTENSIONS, GAMES, STATIC_MODULES, STATUS_CHANNEL, Data
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -240,7 +233,6 @@ class Administrative(commands.Cog):
                     replace_grid,
                     old_name,
                     new_name,
-                    "kr" if game_details["timezone"] == TIMEZONES["KST"] else None,
                 )
         if game_details["pinChannelIds"]:
             await msg.edit(content=f"{text}\nEditing last appearance data...")

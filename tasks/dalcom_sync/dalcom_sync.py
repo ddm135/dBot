@@ -47,21 +47,18 @@ class DalcomSync(commands.Cog):
             self.LOGGER.info("Downloading Dalcom data: %s...", game_details["name"])
             cog: "SuperStar" = self.bot.get_cog("SuperStar")  # type: ignore[assignment]
             ajs = await cog.get_a_json(basic_details)
-            refresh = True
+            refresh = False
 
-            if ajs["code"] == 1000:
-                if (
-                    stored_ajs
-                    and ajs["result"]["version"] == stored_ajs["result"]["version"]
-                ):
-                    refresh = False
-                else:
-                    ajs_path.parent.mkdir(parents=True, exist_ok=True)
-                    with open(ajs_path, "w", encoding="utf-8") as f:
-                        json.dump(ajs, f, indent=4)
-            else:
+            if ajs["code"] != 1000:
                 ajs = stored_ajs
-                refresh = False
+            elif (
+                not stored_ajs
+                or ajs["result"]["version"] != stored_ajs["result"]["version"]
+            ):
+                ajs_path.parent.mkdir(parents=True, exist_ok=True)
+                with open(ajs_path, "w", encoding="utf-8") as f:
+                    json.dump(ajs, f, indent=4)
+                refresh = True
 
             data_files = [
                 "GroupData",

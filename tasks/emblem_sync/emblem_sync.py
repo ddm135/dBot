@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 from discord.ext import commands, tasks
 
-from statics.consts import GAMES, TIMEZONES
+from statics.consts import GAMES
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -40,9 +40,7 @@ class EmblemSync(commands.Cog):
         )  # type: ignore[assignment]
         emblem_details = game_details["emblem"]
         emblem = await sheets_cog.get_sheet_data(
-            emblem_details["spreadsheetId"],
-            emblem_details["range"],
-            "kr" if game_details["timezone"] == TIMEZONES["KST"] else None,
+            emblem_details["spreadsheetId"], emblem_details["range"]
         )
 
         emblem_columns = emblem_details["columns"]

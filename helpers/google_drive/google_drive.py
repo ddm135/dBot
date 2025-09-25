@@ -36,7 +36,7 @@ class GoogleDrive(commands.Cog):
             serviceName=SERVICE_NAME,
             version=VERSION,
             credentials=Credentials.from_service_account_file(
-                filename="dBotDefault.json",
+                filename="dBot.json",
                 scopes=SCOPES,
             ),
             num_retries=MAX_RETRIES,

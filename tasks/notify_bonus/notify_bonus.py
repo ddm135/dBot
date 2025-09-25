@@ -5,12 +5,7 @@ from typing import TYPE_CHECKING
 import discord
 from discord.ext import commands, tasks
 
-from statics.consts import (
-    BONUS_OFFSET,
-    GAMES,
-    STATUS_CHANNEL,
-    TIMEZONES,
-)
+from statics.consts import BONUS_OFFSET, GAMES, STATUS_CHANNEL
 
 from .embeds import NotifyBonusEmbed
 
@@ -61,9 +56,7 @@ class NotifyBonus(commands.Cog):
             ping_artist_index = ping_columns.index("artist_name")
 
             ping_data = await cog.get_sheet_data(
-                ping_details["spreadsheetId"],
-                ping_details["range"],
-                "kr" if game_details["timezone"] == TIMEZONES["KST"] else None,
+                ping_details["spreadsheetId"], ping_details["range"]
             )
             game_ping_dict = dict.fromkeys(
                 (

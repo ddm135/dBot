@@ -10,7 +10,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from statics.consts import BONUS_OFFSET, GAMES, TIMEZONES
+from statics.consts import BONUS_OFFSET, GAMES
 
 from .autocompletes import artist_autocomplete
 from .commons import STEP, ping_preprocess
@@ -429,7 +429,6 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                     game_details["ping"]["spreadsheetId"],
                     f"{re.split(r"\d+:", game_details["ping"]["range"])[0]}{i}",
                     [[",".join(users)]],
-                    "kr" if game_details["timezone"] == TIMEZONES["KST"] else None,
                 )
 
             return await itr.followup.send(

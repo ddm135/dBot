@@ -13,7 +13,7 @@ from discord.ext import commands
 from google.auth.transport import requests
 from google.oauth2.service_account import IDTokenCredentials
 
-from statics.consts import GAMES, AssetScheme
+from statics.consts import GAMES, STATUS_CHANNEL, AssetScheme
 
 from .embeds import SSLeagueEmbed as _SSLeagueEmbed
 from .types import SuperStarHeaders
@@ -270,7 +270,13 @@ class SuperStar(commands.Cog):
             bundle_extract_path.mkdir(parents=True, exist_ok=True)
             bundle_url = catalog[catalog_key]["internalId"]
             if not bundle_url.startswith("http"):
-                print(bundle_url)
+                channel = self.bot.get_channel(
+                    STATUS_CHANNEL
+                ) or await self.bot.fetch_channel(STATUS_CHANNEL)
+                assert isinstance(channel, discord.TextChannel)
+                await channel.send(
+                    f"<@{self.bot.owner_id}> Built-in bundle: `{bundle_url}`"
+                )
 
             if not any(bundle_extract_path.iterdir()):
                 if not bundle_path.exists():
@@ -290,11 +296,16 @@ class SuperStar(commands.Cog):
             file_extract_paths = (
                 bundle_extract_path / "Assets" / file_path.name,
                 bundle_extract_path / "Assets" / "UploadFiles" / _catalog_key,
+                bundle_extract_path / "Assets" / "BuiltinAddressables" / _catalog_key,
+                bundle_extract_path / "Assets" / file_path.name.replace(",", "_"),
                 bundle_extract_path
                 / "Assets"
                 / "UploadFiles"
                 / _catalog_key.replace(",", "_"),
-                bundle_extract_path / "Assets" / file_path.name.replace(",", "_"),
+                bundle_extract_path
+                / "Assets"
+                / "BuiltinAddressables"
+                / _catalog_key.replace(",", "_"),
             )
             for file_extract_path in file_extract_paths:
                 if file_extract_path.exists():

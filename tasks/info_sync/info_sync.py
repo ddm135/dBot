@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from discord.ext import commands, tasks
 
-from statics.consts import GAMES, TIMEZONES
+from statics.consts import GAMES
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -41,9 +41,7 @@ class InfoSync(commands.Cog):
             "GoogleSheets"
         )  # type: ignore[assignment]
         info = await cog.get_sheet_data(
-            info_details["spreadsheetId"],
-            info_details["range"],
-            "kr" if game_details["timezone"] == TIMEZONES["KST"] else None,
+            info_details["spreadsheetId"], info_details["range"]
         )
 
         info_columns = info_details["columns"]

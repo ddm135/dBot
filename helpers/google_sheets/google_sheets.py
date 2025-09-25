@@ -14,29 +14,17 @@ from statics.consts import MAX_RETRIES
 from .commons import SCOPES, SERVICE_NAME, STATIC_DISCOVERY, VERSION
 
 if TYPE_CHECKING:
-    from googleapiclient._apis.sheets.v4 import SheetsResource
-
     from dBot import dBot
     from statics.types import GridRange
 
 
 class GoogleSheets(commands.Cog):
     def __init__(self) -> None:
-        self.default = build(
+        self.service = build(
             serviceName=SERVICE_NAME,
             version=VERSION,
             credentials=Credentials.from_service_account_file(
-                filename="dBotDefault.json",
-                scopes=SCOPES,
-            ),
-            num_retries=MAX_RETRIES,
-            static_discovery=STATIC_DISCOVERY,
-        ).spreadsheets()
-        self.kr = build(
-            serviceName=SERVICE_NAME,
-            version=VERSION,
-            credentials=Credentials.from_service_account_file(
-                filename="dBotKR.json",
+                filename="dBot.json",
                 scopes=SCOPES,
             ),
             num_retries=MAX_RETRIES,
@@ -44,17 +32,10 @@ class GoogleSheets(commands.Cog):
         ).spreadsheets()
 
     async def get_sheet_data(
-        self,
-        spreadsheet_id: str,
-        range_str: str,
-        instance: str | None = None,
+        self, spreadsheet_id: str, range_str: str
     ) -> list[list[str]]:
-        service: "SheetsResource.SpreadsheetsResource" = getattr(
-            self,
-            instance or "default",
-        )
         result = await asyncio.to_thread(
-            service.values()
+            self.service.values()
             .get(
                 spreadsheetId=spreadsheet_id,
                 range=range_str,
@@ -65,18 +46,10 @@ class GoogleSheets(commands.Cog):
         return result.get("values", [])
 
     async def update_sheet_data(
-        self,
-        spreadsheet_id: str,
-        range_str: str,
-        data: list[list[str]],
-        instance: str | None = None,
+        self, spreadsheet_id: str, range_str: str, data: list[list[str]]
     ) -> None:
-        service: "SheetsResource.SpreadsheetsResource" = getattr(
-            self,
-            instance or "default",
-        )
         await asyncio.to_thread(
-            service.values()
+            self.service.values()
             .update(
                 spreadsheetId=spreadsheet_id,
                 range=range_str,
@@ -88,19 +61,10 @@ class GoogleSheets(commands.Cog):
         )
 
     async def find_replace_sheet_data(
-        self,
-        spreadsheet_id: str,
-        range_grid: "GridRange",
-        find: str,
-        replace: str,
-        instance: str | None = None,
+        self, spreadsheet_id: str, range_grid: "GridRange", find: str, replace: str
     ) -> None:
-        service: "SheetsResource.SpreadsheetsResource" = getattr(
-            self,
-            instance or "default",
-        )
         await asyncio.to_thread(
-            service.batchUpdate(
+            self.service.batchUpdate(
                 spreadsheetId=spreadsheet_id,
                 body={
                     "requests": [
