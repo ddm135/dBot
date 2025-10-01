@@ -9,7 +9,7 @@ import aiohttp
 import discord
 from discord.ext import commands, tasks
 
-from statics.consts import GAMES
+from statics.consts import GAMES, STATUS_CHANNEL
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -67,6 +67,25 @@ class ForwardUpdate(commands.Cog):
                         )
                         self.queue[game] = task
                         break
+            elif (grd_path := Path(f"data/dalcom/{game}/GroupData.json")).exists():
+                with open(grd_path, "r", encoding="utf-8") as f:
+                    grd = json.load(f)
+                for group in grd:
+                    if (display_start := group.get("displayStartAt")) and (
+                        (
+                            start_time := datetime.fromtimestamp(
+                                display_start / 1000, tz=game_details["timezone"]
+                            )
+                        )
+                        > datetime.now(tz=game_details["timezone"])
+                    ):
+                        task = asyncio.create_task(
+                            self.forward_update(
+                                game, forward_details, game_details, start_time
+                            )
+                        )
+                        self.queue[game] = task
+                        break
 
     async def forward_update(
         self,
@@ -75,20 +94,30 @@ class ForwardUpdate(commands.Cog):
         game_details: "GameDetails",
         start_time: datetime | None = None,
     ):
+
         if start_time:
+            source_id = (
+                forward_details.get("source_msd") or forward_details["source_maint"]
+            )
+            channel = self.bot.get_channel(
+                STATUS_CHANNEL
+            ) or await self.bot.fetch_channel(STATUS_CHANNEL)
+            assert isinstance(channel, discord.TextChannel)
+            await channel.send(
+                f"{game_details["name"]}: Forwarding from <#{source_id}> "
+                f"on <t:{int(start_time.timestamp())}:f>"
+            )
+
             while True:
                 await asyncio.sleep(60)
                 if datetime.now(tz=game_details["timezone"]) >= start_time:
-                    source_id = (
-                        forward_details.get("source_msd")
-                        or forward_details["source_maint"]
-                    )
                     break
         else:
             if not (manifestUrl := game_details.get("manifestUrl")):
                 self.queue.pop(game, None)
                 return
 
+            source_id = forward_details["source_maint"]
             cog: "SuperStar" = self.bot.get_cog("SuperStar")  # type: ignore[assignment]
             async with aiohttp.ClientSession() as session:
                 while True:
@@ -103,7 +132,6 @@ class ForwardUpdate(commands.Cog):
                     try:
                         ajs = await cog.get_a_json(self.bot.basic[game])
                         if ajs["code"] == 1000:
-                            source_id = forward_details["source_maint"]
                             break
                     except (
                         aiohttp.ConnectionTimeoutError,

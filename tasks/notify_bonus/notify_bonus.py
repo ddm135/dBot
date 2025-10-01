@@ -29,6 +29,10 @@ class NotifyBonus(commands.Cog):
         cog: "GoogleSheets" = self.bot.get_cog(
             "GoogleSheets"
         )  # type: ignore[assignment]
+        channel = self.bot.get_channel(STATUS_CHANNEL) or await self.bot.fetch_channel(
+            STATUS_CHANNEL
+        )
+        assert isinstance(channel, discord.TextChannel)
 
         for game, game_details in GAMES.items():
             if not (bonus_details := game_details.get("bonus")) or not (
@@ -271,19 +275,11 @@ class NotifyBonus(commands.Cog):
                                 silent=True,
                             )
                         except discord.Forbidden:
-                            channel = self.bot.get_channel(
-                                STATUS_CHANNEL
-                            ) or await self.bot.fetch_channel(STATUS_CHANNEL)
-                            assert isinstance(channel, discord.TextChannel)
                             await channel.send(
                                 f"<@{self.bot.owner_id}> Failed to send bonus ping to"
                                 f" {user.name} ({user.id}) for {game_name} - {artist}."
                             )
                         except discord.HTTPException as e:
-                            channel = self.bot.get_channel(
-                                STATUS_CHANNEL
-                            ) or await self.bot.fetch_channel(STATUS_CHANNEL)
-                            assert isinstance(channel, discord.TextChannel)
                             await channel.send(
                                 f"<@{self.bot.owner_id}> Failed to send bonus ping for"
                                 f" {game_name} - {artist}. Check console for details."
