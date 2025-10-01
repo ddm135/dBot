@@ -9,7 +9,9 @@ import aiohttp
 import discord
 from discord.ext import commands, tasks
 
-from statics.consts import GAMES, STATUS_CHANNEL
+from statics.consts import GAMES
+
+from .commons import NEXT_UPDATE_CHANNEL
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -67,25 +69,29 @@ class ForwardUpdate(commands.Cog):
                         )
                         self.queue[game] = task
                         break
-            elif (grd_path := Path(f"data/dalcom/{game}/GroupData.json")).exists():
-                with open(grd_path, "r", encoding="utf-8") as f:
-                    grd = json.load(f)
-                for group in grd:
-                    if (display_start := group.get("displayStartAt")) and (
-                        (
-                            start_time := datetime.fromtimestamp(
-                                display_start / 1000, tz=game_details["timezone"]
-                            )
-                        )
-                        > datetime.now(tz=game_details["timezone"])
-                    ):
-                        task = asyncio.create_task(
-                            self.forward_update(
-                                game, forward_details, game_details, start_time
-                            )
-                        )
-                        self.queue[game] = task
-                        break
+                else:
+                    if (
+                        grd_path := Path(f"data/dalcom/{game}/GroupData.json")
+                    ).exists():
+                        with open(grd_path, "r", encoding="utf-8") as f:
+                            grd = json.load(f)
+                        for group in grd:
+                            if (display_start := group.get("displayStartAt")) and (
+                                (
+                                    start_time := datetime.fromtimestamp(
+                                        display_start / 1000,
+                                        tz=game_details["timezone"],
+                                    )
+                                )
+                                > datetime.now(tz=game_details["timezone"])
+                            ):
+                                task = asyncio.create_task(
+                                    self.forward_update(
+                                        game, forward_details, game_details, start_time
+                                    )
+                                )
+                                self.queue[game] = task
+                                break
 
     async def forward_update(
         self,
@@ -100,8 +106,8 @@ class ForwardUpdate(commands.Cog):
                 forward_details.get("source_msd") or forward_details["source_maint"]
             )
             channel = self.bot.get_channel(
-                STATUS_CHANNEL
-            ) or await self.bot.fetch_channel(STATUS_CHANNEL)
+                NEXT_UPDATE_CHANNEL
+            ) or await self.bot.fetch_channel(NEXT_UPDATE_CHANNEL)
             assert isinstance(channel, discord.TextChannel)
             await channel.send(
                 f"{game_details["name"]}: Forwarding from <#{source_id}> "
