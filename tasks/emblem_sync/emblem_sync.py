@@ -28,7 +28,7 @@ class EmblemSync(commands.Cog):
         self.emblem_sync.cancel()
         self.bot.emblem.clear()
 
-    @tasks.loop(time=[time(hour=h, minute=20) for h in range(24)])
+    @tasks.loop(time=[time(hour=h, minute=25) for h in range(24)])
     async def emblem_sync(self) -> None:
         for game, game_details in GAMES.items():
             await self.get_emblem_data(game, game_details)

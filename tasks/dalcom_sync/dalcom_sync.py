@@ -36,7 +36,7 @@ class DalcomSync(commands.Cog):
     async def cog_unload(self) -> None:
         self.dalcom_sync.cancel()
 
-    @tasks.loop(time=[time(hour=h, minute=5) for h in range(24)])
+    @tasks.loop(time=[time(hour=h, minute=10) for h in range(24)])
     async def dalcom_sync(self) -> None:
         drive_cog: "GoogleDrive" = self.bot.get_cog(
             "GoogleDrive"

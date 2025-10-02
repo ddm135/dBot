@@ -30,7 +30,7 @@ class BasicSync(commands.Cog):
         self.basic_sync.cancel()
         self.bot.basic.clear()
 
-    @tasks.loop(time=[time(hour=h, minute=2, second=30) for h in range(24)])
+    @tasks.loop(time=[time(hour=h, minute=5) for h in range(24)])
     async def basic_sync(self) -> None:
         for game, game_details in GAMES.items():
             await self.get_basic_data(game, game_details)

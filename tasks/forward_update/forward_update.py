@@ -35,7 +35,7 @@ class ForwardUpdate(commands.Cog):
             task.cancel()
         self.queue.clear()
 
-    @tasks.loop(time=[time(hour=h, minute=10) for h in range(24)])
+    @tasks.loop(time=[time(hour=h, minute=15) for h in range(24)])
     async def queue_update(self) -> None:
         for game, game_details in GAMES.items():
             if (
