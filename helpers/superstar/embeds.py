@@ -56,12 +56,20 @@ class SSLeagueEmbed(discord.Embed):
         )
 
         self.set_thumbnail(
-            url=(f"attachment://{album.name}" if isinstance(album, Path) else album)
+            url=(
+                f"attachment://{album.name.replace(r"'", r"")}"
+                if isinstance(album, Path)
+                else album
+            )
         )
         self.set_footer(
             text=(
                 f"{current_time.strftime("%A, %B %d, %Y").replace(" 0", " ")}"
                 f" · Pinned by {user_name}"
             ),
-            icon_url=(f"attachment://{icon.name}" if isinstance(icon, Path) else icon),
+            icon_url=(
+                f"attachment://{icon.name.replace(r"'", r"")}"
+                if isinstance(icon, Path)
+                else icon
+            ),
         )

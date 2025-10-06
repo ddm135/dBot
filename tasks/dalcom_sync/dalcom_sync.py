@@ -165,31 +165,30 @@ class DalcomSync(commands.Cog):
                     }
                     border_folder = (await drive_cog.create_file(metadata))[0]
 
-                next_page = ""
-                while True:
-                    border_files = await drive_cog.get_file_list(
-                        border_folder, next_page=next_page
-                    )
-                    for file in border_files["files"]:
-                        borders.pop(file["name"], None)
-                    if not (next_page := border_files.get("nextPageToken", "")):
-                        break
+                # next_page = ""
+                # while True:
+                #     border_files = await drive_cog.get_file_list(
+                #         border_folder, next_page=next_page
+                #     )
+                #     for file in border_files["files"]:
+                #         borders.pop(file["name"], None)
+                #     if not (next_page := border_files.get("nextPageToken", "")):
+                #         break
 
                 for border_name, border_key in borders.items():
                     try:
                         border_file_path = await ss_cog.extract_file_from_bundle(
                             game, border_key
                         )
-                        border_media = MediaFileUpload(border_file_path)
+                        # border_media = MediaFileUpload(border_file_path)
                     except KeyError:
                         continue
                     metadata = {"name": border_name, "parents": [border_folder]}
-                    link = (await drive_cog.create_file(metadata, border_media))[2]
-                    await border_channel.send(
-                        f"{game_details["name"]}: {border_name.replace(r"<", r"\<")}\n"
-                        f"<{link}>"
-                    )
-                    border_file_path.unlink()
+                    # link = (await drive_cog.create_file(metadata, border_media))[2]
+                    # await border_channel.send(
+                    #     f"{game_details["name"]}: {border_name.replace(r"<", r"\<")}\n"
+                    #     f"<{link}>"
+                    # )
 
             except (json.JSONDecodeError, binascii.Error, ValueError):
                 self.LOGGER.info(

@@ -3,7 +3,6 @@
 import asyncio
 import gzip
 import json
-import shutil
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
@@ -258,64 +257,52 @@ class SuperStar(commands.Cog):
         game: str,
         catalog_key: str,
     ) -> Path:
-        _catalog_key = catalog_key
         catalog = self.bot.basic[game]["catalog"]
-        file_path = Path(f"data/assets/{game}/{catalog_key}")
+        file_extract_path = ""
+        file_name = Path(catalog_key).name
+        while dependency := catalog[catalog_key]["dependency"]:
+            file_extract_path = catalog[catalog_key]["internalId"]
+            catalog_key = dependency
+
+        bundle_path = Path(f"data/files/{game}/{catalog_key}")
+        bundle_extract_path = bundle_path.with_suffix("")
+        bundle_extract_path.mkdir(parents=True, exist_ok=True)
+        bundle_url = catalog[catalog_key]["internalId"]
+
+        file_path = (
+            bundle_extract_path / file_extract_path.replace(",", "_")
+            if file_extract_path.startswith("Assets")
+            else bundle_extract_path / "Assets" / file_name.replace(",", "_")
+        )
+
         if not file_path.exists():
-            file_path.parent.mkdir(parents=True, exist_ok=True)
-            while dependency := catalog[catalog_key]["dependency"]:
-                catalog_key = dependency
-            bundle_path = Path(f"data/bundles/{game}/{catalog_key}")
-            bundle_extract_path = bundle_path.with_suffix("")
-            bundle_extract_path.mkdir(parents=True, exist_ok=True)
-            bundle_url = catalog[catalog_key]["internalId"]
+            if not bundle_path.exists():
+                if not bundle_url.startswith("http"):
+                    channel = self.bot.get_channel(
+                        STATUS_CHANNEL
+                    ) or await self.bot.fetch_channel(STATUS_CHANNEL)
+                    assert isinstance(channel, discord.TextChannel)
+                    await channel.send(
+                        f"<@{self.bot.owner_id}> Built-in bundle: `{bundle_url}`"
+                    )
 
-            if not any(bundle_extract_path.iterdir()):
-                if not bundle_path.exists():
-                    if not bundle_url.startswith("http"):
-                        channel = self.bot.get_channel(
-                            STATUS_CHANNEL
-                        ) or await self.bot.fetch_channel(STATUS_CHANNEL)
-                        assert isinstance(channel, discord.TextChannel)
-                        await channel.send(
-                            f"<@{self.bot.owner_id}> Built-in bundle: `{bundle_url}`"
-                        )
-
-                    async with aiohttp.ClientSession() as session:
-                        async with session.get(bundle_url) as r:
-                            with open(bundle_path, "wb") as f:
-                                f.write(await r.read())
-                process = await asyncio.create_subprocess_exec(
-                    "utils/bundle",
-                    str(bundle_path),
-                    str(bundle_extract_path),
-                    stdout=asyncio.subprocess.PIPE,
-                    stderr=asyncio.subprocess.PIPE,
-                )
-                await process.communicate()
-
-            file_extract_paths = (
-                bundle_extract_path / "Assets" / file_path.name,
-                bundle_extract_path / "Assets" / "UploadFiles" / _catalog_key,
-                bundle_extract_path / "Assets" / "BuiltinAddressables" / _catalog_key,
-                bundle_extract_path / "Assets" / file_path.name.replace(",", "_"),
-                bundle_extract_path
-                / "Assets"
-                / "UploadFiles"
-                / _catalog_key.replace(",", "_"),
-                bundle_extract_path
-                / "Assets"
-                / "BuiltinAddressables"
-                / _catalog_key.replace(",", "_"),
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(bundle_url) as r:
+                        with open(bundle_path, "wb") as f:
+                            f.write(await r.read())
+            process = await asyncio.create_subprocess_exec(
+                "utils/bundle",
+                str(bundle_path),
+                str(bundle_extract_path),
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
             )
-            for file_extract_path in file_extract_paths:
-                if file_extract_path.exists():
-                    shutil.copyfile(file_extract_path, file_path)
-                    bundle_path.unlink(missing_ok=True)
-                    break
-            else:
-                print(file_extract_paths)
-                print(file_path)
+            await process.communicate()
+
+        if not file_path.exists():
+            print(file_path)
+        else:
+            bundle_path.unlink(missing_ok=True)
 
         return file_path
 
