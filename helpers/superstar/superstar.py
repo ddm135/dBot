@@ -298,10 +298,6 @@ class SuperStar(commands.Cog):
                 stderr=asyncio.subprocess.PIPE,
             )
             await process.communicate()
-
-        if not file_path.exists():
-            print(file_path)
-        else:
             bundle_path.unlink(missing_ok=True)
 
         return file_path
