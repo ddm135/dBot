@@ -1,7 +1,7 @@
 import asyncio
 import binascii
 import json
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -51,6 +51,7 @@ class ForwardUpdate(commands.Cog):
                 )
                 self.queue[game] = task
             elif (msd_path := Path(f"data/dalcom/{game}/MusicData.json")).exists():
+                current_time = datetime.now(tz=game_details["timezone"])
                 with open(msd_path, "r", encoding="utf-8") as f:
                     msd = json.load(f)
                 for song in msd:
@@ -60,7 +61,8 @@ class ForwardUpdate(commands.Cog):
                                 display_start / 1000, tz=game_details["timezone"]
                             )
                         )
-                        > datetime.now(tz=game_details["timezone"])
+                        > current_time
+                        and start_time - current_time <= timedelta(days=1)
                     ):
                         task = asyncio.create_task(
                             self.forward_update(
@@ -83,7 +85,8 @@ class ForwardUpdate(commands.Cog):
                                         tz=game_details["timezone"],
                                     )
                                 )
-                                > datetime.now(tz=game_details["timezone"])
+                                > current_time
+                                and start_time - current_time <= timedelta(days=1)
                             ):
                                 task = asyncio.create_task(
                                     self.forward_update(
