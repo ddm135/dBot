@@ -2,7 +2,7 @@
 
 from typing import TYPE_CHECKING
 
-from statics.consts import GAMES, TIMEZONES
+from statics.consts import GAMES
 
 if TYPE_CHECKING:
     from dBot import dBot

@@ -62,7 +62,7 @@ class ForwardUpdate(commands.Cog):
                             )
                         )
                         > current_time
-                        and start_time - current_time <= timedelta(days=1)
+                        and start_time - current_time <= timedelta(days=7)
                     ):
                         task = asyncio.create_task(
                             self.forward_update(
@@ -86,7 +86,7 @@ class ForwardUpdate(commands.Cog):
                                     )
                                 )
                                 > current_time
-                                and start_time - current_time <= timedelta(days=1)
+                                and start_time - current_time <= timedelta(days=7)
                             ):
                                 task = asyncio.create_task(
                                     self.forward_update(
