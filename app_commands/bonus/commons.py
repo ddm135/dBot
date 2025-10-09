@@ -22,9 +22,7 @@ async def ping_preprocess(
     return (
         game_details,
         await cog.get_sheet_data(
-            game_details["ping"]["spreadsheetId"],
-            game_details["ping"]["range"],
-            "kr" if game_details["timezone"] == TIMEZONES["KST"] else None,
+            game_details["ping"]["spreadsheetId"], game_details["ping"]["range"]
         ),
         ping_columns.index("artist_name"),
         ping_columns.index("users"),
