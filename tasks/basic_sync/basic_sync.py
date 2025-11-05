@@ -119,6 +119,7 @@ class BasicSync(commands.Cog):
 
                     with open(catalog_extracted_path, "r", encoding="utf-8") as f:
                         self.bot.basic[game]["catalog"] = json.load(f)
+                    break
 
         if "catalog" not in self.bot.basic[game]:
             with open(catalog_extracted_path, "r", encoding="utf-8") as f:
