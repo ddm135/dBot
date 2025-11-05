@@ -809,7 +809,7 @@ GAMES: dict[str, "GameDetails"] = {
         "target_audience": "1006848262784-luosgb8o1hrjvbu6v8mjgh35b5oiimli",
     },
     "PH": {
-        "name": "SuperStar Philippines",
+        "name": "SuperStar PHILIPPINES",
         "color": 0x04102D,
         "info": {
             "spreadsheetId": "1Fz71pl3YCUIbCRcZRuKBjsDT4JEW0m9Uoj8wyJhUMOc",
