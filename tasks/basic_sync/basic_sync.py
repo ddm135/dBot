@@ -87,37 +87,38 @@ class BasicSync(commands.Cog):
                     if file.is_file():
                         file.unlink()
                 while True:
-                    try:
-                        async with session.get(
-                            catalog_url.format(version=resource_version)
-                        ) as r:
-                            with open(catalog_packaged_path, "wb") as f:
+                    async with session.get(
+                        catalog_url.format(version=resource_version)
+                    ) as r:
+                        with open(catalog_packaged_path, "wb") as f:
+                            try:
                                 text_result = await r.text()
                                 if "AccessDenied" in text_result:
-                                    raise FileNotFoundError
-                                f.write(await r.read())
+                                    resource_version = str(int(resource_version) - 1)
+                                    catalog_packaged_path = (
+                                        catalog_folder_path
+                                        / f"{resource_version}.{extension}"
+                                    )
+                                    catalog_extracted_path = (
+                                        catalog_folder_path
+                                        / f"{resource_version}_extracted.json"
+                                    )
+                                    continue
+                            except UnicodeDecodeError:
+                                pass
+                            f.write(await r.read())
 
-                        process = await asyncio.create_subprocess_exec(
-                            f"utils/catalog-{extension}",
-                            str(catalog_packaged_path),
-                            str(catalog_extracted_path),
-                            stdout=asyncio.subprocess.PIPE,
-                            stderr=asyncio.subprocess.PIPE,
-                        )
-                        await process.communicate()
+                    process = await asyncio.create_subprocess_exec(
+                        f"utils/catalog-{extension}",
+                        str(catalog_packaged_path),
+                        str(catalog_extracted_path),
+                        stdout=asyncio.subprocess.PIPE,
+                        stderr=asyncio.subprocess.PIPE,
+                    )
+                    await process.communicate()
 
-                        with open(catalog_extracted_path, "r", encoding="utf-8") as f:
-                            self.bot.basic[game]["catalog"] = json.load(f)
-                    except FileNotFoundError:
-                        resource_version = str(int(resource_version) - 1)
-                        catalog_packaged_path = (
-                            catalog_folder_path / f"{resource_version}.{extension}"
-                        )
-                        catalog_extracted_path = (
-                            catalog_folder_path / f"{resource_version}_extracted.json"
-                        )
-                    else:
-                        break
+                    with open(catalog_extracted_path, "r", encoding="utf-8") as f:
+                        self.bot.basic[game]["catalog"] = json.load(f)
 
         if "catalog" not in self.bot.basic[game]:
             with open(catalog_extracted_path, "r", encoding="utf-8") as f:
