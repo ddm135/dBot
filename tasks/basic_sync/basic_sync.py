@@ -92,6 +92,9 @@ class BasicSync(commands.Cog):
                             catalog_url.format(version=resource_version)
                         ) as r:
                             with open(catalog_packaged_path, "wb") as f:
+                                text_result = await r.text()
+                                if "AccessDenied" in text_result:
+                                    raise FileNotFoundError
                                 f.write(await r.read())
 
                         process = await asyncio.create_subprocess_exec(

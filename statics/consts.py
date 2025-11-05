@@ -329,7 +329,7 @@ GAMES: dict[str, "GameDetails"] = {
         "assetScheme": AssetScheme.BINARY_CATALOG,
         "catalogUrl": (
             "http://d1869m1xmsv4ed.cloudfront.net/assets"
-            "/LIVE/iOS/catalog_{version}.bin"
+            "/LIVE/iOS/2.7.4/catalog_{version}.bin"
         ),
         "authorization": "bnZQb1RweVg4WVlyUlZERE85Zkc6WVBrQklrNFdhcQ==",
         "target_audience": "42043845970-4hm4teclds9q4pji2on6f8o35n4ji6ac",
