@@ -193,7 +193,7 @@ GAMES: dict[str, "GameDetails"] = {
         "assetScheme": AssetScheme.BINARY_CATALOG,
         "catalogUrl": (
             "https://d13i7sjdvvio90.cloudfront.net/assets"
-            "/LIVE/iOS/catalog_{version}.bin"
+            "/LIVE/iOS/2.7.4/catalog_{version}.bin"
         ),
         "authorization": "SFFINkh6ckdwRkZiRmlYeis1Mi86U1cwU0JxdWg1dw==",
         "target_audience": "864447301209-h0hsb0denh03td7sgoelh5lmdvv79f9h",
@@ -557,7 +557,7 @@ GAMES: dict[str, "GameDetails"] = {
         "assetScheme": AssetScheme.BINARY_CATALOG,
         "catalogUrl": (
             "https://d189x7hw581nsg.cloudfront.net/assets"
-            "/LIVE/iOS/catalog_{version}.bin"
+            "/LIVE/iOS/2.7.4/catalog_{version}.bin"
         ),
         "target_audience": "259379396797-tfc19vpi39fosa2sic420po6l67p9ltu",
     },
