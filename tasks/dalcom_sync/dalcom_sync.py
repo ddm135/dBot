@@ -122,7 +122,6 @@ class DalcomSync(commands.Cog):
                 ):
                     continue
 
-                self.LOGGER.info("Uploading borders: %s...", game_details["name"])
                 borders = {}
                 for border in ttd:
                     if not border["code"]:
@@ -177,6 +176,9 @@ class DalcomSync(commands.Cog):
                         borders.pop(file["name"], None)
                     if not (next_page := border_files.get("nextPageToken", "")):
                         break
+
+                if borders:
+                    self.LOGGER.info("Uploading borders: %s...", game_details["name"])
 
                 for border_name, border_key in borders.items():
                     try:
