@@ -179,21 +179,20 @@ class DalcomSync(commands.Cog):
 
                 if borders:
                     self.LOGGER.info("Uploading borders: %s...", game_details["name"])
-
-                for border_name, border_key in borders.items():
-                    try:
-                        border_file_path = await ss_cog.extract_file_from_bundle(
-                            game, border_key
+                    for border_name, border_key in borders.items():
+                        try:
+                            border_file_path = await ss_cog.extract_file_from_bundle(
+                                game, border_key
+                            )
+                            border_media = MediaFileUpload(border_file_path)
+                        except KeyError:
+                            continue
+                        metadata = {"name": border_name, "parents": [border_folder]}
+                        link = (await drive_cog.create_file(metadata, border_media))[2]
+                        await border_channel.send(
+                            f"{game_details["name"]}: "
+                            f"{border_name.replace(r"<", r"\<")}\n<{link}>"
                         )
-                        border_media = MediaFileUpload(border_file_path)
-                    except KeyError:
-                        continue
-                    metadata = {"name": border_name, "parents": [border_folder]}
-                    link = (await drive_cog.create_file(metadata, border_media))[2]
-                    await border_channel.send(
-                        f"{game_details["name"]}: {border_name.replace(r"<", r"\<")}\n"
-                        f"<{link}>"
-                    )
 
             except (json.JSONDecodeError, binascii.Error, ValueError):
                 self.LOGGER.info(
