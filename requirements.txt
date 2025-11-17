@@ -1,5 +1,6 @@
 aiohttp>=3.13.2
 asteval>=1.0.6
+curl_cffi>=0.13.0
 discord.py>=2.6.4
 google-api-python-client>=2.186.0
 google-api-python-client-stubs>=1.31.0
@@ -8,4 +9,5 @@ google-auth-oauthlib>=1.2.3
 numpy>=2.3.4
 pycryptodomex>=3.23.0
 python-dotenv>=1.2.1
+soundfile>=0.13.1
 tzdata>=2025.2

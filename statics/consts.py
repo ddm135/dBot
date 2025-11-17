@@ -190,6 +190,7 @@ GAMES: dict[str, "GameDetails"] = {
         "timezone": TIMEZONES["KST"],
         "lookupQuery": "id=890937532&country=kr",
         "manifestUrl": "https://super-star.s3.amazonaws.com/version/{version}.txt",
+        "packageName": "kr.co.dalcomsoft.superstar.a",
         "assetScheme": AssetScheme.BINARY_CATALOG,
         "catalogUrl": (
             "https://d13i7sjdvvio90.cloudfront.net/assets"
@@ -260,6 +261,7 @@ GAMES: dict[str, "GameDetails"] = {
         "manifestUrl": (
             "https://superstar-jyp-resource.s3.amazonaws.com/version/j_{version}.txt"
         ),
+        "packageName": "com.dalcomsoft.ss.jyp",
         "assetScheme": AssetScheme.BINARY_CATALOG,
         "catalogUrl": (
             "https://d2hl696dqqmbgp.cloudfront.net/live/assets"
@@ -326,6 +328,7 @@ GAMES: dict[str, "GameDetails"] = {
             "https://superstar-starship.s3.amazonaws.com"
             "/version/real/manifest/{version}.txt"
         ),
+        "packageName": "com.dalcomsoft.sss",
         "assetScheme": AssetScheme.BINARY_CATALOG,
         "catalogUrl": (
             "http://d1869m1xmsv4ed.cloudfront.net/assets"
@@ -388,6 +391,7 @@ GAMES: dict[str, "GameDetails"] = {
         "pinRoles": {},
         "dateFormat": "%Y-%m-%d",
         "timezone": TIMEZONES["KST"],
+        "packageName": "com.dalcomsoft.kangdaniel",
         "assetScheme": AssetScheme.JSON_URL,
     },
     "ATZ": {
@@ -443,6 +447,7 @@ GAMES: dict[str, "GameDetails"] = {
             "https://superstar-ateez.s3.amazonaws.com"
             "/version/real/manifest/{version}.txt"
         ),
+        "packageName": "com.dalcomsoft.ssat",
         "assetScheme": AssetScheme.BINARY_CATALOG,
         "catalogUrl": (
             "http://d3kmsky8b54x07.cloudfront.net/assets"
@@ -505,6 +510,7 @@ GAMES: dict[str, "GameDetails"] = {
             "https://superstar-stayc.s3.amazonaws.com"
             "/version/real/manifest/{version}.txt"
         ),
+        "packageName": "com.dalcomsoft.stayc",
         "assetScheme": AssetScheme.BINARY_CATALOG,
         "catalogUrl": (
             "https://d4ybtwjh1nw39.cloudfront.net/assets"
@@ -554,6 +560,7 @@ GAMES: dict[str, "GameDetails"] = {
             "https://superstar-wakeone.s3.amazonaws.com"
             "/version/real/manifest/{version}.txt"
         ),
+        "packageName": "com.dalcomsoft.sswo",
         "assetScheme": AssetScheme.BINARY_CATALOG,
         "catalogUrl": (
             "https://d189x7hw581nsg.cloudfront.net/assets"
@@ -621,6 +628,7 @@ GAMES: dict[str, "GameDetails"] = {
         "manifestUrl": (
             "https://superstar-smtown-real.s3.amazonaws.com/version/{version}.txt"
         ),
+        "packageName": "jp.co.ponos.superstarsmtown",
         "assetScheme": AssetScheme.DIRECT_URL,
         "target_audience": "28835016655-choauh766oss3ht8ddqiamavvtfm05ur",
     },
@@ -685,6 +693,7 @@ GAMES: dict[str, "GameDetails"] = {
             "https://superstar-jyp-jp-real.s3.amazonaws.com"
             "/version/manifest/{version}.txt"
         ),
+        "packageName": "jp.co.dalcomsoft.superstarjypnation",
         "assetScheme": AssetScheme.JSON_URL,
         "target_audience": "776124120237-r7q2lcrob52mp0asch12hbmkd52elej5",
     },
@@ -749,6 +758,7 @@ GAMES: dict[str, "GameDetails"] = {
             "https://superstar-lapone-jp-real.s3.amazonaws.com"
             "/version/manifest/{version}.txt"
         ),
+        "packageName": "jp.co.dalcomsoft.superstarlapone",
         "assetScheme": AssetScheme.JSON_URL,
         "target_audience": "668693032380-fmhat079lhao0o335ov5uk4jkl6kget6",
     },
@@ -805,6 +815,7 @@ GAMES: dict[str, "GameDetails"] = {
             "https://superstar-ebidan-jp-real.s3.amazonaws.com"
             "/version/manifest/{version}.txt"
         ),
+        "packageName": "jp.co.dalcomsoft.superstarebidan",
         "assetScheme": AssetScheme.JSON_URL,
         "target_audience": "1006848262784-luosgb8o1hrjvbu6v8mjgh35b5oiimli",
     },
@@ -862,6 +873,7 @@ GAMES: dict[str, "GameDetails"] = {
             "https://superstar-philippines.s3.amazonaws.com"
             "/version/real/manifest/{version}.txt"
         ),
+        "packageName": "com.dalcomsoft.ssph",
         "assetScheme": AssetScheme.JSON_URL,
         "authorization": "WWFeNnhxVldSJWFkVWp4Z3ViOFY6WmJRcy1uZ1YyQQ==",
         "target_audience": "234980834479-creie63p99odjttcv9pvifjelsuf983i",

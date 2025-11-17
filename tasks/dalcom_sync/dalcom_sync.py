@@ -85,9 +85,11 @@ class DalcomSync(commands.Cog):
                     "ThemeData",
                     "ThemeTypeData",
                 ]
+                if "SeqData" in ajs["result"]["context"]:
+                    data_files.append("SeqData")
                 if game_details["assetScheme"] == AssetScheme.JSON_URL:
                     data_files.append("URLs")
-                lcd = tmd = ttd = None
+                lcd = tmd = ttd = msd = seq = None
                 for data_file in data_files:
                     data_path = Path(f"data/dalcom/{game}/{data_file}.json")
                     if (
@@ -113,6 +115,10 @@ class DalcomSync(commands.Cog):
                             tmd = data
                         case "ThemeTypeData":
                             ttd = data
+                        case "MusicData":
+                            msd = data
+                        case "SeqData":
+                            seq = data
                         case _:
                             pass
 

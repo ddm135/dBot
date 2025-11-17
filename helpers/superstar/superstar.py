@@ -12,6 +12,7 @@ from discord.ext import commands
 from google.auth.transport import requests
 from google.oauth2.service_account import IDTokenCredentials
 
+from helpers.superstar.commons import APKPURE_URL
 from statics.consts import GAMES, STATUS_CHANNEL, AssetScheme
 
 from .embeds import SSLeagueEmbed as _SSLeagueEmbed

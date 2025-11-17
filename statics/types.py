@@ -35,6 +35,7 @@ class GameDetails(TypedDict):
     timezone: ZoneInfo
     lookupQuery: NotRequired[str]
     manifestUrl: NotRequired[str]
+    packageName: str
     assetScheme: "AssetScheme"
     catalogUrl: NotRequired[str]
     authorization: NotRequired[str]
