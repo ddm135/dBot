@@ -45,7 +45,6 @@ class BasicSync(commands.Cog):
         async with aiohttp.ClientSession() as session:
             async with session.get(
                 f"https://itunes.apple.com/lookup?{query}",
-                headers={"Cache-Control": "max-age=0"},
             ) as r:
                 weird_result = await r.text()
                 text_result = weird_result.replace("\n", "")
@@ -53,8 +52,12 @@ class BasicSync(commands.Cog):
                 version = json_result["results"][0]["version"]
                 iconUrl = json_result["results"][0]["artworkUrl100"]
 
-            async with session.get(manifest_url.format(version=version)) as r:
-                manifest = await r.json(content_type=None)
+            while True:
+                async with session.get(manifest_url.format(version=version)) as r:
+                    manifest = await r.json(content_type=None)
+                if manifest["ActiveVersion_Android"] == version:
+                    break
+                version = manifest["ActiveVersion_Android"]
 
             self.bot.basic[game] = BasicDetails(
                 version=version,

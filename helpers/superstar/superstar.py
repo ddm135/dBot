@@ -328,7 +328,7 @@ class SuperStar(commands.Cog):
         xapk_folder_path.mkdir(parents=True, exist_ok=True)
         xapks = list(
             xapk_folder_path.rglob(
-                f"*{self.bot.basic[game]["manifest"]["ActiveVersion_Android"]}*.xapk"
+                f"*{self.bot.basic[game]["version"]}*.xapk"
             )
         )
         if xapks:
