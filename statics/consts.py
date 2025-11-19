@@ -194,7 +194,7 @@ GAMES: dict[str, "GameDetails"] = {
         "assetScheme": AssetScheme.BINARY_CATALOG,
         "catalogUrl": (
             "https://d13i7sjdvvio90.cloudfront.net/assets"
-            "/LIVE/iOS/2.7.4/catalog_{version}.bin"
+            "/LIVE/Android/2.7.4/catalog_{version}.bin"
         ),
         "authorization": "SFFINkh6ckdwRkZiRmlYeis1Mi86U1cwU0JxdWg1dw==",
         "target_audience": "864447301209-h0hsb0denh03td7sgoelh5lmdvv79f9h",
@@ -265,7 +265,7 @@ GAMES: dict[str, "GameDetails"] = {
         "assetScheme": AssetScheme.BINARY_CATALOG,
         "catalogUrl": (
             "https://d2hl696dqqmbgp.cloudfront.net/live/assets"
-            "/LIVE/iOS/catalog_{version}.bin"
+            "/LIVE/Android/catalog_{version}.bin"
         ),
         "authorization": "MHhYTEhMQnV1aGpqY3ZRd1JHbUY6SlE0VFZZaVhXYw==",
         "target_audience": "506321732908-4u8t2uk3888gm8087i7lcpi97ff6ld4a",
@@ -332,7 +332,7 @@ GAMES: dict[str, "GameDetails"] = {
         "assetScheme": AssetScheme.BINARY_CATALOG,
         "catalogUrl": (
             "http://d1869m1xmsv4ed.cloudfront.net/assets"
-            "/LIVE/iOS/2.7.4/catalog_{version}.bin"
+            "/LIVE/Android/2.7.4/catalog_{version}.bin"
         ),
         "authorization": "bnZQb1RweVg4WVlyUlZERE85Zkc6WVBrQklrNFdhcQ==",
         "target_audience": "42043845970-4hm4teclds9q4pji2on6f8o35n4ji6ac",
@@ -451,7 +451,7 @@ GAMES: dict[str, "GameDetails"] = {
         "assetScheme": AssetScheme.BINARY_CATALOG,
         "catalogUrl": (
             "http://d3kmsky8b54x07.cloudfront.net/assets"
-            "/LIVE/iOS/2.7.4/catalog_{version}.bin"
+            "/LIVE/Android/2.7.4/catalog_{version}.bin"
         ),
         "authorization": "QWVob3JZcmxGanJ2dmRtTXY4S0w6SVJLR0lqTlRyRw==",
         "target_audience": "832096356756-6nust6ofm2hfoima94nd93uakqq44ev8",
@@ -514,7 +514,7 @@ GAMES: dict[str, "GameDetails"] = {
         "assetScheme": AssetScheme.BINARY_CATALOG,
         "catalogUrl": (
             "https://d4ybtwjh1nw39.cloudfront.net/assets"
-            "/LIVE/iOS/catalog_{version}.bin"
+            "/LIVE/Android/catalog_{version}.bin"
         ),
         "authorization": "WW5yI0VCPmlKM182fG5qXllrMzQ6THpULVQ3UF9dfg==",
         "target_audience": "154091709836-q1sk7hq02vi16f3v0q88uvuf6op5lenv",
@@ -564,7 +564,7 @@ GAMES: dict[str, "GameDetails"] = {
         "assetScheme": AssetScheme.BINARY_CATALOG,
         "catalogUrl": (
             "https://d189x7hw581nsg.cloudfront.net/assets"
-            "/LIVE/iOS/2.7.4/catalog_{version}.bin"
+            "/LIVE/Android/2.7.4/catalog_{version}.bin"
         ),
         "target_audience": "259379396797-tfc19vpi39fosa2sic420po6l67p9ltu",
     },
