@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 import aiohttp
 from discord.ext import commands, tasks
 
-from statics.consts import CHUNK_SIZE, GAMES, AssetScheme
+from statics.consts import GAMES, AssetScheme
 from statics.types import BasicDetails
 
 if TYPE_CHECKING:
