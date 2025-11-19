@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 import aiohttp
 from discord.ext import commands, tasks
 
-from statics.consts import GAMES, AssetScheme
+from statics.consts import CHUNK_SIZE, GAMES, AssetScheme
 from statics.types import BasicDetails
 
 if TYPE_CHECKING:
@@ -106,7 +106,8 @@ class BasicSync(commands.Cog):
                                     continue
                             except UnicodeDecodeError:
                                 pass
-                            f.write(await r.read())
+                            async for chunk in r.content.iter_chunked(CHUNK_SIZE):
+                                f.write(chunk)
 
                     process = await asyncio.create_subprocess_exec(
                         f"utils/catalog-{extension}",

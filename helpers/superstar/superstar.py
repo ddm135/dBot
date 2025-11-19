@@ -16,7 +16,7 @@ from google.auth.transport import requests
 from google.oauth2.service_account import IDTokenCredentials
 
 from helpers.superstar.commons import APKPURE_URL
-from statics.consts import GAMES, STATUS_CHANNEL, AssetScheme
+from statics.consts import CHUNK_SIZE, GAMES, STATUS_CHANNEL, AssetScheme
 
 from .embeds import SSLeagueEmbed as _SSLeagueEmbed
 from .types import SuperStarHeaders
@@ -308,7 +308,8 @@ class SuperStar(commands.Cog):
                     async with aiohttp.ClientSession() as session:
                         async with session.get(bundle_url) as r:
                             with open(bundle_path, "wb") as f:
-                                f.write(await r.read())
+                                async for chunk in r.content.iter_chunked(CHUNK_SIZE):
+                                    f.write(chunk)
 
             process = await asyncio.create_subprocess_exec(
                 "utils/bundle",
@@ -326,7 +327,9 @@ class SuperStar(commands.Cog):
         xapk_folder_path = Path(f"data/xapks/{game}")
         xapk_folder_path.mkdir(parents=True, exist_ok=True)
         xapks = list(
-            xapk_folder_path.rglob(f"*{self.bot.basic[game]["version"]}*.xapk")
+            xapk_folder_path.rglob(
+                f"*{self.bot.basic[game]["manifest"]["ActiveVersion_Android"]}*.xapk"
+            )
         )
         if xapks:
             xapk_path = xapks[0]
@@ -360,7 +363,7 @@ class SuperStar(commands.Cog):
 
                 xapk_path = xapk_folder_path / xapk_file_name
                 with open(xapk_path, "wb") as f:
-                    async for chunk in r.content.iter_chunked(1048576):
+                    async for chunk in r.content.iter_chunked(CHUNK_SIZE):
                         f.write(chunk)
 
         return xapk_path
