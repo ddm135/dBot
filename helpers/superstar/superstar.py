@@ -363,6 +363,8 @@ class SuperStar(commands.Cog):
                     async for chunk in r.content.iter_chunked(1048576):
                         f.write(chunk)
 
+        return xapk_path
+
     @staticmethod
     async def pin_new_ssl(
         embed: discord.Embed,
