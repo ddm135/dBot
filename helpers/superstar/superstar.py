@@ -3,6 +3,7 @@
 import asyncio
 import gzip
 import json
+import zipfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 from zipfile import ZipFile
@@ -328,7 +329,11 @@ class SuperStar(commands.Cog):
             xapk_folder_path.rglob(f"*{self.bot.basic[game]["version"]}*.xapk")
         )
         if xapks:
-            return xapks[0]
+            xapk_path = xapks[0]
+            if not zipfile.is_zipfile(xapk_path):
+                xapk_path.unlink(missing_ok=True)
+            else:
+                return xapk_path
 
         for file in xapk_folder_path.iterdir():
             if file.is_file():
@@ -355,7 +360,8 @@ class SuperStar(commands.Cog):
 
                 xapk_path = xapk_folder_path / xapk_file_name
                 with open(xapk_path, "wb") as f:
-                    f.write(await r.read())
+                    async for chunk in r.content.iter_chunked(1048576):
+                        f.write(chunk)
 
     @staticmethod
     async def pin_new_ssl(
