@@ -108,7 +108,7 @@ class BasicSync(commands.Cog):
                                 pass
                             # async for chunk in r.content.iter_chunked(CHUNK_SIZE):
                             #     f.write(chunk)
-                            f.write(await f.read())
+                            f.write(await r.read())
 
                     process = await asyncio.create_subprocess_exec(
                         f"utils/catalog-{extension}",
