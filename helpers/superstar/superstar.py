@@ -5,9 +5,11 @@ import gzip
 import json
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
+from zipfile import ZipFile
 
 import aiohttp
 import discord
+from curl_cffi import AsyncSession
 from discord.ext import commands
 from google.auth.transport import requests
 from google.oauth2.service_account import IDTokenCredentials
@@ -257,7 +259,7 @@ class SuperStar(commands.Cog):
         self,
         game: str,
         catalog_key: str,
-    ) -> Path:
+    ) -> Path | None:
         catalog = self.bot.basic[game]["catalog"]
         file_extract_path = ""
         file_name = Path(catalog_key).name
@@ -279,18 +281,34 @@ class SuperStar(commands.Cog):
         if not file_path.exists():
             if not bundle_path.exists():
                 if not bundle_url.startswith("http"):
-                    channel = self.bot.get_channel(
-                        STATUS_CHANNEL
-                    ) or await self.bot.fetch_channel(STATUS_CHANNEL)
-                    assert isinstance(channel, discord.TextChannel)
-                    await channel.send(
-                        f"<@{self.bot.owner_id}> Built-in bundle: `{bundle_url}`"
-                    )
+                    xapk_path = await self.get_xapk(game)
+                    if not xapk_path:
+                        channel = self.bot.get_channel(
+                            STATUS_CHANNEL
+                        ) or await self.bot.fetch_channel(STATUS_CHANNEL)
+                        assert isinstance(channel, discord.TextChannel)
+                        await channel.send(
+                            f"<@{self.bot.owner_id}> Built-in bundle: `{bundle_url}`"
+                        )
+                        return None
 
-                async with aiohttp.ClientSession() as session:
-                    async with session.get(bundle_url) as r:
-                        with open(bundle_path, "wb") as f:
-                            f.write(await r.read())
+                    apk_bundle_path = catalog[catalog_key]["internalId"].split(
+                        "/Android/"
+                    )[-1]
+                    with ZipFile(xapk_path, "r") as xapk:
+                        with xapk.open("base_assets.apk", "r") as base_assets:
+                            with ZipFile(base_assets, "r") as apk:
+                                with apk.open(
+                                    f"assets/aa/Android/{apk_bundle_path}", "r"
+                                ) as bundle_file:
+                                    with open(bundle_path, "wb") as f:
+                                        f.write(bundle_file.read())
+                else:
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get(bundle_url) as r:
+                            with open(bundle_path, "wb") as f:
+                                f.write(await r.read())
+
             process = await asyncio.create_subprocess_exec(
                 "utils/bundle",
                 str(bundle_path),
@@ -302,6 +320,42 @@ class SuperStar(commands.Cog):
             bundle_path.unlink(missing_ok=True)
 
         return file_path
+
+    async def get_xapk(self, game) -> Path | None:
+        xapk_folder_path = Path(f"data/xapks/{game}")
+        xapk_folder_path.mkdir(parents=True, exist_ok=True)
+        xapks = list(
+            xapk_folder_path.rglob(f"*{self.bot.basic[game]["version"]}*.xapk")
+        )
+        if xapks:
+            return xapks[0]
+
+        for file in xapk_folder_path.iterdir():
+            if file.is_file():
+                file.unlink()
+        async with AsyncSession() as session:
+            response = await session.get(
+                APKPURE_URL.format(package_name=GAMES[game]["packageName"]),
+                impersonate="chrome",
+                allow_redirects=False,
+            )
+            xapk_url = response.headers.get("Location")
+            if not xapk_url:
+                return None
+
+        async with aiohttp.ClientSession() as session:
+            async with session.get(xapk_url) as r:
+                disposition = r.headers.get("Content-Disposition")
+                if not disposition:
+                    return None
+
+                xapk_file_name = disposition.split("filename=")[-1].strip('"')
+                if self.bot.basic[game]["version"] not in xapk_file_name:
+                    return None
+
+                xapk_path = xapk_folder_path / xapk_file_name
+                with open(xapk_path, "wb") as f:
+                    f.write(await r.read())
 
     @staticmethod
     async def pin_new_ssl(
