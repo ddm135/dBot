@@ -45,7 +45,6 @@ class BasicSync(commands.Cog):
         async with aiohttp.ClientSession() as session:
             async with session.get(
                 f"https://itunes.apple.com/lookup?{query}",
-                headers={"Cache-Control": "max-age=0"},
             ) as r:
                 weird_result = await r.text()
                 text_result = weird_result.replace("\n", "")
@@ -54,10 +53,8 @@ class BasicSync(commands.Cog):
                 iconUrl = json_result["results"][0]["artworkUrl100"]
 
             while True:
-                print(version)
                 async with session.get(manifest_url.format(version=version)) as r:
                     manifest = await r.json(content_type=None)
-                print(manifest)
                 if manifest["ActiveVersion_Android"] == version:
                     break
                 version = manifest["ActiveVersion_Android"]
