@@ -1,4 +1,5 @@
-# mypy: disable-error-code="assignment"
+# mypy: disable-error-code="assignment, import-untyped"
+# pylint: disable=protected-access
 # pyright: reportAssignmentType=false, reportTypedDictNotRequiredAccess=false
 
 import binascii
@@ -151,12 +152,6 @@ class DalcomSync(commands.Cog):
                             async with session.get(src_path) as r:
                                 with open(dst_path, "wb") as f:
                                     f.write(await r.read())
-
-                    thing = src_path
-                    while not thing.is_dir() or thing.name != "Assets":
-                        thing = thing.parent
-                    thing = thing.parent
-                    print(thing)
 
                     duration = soundfile.info(dst_path)._duration_str.partition(".")[0]
                     self.bot.info_from_file[game][str(music["code"])]["sound"] = {
