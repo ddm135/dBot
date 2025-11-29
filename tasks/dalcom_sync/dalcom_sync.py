@@ -154,6 +154,8 @@ class DalcomSync(commands.Cog):
                                     f.write(await r.read())
 
                     duration = soundfile.info(dst_path)._duration_str.partition(".")[0]
+                    if duration[0] == "0":
+                        duration = duration[1:]
                     self.bot.info_from_file[game][str(music["code"])]["sound"] = {
                         "duration": duration,
                         "key": found_key,
