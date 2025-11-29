@@ -1,5 +1,4 @@
 # mypy: disable-error-code="assignment, import-untyped"
-# pylint: disable=protected-access
 # pyright: reportAssignmentType=false, reportTypedDictNotRequiredAccess=false
 
 import binascii
@@ -136,33 +135,33 @@ class DalcomSync(commands.Cog):
                         .get("key")
                     )
                     found_key = music["sound"]
-                    if current_key and current_key == found_key:
-                        continue
+                    # if current_key and current_key == found_key:
+                    #     continue
 
-                    results = await ss_cog.get_attributes(
-                        game, "MusicData", music["code"], {"sound": True}
-                    )
-                    src_path = results["sound"]
+                    # results = await ss_cog.get_attributes(
+                    #     game, "MusicData", music["code"], {"sound": True}
+                    # )
+                    # src_path = results["sound"]
                     dst_path = Path(f"data/MusicData/{game}/{music["code"]}.ogg")
                     dst_path.parent.mkdir(parents=True, exist_ok=True)
 
-                    if isinstance(src_path, Path):
-                        shutil.copyfile(src_path, dst_path)
-                        while not src_path.is_dir() or src_path.name != "Assets":
-                            src_path = src_path.parent
-                        src_path = src_path.parent
-                        bundle_folders.add(src_path)
-                    else:
-                        async with aiohttp.ClientSession() as session:
-                            async with session.get(src_path) as r:
-                                with open(dst_path, "wb") as f:
-                                    f.write(await r.read())
+                    # if isinstance(src_path, Path):
+                    #     shutil.copyfile(src_path, dst_path)
+                    #     while not src_path.is_dir() or src_path.name != "Assets":
+                    #         src_path = src_path.parent
+                    #     src_path = src_path.parent
+                    #     bundle_folders.add(src_path)
+                    # else:
+                    #     async with aiohttp.ClientSession() as session:
+                    #         async with session.get(src_path) as r:
+                    #             with open(dst_path, "wb") as f:
+                    #                 f.write(await r.read())
 
-                    duration = soundfile.info(dst_path)._duration_str.partition(".")[0]
-                    if duration[0] == "0":
-                        duration = duration[1:]
+                    duration = int(soundfile.info(dst_path).duration)
+                    minutes = duration // 60
+                    seconds = str(duration % 60).zfill(2)
                     self.bot.info_from_file[game][str(music["code"])]["sound"] = {
-                        "duration": duration,
+                        "duration": f"{minutes}:{seconds}",
                         "key": found_key,
                     }
 
