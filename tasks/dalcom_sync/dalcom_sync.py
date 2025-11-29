@@ -61,11 +61,11 @@ class DalcomSync(commands.Cog):
                     with open(ajs_path, "r", encoding="utf-8") as f:
                         stored_ajs = json.load(f)
                 else:
-                    stored_ajs = None
+                    stored_ajs = defaultdict(lambda: defaultdict(dict))
 
                 self.LOGGER.info("Downloading Dalcom data: %s...", game_details["name"])
                 if "lastVersion" in game_details:
-                    ajs: defaultdict = defaultdict(dict)
+                    ajs = stored_ajs
                 else:
                     ajs = await ss_cog.get_a_json(game)
                 refresh = False
@@ -252,8 +252,7 @@ class DalcomSync(commands.Cog):
                             f"{border_name.replace(r"<", r"\<")}\n<{link}>"
                         )
 
-            except (json.JSONDecodeError, binascii.Error, ValueError) as e:
-                self.LOGGER.exception(str(e))
+            except (json.JSONDecodeError, binascii.Error, ValueError):
                 self.LOGGER.info(
                     "%s server is unavailable. Skipping...", game_details["name"]
                 )

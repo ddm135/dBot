@@ -52,6 +52,9 @@ class InfoSync(commands.Cog):
         info_by_name: dict[str, dict[str, list[str]]] = {}
         info_by_id: dict[str, list[str]] = {}
         for row in info:
+            if game == "KD":
+                print(row)
+                print(artist_name_index, song_name_index, song_id_index)
             info_by_name.setdefault(row[artist_name_index], {})[
                 row[song_name_index]
             ] = row
