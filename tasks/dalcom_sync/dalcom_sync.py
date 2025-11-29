@@ -123,6 +123,9 @@ class DalcomSync(commands.Cog):
 
                 original_paths: set[Path] = set()
                 for music in dalcom_data["MusicData"]:
+                    if music["isHidden"]:
+                        continue
+
                     current_key = (
                         self.bot.info_from_file[game]
                         .setdefault(str(music["code"]), {})
@@ -149,6 +152,12 @@ class DalcomSync(commands.Cog):
                                 with open(dst_path, "wb") as f:
                                     f.write(await r.read())
 
+                    thing = src_path
+                    while not thing.is_dir() or thing.name != "Assets":
+                        thing = thing.parent
+                    thing = thing.parent
+                    print(thing)
+
                     duration = soundfile.info(dst_path)._duration_str.partition(".")[0]
                     self.bot.info_from_file[game][str(music["code"])]["sound"] = {
                         "duration": duration,
@@ -162,8 +171,7 @@ class DalcomSync(commands.Cog):
                     while not path.is_dir() or path.name != "Assets":
                         path = path.parent
                     path = path.parent
-                    print(path)
-                    # shutil.rmtree(path)
+                    shutil.rmtree(path)
 
                 if game_details["assetScheme"] not in (
                     AssetScheme.BINARY_CATALOG,
