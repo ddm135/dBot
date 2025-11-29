@@ -1,4 +1,5 @@
-# pyright: reportTypedDictNotRequiredAccess=false
+# mypy: disable-error-code="assignment"
+# pyright: reportAssignmentType=false, reportTypedDictNotRequiredAccess=false
 
 import asyncio
 import gzip
@@ -49,9 +50,7 @@ class SuperStar(commands.Cog):
         basic_details = self.bot.basic[game]
 
         async with aiohttp.ClientSession() as session:
-            cog: "Cryptographic" = self.bot.get_cog(
-                "Cryptographic"
-            )  # type: ignore[assignment]
+            cog: "Cryptographic" = self.bot.get_cog("Cryptographic")
 
             async with session.post(
                 url=basic_details["manifest"]["ServerUrl"],
@@ -69,9 +68,7 @@ class SuperStar(commands.Cog):
         basic_details = self.bot.basic[game]
 
         async with aiohttp.ClientSession() as session:
-            cog: "Cryptographic" = self.bot.get_cog(
-                "Cryptographic"
-            )  # type: ignore[assignment]
+            cog: "Cryptographic" = self.bot.get_cog("Cryptographic")
 
             async with session.post(
                 url=basic_details["manifest"]["ServerUrl"],
@@ -105,9 +102,7 @@ class SuperStar(commands.Cog):
         basic_details = self.bot.basic[game]
 
         async with aiohttp.ClientSession() as session:
-            cog: "Cryptographic" = self.bot.get_cog(
-                "Cryptographic"
-            )  # type: ignore[assignment]
+            cog: "Cryptographic" = self.bot.get_cog("Cryptographic")
 
             async with session.post(
                 url=basic_details["manifest"]["ServerUrl"],
@@ -150,9 +145,7 @@ class SuperStar(commands.Cog):
                 dalcom_id = await r.json(content_type=None)
                 access_token = dalcom_id["data"]["access_token"]
 
-            cog: "Cryptographic" = self.bot.get_cog(
-                "Cryptographic"
-            )  # type: ignore[assignment]
+            cog: "Cryptographic" = self.bot.get_cog("Cryptographic")
 
             async with session.post(
                 url=basic_details["manifest"]["ServerUrl"],
@@ -178,9 +171,7 @@ class SuperStar(commands.Cog):
         basic_details = self.bot.basic[game]
 
         async with aiohttp.ClientSession() as session:
-            cog: "Cryptographic" = self.bot.get_cog(
-                "Cryptographic"
-            )  # type: ignore[assignment]
+            cog: "Cryptographic" = self.bot.get_cog("Cryptographic")
 
             async with session.post(
                 url=basic_details["manifest"]["ServerUrl"],
@@ -201,9 +192,7 @@ class SuperStar(commands.Cog):
         try:
             result = await response.json(content_type=None)
         except json.JSONDecodeError:
-            cog: "Cryptographic" = self.bot.get_cog(
-                "Cryptographic"
-            )  # type: ignore[assignment]
+            cog: "Cryptographic" = self.bot.get_cog("Cryptographic")
             result = json.loads(cog.decrypt_cbc(await response.text(), iv))
         return result
 
@@ -212,9 +201,7 @@ class SuperStar(commands.Cog):
             async with session.get(url=url) as r:
                 content = await r.read()
 
-        cog: "Cryptographic" = self.bot.get_cog(
-            "Cryptographic"
-        )  # type: ignore[assignment]
+        cog: "Cryptographic" = self.bot.get_cog("Cryptographic")
         return json.loads(
             cog.decrypt_ecb(gzip.decompress(content)).replace(rb"\/", rb"/")
         )

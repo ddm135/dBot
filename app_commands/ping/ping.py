@@ -1,3 +1,6 @@
+# mypy: disable-error-code="assignment"
+# pyright: reportAssignmentType=false
+
 from typing import TYPE_CHECKING
 
 import discord
@@ -46,7 +49,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
             "count": 0,
         }
 
-        cog: "DataSync" = self.bot.get_cog("DataSync")  # type: ignore[assignment]
+        cog: "DataSync" = self.bot.get_cog("DataSync")
         cog.save_data(Data.WORD_PINGS)
         return await itr.followup.send(
             f"Added to the ping list for `{word}` in this server!"
@@ -75,7 +78,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
             )
         self.bot.word_pings[guild_id][word].pop(user_id)
 
-        cog: "DataSync" = self.bot.get_cog("DataSync")  # type: ignore[assignment]
+        cog: "DataSync" = self.bot.get_cog("DataSync")
         cog.save_data(Data.WORD_PINGS)
         return await itr.followup.send(
             f"Removed from the ping list for `{word}` in this server!"
@@ -125,7 +128,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
         await itr.response.defer(ephemeral=True)
         guild_id = str(itr.guild_id)
         user_id = str(itr.user.id)
-        cog: "DataSync" = self.bot.get_cog("DataSync")  # type: ignore[assignment]
+        cog: "DataSync" = self.bot.get_cog("DataSync")
 
         if word is not None:
             if user.id == itr.user.id:
@@ -183,7 +186,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
         await itr.response.defer(ephemeral=True)
         guild_id = str(itr.guild_id)
         user_id = str(itr.user.id)
-        cog: "DataSync" = self.bot.get_cog("DataSync")  # type: ignore[assignment]
+        cog: "DataSync" = self.bot.get_cog("DataSync")
 
         if word is not None:
             if not self.bot.word_pings[guild_id][word][user_id]:
@@ -249,7 +252,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
         await itr.response.defer(ephemeral=True)
         guild_id = str(itr.guild_id)
         user_id = str(itr.user.id)
-        cog: "DataSync" = self.bot.get_cog("DataSync")  # type: ignore[assignment]
+        cog: "DataSync" = self.bot.get_cog("DataSync")
 
         if word is not None:
             if user.id == itr.user.id:
@@ -307,7 +310,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
         await itr.response.defer(ephemeral=True)
         guild_id = str(itr.guild_id)
         user_id = str(itr.user.id)
-        cog: "DataSync" = self.bot.get_cog("DataSync")  # type: ignore[assignment]
+        cog: "DataSync" = self.bot.get_cog("DataSync")
 
         if word is not None:
             if not self.bot.word_pings[guild_id][word][user_id]:

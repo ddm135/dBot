@@ -1,3 +1,5 @@
+# pyright: reportTypedDictNotRequiredAccess=false
+
 import asyncio
 import json
 import logging
@@ -45,14 +47,18 @@ class BasicSync(commands.Cog):
         cog: "SuperStar" = self.bot.get_cog("SuperStar")  # type: ignore[assignment]
 
         async with aiohttp.ClientSession() as session:
-            async with session.get(
-                f"https://itunes.apple.com/lookup?{query}",
-            ) as r:
-                weird_result = await r.text()
-                text_result = weird_result.replace("\n", "")
-                json_result = json.loads(text_result)
-                version = json_result["results"][0]["version"]
-                iconUrl = json_result["results"][0]["artworkUrl100"]
+            if {"iconUrl", "lastVersion"} <= set(game_details):
+                version = game_details["lastVersion"]
+                iconUrl = game_details["iconUrl"]
+            else:
+                async with session.get(
+                    f"https://itunes.apple.com/lookup?{query}",
+                ) as r:
+                    weird_result = await r.text()
+                    text_result = weird_result.replace("\n", "")
+                    json_result = json.loads(text_result)
+                    version = json_result["results"][0]["version"]
+                    iconUrl = json_result["results"][0]["artworkUrl100"]
 
             manifest = await cog.get_manifest(game, version)
             self.bot.basic[game] = BasicDetails(

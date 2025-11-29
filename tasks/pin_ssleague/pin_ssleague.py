@@ -1,4 +1,5 @@
-# pyright: reportTypedDictNotRequiredAccess=false
+# mypy: disable-error-code="assignment"
+# pyright: reportAssignmentType=false, reportTypedDictNotRequiredAccess=false
 
 import asyncio
 import json
@@ -34,7 +35,7 @@ class PinSSLeague(commands.Cog):
 
     @tasks.loop(time=[time(hour=h) for h in range(24)])
     async def pin_ssls(self) -> None:
-        cog: "DataSync" = self.bot.get_cog("DataSync")  # type: ignore[assignment]
+        cog: "DataSync" = self.bot.get_cog("DataSync")
         cog.save_last_appearance()
 
         with open(Data.CREDENTIALS.value, "r", encoding="utf-8") as f:
@@ -55,7 +56,7 @@ class PinSSLeague(commands.Cog):
         if current_time.hour:
             return
         backoff = discord.backoff.ExponentialBackoff()
-        cog: "SuperStar" = self.bot.get_cog("SuperStar")  # type: ignore[assignment]
+        cog: "SuperStar" = self.bot.get_cog("SuperStar")
 
         while True:
             try:

@@ -1,4 +1,5 @@
-# pyright: reportTypedDictNotRequiredAccess=false
+# mypy: disable-error-code="assignment"
+# pyright: reportAssignmentType=false, reportTypedDictNotRequiredAccess=false
 
 import json
 import logging
@@ -47,7 +48,7 @@ class DataSync(commands.Cog):
         await self.bot.unload_extension("helpers.google_drive")
 
     async def data_download(self) -> None:
-        cog: "GoogleDrive" = self.bot.get_cog("GoogleDrive")  # type: ignore[assignment]
+        cog: "GoogleDrive" = self.bot.get_cog("GoogleDrive")
         drive_files = await cog.get_file_list(DATA_FOLDER)
         if Data.LAST_MODIFIED.value.exists():
             with open(Data.LAST_MODIFIED.value, "r", encoding="utf-8") as f:
@@ -133,7 +134,7 @@ class DataSync(commands.Cog):
 
     @tasks.loop(time=[time(hour=h, minute=30) for h in range(24)])
     async def data_upload(self) -> None:
-        cog: "GoogleDrive" = self.bot.get_cog("GoogleDrive")  # type: ignore[assignment]
+        cog: "GoogleDrive" = self.bot.get_cog("GoogleDrive")
         drive_files = await cog.get_file_list(DATA_FOLDER)
         last_modified = {}
 

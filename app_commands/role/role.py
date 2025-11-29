@@ -1,3 +1,6 @@
+# mypy: disable-error-code="assignment"
+# pyright: reportAssignmentType=false
+
 from typing import TYPE_CHECKING
 
 import discord
@@ -58,7 +61,7 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
         self.bot.roles[user_id].remove(target_role.id)
         await itr.user.add_roles(target_role)
 
-        cog: "DataSync" = self.bot.get_cog("DataSync")  # type: ignore[assignment]
+        cog: "DataSync" = self.bot.get_cog("DataSync")
         cog.save_data(Data.ROLES)
         await itr.followup.send(
             f"Added {target_role.mention}!\n-# {NOTICE}",
@@ -99,7 +102,7 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
         self.bot.roles[user_id].append(target_role.id)
         await itr.user.remove_roles(target_role)
 
-        cog: "DataSync" = self.bot.get_cog("DataSync")  # type: ignore[assignment]
+        cog: "DataSync" = self.bot.get_cog("DataSync")
         cog.save_data(Data.ROLES)
         await itr.followup.send(
             f"Removed {target_role.mention}!\n-# {NOTICE}",
@@ -163,7 +166,7 @@ class Role(commands.GroupCog, name="role", description="Manage SuperStar Roles")
         await itr.user.add_roles(*add_roles)
         await itr.user.remove_roles(*remove_roles)
 
-        cog: "DataSync" = self.bot.get_cog("DataSync")  # type: ignore[assignment]
+        cog: "DataSync" = self.bot.get_cog("DataSync")
         cog.save_data(Data.ROLES)
         await itr.followup.send(
             f"Set to {target_role.mention}!",

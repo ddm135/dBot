@@ -1,3 +1,6 @@
+# mypy: disable-error-code="assignment"
+# pyright: reportAssignmentType=false
+
 import logging
 from datetime import time
 from pathlib import Path
@@ -35,9 +38,7 @@ class EmblemSync(commands.Cog):
 
     async def get_emblem_data(self, game: str, game_details: "GameDetails") -> None:
         self.LOGGER.info("Downloading emblem data: %s...", game_details["name"])
-        sheets_cog: "GoogleSheets" = self.bot.get_cog(
-            "GoogleSheets"
-        )  # type: ignore[assignment]
+        sheets_cog: "GoogleSheets" = self.bot.get_cog("GoogleSheets")
         emblem_details = game_details["emblem"]
         emblem = await sheets_cog.get_sheet_data(
             emblem_details["spreadsheetId"], emblem_details["range"]
@@ -48,7 +49,7 @@ class EmblemSync(commands.Cog):
         emblem_index = emblem_columns.index("emblem")
 
         data: dict[str, str | Path | None] = {}
-        ss_cog: "SuperStar" = self.bot.get_cog("SuperStar")  # type: ignore[assignment]
+        ss_cog: "SuperStar" = self.bot.get_cog("SuperStar")
         for row in emblem:
             artist_name = row[artist_name_index]
             emblem_value = row[emblem_index]

@@ -54,10 +54,7 @@ class Info(commands.Cog):
         icon: str | Path | None
         if not artist_choice:
             songs = self.bot.info_by_id[game_choice.value].values()
-            icon = (
-                game_details.get("iconUrl")
-                or self.bot.basic[game_choice.value]["iconUrl"]
-            )
+            icon = self.bot.basic[game_choice.value]["iconUrl"]
         else:
             if not (
                 songs := (

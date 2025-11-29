@@ -1,3 +1,6 @@
+# mypy: disable-error-code="assignment"
+# pyright: reportAssignmentType=false
+
 import asyncio
 import importlib
 import logging
@@ -219,9 +222,7 @@ class Administrative(commands.Cog):
 
         text = f"Renaming {old_name} to {new_name} in {game_details["name"]}..."
         msg = await ctx.send(text)
-        sheets_cog: "GoogleSheets" = self.bot.get_cog(
-            "GoogleSheets"
-        )  # type: ignore[assignment]
+        sheets_cog: "GoogleSheets" = self.bot.get_cog("GoogleSheets")
 
         for data in ("info", "bonus", "ping", "emblem"):
             if (details := game_details.get(data)) and (
@@ -246,25 +247,19 @@ class Administrative(commands.Cog):
             ):
                 self.bot.ssleague_manual[game]["artist"] = new_name
 
-                data_cog: "DataSync" = self.bot.get_cog(
-                    "DataSync"
-                )  # type: ignore[assignment]
+                data_cog: "DataSync" = self.bot.get_cog("DataSync")
                 data_cog.save_data(Data.SSLEAGUES)
 
         await msg.edit(content=f"{text}\nDownloading info data...")
-        info_cog: "InfoSync" = self.bot.get_cog("InfoSync")  # type: ignore[assignment]
+        info_cog: "InfoSync" = self.bot.get_cog("InfoSync")
         await info_cog.get_info_data(game, game_details)
 
         await msg.edit(content=f"{text}\nDownloading bonus data...")
-        bonus_cog: "BonusSync" = self.bot.get_cog(
-            "BonusSync"
-        )  # type: ignore[assignment]
+        bonus_cog: "BonusSync" = self.bot.get_cog("BonusSync")
         await bonus_cog.get_bonus_data(game, game_details)
 
         await msg.edit(content=f"{text}\nDownloading emblem data...")
-        emblem_cog: "EmblemSync" = self.bot.get_cog(
-            "EmblemSync"
-        )  # type: ignore[assignment]
+        emblem_cog: "EmblemSync" = self.bot.get_cog("EmblemSync")
         await emblem_cog.get_emblem_data(game, game_details)
 
         await msg.edit(

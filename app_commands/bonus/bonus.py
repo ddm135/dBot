@@ -63,10 +63,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         icon: str | Path | None
         if not artist_choice:
             artists = bonus_data.keys()
-            icon = (
-                game_details.get("iconUrl")
-                or self.bot.basic[game_choice.value]["iconUrl"]
-            )
+            icon = self.bot.basic[game_choice.value]["iconUrl"]
         else:
             if artist_choice not in bonus_data:
                 return await itr.followup.send("Artist not found.")

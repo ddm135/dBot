@@ -392,6 +392,11 @@ GAMES: dict[str, "GameDetails"] = {
         "pinRoles": {},
         "dateFormat": "%Y-%m-%d",
         "timezone": TIMEZONES["KST"],
+        "manifestUrl": (
+            "https://superstar-kangdaniel.s3.amazonaws.com"
+            "/version/real/manifest/{version}.txt"
+        ),
+        "lastVersion": "4.0.1",
         "packageName": "com.dalcomsoft.kangdaniel",
         "assetScheme": AssetScheme.JSON_URL,
     },
@@ -700,6 +705,11 @@ GAMES: dict[str, "GameDetails"] = {
     },
     "LP": {
         "name": "SUPERSTAR LAPONE",
+        "iconUrl": (
+            "https://play-lh.googleusercontent.com"
+            "/jd2Jh8aSU_0CfHLIq-NQILuzmgCJq7T3af6jgaL1PMkxjbiZN-ef7LSzFtT5glDhjQ"
+            "=w240-h480"
+        ),
         "color": 0xEAA715,
         "info": {
             "spreadsheetId": "1Ng57BGCDj025bxwCBbQulYFhRjS5runy5HnbStY_xSw",
@@ -754,11 +764,11 @@ GAMES: dict[str, "GameDetails"] = {
         },
         "dateFormat": "%Y-%m-%d",
         "timezone": TIMEZONES["JST"],
-        "lookupQuery": "id=1642691486&country=jp",
         "manifestUrl": (
             "https://superstar-lapone-jp-real.s3.amazonaws.com"
             "/version/manifest/{version}.txt"
         ),
+        "lastVersion": "1.9.4",
         "packageName": "jp.co.dalcomsoft.superstarlapone",
         "assetScheme": AssetScheme.JSON_URL,
         "target_audience": "668693032380-fmhat079lhao0o335ov5uk4jkl6kget6",

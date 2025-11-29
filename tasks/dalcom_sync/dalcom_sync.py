@@ -1,4 +1,5 @@
-# pyright: reportTypedDictNotRequiredAccess=false
+# mypy: disable-error-code="assignment"
+# pyright: reportAssignmentType=false, reportTypedDictNotRequiredAccess=false
 
 import binascii
 import json
@@ -38,10 +39,8 @@ class DalcomSync(commands.Cog):
 
     @tasks.loop(time=[time(hour=h, minute=10) for h in range(24)])
     async def dalcom_sync(self) -> None:
-        drive_cog: "GoogleDrive" = self.bot.get_cog(
-            "GoogleDrive"
-        )  # type: ignore[assignment]
-        ss_cog: "SuperStar" = self.bot.get_cog("SuperStar")  # type: ignore[assignment]
+        drive_cog: "GoogleDrive" = self.bot.get_cog("GoogleDrive")
+        ss_cog: "SuperStar" = self.bot.get_cog("SuperStar")
         border_channel = self.bot.get_channel(
             BORDER_CHANNEL
         ) or await self.bot.fetch_channel(BORDER_CHANNEL)
