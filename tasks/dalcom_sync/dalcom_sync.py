@@ -122,12 +122,11 @@ class DalcomSync(commands.Cog):
                     else:
                         self.bot.info_from_file[game] = {}
 
-                original_paths: set[Path] = set()
+                bundle_folders: set[Path] = set()
                 for music in dalcom_data["MusicData"]:
                     if music["isHidden"]:
                         continue
-                    
-                    print(music["code"])
+
                     current_key = (
                         self.bot.info_from_file[game]
                         .setdefault(str(music["code"]), {})
@@ -147,7 +146,10 @@ class DalcomSync(commands.Cog):
 
                     if isinstance(src_path, Path):
                         shutil.copyfile(src_path, dst_path)
-                        original_paths.add(src_path)
+                        while not src_path.is_dir() or src_path.name != "Assets":
+                            src_path = src_path.parent
+                        src_path = src_path.parent
+                        bundle_folders.add(src_path)
                     else:
                         async with aiohttp.ClientSession() as session:
                             async with session.get(src_path) as r:
@@ -165,17 +167,8 @@ class DalcomSync(commands.Cog):
                 with open(music_info_file, "w", encoding="utf-8") as f:
                     json.dump(self.bot.info_from_file[game], f, indent=4)
 
-                for path in original_paths:
-                    print(path)
-                    while not path.is_dir() or path.name != "Assets":
-                        if path == path.parent:
-                            continue
-                        path = path.parent
-                        print(path)
-                    path = path.parent
-                    print(path)
+                for path in bundle_folders:
                     shutil.rmtree(path)
-                    print()
 
                 if game_details["assetScheme"] not in (
                     AssetScheme.BINARY_CATALOG,
