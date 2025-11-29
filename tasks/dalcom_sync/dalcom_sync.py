@@ -126,7 +126,8 @@ class DalcomSync(commands.Cog):
                 for music in dalcom_data["MusicData"]:
                     if music["isHidden"]:
                         continue
-
+                    
+                    print(music["code"])
                     current_key = (
                         self.bot.info_from_file[game]
                         .setdefault(str(music["code"]), {})
