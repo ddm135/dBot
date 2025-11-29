@@ -8,6 +8,7 @@ from datetime import time
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import aiohttp
 import discord
 from discord.ext import commands, tasks
 from googleapiclient.http import MediaFileUpload
@@ -205,6 +206,8 @@ class DalcomSync(commands.Cog):
                 self.LOGGER.info(
                     "%s server is unavailable. Skipping...", game_details["name"]
                 )
+                continue
+            except aiohttp.ClientConnectorDNSError:
                 continue
             except Exception as e:
                 self.LOGGER.exception(str(e))
