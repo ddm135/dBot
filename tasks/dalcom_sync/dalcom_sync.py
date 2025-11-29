@@ -168,6 +168,8 @@ class DalcomSync(commands.Cog):
                 for path in original_paths:
                     print(path)
                     while not path.is_dir() or path.name != "Assets":
+                        if path == path.parent:
+                            continue
                         path = path.parent
                         print(path)
                     path = path.parent
