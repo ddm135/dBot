@@ -114,7 +114,7 @@ class DalcomSync(commands.Cog):
                     dalcom_data[data_file] = data
 
                 music_info_file = Path(f"data/MusicData/{game}.json")
-                if not self.bot.info_from_file[game]:
+                if not self.bot.info_from_file.get(game):
                     if music_info_file.exists():
                         with open(music_info_file, "r", encoding="utf-8") as f:
                             self.bot.info_from_file[game] = json.load(f)
