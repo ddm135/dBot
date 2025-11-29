@@ -363,7 +363,7 @@ GAMES: dict[str, "GameDetails"] = {
         "color": 0xB72476,
         "info": {
             "spreadsheetId": "1QSCRXKtiwoMTLV8knHC_o4NwV3UZM6ZvL-l9ZCPxoRM",
-            "range": "Official Local Version!A2:E",
+            "range": "Official Local Version!A2:C",
             "columns": InfoColumns.NO_SSL.value,
             "replaceGrid": {
                 "sheetId": 0,

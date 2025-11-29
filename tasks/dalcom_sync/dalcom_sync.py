@@ -252,7 +252,8 @@ class DalcomSync(commands.Cog):
                             f"{border_name.replace(r"<", r"\<")}\n<{link}>"
                         )
 
-            except (json.JSONDecodeError, binascii.Error, ValueError):
+            except (json.JSONDecodeError, binascii.Error, ValueError) as e:
+                self.LOGGER.exception(str(e))
                 self.LOGGER.info(
                     "%s server is unavailable. Skipping...", game_details["name"]
                 )
