@@ -165,6 +165,7 @@ class DalcomSync(commands.Cog):
                     json.dump(self.bot.info_from_file[game], f, indent=4)
 
                 for path in original_paths:
+                    print(path)
                     while not path.is_dir() or path.name != "Assets":
                         path = path.parent
                     path = path.parent
