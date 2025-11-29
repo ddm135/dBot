@@ -6,6 +6,7 @@ import binascii
 import json
 import logging
 import shutil
+from collections import defaultdict
 from datetime import time
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -55,8 +56,6 @@ class DalcomSync(commands.Cog):
 
         for game, game_details in GAMES.items():
             try:
-                if not self.bot.basic.get(game):
-                    continue
                 ajs_path = Path(f"data/dalcom/{game}/a.json")
                 if ajs_path.exists():
                     with open(ajs_path, "r", encoding="utf-8") as f:
@@ -65,7 +64,10 @@ class DalcomSync(commands.Cog):
                     stored_ajs = None
 
                 self.LOGGER.info("Downloading Dalcom data: %s...", game_details["name"])
-                ajs = await ss_cog.get_a_json(game)
+                if "lastVersion" in game_details:
+                    ajs: defaultdict = defaultdict(dict)
+                else:
+                    ajs = await ss_cog.get_a_json(game)
                 refresh = False
 
                 if ajs["code"] != 1000:

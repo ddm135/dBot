@@ -9,23 +9,24 @@ from .embeds import InfoEmbed
 
 if TYPE_CHECKING:
     from dBot import dBot
-    from statics.types import GameDetails
 
 
 class InfoView(discord.ui.View):
     def __init__(
         self,
         message_id: discord.Message,
-        game_details: "GameDetails",
+        game: str,
         artist: str | None,
         songs: list[list[str]],
+        info: dict[str, dict[str, dict[str, str]]],
         user: discord.User | discord.Member,
         icon: str | Path | None,
     ) -> None:
         self.message = message_id
-        self.game_details = game_details
+        self.game = game
         self.artist = artist
         self.songs = songs
+        self.info = info
         self.user = user
         self.icon = icon
         self.current = 1
@@ -42,9 +43,10 @@ class InfoView(discord.ui.View):
         await itr.followup.edit_message(
             message_id=self.message.id,
             embed=InfoEmbed(
-                self.game_details,
+                self.game,
                 self.artist,
                 self.songs,
+                self.info,
                 self.icon,
                 self.current,
                 self.max,

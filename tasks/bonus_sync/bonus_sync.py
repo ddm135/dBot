@@ -48,15 +48,11 @@ class BonusSync(commands.Cog):
         bonus_start_index = bonus_columns.index("bonus_start")
         bonus_end_index = bonus_columns.index("bonus_end")
         bonus_amount_index = bonus_columns.index("bonus_amount")
-        duration_index = bonus_columns.index("duration")
         date_format = game_details["dateFormat"]
         timezone = game_details["timezone"]
 
         data: dict[str, list[list]] = {}
         for raw_row in bonus:
-            if len(raw_row) < len(bonus_columns):
-                continue
-
             row: list = raw_row
             row[bonus_start_index] = datetime.strptime(
                 raw_row[bonus_start_index], date_format
@@ -64,17 +60,6 @@ class BonusSync(commands.Cog):
             row[bonus_end_index] = datetime.strptime(
                 raw_row[bonus_end_index], date_format
             ).replace(tzinfo=timezone)
-            row[duration_index] = (
-                ""
-                if not raw_row[duration_index]
-                else (
-                    raw_row[duration_index]
-                    if ":" in raw_row[duration_index]
-                    or "N/A" in raw_row[duration_index]
-                    else f"{int(raw_row[duration_index]) // 60}:"
-                    f"{int(raw_row[duration_index]) % 60:02d}"
-                )
-            )
             row[bonus_amount_index] = int(raw_row[bonus_amount_index].replace("%", ""))
             data.setdefault(row[artist_name_index], []).append(row)
 

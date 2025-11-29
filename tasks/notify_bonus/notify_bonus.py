@@ -75,10 +75,10 @@ class NotifyBonus(commands.Cog):
                 continue
 
             bonus_columns = bonus_details["columns"]
+            song_id_index = bonus_columns.index("song_id")
             member_name_index = bonus_columns.index("member_name")
             album_name_index = bonus_columns.index("album_name")
             song_name_index = bonus_columns.index("song_name")
-            duration_index = bonus_columns.index("duration")
             bonus_start_index = bonus_columns.index("bonus_start")
             bonus_end_index = bonus_columns.index("bonus_end")
             bonus_amount_index = bonus_columns.index("bonus_amount")
@@ -221,7 +221,9 @@ class NotifyBonus(commands.Cog):
                             .replace(r"_", r"\_")
                             .replace(r"`", r"\`")
                         )
-                        song_duration = bonus[duration_index]
+                        song_duration = self.bot.info_from_file[game][
+                            bonus[song_id_index]
+                        ]["sound"]["duration"]
 
                         if song_end == current_date and end_check:
                             msg = (

@@ -2,38 +2,38 @@
 
 import math
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 import discord
 
-from .commons import STEP
+from statics.consts import GAMES
 
-if TYPE_CHECKING:
-    from statics.types import GameDetails
+from .commons import STEP
 
 
 class InfoEmbed(discord.Embed):
     def __init__(
         self,
-        game_details: "GameDetails",
+        game: str,
         artist: str | None,
         songs: list[list[str]],
+        info: dict[str, dict[str, dict[str, str]]],
         icon: str | Path | None,
         current_page: int = 1,
         max_page: int | None = None,
     ) -> None:
+        game_details = GAMES[game]
         end = current_page * STEP
         start = end - STEP
         filtered_songs = songs[start:end]
         info_columns = game_details["info"]["columns"]
-        duration_index = info_columns.index("duration")
+        song_id_index = info_columns.index("song_id")
         artist_name_index = info_columns.index("artist_name")
         song_name_index = info_columns.index("song_name")
 
         super().__init__(
             title="Songs",
             description="\n".join(
-                f"({song[duration_index]}) "
+                f"({info[song[song_id_index]]["sound"]["duration"]}) "
                 f"{(f"{song[artist_name_index].replace(r"*", r"\*").replace(r"_", r"\_")
                     .replace(r"`", r"\`")} - " if not artist else "")}"
                 f"**{(song[song_name_index].replace(r"*", r"\*").replace(r"_", r"\_")

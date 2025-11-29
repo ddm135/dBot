@@ -49,7 +49,7 @@ class Info(commands.Cog):
 
         await itr.response.defer()
         game_details = GAMES[game_choice.value]
-        duration_index = game_details["info"]["columns"].index("duration")
+        song_id_index = game_details["info"]["columns"].index("song_id")
 
         icon: str | Path | None
         if not artist_choice:
@@ -66,13 +66,32 @@ class Info(commands.Cog):
                 return await itr.followup.send("Artist not found.")
             icon = self.bot.emblem[game_choice.value][artist_choice]
 
-        sorted_songs = sorted(songs, key=lambda x: x[duration_index])
+        sorted_songs = sorted(
+            songs,
+            key=lambda x: self.bot.info_from_file[game_choice.value][x[song_id_index]][
+                "sound"
+            ]["duration"],
+        )
         msg = await itr.followup.send(
-            embed=InfoEmbed(game_details, artist_choice, sorted_songs, icon),
+            embed=InfoEmbed(
+                game_choice.value,
+                artist_choice,
+                sorted_songs,
+                self.bot.info_from_file[game_choice.value],
+                icon,
+            ),
             files=[discord.File(icon)] if isinstance(icon, Path) else [],
             wait=True,
         )
-        view = InfoView(msg, game_details, artist_choice, sorted_songs, itr.user, icon)
+        view = InfoView(
+            msg,
+            game_choice.value,
+            artist_choice,
+            sorted_songs,
+            self.bot.info_from_file[game_choice.value],
+            itr.user,
+            icon,
+        )
         await msg.edit(view=view)
 
 

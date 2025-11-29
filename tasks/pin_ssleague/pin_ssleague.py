@@ -97,7 +97,6 @@ class PinSSLeague(commands.Cog):
         info_columns = game_details["info"]["columns"]
         artist_name_index = info_columns.index("artist_name")
         song_name_index = info_columns.index("song_name")
-        duration_index = info_columns.index("duration")
         skills_index = (
             info_columns.index("skills")
             if game_details["info"]["columns"] == InfoColumns.SSL_WITH_SKILLS.value
@@ -106,7 +105,7 @@ class PinSSLeague(commands.Cog):
 
         artist_name = ssl_song[artist_name_index]
         song_name = ssl_song[song_name_index]
-        duration = ssl_song[duration_index]
+        duration = self.bot.info_from_file[game][str(song_id)]["sound"]["duration"]
         skills = ssl_song[skills_index] if skills_index is not None else None
 
         results = await cog.get_attributes(

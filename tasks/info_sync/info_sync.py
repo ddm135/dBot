@@ -48,21 +48,10 @@ class InfoSync(commands.Cog):
         artist_name_index = info_columns.index("artist_name")
         song_name_index = info_columns.index("song_name")
         song_id_index = info_columns.index("song_id")
-        duration_index = info_columns.index("duration")
 
         info_by_name: dict[str, dict[str, list[str]]] = {}
         info_by_id: dict[str, list[str]] = {}
         for row in info:
-            if len(row) < len(info_columns):
-                continue
-
-            row[duration_index] = (
-                row[duration_index]
-                if ":" in row[duration_index]
-                else f"{int(row[duration_index]) // 60}:"
-                f"{int(row[duration_index]) % 60:02d}"
-            )
-
             info_by_name.setdefault(row[artist_name_index], {})[
                 row[song_name_index]
             ] = row
