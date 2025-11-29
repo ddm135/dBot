@@ -39,10 +39,6 @@ class BasicSync(commands.Cog):
             await self.get_basic_data(game, game_details)
 
     async def get_basic_data(self, game: str, game_details: "GameDetails") -> None:
-        if not (query := game_details.get("lookupQuery")) or not (
-            game_details.get("manifestUrl")
-        ):
-            return
         self.LOGGER.info("Downloading basic data: %s...", game_details["name"])
         cog: "SuperStar" = self.bot.get_cog("SuperStar")  # type: ignore[assignment]
 
@@ -51,6 +47,7 @@ class BasicSync(commands.Cog):
                 version = game_details["lastVersion"]
                 iconUrl = game_details["iconUrl"]
             else:
+                query = game_details.get("lookupQuery")
                 async with session.get(
                     f"https://itunes.apple.com/lookup?{query}",
                 ) as r:
