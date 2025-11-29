@@ -13,6 +13,7 @@ from statics.types import BasicDetails
 
 if TYPE_CHECKING:
     from dBot import dBot
+    from helpers.superstar import SuperStar
     from statics.types import GameDetails
 
 
@@ -37,10 +38,11 @@ class BasicSync(commands.Cog):
 
     async def get_basic_data(self, game: str, game_details: "GameDetails") -> None:
         if not (query := game_details.get("lookupQuery")) or not (
-            manifest_url := game_details.get("manifestUrl")
+            game_details.get("manifestUrl")
         ):
             return
         self.LOGGER.info("Downloading basic data: %s...", game_details["name"])
+        cog: "SuperStar" = self.bot.get_cog("SuperStar")  # type: ignore[assignment]
 
         async with aiohttp.ClientSession() as session:
             async with session.get(
@@ -52,13 +54,7 @@ class BasicSync(commands.Cog):
                 version = json_result["results"][0]["version"]
                 iconUrl = json_result["results"][0]["artworkUrl100"]
 
-            while True:
-                async with session.get(manifest_url.format(version=version)) as r:
-                    manifest = await r.json(content_type=None)
-                if manifest["ActiveVersion_Android"] == version:
-                    break
-                version = manifest["ActiveVersion_Android"]
-
+            manifest = await cog.get_manifest(game, version)
             self.bot.basic[game] = BasicDetails(
                 version=version,
                 iconUrl=iconUrl,

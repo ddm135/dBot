@@ -112,43 +112,44 @@ class ForwardUpdate(commands.Cog):
                 NEXT_UPDATE_CHANNEL
             ) or await self.bot.fetch_channel(NEXT_UPDATE_CHANNEL)
             assert isinstance(channel, discord.TextChannel)
-            await channel.send(
+            content = (
                 f"{game_details["name"]}: Forwarding from <#{source_id}> "
                 f"on <t:{int(start_time.timestamp())}:f>"
             )
+            async for message in channel.history(after=start_time - timedelta(days=7)):
+                if content == message.content:
+                    break
+            else:
+                await channel.send(content)
 
             while True:
                 await asyncio.sleep(60)
                 if datetime.now(tz=game_details["timezone"]) >= start_time:
                     break
         else:
-            if not (manifestUrl := game_details.get("manifestUrl")):
+            if not (game_details.get("manifestUrl")):
                 self.queue.pop(game, None)
                 return
 
             source_id = forward_details["source_maint"]
             cog: "SuperStar" = self.bot.get_cog("SuperStar")  # type: ignore[assignment]
-            async with aiohttp.ClientSession() as session:
-                while True:
-                    await asyncio.sleep(60)
-                    async with session.get(
-                        manifestUrl.format(version=self.bot.basic[game]["version"])
-                    ) as r:
-                        manifest = await r.json(content_type=None)
+            while True:
+                await asyncio.sleep(60)
+                try:
+                    manifest = await cog.get_manifest(game)
                     if manifest["MaintenanceUrl"]:
                         continue
 
-                    try:
-                        ajs = await cog.get_a_json(self.bot.basic[game])
-                        if ajs["code"] == 1000:
-                            break
-                    except (
-                        aiohttp.ConnectionTimeoutError,
-                        json.JSONDecodeError,
-                        binascii.Error,
-                        ValueError,
-                    ):
-                        continue
+                    ajs = await cog.get_a_json(game)
+                    if ajs["code"] == 1000:
+                        break
+                except (
+                    aiohttp.ConnectionTimeoutError,
+                    json.JSONDecodeError,
+                    binascii.Error,
+                    ValueError,
+                ):
+                    continue
 
         target_channels = []
         for channel_id in forward_details["target"].values():

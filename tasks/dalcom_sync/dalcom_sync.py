@@ -52,7 +52,7 @@ class DalcomSync(commands.Cog):
 
         for game, game_details in GAMES.items():
             try:
-                if not (basic_details := self.bot.basic.get(game)):
+                if not self.bot.basic.get(game):
                     continue
                 ajs_path = Path(f"data/dalcom/{game}/a.json")
                 if ajs_path.exists():
@@ -62,7 +62,7 @@ class DalcomSync(commands.Cog):
                     stored_ajs = None
 
                 self.LOGGER.info("Downloading Dalcom data: %s...", game_details["name"])
-                ajs = await ss_cog.get_a_json(basic_details)
+                ajs = await ss_cog.get_a_json(game)
                 refresh = False
 
                 if ajs["code"] != 1000:
@@ -190,6 +190,8 @@ class DalcomSync(commands.Cog):
                             border_file_path = await ss_cog.extract_file_from_bundle(
                                 game, border_key
                             )
+                            if not border_file_path:
+                                continue
                             border_media = MediaFileUpload(border_file_path)
                         except KeyError:
                             continue

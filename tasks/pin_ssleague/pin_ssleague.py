@@ -61,24 +61,22 @@ class PinSSLeague(commands.Cog):
             try:
                 match credentials["provider"]:
                     case 0 | 1 if not credentials["isSNS"]:
-                        oid, key = await cog.login_classic(
-                            self.bot.basic[game], credentials
-                        )
+                        oid, key = await cog.login_classic(game, credentials)
                     case 0 if credentials["isSNS"] and (
                         target_audience := game_details.get("target_audience")
                     ):
                         oid, key = await cog.login_google(
-                            self.bot.basic[game], credentials, target_audience
+                            game, credentials, target_audience
                         )
                     case 3 if credentials["isSNS"] and (
                         authorization := game_details.get("authorization")
                     ):
                         oid, key = await cog.login_dalcom(
-                            self.bot.basic[game], credentials, authorization
+                            game, credentials, authorization
                         )
                     case _:
                         return
-                ssleague = await cog.get_ssleague(self.bot.basic[game], oid, key)
+                ssleague = await cog.get_ssleague(game, oid, key)
             except aiohttp.ClientError as e:
                 self.LOGGER.exception(str(e))
                 await asyncio.sleep(backoff.delay())

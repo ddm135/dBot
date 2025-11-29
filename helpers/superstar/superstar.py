@@ -24,16 +24,29 @@ from .types import SuperStarHeaders
 if TYPE_CHECKING:
     from dBot import dBot
     from helpers.cryptographic import Cryptographic
-    from statics.types import BasicDetails
 
 
 class SuperStar(commands.Cog):
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
 
-    async def get_a_json(self, basic_details: "BasicDetails") -> dict:
+    async def get_manifest(self, game: str, version: str | None = None) -> dict:
+        async with aiohttp.ClientSession() as session:
+            while True:
+                async with session.get(
+                    GAMES[game]["manifestUrl"].format(
+                        version=version or self.bot.basic[game]["version"]
+                    )
+                ) as r:
+                    manifest = await r.json(content_type=None)
+                    if manifest["ActiveVersion_Android"] == version:
+                        return manifest
+                    version = manifest["ActiveVersion_Android"]
+
+    async def get_a_json(self, game: str) -> dict:
         headers = SuperStarHeaders()
         iv = headers["X-SuperStar-AES-IV"]
+        basic_details = self.bot.basic[game]
 
         async with aiohttp.ClientSession() as session:
             cog: "Cryptographic" = self.bot.get_cog(
@@ -50,11 +63,10 @@ class SuperStar(commands.Cog):
                 ajs = await self.read_dalcom_json(r, iv)
         return ajs
 
-    async def login_classic(
-        self, basic_details: "BasicDetails", credentials: dict
-    ) -> tuple[int, str]:
+    async def login_classic(self, game: str, credentials: dict) -> tuple[int, str]:
         headers = SuperStarHeaders()
         iv = headers["X-SuperStar-AES-IV"]
+        basic_details = self.bot.basic[game]
 
         async with aiohttp.ClientSession() as session:
             cog: "Cryptographic" = self.bot.get_cog(
@@ -79,7 +91,7 @@ class SuperStar(commands.Cog):
         return oid, key
 
     async def login_google(
-        self, basic_details: "BasicDetails", credentials: dict, target_audience: str
+        self, game: str, credentials: dict, target_audience: str
     ) -> tuple[int, str]:
         gredentials = IDTokenCredentials.from_service_account_file(
             filename=credentials["service_account"],
@@ -90,6 +102,7 @@ class SuperStar(commands.Cog):
 
         headers = SuperStarHeaders()
         iv = headers["X-SuperStar-AES-IV"]
+        basic_details = self.bot.basic[game]
 
         async with aiohttp.ClientSession() as session:
             cog: "Cryptographic" = self.bot.get_cog(
@@ -115,10 +128,11 @@ class SuperStar(commands.Cog):
         return oid, key
 
     async def login_dalcom(
-        self, basic_details: "BasicDetails", credentials: dict, authorization: str
+        self, game: str, credentials: dict, authorization: str
     ) -> tuple[int, str]:
         headers = SuperStarHeaders()
         iv = headers["X-SuperStar-AES-IV"]
+        basic_details = self.bot.basic[game]
 
         async with aiohttp.ClientSession() as session:
             async with session.post(
@@ -158,11 +172,10 @@ class SuperStar(commands.Cog):
         key = account["invoke"][0]["params"][0]
         return oid, key
 
-    async def get_ssleague(
-        self, basic_details: "BasicDetails", oid: int, key: str
-    ) -> dict:
+    async def get_ssleague(self, game: str, oid: int, key: str) -> dict:
         headers = SuperStarHeaders()
         iv = headers["X-SuperStar-AES-IV"]
+        basic_details = self.bot.basic[game]
 
         async with aiohttp.ClientSession() as session:
             cog: "Cryptographic" = self.bot.get_cog(
@@ -327,9 +340,7 @@ class SuperStar(commands.Cog):
         xapk_folder_path = Path(f"data/xapks/{game}")
         xapk_folder_path.mkdir(parents=True, exist_ok=True)
         xapks = list(
-            xapk_folder_path.rglob(
-                f"*{self.bot.basic[game]["version"]}*.xapk"
-            )
+            xapk_folder_path.rglob(f"*{self.bot.basic[game]["version"]}*.xapk")
         )
         if xapks:
             xapk_path = xapks[0]
