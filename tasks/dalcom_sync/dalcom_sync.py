@@ -168,8 +168,11 @@ class DalcomSync(commands.Cog):
                     print(path)
                     while not path.is_dir() or path.name != "Assets":
                         path = path.parent
+                        print(path)
                     path = path.parent
+                    print(path)
                     shutil.rmtree(path)
+                    print()
 
                 if game_details["assetScheme"] not in (
                     AssetScheme.BINARY_CATALOG,
