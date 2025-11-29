@@ -396,7 +396,7 @@ GAMES: dict[str, "GameDetails"] = {
             "https://superstar-kangdaniel.s3.amazonaws.com"
             "/version/real/manifest/{version}.txt"
         ),
-        "lastVersion": "4.0.1",
+        "lastVersion": "4.0.0",
         "packageName": "com.dalcomsoft.kangdaniel",
         "assetScheme": AssetScheme.JSON_URL,
     },
