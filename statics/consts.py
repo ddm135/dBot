@@ -722,28 +722,6 @@ GAMES: dict[str, "GameDetails"] = {
             "range": "Songs!A2:F",
             "columns": InfoColumns.SSL_WITH_SKILLS.value,
         },
-        "bonus": {
-            "spreadsheetId": "1Ng57BGCDj025bxwCBbQulYFhRjS5runy5HnbStY_xSw",
-            "range": "Bonuses!A2:J",
-            "columns": BONUS_COLUMNS,
-            "replaceGrid": {
-                "sheetId": 126522384,
-                "startRowIndex": 1,
-                "startColumnIndex": 2,
-                "endColumnIndex": 3,
-            },
-        },
-        "ping": {
-            "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-            "range": "LAPONE!C1:D",
-            "columns": PING_COLUMNS,
-            "replaceGrid": {
-                "sheetId": 0,
-                "startRowIndex": 0,
-                "startColumnIndex": 3,
-                "endColumnIndex": 4,
-            },
-        },
         "emblem": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
             "range": "LAPONE!A1:B",
@@ -755,13 +733,6 @@ GAMES: dict[str, "GameDetails"] = {
             TEST_GUILD: 1340868523957813348,
         },
         "pinRoles": {},
-        "forward": {
-            "source_maint": 1415366726656458763,
-            "target": {
-                SSRG_GUILD: 1039132737979813908,
-                TEST_GUILD: 1340868523957813348,
-            },
-        },
         "dateFormat": "%Y-%m-%d",
         "timezone": TIMEZONES["JST"],
         "manifestUrl": (

@@ -339,8 +339,8 @@ class SuperStar(commands.Cog):
         for file in xapk_folder_path.iterdir():
             if file.is_file():
                 file.unlink()
-        async with AsyncSession() as cffi_session:
-            response = await cffi_session.get(
+        async with AsyncSession() as session:
+            response = await session.get(
                 APKPURE_URL.format(package_name=GAMES[game]["packageName"]),
                 impersonate="chrome",
                 allow_redirects=False,
