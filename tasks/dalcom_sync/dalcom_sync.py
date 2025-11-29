@@ -4,12 +4,14 @@
 import binascii
 import json
 import logging
+import shutil
 from datetime import time
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import aiohttp
 import discord
+import soundfile
 from discord.ext import commands, tasks
 from googleapiclient.http import MediaFileUpload
 
@@ -89,7 +91,8 @@ class DalcomSync(commands.Cog):
                     data_files.append("SeqData")
                 if game_details["assetScheme"] == AssetScheme.JSON_URL:
                     data_files.append("URLs")
-                lcd = tmd = ttd = msd = seq = None
+                dalcom_data = {}
+
                 for data_file in data_files:
                     data_path = Path(f"data/dalcom/{game}/{data_file}.json")
                     if (
@@ -108,33 +111,71 @@ class DalcomSync(commands.Cog):
                     else:
                         with open(data_path, "r", encoding="utf-8") as f:
                             data = json.load(f)
-                    match data_file:
-                        case "LocaleData":
-                            lcd = data
-                        case "ThemeData":
-                            tmd = data
-                        case "ThemeTypeData":
-                            ttd = data
-                        case "MusicData":
-                            msd = data
-                        case "SeqData":
-                            seq = data
-                        case _:
-                            pass
+                    dalcom_data[data_file] = data
 
-                if not (lcd and tmd and ttd) or game_details["assetScheme"] not in (
+                music_info_file = Path(f"data/MusicData/{game}.json")
+                if not self.bot.info_from_file[game]:
+                    if music_info_file.exists():
+                        with open(music_info_file, "r", encoding="utf-8") as f:
+                            self.bot.info_from_file[game] = json.load(f)
+                    else:
+                        self.bot.info_from_file[game] = {}
+
+                original_paths: set[Path] = set()
+                for music in dalcom_data["MusicData"]:
+                    current_key = (
+                        self.bot.info_from_file[game]
+                        .setdefault(str(music["code"]), {})
+                        .setdefault("sound", {})
+                        .get("key")
+                    )
+                    found_key = music["sound"]
+                    if current_key and current_key == found_key:
+                        continue
+
+                    results = await ss_cog.get_attributes(
+                        game, "MusicData", music["code"], {"sound": True}
+                    )
+                    src_path = results["sound"]
+                    dst_path = Path(f"data/MusicData/{game}/{music["code"]}.ogg")
+                    dst_path.parent.mkdir(parents=True, exist_ok=True)
+
+                    if isinstance(src_path, Path):
+                        shutil.copyfile(src_path, dst_path)
+                        original_paths.add(src_path)
+                    else:
+                        async with aiohttp.ClientSession() as session:
+                            async with session.get(src_path) as r:
+                                with open(dst_path, "wb") as f:
+                                    f.write(await r.read())
+
+                    duration = soundfile.info(dst_path)._duration_str.partition(".")[0]
+                    self.bot.info_from_file[game][str(music["code"])]["sound"] = {
+                        "duration": duration,
+                        "key": found_key,
+                    }
+
+                with open(music_info_file, "w", encoding="utf-8") as f:
+                    json.dump(self.bot.info_from_file[game], f, indent=4)
+
+                for path in original_paths:
+                    while not path.is_dir() or path.name != "Assets":
+                        path = path.parent
+                    shutil.rmtree(path)
+
+                if game_details["assetScheme"] not in (
                     AssetScheme.BINARY_CATALOG,
                     AssetScheme.JSON_CATALOG,
                 ):
                     continue
 
                 borders = {}
-                for border in ttd:
+                for border in dalcom_data["ThemeTypeData"]:
                     if not border["code"]:
                         continue
 
                     suffixes = {"_Large": ""}
-                    for theme in tmd:
+                    for theme in dalcom_data["ThemeData"]:
                         if theme["themeTypeCode"] == border["code"]:
                             if theme["nameImageZoom"]:
                                 suffixes["_Zoom"] = "z"
@@ -145,7 +186,7 @@ class DalcomSync(commands.Cog):
                     if not theme["limitedType"]:
                         continue
 
-                    for locale in lcd:
+                    for locale in dalcom_data["LocaleData"]:
                         if theme["localeName"] == locale["code"]:
                             name = locale["enUS"]
                             break
