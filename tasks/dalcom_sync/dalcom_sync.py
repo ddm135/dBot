@@ -8,6 +8,7 @@ import shutil
 from collections import defaultdict
 from datetime import time
 from pathlib import Path
+from pprint import pprint
 from typing import TYPE_CHECKING
 
 import aiohttp
@@ -194,6 +195,11 @@ class DalcomSync(commands.Cog):
                             "count": seq_obj.count,
                             "key": found_key,
                         }
+                        pprint(
+                            self.bot.info_from_file[game][str(music["code"])]["seq"][
+                                difficulty.replace("seq", "")
+                            ]
+                        )
 
                 if "SeqData" in dalcom_data:
                     for seq in dalcom_data["SeqData"]:
@@ -233,6 +239,11 @@ class DalcomSync(commands.Cog):
                             "count": seq_obj.count,
                             "key": found_key,
                         }
+                        pprint(
+                            self.bot.info_from_file[game][str(seq["linkedMusic"])][
+                                "seq"
+                            ][seq["seqLevel"]]
+                        )
 
                 with open(music_info_file, "w", encoding="utf-8") as f:
                     json.dump(self.bot.info_from_file[game], f, indent=4)
