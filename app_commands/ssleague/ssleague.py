@@ -150,6 +150,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             song_id = int(ssl_song[info_columns.index("song_id")])
 
         duration = self.bot.info_from_file[game][str(song_id)]["sound"]["duration"]
+        note_count = self.bot.info_from_file[game][str(song_id)]["seq"]
         skills = (
             ssl_song[info_columns.index("skills")]
             if game_details["info"]["columns"] == InfoColumns.SSL_WITH_SKILLS.value
@@ -193,6 +194,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             artist_name,
             song_name,
             duration,
+            note_count,
             album,
             icon,
             color,

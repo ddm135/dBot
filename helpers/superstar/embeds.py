@@ -10,6 +10,7 @@ class SSLeagueEmbed(discord.Embed):
         artist_name: str,
         song_name: str,
         duration: str,
+        note_count: dict,
         album: str | Path | None,
         icon: str | Path | None,
         color: int,
@@ -31,8 +32,14 @@ class SSLeagueEmbed(discord.Embed):
         )
 
         self.add_field(name="Duration", value=duration)
+        self.add_field(
+            name="Note Count",
+            value=" / ".join(
+                str(difficulty["count"]) for difficulty in note_count.values()
+            ),
+        )
         if skills:
-            self.add_field(name="Skill Order", value=skills)
+            self.add_field(name="Skill Order", value=skills, inline=False)
 
         self.add_field(
             name="Artist Last Appearance",
