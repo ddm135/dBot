@@ -96,8 +96,8 @@ class InfoColumns(Enum):
         "song_id",
         "_",
         "artist_name",
-        "_",
-        "_",
+        "member_name",
+        "album_name",
         "song_name",
     )
 

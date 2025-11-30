@@ -52,7 +52,10 @@ class InfoSync(commands.Cog):
         info_by_name: dict[str, dict[str, list[str]]] = {}
         info_by_id: dict[str, list[str]] = {}
         for row in info:
-            if not row:
+            if not row or (
+                "album_name" in info_columns
+                and not row[info_columns.index("album_name")]
+            ):
                 continue
             info_by_name.setdefault(row[artist_name_index], {})[
                 row[song_name_index]
