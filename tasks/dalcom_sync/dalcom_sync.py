@@ -19,6 +19,7 @@ from googleapiclient.http import MediaFileUpload
 from statics.consts import GAMES, AssetScheme
 
 from .commons import BORDER_CHANNEL, BORDER_FOLDER, FOLDER_MIME
+from .types import Seq
 
 if TYPE_CHECKING:
     from googleapiclient._apis.drive.v3 import File
@@ -115,6 +116,7 @@ class DalcomSync(commands.Cog):
                             data = json.load(f)
                     dalcom_data[data_file] = data
 
+                # Retrieve music info
                 music_info_file = Path(f"data/MusicData/{game}.json")
                 if not self.bot.info_from_file.get(game):
                     if music_info_file.exists():
@@ -142,20 +144,10 @@ class DalcomSync(commands.Cog):
                         game, "MusicData", music["code"], {"sound": True}
                     )
                     src_path = results["sound"]
+                    if not src_path:
+                        continue
                     dst_path = Path(f"data/MusicData/{game}/{music["code"]}.ogg")
-                    dst_path.parent.mkdir(parents=True, exist_ok=True)
-
-                    if isinstance(src_path, Path):
-                        shutil.copyfile(src_path, dst_path)
-                        while not src_path.is_dir() or src_path.name != "Assets":
-                            src_path = src_path.parent
-                        src_path = src_path.parent
-                        bundle_folders.add(src_path)
-                    else:
-                        async with aiohttp.ClientSession() as session:
-                            async with session.get(src_path) as r:
-                                with open(dst_path, "wb") as f:
-                                    f.write(await r.read())
+                    await self.copy_file(src_path, dst_path, bundle_folders)
 
                     duration = int(soundfile.info(dst_path).duration)
                     minutes = duration // 60
@@ -165,12 +157,91 @@ class DalcomSync(commands.Cog):
                         "key": found_key,
                     }
 
+                    if "SeqData" in dalcom_data:
+                        continue
+
+                    for difficulty, extension in {
+                        "seqEasy": "_4.seq",
+                        "seqNormal": "_7.seq",
+                        "seqHard": "_13.seq",
+                    }.items():
+                        current_key = (
+                            self.bot.info_from_file[game]
+                            .setdefault(str(music["code"]), {})
+                            .setdefault("seq", {})
+                            .setdefault(difficulty.replace("seq", ""), {})
+                            .get("key")
+                        )
+                        found_key = music[difficulty]
+                        if current_key and current_key == found_key:
+                            continue
+
+                        results = await ss_cog.get_attributes(
+                            game, "MusicData", music["code"], {difficulty: True}
+                        )
+                        src_path = results[difficulty]
+                        if not src_path:
+                            continue
+                        dst_path = Path(
+                            f"data/MusicData/{game}/{music['code']}{extension}"
+                        )
+                        await self.copy_file(src_path, dst_path, bundle_folders)
+
+                        seq_obj = Seq(dst_path)
+                        self.bot.info_from_file[game][str(music["code"])]["seq"][
+                            difficulty.replace("seq", "")
+                        ] = {
+                            "count": seq_obj.count,
+                            "key": found_key,
+                        }
+
+                if "SeqData" in dalcom_data:
+                    for seq in dalcom_data["SeqData"]:
+                        results = await ss_cog.get_attributes(
+                            game, "MusicData", seq["linkedMusic"], {"isHidden": False}
+                        )
+                        if results["isHidden"]:
+                            continue
+
+                        current_key = (
+                            self.bot.info_from_file[game]
+                            .setdefault(str(seq["linkedMusic"]), {})
+                            .setdefault("seq", {})
+                            .setdefault(seq["seqLevel"], {})
+                            .get("key")
+                        )
+                        found_key = seq["seqPath"]
+                        if current_key and current_key == found_key:
+                            continue
+
+                        results = await ss_cog.get_attributes(
+                            game, "SeqData", seq["code"], {"seqPath": True}
+                        )
+                        src_path = results["seqPath"]
+                        if not src_path:
+                            continue
+                        dst_path = Path(
+                            f"data/MusicData/{game}"
+                            f"/{seq["linkedMusic"]}_{seq["seqLevel"]}.seq"
+                        )
+                        await self.copy_file(src_path, dst_path, bundle_folders)
+
+                        seq_obj = Seq(dst_path)
+                        self.bot.info_from_file[game][str(seq["linkedMusic"])]["seq"][
+                            seq["seqLevel"]
+                        ] = {
+                            "count": seq_obj.count,
+                            "key": found_key,
+                        }
+
                 with open(music_info_file, "w", encoding="utf-8") as f:
                     json.dump(self.bot.info_from_file[game], f, indent=4)
 
                 for path in bundle_folders:
                     shutil.rmtree(path)
 
+                # Upload borders for games using catalogs
+                # TODO: Check if key has been changed
                 if game_details["assetScheme"] not in (
                     AssetScheme.BINARY_CATALOG,
                     AssetScheme.JSON_CATALOG,
@@ -261,6 +332,22 @@ class DalcomSync(commands.Cog):
             except Exception as e:
                 self.LOGGER.exception(str(e))
                 continue
+
+    @staticmethod
+    async def copy_file(src: str | Path, dst: Path, bundle_folders: set[Path]):
+        dst.parent.mkdir(parents=True, exist_ok=True)
+
+        if isinstance(src, Path):
+            shutil.copyfile(src, dst)
+            while not src.is_dir() or src.name != "Assets":
+                src = src.parent
+            src = src.parent
+            bundle_folders.add(src)
+        else:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(src) as r:
+                    with open(dst, "wb") as f:
+                        f.write(await r.read())
 
 
 async def setup(bot: "dBot") -> None:
