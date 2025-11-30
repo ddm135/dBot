@@ -8,7 +8,6 @@ import shutil
 from collections import defaultdict
 from datetime import time
 from pathlib import Path
-from pprint import pprint
 from typing import TYPE_CHECKING
 
 import aiohttp
@@ -138,25 +137,23 @@ class DalcomSync(commands.Cog):
                         .get("key")
                     )
                     found_key = music["sound"]
-                    if current_key and current_key == found_key:
-                        continue
+                    if not current_key or current_key != found_key:
+                        results = await ss_cog.get_attributes(
+                            game, "MusicData", music["code"], {"sound": True}
+                        )
+                        src_path = results["sound"]
+                        if not src_path:
+                            continue
+                        dst_path = Path(f"data/MusicData/{game}/{music["code"]}.ogg")
+                        await self.copy_file(src_path, dst_path, bundle_folders)
 
-                    results = await ss_cog.get_attributes(
-                        game, "MusicData", music["code"], {"sound": True}
-                    )
-                    src_path = results["sound"]
-                    if not src_path:
-                        continue
-                    dst_path = Path(f"data/MusicData/{game}/{music["code"]}.ogg")
-                    await self.copy_file(src_path, dst_path, bundle_folders)
-
-                    duration = int(soundfile.info(dst_path).duration)
-                    minutes = duration // 60
-                    seconds = str(duration % 60).zfill(2)
-                    self.bot.info_from_file[game][str(music["code"])]["sound"] = {
-                        "duration": f"{minutes}:{seconds}",
-                        "key": found_key,
-                    }
+                        duration = int(soundfile.info(dst_path).duration)
+                        minutes = duration // 60
+                        seconds = str(duration % 60).zfill(2)
+                        self.bot.info_from_file[game][str(music["code"])]["sound"] = {
+                            "duration": f"{minutes}:{seconds}",
+                            "key": found_key,
+                        }
 
                     if "SeqData" in dalcom_data:
                         continue
@@ -195,11 +192,6 @@ class DalcomSync(commands.Cog):
                             "count": seq_obj.count,
                             "key": found_key,
                         }
-                        pprint(
-                            self.bot.info_from_file[game][str(music["code"])]["seq"][
-                                difficulty.replace("seq", "")
-                            ]
-                        )
 
                 if "SeqData" in dalcom_data:
                     for seq in dalcom_data["SeqData"]:
@@ -239,11 +231,6 @@ class DalcomSync(commands.Cog):
                             "count": seq_obj.count,
                             "key": found_key,
                         }
-                        pprint(
-                            self.bot.info_from_file[game][str(seq["linkedMusic"])][
-                                "seq"
-                            ][seq["seqLevel"]]
-                        )
 
                 with open(music_info_file, "w", encoding="utf-8") as f:
                     json.dump(self.bot.info_from_file[game], f, indent=4)
