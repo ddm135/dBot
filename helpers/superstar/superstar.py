@@ -216,6 +216,7 @@ class SuperStar(commands.Cog):
             "ThemeData",
             "ThemeTypeData",
             "SeqData",
+            "URLs",
         ],
         item_id: int,
         attributes: dict[str, bool],

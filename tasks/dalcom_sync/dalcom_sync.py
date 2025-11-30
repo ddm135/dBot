@@ -116,7 +116,6 @@ class DalcomSync(commands.Cog):
                             data = json.load(f)
                     dalcom_data[data_file] = data
 
-                # Retrieve music info
                 music_info_file = Path(f"data/MusicData/{game}.json")
                 if not self.bot.info_from_file.get(game):
                     if music_info_file.exists():
@@ -137,6 +136,12 @@ class DalcomSync(commands.Cog):
                         .get("key")
                     )
                     found_key = music["sound"]
+                    if isinstance(found_key, int):
+                        results = await ss_cog.get_attributes(
+                            game, "URLs", found_key, {"url": False}
+                        )
+                        found_key = results["url"]
+
                     if not current_key or current_key != found_key:
                         results = await ss_cog.get_attributes(
                             game, "MusicData", music["code"], {"sound": True}
@@ -171,6 +176,12 @@ class DalcomSync(commands.Cog):
                             .get("key")
                         )
                         found_key = music[difficulty]
+                        if isinstance(found_key, int):
+                            results = await ss_cog.get_attributes(
+                                game, "URLs", found_key, {"url": False}
+                            )
+                            found_key = results["url"]
+
                         if current_key and current_key == found_key:
                             continue
 
@@ -209,6 +220,12 @@ class DalcomSync(commands.Cog):
                             .get("key")
                         )
                         found_key = seq["seqPath"]
+                        if isinstance(found_key, int):
+                            results = await ss_cog.get_attributes(
+                                game, "URLs", found_key, {"url": False}
+                            )
+                            found_key = results["url"]
+
                         if current_key and current_key == found_key:
                             continue
 
@@ -238,7 +255,6 @@ class DalcomSync(commands.Cog):
                 for path in bundle_folders:
                     shutil.rmtree(path)
 
-                # Upload borders for games using catalogs
                 # TODO: Check if key has been changed
                 if game_details["assetScheme"] not in (
                     AssetScheme.BINARY_CATALOG,
