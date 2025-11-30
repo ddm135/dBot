@@ -205,7 +205,7 @@ class DalcomSync(commands.Cog):
                             self.bot.info_from_file[game]
                             .setdefault(str(seq["linkedMusic"]), {})
                             .setdefault("seq", {})
-                            .setdefault(seq["seqLevel"], {})
+                            .setdefault(str(seq["seqLevel"]), {})
                             .get("key")
                         )
                         found_key = seq["seqPath"]
@@ -226,7 +226,7 @@ class DalcomSync(commands.Cog):
 
                         seq_obj = Seq(dst_path)
                         self.bot.info_from_file[game][str(seq["linkedMusic"])]["seq"][
-                            seq["seqLevel"]
+                            str(seq["seqLevel"])
                         ] = {
                             "count": seq_obj.count,
                             "key": found_key,
@@ -324,8 +324,6 @@ class DalcomSync(commands.Cog):
                 self.LOGGER.info(
                     "%s server is unavailable. Skipping...", game_details["name"]
                 )
-                continue
-            except aiohttp.ClientConnectorDNSError:
                 continue
             except Exception as e:
                 self.LOGGER.exception(str(e))
