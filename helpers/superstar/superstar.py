@@ -209,21 +209,34 @@ class SuperStar(commands.Cog):
     async def get_attributes(
         self,
         game: str,
-        search: Literal[
-            "GroupData",
-            "LocaleData",
-            "MusicData",
-            "ThemeData",
-            "ThemeTypeData",
-            "SeqData",
-            "URLs",
-        ],
+        search: (
+            Literal[
+                "GroupData",
+                "LocaleData",
+                "MusicData",
+                "ThemeData",
+                "ThemeTypeData",
+                "SeqData",
+                "URLs",
+            ]
+            | tuple[list[dict], list[dict] | None]
+        ),
         item_id: int,
         attributes: dict[str, bool],
     ) -> dict:
-        data_path = Path(f"data/dalcom/{game}/{search}.json")
-        with open(data_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
+        if isinstance(search, str):
+            data_path = Path(f"data/dalcom/{game}/{search}.json")
+            with open(data_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if GAMES[game]["assetScheme"] == AssetScheme.JSON_URL:
+                with open(f"data/dalcom/{game}/URLs.json", "r", encoding="utf-8") as f:
+                    url_data = json.load(f)
+            else:
+                url_data = None
+        else:
+            data = search[0]
+            url_data = search[1]
+
         found_data = {}
         for item in data:
             if item["code"] == item_id:
@@ -239,9 +252,7 @@ class SuperStar(commands.Cog):
             if not is_file:
                 continue
 
-            if GAMES[game]["assetScheme"] == AssetScheme.JSON_URL:
-                with open(f"data/dalcom/{game}/URLs.json", "r", encoding="utf-8") as f:
-                    url_data = json.load(f)
+            if url_data:
                 for url in url_data:
                     if url["code"] == found_data[attribute]:
                         found_data[attribute] = url["url"]
