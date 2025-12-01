@@ -221,8 +221,11 @@ class SuperStar(commands.Cog):
         item_id: int,
         attributes: dict[str, bool],
     ) -> dict:
+        data_path = Path(f"data/dalcom/{game}/{search}.json")
+        with open(data_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
         found_data = {}
-        for item in self.bot.dalcom[game][search]:
+        for item in data:
             if item["code"] == item_id:
                 for attribute in attributes:
                     found_data[attribute] = item[attribute]
@@ -237,7 +240,9 @@ class SuperStar(commands.Cog):
                 continue
 
             if GAMES[game]["assetScheme"] == AssetScheme.JSON_URL:
-                for url in self.bot.dalcom[game]["URLs"]:
+                with open(f"data/dalcom/{game}/URLs.json", "r", encoding="utf-8") as f:
+                    url_data = json.load(f)
+                for url in url_data:
                     if url["code"] == found_data[attribute]:
                         found_data[attribute] = url["url"]
                         break

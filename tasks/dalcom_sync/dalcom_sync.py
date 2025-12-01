@@ -94,6 +94,7 @@ class DalcomSync(commands.Cog):
                     data_files.append("SeqData")
                 if game_details["assetScheme"] == AssetScheme.JSON_URL:
                     data_files.append("URLs")
+                dalcom_data = {}
 
                 for data_file in data_files:
                     data_path = Path(f"data/dalcom/{game}/{data_file}.json")
@@ -113,7 +114,7 @@ class DalcomSync(commands.Cog):
                     else:
                         with open(data_path, "r", encoding="utf-8") as f:
                             data = json.load(f)
-                    self.bot.dalcom.setdefault(game, {})[data_file] = data
+                    dalcom_data[data_file] = data
 
                 music_info_file = Path(f"data/MusicData/{game}.json")
                 if not self.bot.info_from_file.get(game):
@@ -124,7 +125,7 @@ class DalcomSync(commands.Cog):
                         self.bot.info_from_file[game] = {}
 
                 bundle_folders: set[Path] = set()
-                for music in self.bot.dalcom[game]["MusicData"]:
+                for music in dalcom_data["MusicData"]:
                     if music["isHidden"]:
                         continue
 
@@ -159,7 +160,7 @@ class DalcomSync(commands.Cog):
                             "key": found_key,
                         }
 
-                    if "SeqData" in self.bot.dalcom[game]:
+                    if "SeqData" in dalcom_data:
                         continue
 
                     for difficulty, extension in {
@@ -203,8 +204,8 @@ class DalcomSync(commands.Cog):
                             "key": found_key,
                         }
 
-                if "SeqData" in self.bot.dalcom[game]:
-                    for seq in self.bot.dalcom[game]["SeqData"]:
+                if "SeqData" in dalcom_data:
+                    for seq in dalcom_data["SeqData"]:
                         results = await ss_cog.get_attributes(
                             game, "MusicData", seq["linkedMusic"], {"isHidden": False}
                         )
@@ -262,12 +263,12 @@ class DalcomSync(commands.Cog):
                     continue
 
                 borders = {}
-                for border in self.bot.dalcom[game]["ThemeTypeData"]:
+                for border in dalcom_data["ThemeTypeData"]:
                     if not border["code"]:
                         continue
 
                     suffixes = {"_Large": ""}
-                    for theme in self.bot.dalcom[game]["ThemeData"]:
+                    for theme in dalcom_data["ThemeData"]:
                         if theme["themeTypeCode"] == border["code"]:
                             if theme["nameImageZoom"]:
                                 suffixes["_Zoom"] = "z"
@@ -278,7 +279,7 @@ class DalcomSync(commands.Cog):
                     if not theme["limitedType"]:
                         continue
 
-                    for locale in self.bot.dalcom[game]["LocaleData"]:
+                    for locale in dalcom_data["LocaleData"]:
                         if theme["localeName"] == locale["code"]:
                             name = locale["enUS"]
                             break

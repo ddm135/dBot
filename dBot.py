@@ -16,8 +16,6 @@ class dBot(commands.Bot):
 
     basic: dict[str, BasicDetails] = {}
 
-    dalcom: dict[str, dict[str, list[dict]]] = {}
-
     info_by_name: dict[str, dict[str, dict[str, list[str]]]] = {}
     info_by_id: dict[str, dict[str, list[str]]] = {}
     info_from_file: dict[str, dict[str, dict[str, dict]]] = {}
