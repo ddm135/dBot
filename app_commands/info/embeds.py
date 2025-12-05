@@ -14,7 +14,7 @@ class InfoEmbed(discord.Embed):
     def __init__(
         self,
         game: str,
-        artist: str | None,
+        artist_name: str | None,
         songs: list[list[str]],
         info: dict[str, dict[str, dict[str, str]]],
         icon: str | Path | None,
@@ -35,7 +35,7 @@ class InfoEmbed(discord.Embed):
             description="\n".join(
                 f"({info[song[song_id_index]]["sound"]["duration"]}) "
                 f"{(f"{song[artist_name_index].replace(r"*", r"\*").replace(r"_", r"\_")
-                    .replace(r"`", r"\`")} - " if not artist else "")}"
+                    .replace(r"`", r"\`")} - " if not artist_name else "")}"
                 f"**{(song[song_name_index].replace(r"*", r"\*").replace(r"_", r"\_")
                       .replace(r"`", r"\`"))}**"
                 for song in filtered_songs
@@ -43,7 +43,7 @@ class InfoEmbed(discord.Embed):
             color=game_details["color"],
         )
         self.set_author(
-            name=f"{game_details["name"]}{f" - {artist}" if artist else ""}",
+            name=f"{game_details["name"]}{f" - {artist_name}" if artist_name else ""}",
             icon_url=(
                 f"attachment://{icon.name.replace(r"'", r"")}"
                 if isinstance(icon, Path)
@@ -53,3 +53,56 @@ class InfoEmbed(discord.Embed):
         self.set_footer(
             text=f"Page {current_page}/{max_page or math.ceil(len(songs) / STEP)}",
         )
+
+
+class InfoDetailsEmbed(discord.Embed):
+    def __init__(
+        self,
+        game: str,
+        artist_name: str,
+        song_name: str,
+        duration: str,
+        note_count: dict,
+        album: str | Path | None,
+        icon: str | Path | None,
+        color: int,
+        skills: str | None,
+    ) -> None:
+        game_details = GAMES[game]
+        super().__init__(
+            title=artist_name,
+            description=song_name,
+            color=color,
+        )
+        self.set_author(
+            name=game_details["name"],
+            icon_url=(
+                f"attachment://{icon.name.replace(r"'", r"")}"
+                if isinstance(icon, Path)
+                else icon
+            ),
+        )
+        self.set_thumbnail(
+            url=(
+                f"attachment://{album.name.replace(r"'", r"")}"
+                if isinstance(album, Path)
+                else album
+            )
+        )
+
+        self.add_field(name="Duration", value=duration)
+        if (
+            difficulty_levels := " / ".join(
+                difficulty for difficulty in note_count.keys()
+            )
+            != "Easy / Normal / Hard"
+        ):
+            self.add_field(name="Difficulty Levels", value=difficulty_levels)
+        self.add_field(
+            name="Note Count",
+            value=" / ".join(
+                str(difficulty["count"]) for difficulty in note_count.values()
+            ),
+        )
+        if skills:
+            self.add_field(name="Skill Order", value=skills, inline=False)
