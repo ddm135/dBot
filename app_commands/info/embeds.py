@@ -120,6 +120,7 @@ class InfoDetailsEmbed(discord.Embed):
                 .replace(r"*", r"\*")
                 .replace(r"_", r"\_")
                 .replace(r"`", r"\`"),
+                inline=False,
             )
             self.add_field(
                 name="Release Date",
@@ -132,6 +133,7 @@ class InfoDetailsEmbed(discord.Embed):
                 .replace(r"*", r"\*")
                 .replace(r"_", r"\_")
                 .replace(r"`", r"\`"),
+                inline=False,
             )
             self.add_field(
                 name="Release Date",

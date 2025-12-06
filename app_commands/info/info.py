@@ -127,7 +127,7 @@ class Info(commands.Cog):
                             )
                         )["enUS"],
                         "bonus_date": datetime.fromtimestamp(
-                            results["releaseDate"], tz=game_details["timezone"]
+                            results["releaseDate"] / 1000, tz=game_details["timezone"]
                         ).strftime(game_details["dateFormat"]),
                     }
                 return await itr.followup.send(
