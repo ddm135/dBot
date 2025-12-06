@@ -1,5 +1,6 @@
 # pyright: reportTypedDictNotRequiredAccess=false
 
+from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -96,6 +97,39 @@ class Info(commands.Cog):
                     else game_details["color"]
                 )
                 album = results["album"]
+
+                album_info: list[str] | dict[str, str]
+                if "bonus" in game_details:
+                    album_info = next(
+                        bonus
+                        for bonus in self.bot.bonus[game_choice.value][artist_name]
+                        if song_id
+                        == bonus[
+                            GAMES[game_choice.value]["bonus"]["columns"].index(
+                                "song_id"
+                            )
+                        ]
+                    )
+                else:
+                    results = await cog.get_attributes(
+                        game_choice.value,
+                        "MusicData",
+                        int(song_id),
+                        {"albumName": False, "releaseDate": False},
+                    )
+                    album_info = {
+                        "album_name": (
+                            await cog.get_attributes(
+                                game_choice.value,
+                                "LocaleData",
+                                results["albumName"],
+                                {"enUS": False},
+                            )
+                        )["enUS"],
+                        "bonus_date": datetime.fromtimestamp(
+                            results["releaseDate"], tz=game_details["timezone"]
+                        ).strftime(game_details["dateFormat"]),
+                    }
                 return await itr.followup.send(
                     embed=InfoDetailsEmbed(
                         game_choice.value,
@@ -110,6 +144,7 @@ class Info(commands.Cog):
                         album,
                         icon,
                         color,
+                        album_info,
                         (
                             song[info_columns.index("skills")]
                             if info_columns == InfoColumns.SSL_WITH_SKILLS.value
