@@ -68,6 +68,7 @@ class InfoDetailsEmbed(discord.Embed):
         color: int,
         album_info: list[str] | dict[str, str],
         skills: str | None,
+        my_record: int,
     ) -> None:
         game_details = GAMES[game]
         super().__init__(
@@ -139,3 +140,7 @@ class InfoDetailsEmbed(discord.Embed):
                 name="Release Date",
                 value=album_info["bonus_date"],
             )
+        self.add_field(
+            name="My Record Challenge Score",
+            value=f"{my_record:,}",
+        )

@@ -110,12 +110,24 @@ class Info(commands.Cog):
                             )
                         ]
                     )
+                    results = await cog.get_attributes(
+                        game_choice.value,
+                        "MusicData",
+                        int(song_id),
+                        {
+                            "myrecordQualifyingScore": False,
+                        },
+                    )
                 else:
                     results = await cog.get_attributes(
                         game_choice.value,
                         "MusicData",
                         int(song_id),
-                        {"albumName": False, "releaseDate": False},
+                        {
+                            "albumName": False,
+                            "releaseDate": False,
+                            "myrecordQualifyingScore": False,
+                        },
                     )
                     album_info = {
                         "album_name": (
@@ -150,6 +162,7 @@ class Info(commands.Cog):
                             if info_columns == InfoColumns.SSL_WITH_SKILLS.value
                             else None
                         ),
+                        results["myrecordQualifyingScore"],
                     ),
                     files=[
                         discord.File(file)
