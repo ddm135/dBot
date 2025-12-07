@@ -113,6 +113,7 @@ class InfoDetailsEmbed(discord.Embed):
         if skills:
             self.add_field(name="Skill Order", value=skills, inline=False)
 
+        print(album_info)
         if isinstance(album_info, list):
             bonus_columns = GAMES[game]["bonus"]["columns"]
             self.add_field(
