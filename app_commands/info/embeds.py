@@ -66,7 +66,7 @@ class InfoDetailsEmbed(discord.Embed):
         album: str | Path | None,
         icon: str | Path | None,
         color: int,
-        album_info: list[str] | dict[str, str],
+        album_info: dict[str, str],
         skills: str | None,
         my_record: int,
     ) -> None:
@@ -113,34 +113,18 @@ class InfoDetailsEmbed(discord.Embed):
         if skills:
             self.add_field(name="Skill Order", value=skills, inline=False)
 
-        print(album_info)
-        if isinstance(album_info, list):
-            bonus_columns = GAMES[game]["bonus"]["columns"]
-            self.add_field(
-                name="Album",
-                value=album_info[bonus_columns.index("album_name")]
-                .replace(r"*", r"\*")
-                .replace(r"_", r"\_")
-                .replace(r"`", r"\`"),
-                inline=False,
-            )
-            self.add_field(
-                name="Release Date",
-                value=album_info[bonus_columns.index("bonus_date")],
-            )
-        else:
-            self.add_field(
-                name="Album",
-                value=album_info["album_name"]
-                .replace(r"*", r"\*")
-                .replace(r"_", r"\_")
-                .replace(r"`", r"\`"),
-                inline=False,
-            )
-            self.add_field(
-                name="Release Date",
-                value=album_info["bonus_date"],
-            )
+        self.add_field(
+            name="Album",
+            value=album_info["album_name"]
+            .replace(r"*", r"\*")
+            .replace(r"_", r"\_")
+            .replace(r"`", r"\`"),
+            inline=False,
+        )
+        self.add_field(
+            name="Release Date",
+            value=album_info["release_date"],
+        )
         self.add_field(
             name="My Record Challenge Score",
             value=f"{my_record:,}",

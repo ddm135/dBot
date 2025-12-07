@@ -89,46 +89,40 @@ class Info(commands.Cog):
                     game_choice.value,
                     "MusicData",
                     int(song_id),
-                    {"albumBgColor": False, "album": True},
+                    {
+                        "album": True,
+                        "albumName": False,
+                        "albumBgColor": False,
+                        "releaseDate": False,
+                        "myrecordQualifyingScore": False,
+                    },
                 )
                 color = (
                     int(results["albumBgColor"][:-2], 16)
                     if results["albumBgColor"]
                     else game_details["color"]
                 )
-                album = results["album"]
+
+                file_info = self.bot.info_from_file[game_choice.value][
+                    song[song_id_index]
+                ]
 
                 album_info: list[str] | dict[str, str]
                 if "bonus" in game_details:
-                    album_info = next(
+                    bonus_columns = GAMES[game_choice.value]["bonus"]["columns"]
+                    album_name_index = bonus_columns.index("album_name")
+                    song_id_index = bonus_columns.index("song_id")
+                    bonus_date_index = bonus_columns.index("bonus_date")
+                    bonus = next(
                         bonus
                         for bonus in self.bot.bonus[game_choice.value][artist_name]
-                        if song_id
-                        == bonus[
-                            GAMES[game_choice.value]["bonus"]["columns"].index(
-                                "song_id"
-                            )
-                        ]
+                        if bonus[album_name_index] and song_id == bonus[song_id_index]
                     )
-                    results = await cog.get_attributes(
-                        game_choice.value,
-                        "MusicData",
-                        int(song_id),
-                        {
-                            "myrecordQualifyingScore": False,
-                        },
-                    )
+                    album_info = {
+                        "album_name": bonus[album_name_index],
+                        "release_date": bonus[bonus_date_index],
+                    }
                 else:
-                    results = await cog.get_attributes(
-                        game_choice.value,
-                        "MusicData",
-                        int(song_id),
-                        {
-                            "albumName": False,
-                            "releaseDate": False,
-                            "myrecordQualifyingScore": False,
-                        },
-                    )
                     album_info = {
                         "album_name": (
                             await cog.get_attributes(
@@ -138,7 +132,7 @@ class Info(commands.Cog):
                                 {"enUS": False},
                             )
                         )["enUS"],
-                        "bonus_date": datetime.fromtimestamp(
+                        "release_date": datetime.fromtimestamp(
                             results["releaseDate"] / 1000, tz=game_details["timezone"]
                         ).strftime(game_details["dateFormat"]),
                     }
@@ -147,13 +141,9 @@ class Info(commands.Cog):
                         game_choice.value,
                         artist_name,
                         song_name,
-                        self.bot.info_from_file[game_choice.value][song[song_id_index]][
-                            "sound"
-                        ]["duration"],
-                        self.bot.info_from_file[game_choice.value][song[song_id_index]][
-                            "seq"
-                        ],
-                        album,
+                        file_info["sound"]["duration"],
+                        file_info["seq"],
+                        results["album"],
                         icon,
                         color,
                         album_info,
@@ -166,7 +156,7 @@ class Info(commands.Cog):
                     ),
                     files=[
                         discord.File(file)
-                        for file in (album, icon)
+                        for file in (results["album"], icon)
                         if isinstance(file, Path)
                     ],
                 )
