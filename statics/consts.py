@@ -277,7 +277,7 @@ GAMES: dict[str, "GameDetails"] = {
                 "startColumnIndex": 1,
                 "endColumnIndex": 2,
             },
-            "range": "Songs!A2:C",
+            "range": "Songs!A2:D",
             "columns": InfoColumns.CLASSIC.value,
         },
         "bonus": {
@@ -745,7 +745,7 @@ GAMES: dict[str, "GameDetails"] = {
         "info": {
             "spreadsheetId": "1uwLl0MQM895xI4iBmdP-eVVn7HKOBisFaQCCjzJL4GQ",
             "replaceGrid": {},
-            "range": "Songs!A2:C",
+            "range": "Songs!A2:D",
             "columns": InfoColumns.CLASSIC.value,
         },
         "bonus": {
@@ -802,7 +802,7 @@ GAMES: dict[str, "GameDetails"] = {
         "info": {
             "spreadsheetId": "1Fz71pl3YCUIbCRcZRuKBjsDT4JEW0m9Uoj8wyJhUMOc",
             "replaceGrid": {},
-            "range": "Songs!A2:C",
+            "range": "Songs!A2:D",
             "columns": InfoColumns.CLASSIC.value,
         },
         "bonus": {
