@@ -42,8 +42,8 @@ class PinSSLeague(commands.Cog):
             credentials = json.load(f)
         pin_tasks = [
             self.pin_ssl(game, credentials[game])
-            for game, game_details in GAMES.items()
-            if game in credentials and {"info", "pinChannelIds"} <= set(game_details)
+            for game in GAMES.keys()
+            if game in credentials
         ]
         await asyncio.gather(*pin_tasks, return_exceptions=True)
 
@@ -99,7 +99,7 @@ class PinSSLeague(commands.Cog):
         song_name_index = info_columns.index("song_name")
         skills_index = (
             info_columns.index("skills")
-            if game_details["info"]["columns"] == InfoColumns.SSL_WITH_SKILLS.value
+            if game_details["info"]["columns"] == InfoColumns.SKILLS.value
             else None
         )
 

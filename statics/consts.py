@@ -74,7 +74,7 @@ class Data(Enum):
 
 
 class InfoColumns(Enum):
-    SSL = (
+    CLASSIC = (
         "song_id",
         "artist_name",
         "search_term",
@@ -85,7 +85,7 @@ class InfoColumns(Enum):
         "artist_name",
         "song_name",
     )
-    SSL_WITH_SKILLS = (
+    SKILLS = (
         "song_id",
         "artist_name",
         "search_term",
@@ -137,7 +137,7 @@ GAMES: dict[str, "GameDetails"] = {
                 "endColumnIndex": 2,
             },
             "range": "Songs!A2:D",
-            "columns": InfoColumns.SSL.value,
+            "columns": InfoColumns.CLASSIC.value,
         },
         "bonus": {
             "spreadsheetId": "1dX_5lWxenT7CDVXpgyScTHDiwazUZIO3441RaNpN55g",
@@ -207,7 +207,7 @@ GAMES: dict[str, "GameDetails"] = {
                 "endColumnIndex": 2,
             },
             "range": "Songs!A2:D",
-            "columns": InfoColumns.SSL.value,
+            "columns": InfoColumns.CLASSIC.value,
         },
         "bonus": {
             "spreadsheetId": "1XgaSMje3TKa1bnekWzmpLRjr81QWoag_6w9SlzSwN0g",
@@ -278,7 +278,7 @@ GAMES: dict[str, "GameDetails"] = {
                 "endColumnIndex": 2,
             },
             "range": "Songs!A2:C",
-            "columns": InfoColumns.NO_SSL.value,
+            "columns": InfoColumns.CLASSIC.value,
         },
         "bonus": {
             "spreadsheetId": "13MYqeey_Pd8_5vXsEQe94usC517WaMEduPte19xtQiU",
@@ -581,7 +581,7 @@ GAMES: dict[str, "GameDetails"] = {
                 "endColumnIndex": 2,
             },
             "range": "Songs!A2:D",
-            "columns": InfoColumns.SSL.value,
+            "columns": InfoColumns.CLASSIC.value,
         },
         "bonus": {
             "spreadsheetId": "1kC38CLFd6xkDXD9qLHgnnv3s3jmM_4vf4RLsWuXs9NU",
@@ -645,7 +645,7 @@ GAMES: dict[str, "GameDetails"] = {
                 "endColumnIndex": 2,
             },
             "range": "Songs!A2:E",
-            "columns": InfoColumns.SSL_WITH_SKILLS.value,
+            "columns": InfoColumns.SKILLS.value,
         },
         "bonus": {
             "spreadsheetId": "1eVjwi0GudyMixnZtam8TeupRd3DQ6mheyRKp2lDA6qw",
@@ -715,7 +715,7 @@ GAMES: dict[str, "GameDetails"] = {
                 "endColumnIndex": 2,
             },
             "range": "Songs!A2:E",
-            "columns": InfoColumns.SSL_WITH_SKILLS.value,
+            "columns": InfoColumns.SKILLS.value,
         },
         "emblem": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
@@ -746,7 +746,7 @@ GAMES: dict[str, "GameDetails"] = {
             "spreadsheetId": "1uwLl0MQM895xI4iBmdP-eVVn7HKOBisFaQCCjzJL4GQ",
             "replaceGrid": {},
             "range": "Songs!A2:C",
-            "columns": InfoColumns.NO_SSL.value,
+            "columns": InfoColumns.CLASSIC.value,
         },
         "bonus": {
             "spreadsheetId": "1uwLl0MQM895xI4iBmdP-eVVn7HKOBisFaQCCjzJL4GQ",
@@ -803,7 +803,7 @@ GAMES: dict[str, "GameDetails"] = {
             "spreadsheetId": "1Fz71pl3YCUIbCRcZRuKBjsDT4JEW0m9Uoj8wyJhUMOc",
             "replaceGrid": {},
             "range": "Songs!A2:C",
-            "columns": InfoColumns.NO_SSL.value,
+            "columns": InfoColumns.CLASSIC.value,
         },
         "bonus": {
             "spreadsheetId": "1Fz71pl3YCUIbCRcZRuKBjsDT4JEW0m9Uoj8wyJhUMOc",

@@ -149,7 +149,7 @@ class Info(commands.Cog):
                         album_info,
                         (
                             song[info_columns.index("skills")]
-                            if info_columns == InfoColumns.SSL_WITH_SKILLS.value
+                            if info_columns == InfoColumns.SKILLS.value
                             else None
                         ),
                         results["myrecordQualifyingScore"],

@@ -34,7 +34,11 @@ async def song_autocomplete(
     if not (game := itr.namespace.game):
         return []
 
-    # search_term_index = GAMES[game]["info"]["columns"].index("search_term")
+    info_columns = GAMES[game]["info"]["columns"]
+    if "search_term" in info_columns:
+        search_term_index = info_columns.index("search_term")
+    else:
+        search_term_index = None
     if not (songs := itr.client.info_by_name[game].get(itr.namespace.artist, {})):
         return []
 
@@ -42,7 +46,10 @@ async def song_autocomplete(
         app_commands.Choice(name=song_name, value=song_name)
         for song_name, song_details in songs.items()
         if current.lower() in song_name.lower()
-        # or current.lower() in song_details[search_term_index].lower()
+        or (
+            search_term_index is not None
+            and current.lower() in song_details[search_term_index].lower()
+        )
     )
 
     return list(islice(song_choices, MAX_AUTOCOMPLETE))

@@ -153,7 +153,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         note_count = self.bot.info_from_file[game][str(song_id)]["seq"]
         skills = (
             ssl_song[info_columns.index("skills")]
-            if game_details["info"]["columns"] == InfoColumns.SSL_WITH_SKILLS.value
+            if game_details["info"]["columns"] == InfoColumns.SKILLS.value
             else None
         )
 
