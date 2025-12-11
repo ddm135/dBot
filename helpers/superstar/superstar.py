@@ -405,10 +405,8 @@ class SuperStar(commands.Cog):
 
             embeds = pin.embeds
             if embeds and (
-                embeds[0].title
-                and embed_title in embeds[0].title
-                or embeds[0].author.name
-                and embed_title in embeds[0].author.name
+                (embeds[0].title and embed_title in embeds[0].title)
+                or (embeds[0].author.name and embed_title in embeds[0].author.name)
             ):
                 await pin.unpin()
                 break
