@@ -79,6 +79,7 @@ class InfoDetailsEmbed(discord.Embed):
                               .replace(r"`", r"\`"))}**",
             color=color,
         )
+
         self.set_author(
             name=game_details["name"],
             icon_url=(

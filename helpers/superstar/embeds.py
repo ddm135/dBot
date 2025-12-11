@@ -3,10 +3,13 @@ from pathlib import Path
 
 import discord
 
+from statics.consts import GAMES
+
 
 class SSLeagueEmbed(discord.Embed):
     def __init__(
         self,
+        game: str,
         artist_name: str,
         song_name: str,
         duration: str,
@@ -16,19 +19,33 @@ class SSLeagueEmbed(discord.Embed):
         color: int,
         skills: str | None,
         current_time: datetime,
-        user_name: str,
+        username: str,
         artist_last: datetime | None = None,
         song_last: datetime | None = None,
     ) -> None:
         super().__init__(
-            title=f"SSL #{current_time.strftime("%u")}",
-            description=(
-                f"**{(artist_name.replace(r"*", r"\*").replace(r"_", r"\_")
-                      .replace(r"`", r"\`"))} - "
-                f"{(song_name.replace(r"*", r"\*").replace(r"_", r"\_")
-                    .replace(r"`", r"\`"))}**"
-            ),
+            title=artist_name.replace(r"*", r"\*")
+            .replace(r"_", r"\_")
+            .replace(r"`", r"\`"),
+            description=f"**{(song_name.replace(r"*", r"\*").replace(r"_", r"\_")
+                              .replace(r"`", r"\`"))}**",
             color=color,
+        )
+
+        self.set_author(
+            name=f"{GAMES[game]["name"]} - SSL #{current_time.strftime("%u")}",
+            icon_url=(
+                f"attachment://{icon.name.replace(r"'", r"")}"
+                if isinstance(icon, Path)
+                else icon
+            ),
+        )
+        self.set_thumbnail(
+            url=(
+                f"attachment://{album.name.replace(r"'", r"")}"
+                if isinstance(album, Path)
+                else album
+            )
         )
 
         self.add_field(name="Duration", value=duration)
@@ -62,21 +79,9 @@ class SSLeagueEmbed(discord.Embed):
             inline=False,
         )
 
-        self.set_thumbnail(
-            url=(
-                f"attachment://{album.name.replace(r"'", r"")}"
-                if isinstance(album, Path)
-                else album
-            )
-        )
         self.set_footer(
             text=(
                 f"{current_time.strftime("%A, %B %d, %Y").replace(" 0", " ")}"
-                f" · Pinned by {user_name}"
-            ),
-            icon_url=(
-                f"attachment://{icon.name.replace(r"'", r"")}"
-                if isinstance(icon, Path)
-                else icon
+                f" · Pinned by {username}"
             ),
         )

@@ -42,7 +42,7 @@ class PinSSLeague(commands.Cog):
             credentials = json.load(f)
         pin_tasks = [
             self.pin_ssl(game, credentials[game])
-            for game in GAMES.keys()
+            for game in GAMES
             if game in credentials
         ]
         await asyncio.gather(*pin_tasks, return_exceptions=True)
@@ -138,6 +138,7 @@ class PinSSLeague(commands.Cog):
             song_last = None
 
         embed = cog.SSLeagueEmbed(
+            game,
             artist_name,
             song_name,
             duration,

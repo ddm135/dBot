@@ -191,6 +191,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             song_last = None
 
         embed = cog.SSLeagueEmbed(
+            game,
             artist_name,
             song_name,
             duration,
