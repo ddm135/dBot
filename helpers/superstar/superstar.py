@@ -397,6 +397,7 @@ class SuperStar(commands.Cog):
     ) -> None:
         if embed_title is None:
             return
+        embed_title = embed_title.partition(" - ")[2]  # Legacy title
 
         pins = await pin_channel.pins()
         for pin in pins:
@@ -404,9 +405,12 @@ class SuperStar(commands.Cog):
                 continue
 
             embeds = pin.embeds
-            if embeds and (
-                (embeds[0].title and embed_title in embeds[0].title)
-                or (embeds[0].author.name and embed_title in embeds[0].author.name)
+            if (
+                embeds
+                and embeds[0].title
+                and embed_title in embeds[0].title
+                or embeds[0].author.name
+                and embed_title in embeds[0].author.name
             ):
                 await pin.unpin()
                 break
