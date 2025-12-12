@@ -221,7 +221,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         else:
             await pin_channel.send(topic)
         await pin_channel.edit(topic=topic)
-        await cog.unpin_old_ssl(embed.title, pin_channel, new_pin)
+        await cog.unpin_old_ssl(embed, pin_channel, new_pin)
 
         self.bot.ssleague_manual[game] = LastAppearanceManual(
             artist=artist_name,

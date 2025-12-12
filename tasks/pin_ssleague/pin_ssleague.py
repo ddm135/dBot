@@ -174,7 +174,7 @@ class PinSSLeague(commands.Cog):
             else:
                 await pin_channel.send(topic)
             await pin_channel.edit(topic=topic)
-            await cog.unpin_old_ssl(embed.title, pin_channel, new_pin)
+            await cog.unpin_old_ssl(embed, pin_channel, new_pin)
 
         self.bot.ssleagues[game][artist_name]["date"] = current_time.strftime(
             game_details["dateFormat"]

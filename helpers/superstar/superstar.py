@@ -393,11 +393,14 @@ class SuperStar(commands.Cog):
 
     @staticmethod
     async def unpin_old_ssl(
-        embed_title: str | None, pin_channel: discord.TextChannel, new_pin: int
+        embed: discord.Embed, pin_channel: discord.TextChannel, new_pin: int
     ) -> None:
-        if embed_title is None:
+        if embed.title and "SSL #" in embed.title:
+            embed_title = embed.title
+        elif embed.author.name and "SSL #" in embed.author.name:
+            embed_title = embed.author.name.rpartition(" - ")[0]
+        else:
             return
-        embed_title = embed_title.partition(" - ")[2]  # Legacy title
 
         pins = await pin_channel.pins()
         for pin in pins:
