@@ -401,6 +401,7 @@ class SuperStar(commands.Cog):
             embed_title = embed.author.name.rpartition(" - ")[0]
         else:
             return
+        print(embed_title)
 
         pins = await pin_channel.pins()
         for pin in pins:
