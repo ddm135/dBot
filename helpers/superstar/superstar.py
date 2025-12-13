@@ -391,33 +391,34 @@ class SuperStar(commands.Cog):
         await msg.pin()
         return msg.id
 
-    @staticmethod
     async def unpin_old_ssl(
-        embed: discord.Embed, pin_channel: discord.TextChannel, new_pin: int
+        self, embed: discord.Embed, pin_channel: discord.TextChannel, new_pin: int
     ) -> None:
         if embed.title and "SSL #" in embed.title:
             embed_title = embed.title
         elif embed.author.name and "SSL #" in embed.author.name:
-            embed_title = embed.author.name.rpartition(" - ")[0]
+            embed_title = embed.author.name.rpartition(" - ")[2]
         else:
             return
-        print(embed_title)
 
         pins = await pin_channel.pins()
         for pin in pins:
-            if pin.id == new_pin:
+            if (
+                pin.id == new_pin
+                or self.bot.user
+                and pin.author.id != self.bot.user.id
+            ):
                 continue
 
             embeds = pin.embeds
-            if (
-                embeds
-                and embeds[0].title
+            if embeds and (
+                embeds[0].title
                 and embed_title in embeds[0].title
                 or embeds[0].author.name
                 and embed_title in embeds[0].author.name
             ):
                 await pin.unpin()
-                break
+                # break
 
     class SSLeagueEmbed(_SSLeagueEmbed):
         pass
