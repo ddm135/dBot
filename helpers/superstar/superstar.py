@@ -418,7 +418,7 @@ class SuperStar(commands.Cog):
                 and embed_title in embeds[0].author.name
             ):
                 await pin.unpin()
-                # break
+                break
 
     class SSLeagueEmbed(_SSLeagueEmbed):
         pass
