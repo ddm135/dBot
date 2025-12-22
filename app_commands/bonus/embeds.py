@@ -1,10 +1,12 @@
+# pyright: reportTypedDictNotRequiredAccess=false
+
 from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import discord
 
-from statics.consts import BONUS_OFFSET
+from statics.consts import BONUS_OFFSET, GAMES
 
 from .commons import STEP
 from .types import BonusDict
@@ -16,13 +18,17 @@ if TYPE_CHECKING:
 class BonusPingsEmbed(discord.Embed):
     def __init__(
         self,
-        game_details: "GameDetails",
+        game: str,
         ping_data: list[list[str]],
         user_id: str,
-        artist_name_index: int,
-        users_index: int,
+        icon: str,
     ) -> None:
+        game_details = GAMES[game]
+        ping_columns = game_details["ping"]["columns"]
+        artist_name_index = ping_columns.index("artist_name")
+        users_index = ping_columns.index("users")
         description = ""
+
         for row in ping_data:
             _artist_name = row[artist_name_index]
             users = row[users_index].split(",")
@@ -38,17 +44,17 @@ class BonusPingsEmbed(discord.Embed):
             description = description[:-1]
 
         super().__init__(
-            title=game_details["name"],
             description=description,
             color=game_details["color"],
         )
+        self.set_author(name=game_details["name"], icon_url=icon)
 
 
 class BonusesEmbed(discord.Embed):
     def __init__(
         self,
         game_details: "GameDetails",
-        artist: str | None,
+        artist_name: str | None,
         bonuses: list[BonusDict],
         first_date: datetime,
         last_date: datetime,
@@ -63,14 +69,16 @@ class BonusesEmbed(discord.Embed):
 
         super().__init__(
             title=(
-                f"Bonuses ("
-                f"{first_date.strftime("%B %d")} - {last_date.strftime("%B %d")})"
-            ).replace(" 0", " "),
+                f"{(artist_name.replace(r"*", r"\*").replace(r"_", r"\_")
+                    .replace(r"`", r"\`")) if artist_name else "All Bonuses"} ("
+                f"{first_date.strftime("%B %d").replace(" 0", " ")} - "
+                f"{last_date.strftime("%B %d").replace(" 0", " ")})"
+            ),
             description="None" if not filtered_bonuses else None,
             color=game_details["color"],
         )
         self.set_author(
-            name=f"{game_details["name"]}{f" - {artist}" if artist else ""}",
+            name=f"{game_details["name"]} - Bonus Info",
             icon_url=(
                 f"attachment://{icon.name.replace(r"'", r"")}"
                 if isinstance(icon, Path)
@@ -85,13 +93,13 @@ class BonusesEmbed(discord.Embed):
                     f"{("~~" if bonus["bonusEnd"] < current_date
                         else "" if bonus["bonusStart"] > current_date
                         else ":white_check_mark: ")}"
-                    f"{f"**{bonus["artist"]}**" if not artist else ""}"
-                    f"{" " if not artist and bonus["members"] else ""}"
+                    f"{f"**{bonus["artist"]}**" if not artist_name else ""}"
+                    f"{" " if not artist_name and bonus["members"] else ""}"
                     f"{(f"{bonus["members"]}"
                         if bonus["members"]
                         and bonus["artist"] != bonus["members"]
                         else "")}"
-                    f"{(": " if not artist
+                    f"{(": " if not artist_name
                         or bonus["members"] and bonus["artist"] != bonus["members"]
                         else "")}"
                     f"{(bonus["song"] if bonus["song"]

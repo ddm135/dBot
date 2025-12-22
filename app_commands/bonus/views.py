@@ -17,7 +17,7 @@ class BonusView(discord.ui.View):
         self,
         message: discord.Message,
         game_details: "GameDetails",
-        artist: str | None,
+        artist_name: str | None,
         first_date: datetime,
         last_date: datetime,
         current_date: datetime,
@@ -29,7 +29,7 @@ class BonusView(discord.ui.View):
     ) -> None:
         self.message = message
         self.game_details = game_details
-        self.artist = artist
+        self.artist = artist_name
         self.bonuses = bonuses
         self.first_date = first_date
         self.last_date = last_date

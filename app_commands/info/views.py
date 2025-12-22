@@ -16,7 +16,7 @@ class InfoView(discord.ui.View):
         self,
         message_id: discord.Message,
         game: str,
-        artist: str | None,
+        artist_name: str | None,
         songs: list[list[str]],
         info: dict[str, dict[str, dict[str, str]]],
         user: discord.User | discord.Member,
@@ -24,7 +24,7 @@ class InfoView(discord.ui.View):
     ) -> None:
         self.message = message_id
         self.game = game
-        self.artist = artist
+        self.artist_name = artist_name
         self.songs = songs
         self.info = info
         self.user = user
@@ -44,7 +44,7 @@ class InfoView(discord.ui.View):
             message_id=self.message.id,
             embed=InfoEmbed(
                 self.game,
-                self.artist,
+                self.artist_name,
                 self.songs,
                 self.info,
                 self.icon,

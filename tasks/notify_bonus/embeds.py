@@ -9,7 +9,7 @@ from statics.consts import BONUS_OFFSET
 class NotifyBonusEmbed(discord.Embed):
     def __init__(
         self,
-        artist: str,
+        artist_name: str,
         icon: str | Path | None,
         current_date: datetime,
         starts: list[str],
@@ -20,7 +20,9 @@ class NotifyBonusEmbed(discord.Embed):
             color=color,
         )
         self.set_author(
-            name=artist.replace(r"*", r"\*").replace(r"_", r"\_").replace(r"`", r"\`"),
+            name=artist_name.replace(r"*", r"\*")
+            .replace(r"_", r"\_")
+            .replace(r"`", r"\`"),
             icon_url=(
                 f"attachment://{icon.name.replace(r"'", r"")}"
                 if isinstance(icon, Path)

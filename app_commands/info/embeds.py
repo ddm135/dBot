@@ -31,7 +31,13 @@ class InfoEmbed(discord.Embed):
         song_name_index = info_columns.index("song_name")
 
         super().__init__(
-            title="Songs",
+            title=(
+                artist_name.replace(r"*", r"\*")
+                .replace(r"_", r"\_")
+                .replace(r"`", r"\`")
+                if artist_name
+                else "All Songs"
+            ),
             description="\n".join(
                 f"({info[song[song_id_index]]["sound"]["duration"]}) "
                 f"{(f"{song[artist_name_index].replace(r"*", r"\*").replace(r"_", r"\_")
@@ -43,7 +49,7 @@ class InfoEmbed(discord.Embed):
             color=game_details["color"],
         )
         self.set_author(
-            name=f"{game_details["name"]}{f" - {artist_name}" if artist_name else ""}",
+            name=f"{game_details["name"]} - Song Length",
             icon_url=(
                 f"attachment://{icon.name.replace(r"'", r"")}"
                 if isinstance(icon, Path)
@@ -81,7 +87,7 @@ class InfoDetailsEmbed(discord.Embed):
         )
 
         self.set_author(
-            name=game_details["name"],
+            name=f"{game_details["name"]} - Song Info",
             icon_url=(
                 f"attachment://{icon.name.replace(r"'", r"")}"
                 if isinstance(icon, Path)

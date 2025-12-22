@@ -1,4 +1,5 @@
-# pyright: reportTypedDictNotRequiredAccess=false
+# mypy: disable-error-code="assignment"
+# pyright: reportAssignmentType=false, reportTypedDictNotRequiredAccess=false
 
 import math
 import re
@@ -13,7 +14,7 @@ from discord.ext import commands
 from statics.consts import BONUS_OFFSET, GAMES
 
 from .autocompletes import artist_autocomplete
-from .commons import STEP, ping_preprocess
+from .commons import STEP
 from .embeds import BonusesEmbed, BonusPingsEmbed
 from .types import BonusDict
 from .views import BonusView
@@ -362,17 +363,15 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         games = [game_choice] if game_choice else self.GAME_CHOICES
 
         await itr.user.send("## Bonus Ping List")
+
+        cog: "GoogleSheets" = self.bot.get_cog("GoogleSheets")
         for game in games:
-            (game_details, ping_data, artist_name_index, users_index) = (
-                await ping_preprocess(game.value, self.bot)
+            game_details = GAMES[game.value]
+            ping_data = await cog.get_sheet_data(
+                game_details["ping"]["spreadsheetId"], game_details["ping"]["range"]
             )
-            embed = BonusPingsEmbed(
-                game_details,
-                ping_data,
-                str(itr.user.id),
-                artist_name_index,
-                users_index,
-            )
+            icon = self.bot.basic[game.value]["iconUrl"]
+            embed = BonusPingsEmbed(game.value, ping_data, str(itr.user.id), icon)
             await itr.user.send(embed=embed, silent=True)
 
         return await itr.followup.send(
@@ -388,8 +387,14 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
     ) -> None:
         await itr.response.defer(ephemeral=True)
         user_id = str(itr.user.id)
-        (game_details, ping_data, artist_name_index, users_index) = (
-            await ping_preprocess(game_key, self.bot)
+
+        cog: "GoogleSheets" = self.bot.get_cog("GoogleSheets")
+        game_details = GAMES[game_key]
+        ping_columns = game_details["ping"]["columns"]
+        artist_name_index = ping_columns.index("artist_name")
+        users_index = ping_columns.index("users")
+        ping_data = await cog.get_sheet_data(
+            game_details["ping"]["spreadsheetId"], game_details["ping"]["range"]
         )
 
         for i, row in enumerate(ping_data, start=1):
@@ -419,9 +424,6 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                 return await itr.followup.send("Internal error.")
 
             if not message_prefix.startswith("Already"):
-                cog: "GoogleSheets" = self.bot.get_cog(
-                    "GoogleSheets"  # type: ignore[assignment]
-                )
                 await cog.update_sheet_data(
                     game_details["ping"]["spreadsheetId"],
                     f"{re.split(r"\d+:", game_details["ping"]["range"])[0]}{i}",
