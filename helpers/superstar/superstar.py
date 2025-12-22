@@ -276,7 +276,7 @@ class SuperStar(commands.Cog):
     ) -> Path | None:
         catalog = self.bot.basic[game]["catalog"]
         file_extract_path = ""
-        file_name = Path(catalog_key).name
+        # file_name = Path(catalog_key).name
         while dependency := catalog[catalog_key]["dependency"]:
             file_extract_path = catalog[catalog_key]["internalId"]
             catalog_key = dependency
@@ -289,7 +289,8 @@ class SuperStar(commands.Cog):
         file_path = (
             bundle_extract_path / file_extract_path.replace(",", "_")
             if file_extract_path.startswith("Assets")
-            else bundle_extract_path / "Assets" / file_name.replace(",", "_")
+            # else bundle_extract_path / "Assets" / file_name.replace(",", "_")
+            else bundle_extract_path / "Assets" / file_extract_path
         )
 
         if not file_path.exists():
