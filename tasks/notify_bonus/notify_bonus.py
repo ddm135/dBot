@@ -270,7 +270,7 @@ class NotifyBonus(commands.Cog):
                             await user.send(
                                 embed=embed,
                                 files=(
-                                    [discord.File(icon)]
+                                    [discord.File(icon, filename="icon.png")]
                                     if isinstance(icon, Path)
                                     else []
                                 ),

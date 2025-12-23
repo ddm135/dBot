@@ -268,7 +268,11 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                 default_page,
                 max_page,
             ),
-            files=[discord.File(icon)] if isinstance(icon, Path) else [],
+            files=(
+                [discord.File(icon, filename="icon.png")]
+                if isinstance(icon, Path)
+                else []
+            ),
             wait=True,
         )
         view = BonusView(

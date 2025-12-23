@@ -34,18 +34,10 @@ class SSLeagueEmbed(discord.Embed):
 
         self.set_author(
             name=f"{GAMES[game]["name"]} - SSL #{current_time.strftime("%u")}",
-            icon_url=(
-                f"attachment://{icon.name.replace(r"'", r"")}"
-                if isinstance(icon, Path)
-                else icon
-            ),
+            icon_url="attachment://icon.png" if isinstance(icon, Path) else icon,
         )
         self.set_thumbnail(
-            url=(
-                f"attachment://{album.name.replace(r"'", r"")}"
-                if isinstance(album, Path)
-                else album
-            )
+            url="attachment://album.png" if isinstance(album, Path) else album
         )
 
         self.add_field(name="Duration", value=duration)

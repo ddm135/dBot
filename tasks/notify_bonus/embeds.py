@@ -23,11 +23,7 @@ class NotifyBonusEmbed(discord.Embed):
             name=artist_name.replace(r"*", r"\*")
             .replace(r"_", r"\_")
             .replace(r"`", r"\`"),
-            icon_url=(
-                f"attachment://{icon.name.replace(r"'", r"")}"
-                if isinstance(icon, Path)
-                else icon
-            ),
+            icon_url="attachment://icon.png" if isinstance(icon, Path) else icon,
         )
 
         started = False

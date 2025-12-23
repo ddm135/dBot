@@ -207,9 +207,12 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         )
 
         files = []
-        for image in (album, icon):
-            if isinstance(image, Path):
-                files.append(image)
+        for filename, file in {
+            "album.png": album,
+            "icon.png": icon,
+        }.items():
+            if isinstance(file, Path):
+                files.append(discord.File(file, filename=filename))
         pin_channel = self.bot.get_channel(
             pin_channel_id
         ) or await self.bot.fetch_channel(pin_channel_id)

@@ -50,11 +50,7 @@ class InfoEmbed(discord.Embed):
         )
         self.set_author(
             name=f"{game_details["name"]} - Song Length",
-            icon_url=(
-                f"attachment://{icon.name.replace(r"'", r"")}"
-                if isinstance(icon, Path)
-                else icon
-            ),
+            icon_url="attachment://icon.png" if isinstance(icon, Path) else icon,
         )
         self.set_footer(
             text=f"Page {current_page}/{max_page or math.ceil(len(songs) / STEP)}",
@@ -88,18 +84,10 @@ class InfoDetailsEmbed(discord.Embed):
 
         self.set_author(
             name=f"{game_details["name"]} - Song Info",
-            icon_url=(
-                f"attachment://{icon.name.replace(r"'", r"")}"
-                if isinstance(icon, Path)
-                else icon
-            ),
+            icon_url="attachment://icon.png" if isinstance(icon, Path) else icon,
         )
         self.set_thumbnail(
-            url=(
-                f"attachment://{album.name.replace(r"'", r"")}"
-                if isinstance(album, Path)
-                else album
-            )
+            url="attachment://album.png" if isinstance(album, Path) else album
         )
 
         self.add_field(name="Duration", value=duration)

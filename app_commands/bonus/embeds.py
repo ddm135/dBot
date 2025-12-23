@@ -79,11 +79,7 @@ class BonusesEmbed(discord.Embed):
         )
         self.set_author(
             name=f"{game_details["name"]} - Bonus Info",
-            icon_url=(
-                f"attachment://{icon.name.replace(r"'", r"")}"
-                if isinstance(icon, Path)
-                else icon
-            ),
+            icon_url="attachment://icon.png" if isinstance(icon, Path) else icon,
         )
         self.set_footer(text=f"Page {current_page}/{max_page}")
 

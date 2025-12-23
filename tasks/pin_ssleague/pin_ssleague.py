@@ -154,9 +154,12 @@ class PinSSLeague(commands.Cog):
         )
 
         files = []
-        for image in (album, icon):
-            if isinstance(image, Path):
-                files.append(image)
+        for filename, file in {
+            "album.png": album,
+            "icon.png": icon,
+        }.items():
+            if isinstance(file, Path):
+                files.append(discord.File(file, filename=filename))
         pin_channels = game_details["pinChannelIds"]
         pin_roles = game_details["pinRoles"]
         topic = f"[{current_time.strftime("%m.%d.%y")}] {artist_name} - {song_name}"
