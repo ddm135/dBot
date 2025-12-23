@@ -136,6 +136,13 @@ class Info(commands.Cog):
                             results["releaseDate"] / 1000, tz=game_details["timezone"]
                         ).strftime(game_details["dateFormat"]),
                     }
+                files = [
+                    discord.File(file)
+                    for file in (results["album"], icon)
+                    if isinstance(file, Path)
+                ]
+                for file in files:
+                    print(file.filename)
                 return await itr.followup.send(
                     embed=InfoDetailsEmbed(
                         game_choice.value,
@@ -154,11 +161,7 @@ class Info(commands.Cog):
                         ),
                         results["myrecordQualifyingScore"],
                     ),
-                    files=[
-                        discord.File(file)
-                        for file in (results["album"], icon)
-                        if isinstance(file, Path)
-                    ],
+                    files=files,
                 )
 
         sorted_songs = sorted(
