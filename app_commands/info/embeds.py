@@ -76,6 +76,8 @@ class InfoDetailsEmbed(discord.Embed):
         skills: str | None,
         my_record: int,
     ) -> None:
+        print(album)
+        print(icon)
         game_details = GAMES[game]
         super().__init__(
             title=artist_name.replace(r"*", r"\*")

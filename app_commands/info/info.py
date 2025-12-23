@@ -102,7 +102,6 @@ class Info(commands.Cog):
                     if results["albumBgColor"]
                     else game_details["color"]
                 )
-                print(results["album"])
 
                 file_info = self.bot.info_from_file[game_choice.value][
                     song[song_id_index]
