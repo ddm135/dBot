@@ -158,7 +158,7 @@ class Info(commands.Cog):
                         discord.File(file, filename=filename)
                         for filename, file in {
                             "album.png": results["album"],
-                            "icon.png": icon
+                            "icon.png": icon,
                         }.items()
                         if isinstance(file, Path)
                     ],
@@ -178,7 +178,11 @@ class Info(commands.Cog):
                 self.bot.info_from_file[game_choice.value],
                 icon,
             ),
-            files=[discord.File(icon)] if isinstance(icon, Path) else [],
+            files=(
+                [discord.File(icon, filename="icon.png")]
+                if isinstance(icon, Path)
+                else []
+            ),
             wait=True,
         )
         view = InfoView(
