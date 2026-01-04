@@ -1,7 +1,9 @@
 import logging
 import os
 from collections import defaultdict
+from datetime import datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import discord
 from discord.ext import commands
@@ -47,7 +49,10 @@ class dBot(commands.Bot):
                 STATUS_CHANNEL
             )
             assert isinstance(channel, discord.TextChannel)
-            await channel.send("Shutting down...")
+            if datetime.now(tz=ZoneInfo("Etc/GMT+8")).hour == 4:
+                await channel.send("Restarting...")
+            else:
+                await channel.send("Shutting down...")
         except Exception:
             pass
         finally:
