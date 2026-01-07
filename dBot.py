@@ -49,10 +49,13 @@ class dBot(commands.Bot):
                 STATUS_CHANNEL
             )
             assert isinstance(channel, discord.TextChannel)
-            if datetime.now(tz=ZoneInfo("Etc/GMT+8")).hour == 4:
-                await channel.send("Restarting...")
-            else:
-                await channel.send("Shutting down...")
+            # if datetime.now(tz=ZoneInfo("Etc/GMT+8")).hour in (3, 4, 5):
+            #     await channel.send("Restarting...")
+            # else:
+            #     await channel.send("Shutting down...")
+            await channel.send(
+                f"Shutdown initiated at {datetime.now(tz=ZoneInfo("Etc/GMT+8"))} GMT+8"
+            )
         except Exception:
             pass
         finally:

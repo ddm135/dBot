@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
+from zoneinfo import ZoneInfo
 
 import discord
 from discord.ext import commands
@@ -20,7 +21,9 @@ class OnReady(commands.Cog):
             STATUS_CHANNEL
         )
         assert isinstance(channel, discord.TextChannel)
-        await channel.send(f"Successful start at {datetime.now()}")
+        await channel.send(
+            f"Successful start at {datetime.now(tz=ZoneInfo("Etc/GMT+8"))} GMT+8"
+        )
 
 
 async def setup(bot: "dBot") -> None:

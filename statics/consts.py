@@ -152,13 +152,13 @@ GAMES: dict[str, "GameDetails"] = {
         },
         "ping": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-            "range": "SM!C1:D",
+            "range": "SM!D1:E",
             "columns": PING_COLUMNS,
             "replaceGrid": {
                 "sheetId": 2033296248,
                 "startRowIndex": 0,
-                "startColumnIndex": 3,
-                "endColumnIndex": 4,
+                "startColumnIndex": 4,
+                "endColumnIndex": 5,
             },
         },
         "emblem": {
@@ -222,13 +222,13 @@ GAMES: dict[str, "GameDetails"] = {
         },
         "ping": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-            "range": "JYP!C1:D",
+            "range": "JYP!D1:E",
             "columns": PING_COLUMNS,
             "replaceGrid": {
                 "sheetId": 138125467,
                 "startRowIndex": 0,
-                "startColumnIndex": 3,
-                "endColumnIndex": 4,
+                "startColumnIndex": 4,
+                "endColumnIndex": 5,
             },
         },
         "emblem": {
@@ -293,13 +293,13 @@ GAMES: dict[str, "GameDetails"] = {
         },
         "ping": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-            "range": "STARSHIP!C1:D",
+            "range": "STARSHIP!D1:E",
             "columns": PING_COLUMNS,
             "replaceGrid": {
                 "sheetId": 2107313752,
                 "startRowIndex": 0,
-                "startColumnIndex": 3,
-                "endColumnIndex": 4,
+                "startColumnIndex": 4,
+                "endColumnIndex": 5,
             },
         },
         "emblem": {
@@ -417,13 +417,13 @@ GAMES: dict[str, "GameDetails"] = {
         },
         "ping": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-            "range": "ATEEZ!C1:D",
+            "range": "ATEEZ!D1:E",
             "columns": PING_COLUMNS,
             "replaceGrid": {
                 "sheetId": 1373177550,
                 "startRowIndex": 0,
-                "startColumnIndex": 3,
-                "endColumnIndex": 4,
+                "startColumnIndex": 4,
+                "endColumnIndex": 5,
             },
         },
         "emblem": {
@@ -479,13 +479,13 @@ GAMES: dict[str, "GameDetails"] = {
         },
         "ping": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-            "range": "STAYC!C1:D",
+            "range": "STAYC!D1:E",
             "columns": PING_COLUMNS,
             "replaceGrid": {
                 "sheetId": 1795572100,
                 "startRowIndex": 0,
-                "startColumnIndex": 3,
-                "endColumnIndex": 4,
+                "startColumnIndex": 4,
+                "endColumnIndex": 5,
             },
         },
         "emblem": {
@@ -596,13 +596,13 @@ GAMES: dict[str, "GameDetails"] = {
         },
         "ping": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-            "range": "SMTOWN!C1:D",
+            "range": "SMTOWN!D1:E",
             "columns": PING_COLUMNS,
             "replaceGrid": {
                 "sheetId": 755434019,
                 "startRowIndex": 0,
-                "startColumnIndex": 3,
-                "endColumnIndex": 4,
+                "startColumnIndex": 4,
+                "endColumnIndex": 5,
             },
         },
         "emblem": {
@@ -818,13 +818,13 @@ GAMES: dict[str, "GameDetails"] = {
         },
         "ping": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-            "range": "Philippines!C1:D",
+            "range": "Philippines!D1:E",
             "columns": PING_COLUMNS,
             "replaceGrid": {
                 "sheetId": 564410793,
                 "startRowIndex": 0,
-                "startColumnIndex": 3,
-                "endColumnIndex": 4,
+                "startColumnIndex": 4,
+                "endColumnIndex": 5,
             },
         },
         "emblem": {
