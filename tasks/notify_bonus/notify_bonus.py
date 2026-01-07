@@ -167,7 +167,6 @@ class NotifyBonus(commands.Cog):
                     ),
                     default=None,
                 )
-
                 birthday_end = min(
                     (
                         x
@@ -243,7 +242,7 @@ class NotifyBonus(commands.Cog):
                             notify_start.append(msg)
 
                 if notify_start or notify_end:
-                    icon = self.bot.emblem[game][artist]
+                    icon = self.bot.artist[game][artist]["emblem"]
                     embed = NotifyBonusEmbed(
                         artist,
                         icon,

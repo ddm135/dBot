@@ -118,7 +118,7 @@ class PinSSLeague(commands.Cog):
             else game_details["color"]
         )
         album = results["album"]
-        icon = self.bot.emblem[game][artist_name]
+        icon = self.bot.artist[game][artist_name]["emblem"]
 
         artist_last_str = self.bot.ssleagues[game][artist_name]["date"]
         if artist_last_str:

@@ -17,9 +17,9 @@ from statics.consts import EXTENSIONS, GAMES, STATIC_MODULES, STATUS_CHANNEL, Da
 if TYPE_CHECKING:
     from dBot import dBot
     from helpers.google_sheets import GoogleSheets
+    from tasks.artist_sync import ArtistSync
     from tasks.bonus_sync import BonusSync
     from tasks.data_sync import DataSync
-    from tasks.emblem_sync import EmblemSync
     from tasks.info_sync import InfoSync
 
 
@@ -224,7 +224,7 @@ class Administrative(commands.Cog):
         msg = await ctx.send(text)
         sheets_cog: "GoogleSheets" = self.bot.get_cog("GoogleSheets")
 
-        for data in ("info", "bonus", "ping", "emblem"):
+        for data in ("info", "bonus", "ping", "artist"):
             if (details := game_details.get(data)) and (
                 replace_grid := details["replaceGrid"]  # type: ignore[index]
             ):
@@ -258,9 +258,9 @@ class Administrative(commands.Cog):
         bonus_cog: "BonusSync" = self.bot.get_cog("BonusSync")
         await bonus_cog.get_bonus_data(game, game_details)
 
-        await msg.edit(content=f"{text}\nDownloading emblem data...")
-        emblem_cog: "EmblemSync" = self.bot.get_cog("EmblemSync")
-        await emblem_cog.get_emblem_data(game, game_details)
+        await msg.edit(content=f"{text}\nDownloading artist data...")
+        artist_cog: "ArtistSync" = self.bot.get_cog("ArtistSync")
+        await artist_cog.get_artist_data(game, game_details)
 
         await msg.edit(
             content=f"Renamed {old_name} to {new_name} in {game_details["name"]}!"

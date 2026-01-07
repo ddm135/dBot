@@ -2,7 +2,6 @@ import logging
 import os
 from collections import defaultdict
 from datetime import datetime
-from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import discord
@@ -10,7 +9,12 @@ from discord.ext import commands
 from dotenv import load_dotenv
 
 from statics.consts import EXTENSIONS, LOCK, STATUS_CHANNEL
-from statics.types import BasicDetails, LastAppearance, LastAppearanceManual
+from statics.types import (
+    ArtistDetails,
+    BasicDetails,
+    LastAppearance,
+    LastAppearanceManual,
+)
 
 
 class dBot(commands.Bot):
@@ -24,7 +28,7 @@ class dBot(commands.Bot):
 
     bonus: dict[str, dict[str, list[list]]] = {}
 
-    emblem: dict[str, dict[str, str | Path | None]] = {}
+    artist: dict[str, dict[str, ArtistDetails]] = {}
 
     word_pings: defaultdict[str, defaultdict[str, defaultdict[str, dict]]] = (
         defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
@@ -49,13 +53,16 @@ class dBot(commands.Bot):
                 STATUS_CHANNEL
             )
             assert isinstance(channel, discord.TextChannel)
-            # if datetime.now(tz=ZoneInfo("Etc/GMT+8")).hour in (3, 4, 5):
-            #     await channel.send("Restarting...")
-            # else:
-            #     await channel.send("Shutting down...")
-            await channel.send(
-                f"Shutdown initiated at {datetime.now(tz=ZoneInfo("Etc/GMT+8"))} GMT+8"
-            )
+            if datetime.now(tz=ZoneInfo("Etc/GMT-8")).hour == 4:
+                await channel.send(
+                    f"Daily restart initiated at "
+                    f"{datetime.now(tz=ZoneInfo("Etc/GMT-8"))}."
+                )
+            else:
+                await channel.send(
+                    f"Shutdown initiated at "
+                    f"{datetime.now(tz=ZoneInfo("Etc/GMT-8"))}."
+                )
         except Exception:
             pass
         finally:

@@ -71,7 +71,7 @@ class Info(commands.Cog):
                 )
             ):
                 return await itr.followup.send("Artist not found.")
-            icon = self.bot.emblem[game_choice.value][artist_name]
+            icon = self.bot.artist[game_choice.value][artist_name]["emblem"]
 
             if song_name:
                 if not (

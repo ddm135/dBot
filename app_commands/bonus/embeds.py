@@ -108,8 +108,9 @@ class BonusesEmbed(discord.Embed):
                 value=(
                     f"{"~~" if bonus["bonusEnd"] < current_date else ""}"
                     f"{bonus["bonusAmount"]}% | "
-                    f"{bonus["bonusStart"].strftime("%B %d").replace(" 0", " ")} -"
-                    f" {bonus["bonusEnd"].strftime("%B %d").replace(" 0", " ")} | "
+                    f"{bonus["bonusStart"].strftime("%B %d").replace(" 0", " ")} - "
+                    f"{bonus["bonusEnd"].strftime("%B %d").replace(" 0", " ")} | "
+                    f"{f"{bonus["maxScore"]:,} | " if bonus["maxScore"] else ""}"
                     f"{("Expired" if bonus["bonusEnd"] < current_date
                         else f"Available <t:{int(bonus["bonusStart"].timestamp())}:R>"
                         if bonus["bonusStart"] > current_date

@@ -22,7 +22,7 @@ class OnReady(commands.Cog):
         )
         assert isinstance(channel, discord.TextChannel)
         await channel.send(
-            f"Successful start at {datetime.now(tz=ZoneInfo("Etc/GMT+8"))} GMT+8"
+            f"Successful start at {datetime.now(tz=ZoneInfo("Etc/GMT-8"))}."
         )
 
 

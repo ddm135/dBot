@@ -24,8 +24,8 @@ TIMEZONES = {
     "KST": ZoneInfo("Asia/Seoul"),
     "JST": ZoneInfo("Asia/Tokyo"),
     "CST": ZoneInfo("Asia/Taipei"),
-    # "EST": ZoneInfo("Etc/GMT-5"),
-    # "EDT": ZoneInfo("Etc/GMT-4"),
+    # "EST": ZoneInfo("Etc/GMT+5"),
+    # "EDT": ZoneInfo("Etc/GMT+4"),
     "PHT": ZoneInfo("Asia/Manila"),
     # "ICT": ZoneInfo("Asia/Bangkok"),
 }
@@ -51,7 +51,7 @@ EXTENSIONS = (
     "tasks.bonus_sync",
     "tasks.notify_bonus",
     "app_commands.bonus",
-    "tasks.emblem_sync",
+    "tasks.artist_sync",
     "tasks.data_sync",
     "app_commands.ping",
     "app_commands.role",
@@ -114,7 +114,11 @@ BONUS_COLUMNS = (
     "bonus_end",
 )
 PING_COLUMNS = ("users", "artist_name")
-EMBLEM_COLUMNS = ("artist_name", "emblem")
+
+
+class ArtistColumns(Enum):
+    STANDARD = ("artist_name", "emblem", "max_score")
+    OTHER = ("artist_name", "emblem")
 
 
 class AssetScheme(Enum):
@@ -161,10 +165,10 @@ GAMES: dict[str, "GameDetails"] = {
                 "endColumnIndex": 5,
             },
         },
-        "emblem": {
+        "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
             "range": "SM!A1:B",
-            "columns": EMBLEM_COLUMNS,
+            "columns": ArtistColumns.STANDARD.value,
             "replaceGrid": {},
         },
         "pinChannelIds": {
@@ -231,10 +235,10 @@ GAMES: dict[str, "GameDetails"] = {
                 "endColumnIndex": 5,
             },
         },
-        "emblem": {
+        "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
             "range": "JYP!A1:B",
-            "columns": EMBLEM_COLUMNS,
+            "columns": ArtistColumns.STANDARD.value,
             "replaceGrid": {},
         },
         "pinChannelIds": {
@@ -302,10 +306,10 @@ GAMES: dict[str, "GameDetails"] = {
                 "endColumnIndex": 5,
             },
         },
-        "emblem": {
+        "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
             "range": "STARSHIP!A1:B",
-            "columns": EMBLEM_COLUMNS,
+            "columns": ArtistColumns.STANDARD.value,
             "replaceGrid": {},
         },
         "pinChannelIds": {},
@@ -372,10 +376,10 @@ GAMES: dict[str, "GameDetails"] = {
                 "endColumnIndex": 2,
             },
         },
-        "emblem": {
+        "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
             "range": "KD!A1:B",
-            "columns": EMBLEM_COLUMNS,
+            "columns": ArtistColumns.OTHER.value,
             "replaceGrid": {
                 "sheetId": 1200216146,
                 "startRowIndex": 0,
@@ -426,10 +430,10 @@ GAMES: dict[str, "GameDetails"] = {
                 "endColumnIndex": 5,
             },
         },
-        "emblem": {
+        "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
             "range": "ATEEZ!A1:B",
-            "columns": EMBLEM_COLUMNS,
+            "columns": ArtistColumns.STANDARD.value,
             "replaceGrid": {},
         },
         "pinChannelIds": {},
@@ -488,10 +492,10 @@ GAMES: dict[str, "GameDetails"] = {
                 "endColumnIndex": 5,
             },
         },
-        "emblem": {
+        "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
             "range": "STAYC!A1:B",
-            "columns": EMBLEM_COLUMNS,
+            "columns": ArtistColumns.STANDARD.value,
             "replaceGrid": {},
         },
         "pinChannelIds": {},
@@ -534,10 +538,10 @@ GAMES: dict[str, "GameDetails"] = {
             "range": "Songs (Note Count)!A2:C",
             "columns": InfoColumns.NO_SSL.value,
         },
-        "emblem": {
+        "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
             "range": "W1!A1:B",
-            "columns": EMBLEM_COLUMNS,
+            "columns": ArtistColumns.OTHER.value,
             "replaceGrid": {
                 "sheetId": 1164880075,
                 "startRowIndex": 0,
@@ -605,10 +609,10 @@ GAMES: dict[str, "GameDetails"] = {
                 "endColumnIndex": 5,
             },
         },
-        "emblem": {
+        "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
             "range": "SMTOWN!A1:B",
-            "columns": EMBLEM_COLUMNS,
+            "columns": ArtistColumns.STANDARD.value,
             "replaceGrid": {},
         },
         "pinChannelIds": {
@@ -669,10 +673,10 @@ GAMES: dict[str, "GameDetails"] = {
                 "endColumnIndex": 4,
             },
         },
-        "emblem": {
+        "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
             "range": "JYPNATION!A1:B",
-            "columns": EMBLEM_COLUMNS,
+            "columns": ArtistColumns.OTHER.value,
             "replaceGrid": {},
         },
         "pinChannelIds": {
@@ -717,10 +721,10 @@ GAMES: dict[str, "GameDetails"] = {
             "range": "Songs!A2:E",
             "columns": InfoColumns.SKILLS.value,
         },
-        "emblem": {
+        "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
             "range": "LAPONE!A1:B",
-            "columns": EMBLEM_COLUMNS,
+            "columns": ArtistColumns.OTHER.value,
             "replaceGrid": {},
         },
         "pinChannelIds": {
@@ -770,10 +774,10 @@ GAMES: dict[str, "GameDetails"] = {
                 "endColumnIndex": 4,
             },
         },
-        "emblem": {
+        "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
             "range": "EBiDAN!A1:B",
-            "columns": EMBLEM_COLUMNS,
+            "columns": ArtistColumns.OTHER.value,
             "replaceGrid": {},
         },
         "pinChannelIds": {},
@@ -827,10 +831,10 @@ GAMES: dict[str, "GameDetails"] = {
                 "endColumnIndex": 5,
             },
         },
-        "emblem": {
+        "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
             "range": "Philippines!A1:B",
-            "columns": EMBLEM_COLUMNS,
+            "columns": ArtistColumns.STANDARD.value,
             "replaceGrid": {},
         },
         "pinChannelIds": {},

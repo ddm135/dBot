@@ -9,3 +9,4 @@ class BonusDict(TypedDict):
     bonusStart: datetime
     bonusEnd: datetime
     bonusAmount: int
+    maxScore: int | None

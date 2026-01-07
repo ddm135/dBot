@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import TYPE_CHECKING, NotRequired, TypedDict
 from zoneinfo import ZoneInfo
 
@@ -27,7 +28,7 @@ class GameDetails(TypedDict):
     info: NotRequired[SpreadsheetDetails]
     bonus: NotRequired[SpreadsheetDetails]
     ping: NotRequired[SpreadsheetDetails]
-    emblem: SpreadsheetDetails
+    artist: SpreadsheetDetails
     pinChannelIds: dict[int, int | None]
     pinRoles: dict[int, int | None]
     forward: NotRequired[ForwardUpdateDetails]
@@ -53,6 +54,11 @@ class BasicDetails(TypedDict):
     iconUrl: str
     manifest: dict[str, str]
     catalog: NotRequired[dict[str, CatalogDetails]]
+
+
+class ArtistDetails(TypedDict):
+    emblem: str | Path | None
+    score: int | None
 
 
 class LastAppearance(TypedDict):

@@ -69,7 +69,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
             if artist_choice not in bonus_data:
                 return await itr.followup.send("Artist not found.")
             artists = [artist_choice]
-            icon = self.bot.emblem[game_choice.value][artist_choice]
+            icon = self.bot.artist[game_choice.value][artist_choice]["emblem"]
 
         timezone = game_details["timezone"]
         bonus_columns = game_details["bonus"]["columns"]
@@ -182,7 +182,6 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                     ),
                     default=None,
                 )
-
                 birthday_end = min(
                     (
                         x
@@ -195,6 +194,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                     ),
                     default=None,
                 )
+                max_score = self.bot.artist[game_choice.value][artist]["score"]
 
                 if (
                     birthday_bonuses
@@ -212,6 +212,11 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                         bonusStart=birthday_start,
                         bonusEnd=birthday_end,
                         bonusAmount=birthday_total,
+                        maxScore=(
+                            max_score + max_score * birthday_total // 100
+                            if max_score
+                            else None
+                        ),
                     )
                     if bonus_dict not in period_bonuses:
                         period_bonuses.append(bonus_dict)
@@ -240,6 +245,11 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                         bonusStart=song_start,
                         bonusEnd=song_end,
                         bonusAmount=song_total,
+                        maxScore=(
+                            max_score + max_score * song_total // 100
+                            if max_score
+                            else None
+                        ),
                     )
                     if bonus_dict not in period_bonuses:
                         period_bonuses.append(bonus_dict)

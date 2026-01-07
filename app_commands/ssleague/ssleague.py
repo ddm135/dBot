@@ -167,7 +167,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
             else game_details["color"]
         )
         album = results["album"]
-        icon = self.bot.emblem[game][artist_name]
+        icon = self.bot.artist[game][artist_name]["emblem"]
 
         timezone = game_details["timezone"]
         current_time = datetime.now(tz=timezone) - RESET_OFFSET
