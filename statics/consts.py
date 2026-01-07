@@ -167,7 +167,7 @@ GAMES: dict[str, "GameDetails"] = {
         },
         "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-            "range": "SM!A1:B",
+            "range": "SM!A1:C",
             "columns": ArtistColumns.STANDARD.value,
             "replaceGrid": {},
         },
@@ -237,7 +237,7 @@ GAMES: dict[str, "GameDetails"] = {
         },
         "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-            "range": "JYP!A1:B",
+            "range": "JYP!A1:C",
             "columns": ArtistColumns.STANDARD.value,
             "replaceGrid": {},
         },
@@ -308,7 +308,7 @@ GAMES: dict[str, "GameDetails"] = {
         },
         "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-            "range": "STARSHIP!A1:B",
+            "range": "STARSHIP!A1:C",
             "columns": ArtistColumns.STANDARD.value,
             "replaceGrid": {},
         },
@@ -432,7 +432,7 @@ GAMES: dict[str, "GameDetails"] = {
         },
         "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-            "range": "ATEEZ!A1:B",
+            "range": "ATEEZ!A1:C",
             "columns": ArtistColumns.STANDARD.value,
             "replaceGrid": {},
         },
@@ -494,7 +494,7 @@ GAMES: dict[str, "GameDetails"] = {
         },
         "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-            "range": "STAYC!A1:B",
+            "range": "STAYC!A1:C",
             "columns": ArtistColumns.STANDARD.value,
             "replaceGrid": {},
         },
@@ -611,7 +611,7 @@ GAMES: dict[str, "GameDetails"] = {
         },
         "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-            "range": "SMTOWN!A1:B",
+            "range": "SMTOWN!A1:C",
             "columns": ArtistColumns.STANDARD.value,
             "replaceGrid": {},
         },
@@ -833,7 +833,7 @@ GAMES: dict[str, "GameDetails"] = {
         },
         "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-            "range": "Philippines!A1:B",
+            "range": "Philippines!A1:C",
             "columns": ArtistColumns.STANDARD.value,
             "replaceGrid": {},
         },
