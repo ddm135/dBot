@@ -60,6 +60,7 @@ class BasicSync(commands.Cog):
                             iconUrl = json_result["results"][0]["artworkUrl100"]
                             break
                     except aiohttp.ClientConnectorError:
+                        self.LOGGER.exception("?")
                         continue
 
             manifest = await cog.get_manifest(game, version)
