@@ -141,25 +141,16 @@ class BonusTopEmbed(discord.Embed):
         current_page: int = 1,
         max_page: int | None = None,
     ) -> None:
-        page = (
-            pages[current_page]
-            if pages
-            else {
-                "artist": "None",
-                "index": 1,
-                "subpage": 1,
-            }
-        )
+        page = pages[current_page]
         artist_name = page["artist"]
         end = page["subpage"] * STEP
         start = end - STEP
-        max_page = max_page if max_page else max(pages) if pages else 1
-        artist_bonuses = bonuses[page["artist"]] if pages else []
+        max_page = max_page if max_page else max(pages)
+        artist_bonuses = bonuses[page["artist"]] if bonuses else []
         filtered_bonuses = artist_bonuses[start:end]
 
         super().__init__(
-            title=page["artist"]
-            .replace(r"*", r"\*")
+            title=artist_name.replace(r"*", r"\*")
             .replace(r"_", r"\_")
             .replace(r"`", r"\`"),
             color=game_details["color"],

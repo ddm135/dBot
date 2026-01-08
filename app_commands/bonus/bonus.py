@@ -176,7 +176,13 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
             for artist_name, bonuses in sorted_bonuses.items()
         }
 
-        sorted_pages = {}
+        sorted_pages = {
+            1: {
+                "artist": "None",
+                "index": 1,
+                "subpage": 1,
+            }
+        }
         sorted_page = 1
         for index, (artist_name, bonuses) in enumerate(sorted_bonuses.items(), 1):
             subpage_count = math.ceil(len(bonuses) / STEP)
@@ -187,7 +193,13 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                     "subpage": i,
                 }
                 sorted_page += 1
-        highest_pages = {}
+        highest_pages = {
+            1: {
+                "artist": "None",
+                "index": 1,
+                "subpage": 1,
+            }
+        }
         highest_page = 1
         for index, (artist_name, bonuses) in enumerate(highest_bonuses.items(), 1):
             subpage_count = math.ceil(len(bonuses) / STEP)

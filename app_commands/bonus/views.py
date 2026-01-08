@@ -127,7 +127,7 @@ class BonusTopView(discord.ui.View):
         self.user = user
         self.icon = icon
         self.current_page = 1
-        self.max_page = max(self.pages) if self.pages else 1
+        self.max_page = max(self.pages)
         super().__init__()
 
     async def on_timeout(self) -> None:
@@ -203,7 +203,7 @@ class BonusTopView(discord.ui.View):
         active_page = self.pages[self.current_page]
         self.bonuses = self.highest_bonuses
         self.pages = self.highest_pages
-        self.max_page = max(self.pages) if self.pages else 1
+        self.max_page = max(self.pages)
         for page_number, page_details in self.pages.items():
             if page_details["artist"] == active_page["artist"]:
                 self.current_page = page_number
@@ -233,7 +233,7 @@ class BonusTopView(discord.ui.View):
         active_page = self.pages[self.current_page]
         self.bonuses = self.all_bonuses
         self.pages = self.all_pages
-        self.max_page = max(self.pages) if self.pages else 1
+        self.max_page = max(self.pages)
         for page_number, page_details in self.pages.items():
             if page_details["artist"] == active_page["artist"]:
                 self.current_page = page_number
