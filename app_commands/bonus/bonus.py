@@ -129,7 +129,6 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
             if GAMES[choice.value]["artist"]["columns"] == ArtistColumns.STANDARD.value
         ]
     )
-    @app_commands.autocomplete(artist_choice=artist_autocomplete)
     @app_commands.rename(game_choice="game")
     async def bonus_top(
         self,
