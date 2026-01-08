@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from pathlib import Path
+from pprint import pprint
 from typing import TYPE_CHECKING
 
 import discord
@@ -147,6 +148,7 @@ class BonusTopEmbed(discord.Embed):
         start = end - STEP
         max_page = max_page if max_page else max(pages)
         filtered_bonuses = bonuses[page["artist"]][start:end]
+        pprint(bonuses)
 
         super().__init__(
             title=page["artist"]

@@ -53,11 +53,20 @@ class dBot(commands.Bot):
                 STATUS_CHANNEL
             )
             assert isinstance(channel, discord.TextChannel)
-            if datetime.now(tz=ZoneInfo("Etc/GMT-8")).hour == 4:
+            current_date = datetime.now(tz=ZoneInfo("Etc/GMT-8"))
+            if current_date.hour == 4 and not current_date.minute:
+                await self.change_presence(
+                    status=discord.Status.dnd,
+                    activity=discord.CustomActivity("Daily restart in progress..."),
+                )
                 await channel.send(
                     f"Daily restart at {datetime.now(tz=ZoneInfo("Etc/GMT-8"))}."
                 )
             else:
+                await self.change_presence(
+                    status=discord.Status.dnd,
+                    activity=discord.CustomActivity("Shutting down..."),
+                )
                 await channel.send(
                     f"Shutting down at {datetime.now(tz=ZoneInfo("Etc/GMT-8"))}."
                 )

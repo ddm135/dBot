@@ -250,7 +250,7 @@ class BonusTopView(discord.ui.View):
     @discord.ui.button(
         label="Max Weekly Score",
         style=discord.ButtonStyle.secondary,
-        row=2,
+        row=1,
     )
     async def show_score(
         self, itr: discord.Interaction["dBot"], button: discord.ui.Button
