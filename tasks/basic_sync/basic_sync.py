@@ -48,14 +48,19 @@ class BasicSync(commands.Cog):
                 iconUrl = game_details["iconUrl"]
             else:
                 query = game_details.get("lookupQuery")
-                async with session.get(
-                    f"http://itunes.apple.com:80/lookup?{query}", ssl=False
-                ) as r:
-                    weird_result = await r.text()
-                    text_result = weird_result.replace("\n", "")
-                    json_result = json.loads(text_result)
-                    version = json_result["results"][0]["version"]
-                    iconUrl = json_result["results"][0]["artworkUrl100"]
+                while True:
+                    try:
+                        async with session.get(
+                            f"https://itunes.apple.com/lookup?{query}"
+                        ) as r:
+                            weird_result = await r.text()
+                            text_result = weird_result.replace("\n", "")
+                            json_result = json.loads(text_result)
+                            version = json_result["results"][0]["version"]
+                            iconUrl = json_result["results"][0]["artworkUrl100"]
+                            break
+                    except aiohttp.ClientConnectorError:
+                        continue
 
             manifest = await cog.get_manifest(game, version)
             self.bot.basic[game] = BasicDetails(
