@@ -58,7 +58,7 @@ class BasicDetails(TypedDict):
 
 class ArtistDetails(TypedDict):
     emblem: str | Path | None
-    score: int | None
+    score: int
 
 
 class LastAppearance(TypedDict):

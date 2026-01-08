@@ -55,13 +55,11 @@ class dBot(commands.Bot):
             assert isinstance(channel, discord.TextChannel)
             if datetime.now(tz=ZoneInfo("Etc/GMT-8")).hour == 4:
                 await channel.send(
-                    f"Daily restart initiated at "
-                    f"{datetime.now(tz=ZoneInfo("Etc/GMT-8"))}."
+                    f"Daily restart at {datetime.now(tz=ZoneInfo("Etc/GMT-8"))}."
                 )
             else:
                 await channel.send(
-                    f"Shutdown initiated at "
-                    f"{datetime.now(tz=ZoneInfo("Etc/GMT-8"))}."
+                    f"Shutting down at {datetime.now(tz=ZoneInfo("Etc/GMT-8"))}."
                 )
         except Exception:
             pass

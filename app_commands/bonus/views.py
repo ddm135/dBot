@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 import discord
 
-from .embeds import BonusesEmbed
+from .embeds import BonusListEmbed
 from .types import BonusDict
 
 if TYPE_CHECKING:
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from statics.types import GameDetails
 
 
-class BonusView(discord.ui.View):
+class BonusListView(discord.ui.View):
     def __init__(
         self,
         message: discord.Message,
@@ -49,7 +49,7 @@ class BonusView(discord.ui.View):
     async def update_message(self, itr: discord.Interaction) -> None:
         await itr.followup.edit_message(
             message_id=self.message.id,
-            embed=BonusesEmbed(
+            embed=BonusListEmbed(
                 self.game_details,
                 self.artist,
                 self.bonuses,

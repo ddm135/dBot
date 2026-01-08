@@ -50,7 +50,7 @@ class BonusPingsEmbed(discord.Embed):
         self.set_author(name=game_details["name"], icon_url=icon)
 
 
-class BonusesEmbed(discord.Embed):
+class BonusListEmbed(discord.Embed):
     def __init__(
         self,
         game_details: "GameDetails",
@@ -86,23 +86,28 @@ class BonusesEmbed(discord.Embed):
         for bonus in filtered_bonuses:
             self.add_field(
                 name=(
-                    f"{("~~" if bonus["bonusEnd"] < current_date
+                    f"{"~~" if bonus["bonusEnd"] < current_date
                         else "" if bonus["bonusStart"] > current_date
-                        else ":white_check_mark: ")}"
-                    f"{f"**{bonus["artist"]}**" if not artist_name else ""}"
+                        else ":white_check_mark: "}"
+                    f"{f"**{bonus["artist"].replace(r"*", r"\*")
+                            .replace(r"_", r"\_").replace(r"`", r"\`")}**"
+                        if not artist_name else ""}"
                     f"{" " if not artist_name and bonus["members"] else ""}"
-                    f"{(f"{bonus["members"]}"
+                    f"{bonus["members"].replace(r"*", r"\*")
+                        .replace(r"_", r"\_").replace(r"`", r"\`")
                         if bonus["members"]
                         and bonus["artist"] != bonus["members"]
-                        else "")}"
-                    f"{(": " if not artist_name
+                        else ""}"
+                    f"{": " if not artist_name
                         or bonus["members"] and bonus["artist"] != bonus["members"]
-                        else "")}"
-                    f"{(bonus["song"] if bonus["song"]
-                        else "All Songs :birthday:")}"
-                    f"{("" if not bonus["song"]
+                        else ""}"
+                    f"{bonus["song"].replace(r"*", r"\*")
+                        .replace(r"_", r"\_").replace(r"`", r"\`")
+                        if bonus["song"]
+                        else "All Songs :birthday:"}"
+                    f"{"" if not bonus["song"]
                         else " :cd:" if bonus["bonusAmount"] == 3
-                        else " :birthday: :dvd:")}"
+                        else " :birthday: :dvd:"}"
                     f"{"~~" if bonus["bonusEnd"] < current_date else ""}"
                 ),
                 value=(
@@ -111,11 +116,11 @@ class BonusesEmbed(discord.Embed):
                     f"{bonus["bonusStart"].strftime("%B %d").replace(" 0", " ")} - "
                     f"{bonus["bonusEnd"].strftime("%B %d").replace(" 0", " ")} | "
                     f"{f"{bonus["maxScore"]:,} | " if bonus["maxScore"] else ""}"
-                    f"{("Expired" if bonus["bonusEnd"] < current_date
+                    f"{"Expired" if bonus["bonusEnd"] < current_date
                         else f"Available <t:{int(bonus["bonusStart"].timestamp())}:R>"
                         if bonus["bonusStart"] > current_date
                         else f"Ends <t:"
-                        f"{int((bonus["bonusEnd"] + BONUS_OFFSET).timestamp())}:R>")}"
+                        f"{int((bonus["bonusEnd"] + BONUS_OFFSET).timestamp())}:R>"}"
                     f"{" :bangbang:" if bonus["bonusStart"] == last_date else ""}"
                     f"{"~~" if bonus["bonusEnd"] < current_date else ""}"
                 ),

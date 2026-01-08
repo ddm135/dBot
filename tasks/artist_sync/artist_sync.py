@@ -57,7 +57,7 @@ class ArtistSync(commands.Cog):
         for row in artist:
             artist_name = row[artist_name_index]
             emblem_value = row[emblem_index]
-            max_score = int(row[max_score_index]) if max_score_index else None
+            max_score = int(row[max_score_index]) if max_score_index else 0
 
             try:
                 emblem_final = (
