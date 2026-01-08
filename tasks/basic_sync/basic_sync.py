@@ -3,7 +3,6 @@
 import asyncio
 import json
 import logging
-import socket
 from datetime import time
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -43,9 +42,7 @@ class BasicSync(commands.Cog):
         self.LOGGER.info("Downloading basic data: %s...", game_details["name"])
         cog: "SuperStar" = self.bot.get_cog("SuperStar")  # type: ignore[assignment]
 
-        async with aiohttp.ClientSession(
-            connector=aiohttp.TCPConnector(family=socket.AF_INET)
-        ) as session:
+        async with aiohttp.ClientSession() as session:
             if {"iconUrl", "lastVersion"} <= set(game_details):
                 version = game_details["lastVersion"]
                 iconUrl = game_details["iconUrl"]
