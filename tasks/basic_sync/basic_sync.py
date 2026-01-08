@@ -49,7 +49,7 @@ class BasicSync(commands.Cog):
             else:
                 query = game_details.get("lookupQuery")
                 async with session.get(
-                    f"http://itunes.apple.com:80/lookup?{query}",
+                    f"https://itunes.apple.com/lookup?{query}", ssl=False
                 ) as r:
                     weird_result = await r.text()
                     text_result = weird_result.replace("\n", "")
