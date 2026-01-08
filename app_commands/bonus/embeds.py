@@ -153,7 +153,7 @@ class BonusTopEmbed(discord.Embed):
         artist_name = page["artist"]
         end = page["subpage"] * STEP
         start = end - STEP
-        max_page = max_page if max_page else max(pages) or 1
+        max_page = max_page if max_page else max(pages) if pages else 1
         filtered_bonuses = bonuses[page["artist"]][start:end] if pages else []
 
         super().__init__(
