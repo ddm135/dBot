@@ -154,7 +154,8 @@ class BonusTopEmbed(discord.Embed):
         end = page["subpage"] * STEP
         start = end - STEP
         max_page = max_page if max_page else max(pages) if pages else 1
-        filtered_bonuses = bonuses[page["artist"]][start:end] if pages else []
+        artist_bonuses = bonuses[page["artist"]] if pages else []
+        filtered_bonuses = artist_bonuses[start:end]
 
         super().__init__(
             title=page["artist"]
@@ -169,8 +170,8 @@ class BonusTopEmbed(discord.Embed):
         )
         self.set_footer(
             text=f"Page {current_page}/{max_page} "
-            f"(Artist {page["index"]}/{len(bonuses)}, Subpage "
-            f"{page["subpage"]}/{math.ceil(len(bonuses[page["artist"]]) / STEP)})"
+            f"(Artist {page["index"]}/{len(bonuses) or 1}, Subpage "
+            f"{page["subpage"]}/{math.ceil(len(artist_bonuses) / STEP) or 1})"
         )
 
         for bonus in filtered_bonuses:
