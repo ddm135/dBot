@@ -19,8 +19,8 @@ class BonusListView(discord.ui.View):
         game_details: "GameDetails",
         artist_name: str | None,
         first_date: datetime,
-        last_date: datetime,
         current_date: datetime,
+        last_date: datetime,
         bonuses: list[BonusDict],
         user: discord.User | discord.Member,
         icon: str | Path | None,
@@ -101,9 +101,8 @@ class BonusTopView(discord.ui.View):
         self,
         message: discord.Message,
         game_details: "GameDetails",
-        first_date: datetime,
-        last_date: datetime,
         current_date: datetime,
+        last_date: datetime,
         all_bonuses: dict[str, list[BonusDict]],
         highest_bonuses: dict[str, list[BonusDict]],
         all_pages: dict,
@@ -115,7 +114,6 @@ class BonusTopView(discord.ui.View):
     ) -> None:
         self.message = message
         self.game_details = game_details
-        self.first_date = first_date
         self.last_date = last_date
         self.current_date = current_date
         self.all_bonuses = all_bonuses
@@ -144,7 +142,6 @@ class BonusTopView(discord.ui.View):
             embed=BonusTopEmbed(
                 self.game_details,
                 self.bonuses,
-                self.first_date,
                 self.last_date,
                 self.current_date,
                 self.icon,
@@ -263,7 +260,6 @@ class BonusTopView(discord.ui.View):
             )
             return
 
-        self.current_page = 1
         for child in self.children:
             if isinstance(child, discord.ui.Button):
                 if not child.row:

@@ -1,5 +1,6 @@
 # pyright: reportTypedDictNotRequiredAccess=false
 
+import math
 from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -57,8 +58,8 @@ class BonusListEmbed(discord.Embed):
         artist_name: str | None,
         bonuses: list[BonusDict],
         first_date: datetime,
-        last_date: datetime,
         current_date: datetime,
+        last_date: datetime,
         icon: str | Path | None,
         current_page: int,
         max_page: int,
@@ -133,9 +134,8 @@ class BonusTopEmbed(discord.Embed):
         self,
         game_details: "GameDetails",
         bonuses: dict[str, list[BonusDict]],
-        first_date: datetime,
-        last_date: datetime,
         current_date: datetime,
+        last_date: datetime,
         icon: str | Path | None,
         pages: dict[int, dict],
         current_page: int = 1,
@@ -159,7 +159,11 @@ class BonusTopEmbed(discord.Embed):
             name=f"{game_details["name"]} - Top Bonuses",
             icon_url="attachment://icon.png" if isinstance(icon, Path) else icon,
         )
-        self.set_footer(text=f"Page {current_page}/{max_page}")
+        self.set_footer(
+            text=f"Page {current_page}/{max_page} "
+            f"(Artist {page["index"]}/{len(bonuses)}, Subpage "
+            f"{page["subpage"]}/{math.ceil(len(bonuses[page["artist"]]) / STEP)})"
+        )
 
         for bonus in filtered_bonuses:
             self.add_field(

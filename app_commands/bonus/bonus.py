@@ -93,8 +93,8 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                 artist_choice,
                 period_bonuses,
                 first_date,
-                last_date,
                 current_date,
+                last_date,
                 icon,
                 default_page,
                 max_page,
@@ -111,8 +111,8 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
             game_details,
             artist_choice,
             first_date,
-            last_date,
             current_date,
+            last_date,
             period_bonuses,
             itr.user,
             icon,
@@ -152,7 +152,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         )
         if not results:
             return await itr.followup.send("Invalid time period.")
-        period_bonuses, first_date, current_date, last_date = results
+        period_bonuses, _, current_date, last_date = results
 
         period_bonuses.sort(key=lambda x: list(bonus_data).index(x["artist"]))
         grouped_bonuses = {
@@ -177,17 +177,25 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
 
         sorted_pages = {}
         sorted_page = 1
-        for artist_name, bonuses in sorted_bonuses.items():
+        for index, (artist_name, bonuses) in enumerate(sorted_bonuses.items()):
             subpage_count = math.ceil(len(bonuses) / STEP)
             for i in range(1, subpage_count + 1):
-                sorted_pages[sorted_page] = {"artist": artist_name, "subpage": i}
+                sorted_pages[sorted_page] = {
+                    "artist": artist_name,
+                    "index": index,
+                    "subpage": i,
+                }
                 sorted_page += 1
         highest_pages = {}
         highest_page = 1
-        for artist_name, bonuses in highest_bonuses.items():
+        for index, (artist_name, bonuses) in enumerate(highest_bonuses.items()):
             subpage_count = math.ceil(len(bonuses) / STEP)
             for i in range(1, subpage_count + 1):
-                highest_pages[highest_page] = {"artist": artist_name, "subpage": i}
+                highest_pages[highest_page] = {
+                    "artist": artist_name,
+                    "index": index,
+                    "subpage": i,
+                }
                 highest_page += 1
 
         all_scores = {
@@ -219,9 +227,8 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
             embed=BonusTopEmbed(
                 game_details,
                 highest_bonuses,
-                first_date,
-                last_date,
                 current_date,
+                last_date,
                 icon,
                 highest_pages,
             ),
@@ -235,9 +242,8 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         view = BonusTopView(
             msg,
             game_details,
-            first_date,
-            last_date,
             current_date,
+            last_date,
             sorted_bonuses,
             highest_bonuses,
             sorted_pages,
