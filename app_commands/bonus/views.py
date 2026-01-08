@@ -191,6 +191,7 @@ class BonusTopView(discord.ui.View):
         label="Highest Bonuses Only",
         style=discord.ButtonStyle.secondary,
         row=1,
+        disabled=True,
     )
     async def show_highest(
         self, itr: discord.Interaction["dBot"], button: discord.ui.Button
