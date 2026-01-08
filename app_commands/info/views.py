@@ -54,7 +54,7 @@ class InfoView(discord.ui.View):
             view=self,
         )
 
-    @discord.ui.button(label="Previous Page", style=discord.ButtonStyle.secondary)
+    @discord.ui.button(label="Previous Page", style=discord.ButtonStyle.primary)
     async def previous_page(
         self, itr: discord.Interaction["dBot"], _: discord.ui.Button
     ) -> None:
@@ -69,7 +69,7 @@ class InfoView(discord.ui.View):
             self.current = self.max
         await self.update_message(itr)
 
-    @discord.ui.button(label="Next Page", style=discord.ButtonStyle.primary)
+    @discord.ui.button(label="Next Page", style=discord.ButtonStyle.success)
     async def next_page(
         self, itr: discord.Interaction["dBot"], _: discord.ui.Button
     ) -> None:

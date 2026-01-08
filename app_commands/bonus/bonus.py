@@ -16,9 +16,9 @@ from statics.consts import BONUS_OFFSET, GAMES, ArtistColumns
 
 from .autocompletes import artist_autocomplete
 from .commons import STEP
-from .embeds import BonusListEmbed, BonusPingsEmbed
+from .embeds import BonusListEmbed, BonusPingsEmbed, BonusTopEmbed
 from .types import BonusDict
-from .views import BonusListView
+from .views import BonusListView, BonusTopView
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -156,29 +156,46 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
 
         period_bonuses.sort(key=lambda x: list(bonus_data).index(x["artist"]))
         grouped_bonuses = {
-            artist: sorted(
+            artist_name: sorted(
                 bonuses, key=lambda x: (-x["maxScore"], x["bonusEnd"], x["bonusStart"])
             )
-            for artist, bonuses in groupby(period_bonuses, key=lambda x: x["artist"])
+            for artist_name, bonuses in groupby(
+                period_bonuses, key=lambda x: x["artist"]
+            )
         }
         sorted_bonuses = dict(
             sorted(grouped_bonuses.items(), key=lambda x: x[1][0]["maxScore"])
         )
         highest_bonuses = {
-            artist: [
+            artist_name: [
                 bonus
                 for bonus in bonuses
                 if bonus["maxScore"] == bonuses[0]["maxScore"]
             ]
-            for artist, bonuses in sorted_bonuses.items()
+            for artist_name, bonuses in sorted_bonuses.items()
         }
 
+        sorted_pages = {}
+        sorted_page = 1
+        for artist_name, bonuses in sorted_bonuses.items():
+            subpage_count = math.ceil(len(bonuses) // STEP)
+            for i in range(subpage_count):
+                sorted_pages[sorted_page] = {"artist": artist_name, "subpage": i}
+                sorted_page += 1
+        highest_pages = {}
+        highest_page = 1
+        for artist_name, bonuses in highest_bonuses.items():
+            subpage_count = math.ceil(len(bonuses) // STEP)
+            for i in range(subpage_count):
+                highest_pages[highest_page] = {"artist": artist_name, "subpage": i}
+                highest_page += 1
+
         all_scores = {
-            artist: details["score"]
-            for artist, details in self.bot.artist[game_choice.value].items()
+            artist_name: details["score"]
+            for artist_name, details in self.bot.artist[game_choice.value].items()
         }
-        for artist, bonuses in highest_bonuses.items():
-            all_scores[artist] = bonuses[0]["maxScore"]
+        for artist_name, bonuses in highest_bonuses.items():
+            all_scores[artist_name] = bonuses[0]["maxScore"]
         sorted_scores = dict(sorted(all_scores.items(), key=lambda x: -x[1]))
 
         score_position = 1
@@ -186,57 +203,51 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         highest_score = 0
         total_score = 0
         highest_scores: dict[int, list] = {}
-        for artist, score in sorted_scores.items():
+        for artist_name, score in sorted_scores.items():
             if score < highest_score:
                 score_position += len(highest_scores[highest_score])
             if score_position > 5:
                 break
 
             highest_score = score
-            highest_scores.setdefault(score, []).append(artist)
+            highest_scores.setdefault(score, []).append(artist_name)
             if remaining_positions:
                 total_score += score
                 remaining_positions -= 1
 
-        sorted_pages = {}
-        for artist, bonuses in sorted_bonuses.items():
-            sorted_pages[artist] = math.ceil(len(bonuses) // STEP)
-        highest_pages = {}
-        for artist, bonuses in highest_bonuses.items():
-            highest_pages[artist] = math.ceil(len(bonuses) // STEP)
-
-        embed = discord.Embed(title="Max Weekly Score", description=f"{total_score:,}")
-        embed.set_author(
-            name=f"{game_details["name"]} - Top Bonuses",
-            icon_url="attachment://icon.png" if isinstance(icon, Path) else icon,
-        )
-        score_position = 1
-        for score, artists in highest_scores.items():
-            last_position = min(score_position + len(artists) - 1, 5)
-            embed.add_field(
-                name=(
-                    f"**Top {score_position}"
-                    f"{f"-{last_position}" if last_position != score_position else ""}"
-                    f": {score}**"
-                ),
-                value=", ".join(artists)
-                .replace(r"*", r"\*")
-                .replace(r"_", r"\_")
-                .replace(r"`", r"\`"),
-            )
-
-            if last_position >= 5:
-                break
-            score_position = last_position + 1
-
-        await itr.followup.send(
-            embed=embed,
+        msg = await itr.followup.send(
+            embed=BonusTopEmbed(
+                game_details,
+                highest_bonuses,
+                first_date,
+                last_date,
+                current_date,
+                icon,
+                highest_pages,
+            ),
             files=(
                 [discord.File(icon, filename="icon.png")]
                 if isinstance(icon, Path)
                 else []
             ),
+            wait=True,
         )
+        view = BonusTopView(
+            msg,
+            game_details,
+            first_date,
+            last_date,
+            current_date,
+            sorted_bonuses,
+            highest_bonuses,
+            sorted_pages,
+            highest_pages,
+            highest_scores,
+            total_score,
+            itr.user,
+            icon,
+        )
+        await msg.edit(view=view)
 
     bonus_ping = app_commands.Group(
         name="ping",
@@ -333,7 +344,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
     async def handle_bonus_command(
         self,
         itr: discord.Interaction["dBot"],
-        game_key: str,
+        game: str,
         artist_name: str,
         operation: str,
     ) -> None:
@@ -341,7 +352,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         user_id = str(itr.user.id)
 
         cog: "GoogleSheets" = self.bot.get_cog("GoogleSheets")
-        game_details = GAMES[game_key]
+        game_details = GAMES[game]
         ping_columns = game_details["ping"]["columns"]
         artist_name_index = ping_columns.index("artist_name")
         users_index = ping_columns.index("users")
@@ -436,14 +447,14 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         period_bonuses = []
 
         while tracking_date <= last_date:
-            for artist in artists:
+            for artist_name in artists:
                 birthday_bonuses = []
                 album_bonuses = []
                 last_birthday_start = None
                 last_birthday_end = None
                 next_birthday_start = None
                 next_birthday_end = None
-                for bonus in bonus_data[artist]:
+                for bonus in bonus_data[artist_name]:
                     start_date = bonus[bonus_start_index]
                     end_date = bonus[bonus_end_index]
 
@@ -511,7 +522,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                     ),
                     default=None,
                 )
-                max_score = self.bot.artist[game][artist]["score"]
+                max_score = self.bot.artist[game][artist_name]["score"]
 
                 if (
                     birthday_bonuses
@@ -523,7 +534,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                     )
                 ):
                     bonus_dict = BonusDict(
-                        artist=artist,
+                        artist=artist_name,
                         members=birthday_members,
                         song=None,
                         bonusStart=birthday_start,
@@ -551,7 +562,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                     song_total = birthday_total + bonus[bonus_amount_index]
                     song_name = bonus[bonus_columns.index("song_name")]
                     bonus_dict = BonusDict(
-                        artist=artist,
+                        artist=artist_name,
                         members=None,
                         song=song_name,
                         bonusStart=song_start,

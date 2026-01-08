@@ -31,14 +31,14 @@ class Info(commands.Cog):
 
     @app_commands.command()
     @app_commands.choices(game_choice=GAME_CHOICES)
-    @app_commands.autocomplete(artist_name=artist_autocomplete)
+    @app_commands.autocomplete(artist_choice=artist_autocomplete)
     @app_commands.autocomplete(song_name=song_autocomplete)
-    @app_commands.rename(game_choice="game", artist_name="artist", song_name="song")
+    @app_commands.rename(game_choice="game", artist_choice="artist", song_name="song")
     async def info(
         self,
         itr: discord.Interaction["dBot"],
         game_choice: app_commands.Choice[str],
-        artist_name: str | None = None,
+        artist_choice: str | None = None,
         song_name: str | None = None,
     ) -> None:
         """View song information, sorted by duration
@@ -47,7 +47,7 @@ class Info(commands.Cog):
         -----------
         game_choice: Choice[:class:`str`]
             Game
-        artist_name: Optional[:class:`str`]
+        artist_choice: Optional[:class:`str`]
             Artist Name
         song_name: Optional[:class:`str`]
             Song Name
@@ -59,24 +59,24 @@ class Info(commands.Cog):
         song_id_index = info_columns.index("song_id")
 
         icon: str | Path | None
-        if not artist_name:
+        if not artist_choice:
             songs = self.bot.info_by_id[game_choice.value].values()
             icon = self.bot.basic[game_choice.value]["iconUrl"]
         else:
             if not (
                 songs := (
                     self.bot.info_by_name[game_choice.value]
-                    .get(artist_name, {})
+                    .get(artist_choice, {})
                     .values()
                 )
             ):
                 return await itr.followup.send("Artist not found.")
-            icon = self.bot.artist[game_choice.value][artist_name]["emblem"]
+            icon = self.bot.artist[game_choice.value][artist_choice]["emblem"]
 
             if song_name:
                 if not (
                     song := self.bot.info_by_name[game_choice.value]
-                    .get(artist_name, {})
+                    .get(artist_choice, {})
                     .get(song_name)
                 ):
                     return await itr.followup.send("Song not found.")
@@ -115,7 +115,7 @@ class Info(commands.Cog):
                     bonus_date_index = bonus_columns.index("bonus_date")
                     bonus = next(
                         bonus
-                        for bonus in self.bot.bonus[game_choice.value][artist_name]
+                        for bonus in self.bot.bonus[game_choice.value][artist_choice]
                         if bonus[album_name_index] and song_id == bonus[song_id_index]
                     )
                     album_info = {
@@ -139,7 +139,7 @@ class Info(commands.Cog):
                 return await itr.followup.send(
                     embed=InfoDetailsEmbed(
                         game_choice.value,
-                        artist_name,
+                        artist_choice,
                         song_name,
                         file_info["sound"]["duration"],
                         file_info["seq"],
@@ -173,7 +173,7 @@ class Info(commands.Cog):
         msg = await itr.followup.send(
             embed=InfoEmbed(
                 game_choice.value,
-                artist_name,
+                artist_choice,
                 sorted_songs,
                 self.bot.info_from_file[game_choice.value],
                 icon,
@@ -188,7 +188,7 @@ class Info(commands.Cog):
         view = InfoView(
             msg,
             game_choice.value,
-            artist_name,
+            artist_choice,
             sorted_songs,
             self.bot.info_from_file[game_choice.value],
             itr.user,
