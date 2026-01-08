@@ -135,7 +135,8 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         itr: discord.Interaction["dBot"],
         game_choice: app_commands.Choice[str],
     ) -> None:
-        """NOT READY FOR USE
+        """View bonuses that yield the highest score with
+        max Top 5 score and groups of the week
 
         Parameters
         -----------
