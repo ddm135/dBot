@@ -27,8 +27,8 @@ class SSLeagueEmbed(discord.Embed):
             title=artist_name.replace(r"*", r"\*")
             .replace(r"_", r"\_")
             .replace(r"`", r"\`"),
-            description=f"**{(song_name.replace(r"*", r"\*").replace(r"_", r"\_")
-                              .replace(r"`", r"\`"))}**",
+            description=f"**{song_name.replace(r"*", r"\*")
+                             .replace(r"_", r"\_").replace(r"`", r"\`")}**",
             color=color,
         )
 

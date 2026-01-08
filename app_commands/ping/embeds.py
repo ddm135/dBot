@@ -18,7 +18,7 @@ class WordPingsEmbed(discord.Embed):
 
             count = pings[word][user_id]["count"]
             description += (
-                f"`{word}` - pinged `{count}` {("times" if count > 1 else "time")}\n"
+                f"`{word}` - pinged `{count}` {"times" if count > 1 else "time"}\n"
             )
 
         if not description:

@@ -69,8 +69,8 @@ class BonusListEmbed(discord.Embed):
 
         super().__init__(
             title=(
-                f"{(artist_name.replace(r"*", r"\*").replace(r"_", r"\_")
-                    .replace(r"`", r"\`")) if artist_name else "All Bonuses"} ("
+                f"{artist_name.replace(r"*", r"\*").replace(r"_", r"\_")
+                    .replace(r"`", r"\`") if artist_name else "All Bonuses"} ("
                 f"{first_date.strftime("%B %d").replace(" 0", " ")} - "
                 f"{last_date.strftime("%B %d").replace(" 0", " ")})"
             ),

@@ -40,10 +40,10 @@ class InfoEmbed(discord.Embed):
             ),
             description="\n".join(
                 f"({info[song[song_id_index]]["sound"]["duration"]}) "
-                f"{(f"{song[artist_name_index].replace(r"*", r"\*").replace(r"_", r"\_")
-                    .replace(r"`", r"\`")} - " if not artist_name else "")}"
-                f"**{(song[song_name_index].replace(r"*", r"\*").replace(r"_", r"\_")
-                      .replace(r"`", r"\`"))}**"
+                f"{f"{song[artist_name_index].replace(r"*", r"\*").replace(r"_", r"\_")
+                      .replace(r"`", r"\`")} - " if not artist_name else ""}"
+                f"**{song[song_name_index].replace(r"*", r"\*")
+                     .replace(r"_", r"\_").replace(r"`", r"\`")}**"
                 for song in filtered_songs
             ),
             color=game_details["color"],
@@ -77,8 +77,8 @@ class InfoDetailsEmbed(discord.Embed):
             title=artist_name.replace(r"*", r"\*")
             .replace(r"_", r"\_")
             .replace(r"`", r"\`"),
-            description=f"**{(song_name.replace(r"*", r"\*").replace(r"_", r"\_")
-                              .replace(r"`", r"\`"))}**",
+            description=f"**{song_name.replace(r"*", r"\*")
+                             .replace(r"_", r"\_").replace(r"`", r"\`")}**",
             color=color,
         )
 
