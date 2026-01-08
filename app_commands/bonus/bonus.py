@@ -177,7 +177,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
 
         sorted_pages = {}
         sorted_page = 1
-        for index, (artist_name, bonuses) in enumerate(sorted_bonuses.items()):
+        for index, (artist_name, bonuses) in enumerate(sorted_bonuses.items(), 1):
             subpage_count = math.ceil(len(bonuses) / STEP)
             for i in range(1, subpage_count + 1):
                 sorted_pages[sorted_page] = {
@@ -188,7 +188,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                 sorted_page += 1
         highest_pages = {}
         highest_page = 1
-        for index, (artist_name, bonuses) in enumerate(highest_bonuses.items()):
+        for index, (artist_name, bonuses) in enumerate(highest_bonuses.items(), 1):
             subpage_count = math.ceil(len(bonuses) / STEP)
             for i in range(1, subpage_count + 1):
                 highest_pages[highest_page] = {
