@@ -32,8 +32,8 @@ class BonusListView(discord.ui.View):
         self.artist_name = artist_name
         self.bonuses = bonuses
         self.first_date = first_date
-        self.last_date = last_date
         self.current_date = current_date
+        self.last_date = last_date
         self.user = user
         self.icon = icon
         self.current_page = current_page
@@ -54,8 +54,8 @@ class BonusListView(discord.ui.View):
                 self.artist_name,
                 self.bonuses,
                 self.first_date,
-                self.last_date,
                 self.current_date,
+                self.last_date,
                 self.icon,
                 self.current_page,
                 self.max_page,
@@ -142,8 +142,8 @@ class BonusTopView(discord.ui.View):
             embed=BonusTopEmbed(
                 self.game_details,
                 self.bonuses,
-                self.last_date,
                 self.current_date,
+                self.last_date,
                 self.icon,
                 self.pages,
                 self.current_page,
