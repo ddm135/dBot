@@ -4,6 +4,8 @@ from typing import TYPE_CHECKING
 
 import discord
 
+from statics.consts import BONUS_OFFSET
+
 from .embeds import BonusListEmbed, BonusMaxEmbed, BonusTopEmbed
 from .types import BonusDict
 
@@ -139,15 +141,24 @@ class BonusTopView(discord.ui.View):
     async def update_message(self, itr: discord.Interaction) -> None:
         await itr.followup.edit_message(
             message_id=self.message.id,
-            embed=BonusTopEmbed(
+            # embeds=[
+            #     BonusTopEmbed(
+            #         self.game_details,
+            #         self.bonuses,
+            #         self.current_date,
+            #         self.last_date,
+            #         self.icon,
+            #         self.pages,
+            #         self.current_page,
+            #         self.max_page,
+            #     )
+            # ],
+            embeds=self.one_page(
                 self.game_details,
                 self.bonuses,
                 self.current_date,
                 self.last_date,
                 self.icon,
-                self.pages,
-                self.current_page,
-                self.max_page,
             ),
             view=self,
         )
@@ -269,8 +280,90 @@ class BonusTopView(discord.ui.View):
         button.disabled = True
         await itr.followup.edit_message(
             message_id=self.message.id,
-            embed=BonusMaxEmbed(
-                self.game_details, self.highest_scores, self.total_score, self.icon
-            ),
+            embeds=[
+                BonusMaxEmbed(
+                    self.game_details, self.highest_scores, self.total_score, self.icon
+                )
+            ],
             view=self,
         )
+
+    def one_page(
+        self,
+        game_details: "GameDetails",
+        bonuses: dict[str, list[BonusDict]],
+        current_date: datetime,
+        last_date: datetime,
+        icon: str | Path | None,
+    ) -> list[discord.Embed]:
+        embeds: list[discord.Embed] = []
+        author = f"{game_details["name"]} - Top Bonuses"
+        embeds.append(discord.Embed(color=game_details["color"]))
+        embeds[-1].set_author(
+            name=author,
+            icon_url="attachment://icon.png" if isinstance(icon, Path) else icon,
+        )
+        embed_count = len(author)
+
+        for artist_name, _bonuses in bonuses.items():
+            field_name = (
+                artist_name.replace(r"*", r"\*")
+                .replace(r"_", r"\_")
+                .replace(r"`", r"\`")
+            )
+            field_value = ""
+            field_count = len(field_name)
+
+            for bonus in _bonuses:
+                text = (
+                    f"> **{"~~" if bonus["bonusEnd"] < current_date
+                           else "" if bonus["bonusStart"] > current_date
+                           else ":white_check_mark: "}"
+                    f"{bonus["members"].replace(r"*", r"\*")
+                        .replace(r"_", r"\_").replace(r"`", r"\`")
+                        if bonus["members"]
+                        and bonus["artist"] != bonus["members"]
+                        else ""}"
+                    f"{": " if not artist_name
+                        or bonus["members"] and bonus["artist"] != bonus["members"]
+                        else ""}"
+                    f"{bonus["song"].replace(r"*", r"\*")
+                        .replace(r"_", r"\_").replace(r"`", r"\`")
+                        if bonus["song"]
+                        else "All Songs :birthday:"}"
+                    f"{"" if not bonus["song"]
+                        else " :cd:" if bonus["bonusAmount"] == 3
+                        else " :birthday: :dvd:"}"
+                    f"{"~~" if bonus["bonusEnd"] < current_date else ""}**\n"
+                    f"> {"~~" if bonus["bonusEnd"] < current_date else ""}"
+                    f"{bonus["bonusAmount"]}% | "
+                    f"{bonus["bonusStart"].strftime("%B %d").replace(" 0", " ")} - "
+                    f"{bonus["bonusEnd"].strftime("%B %d").replace(" 0", " ")} | "
+                    f"{f"{bonus["maxScore"]:,} | " if bonus["maxScore"] else ""}"
+                    f"{"Expired" if bonus["bonusEnd"] < current_date
+                        else f"Available <t:{int(bonus["bonusStart"].timestamp())}:R>"
+                        if bonus["bonusStart"] > current_date
+                        else f"Ends <t:"
+                        f"{int((bonus["bonusEnd"] + BONUS_OFFSET).timestamp())}:R>"}"
+                    f"{" :bangbang:" if bonus["bonusStart"] == last_date else ""}"
+                    f"{"~~" if bonus["bonusEnd"] < current_date else ""}\n"
+                )
+                text_count = len(text)
+
+                if embed_count + field_count + text_count > 6000:
+                    embeds.append(discord.Embed(color=game_details["color"]))
+                    embed_count = 0
+                if field_count + text_count > 1024:
+                    embeds[-1].add_field(name=field_name, value=field_value)
+                    embed_count += field_count
+
+                    field_name = ""
+                    field_value = ""
+                    field_count = 0
+
+                field_value += text
+                field_count += text_count
+
+            embeds[-1].add_field(name=field_name, value=field_value)
+
+        return embeds
