@@ -15,8 +15,8 @@ from discord.ext import commands
 from statics.consts import BONUS_OFFSET, GAMES, ArtistColumns
 
 from .autocompletes import artist_autocomplete
-from .commons import STEP
-from .embeds import BonusListEmbed, BonusPingsEmbed, BonusTopEmbed
+from .commons import STEP, bonus_top_embeds
+from .embeds import BonusListEmbed, BonusPingsEmbed
 from .types import BonusDict
 from .views import BonusListView, BonusTopView
 
@@ -59,7 +59,6 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         """
 
         await itr.response.defer()
-        game_details = GAMES[game_choice.value]
         bonus_data = self.bot.bonus[game_choice.value]
         artists: Iterable[str]
         icon: str | Path | None
@@ -89,7 +88,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
 
         msg = await itr.followup.send(
             embed=BonusListEmbed(
-                game_details,
+                game_choice.value,
                 artist_choice,
                 period_bonuses,
                 first_date,
@@ -108,7 +107,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         )
         view = BonusListView(
             msg,
-            game_details,
+            game_choice.value,
             artist_choice,
             first_date,
             current_date,
@@ -144,7 +143,6 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
             Game
         """
         await itr.response.defer()
-        game_details = GAMES[game_choice.value]
         bonus_data = self.bot.bonus[game_choice.value]
         icon = self.bot.basic[game_choice.value]["iconUrl"]
 
@@ -176,41 +174,6 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
             for artist_name, bonuses in sorted_bonuses.items()
         }
 
-        sorted_pages = {
-            1: {
-                "artist": "None",
-                "index": 1,
-                "subpage": 1,
-            }
-        }
-        sorted_page = 1
-        for index, (artist_name, bonuses) in enumerate(sorted_bonuses.items(), 1):
-            subpage_count = math.ceil(len(bonuses) / STEP)
-            for i in range(1, subpage_count + 1):
-                sorted_pages[sorted_page] = {
-                    "artist": artist_name,
-                    "index": index,
-                    "subpage": i,
-                }
-                sorted_page += 1
-        highest_pages = {
-            1: {
-                "artist": "None",
-                "index": 1,
-                "subpage": 1,
-            }
-        }
-        highest_page = 1
-        for index, (artist_name, bonuses) in enumerate(highest_bonuses.items(), 1):
-            subpage_count = math.ceil(len(bonuses) / STEP)
-            for i in range(1, subpage_count + 1):
-                highest_pages[highest_page] = {
-                    "artist": artist_name,
-                    "index": index,
-                    "subpage": i,
-                }
-                highest_page += 1
-
         all_scores = {
             artist_name: details["score"]
             for artist_name, details in self.bot.artist[game_choice.value].items()
@@ -236,15 +199,12 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                 total_score += score
                 remaining_positions -= 1
 
+        embeds = bonus_top_embeds(
+            game_choice.value, highest_bonuses, current_date, last_date, icon
+        )
+
         msg = await itr.followup.send(
-            embed=BonusTopEmbed(
-                game_details,
-                highest_bonuses,
-                current_date,
-                last_date,
-                icon,
-                highest_pages,
-            ),
+            embed=embeds[0],
             files=(
                 [discord.File(icon, filename="icon.png")]
                 if isinstance(icon, Path)
@@ -254,13 +214,12 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         )
         view = BonusTopView(
             msg,
-            game_details,
+            game_choice.value,
             current_date,
             last_date,
             sorted_bonuses,
             highest_bonuses,
-            sorted_pages,
-            highest_pages,
+            embeds,
             highest_scores,
             total_score,
             itr.user,
