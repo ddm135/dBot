@@ -382,7 +382,7 @@ GAMES: dict[str, "GameDetails"] = {
         },
         "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-            "range": "KD!A1:B",
+            "range": "KD!A1:C",
             "columns": ARTIST_COLUMNS,
             "replaceGrid": {
                 "sheetId": 1200216146,
@@ -546,7 +546,7 @@ GAMES: dict[str, "GameDetails"] = {
         },
         "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-            "range": "W1!A1:B",
+            "range": "W1!A1:C",
             "columns": ARTIST_COLUMNS,
             "replaceGrid": {
                 "sheetId": 1164880075,
@@ -682,7 +682,7 @@ GAMES: dict[str, "GameDetails"] = {
         },
         "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-            "range": "JYPNATION!A1:B",
+            "range": "JYPNATION!A1:C",
             "columns": ARTIST_COLUMNS,
             "replaceGrid": {},
         },
@@ -730,7 +730,7 @@ GAMES: dict[str, "GameDetails"] = {
         },
         "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-            "range": "LAPONE!A1:B",
+            "range": "LAPONE!A1:C",
             "columns": ARTIST_COLUMNS,
             "replaceGrid": {},
         },
@@ -783,7 +783,7 @@ GAMES: dict[str, "GameDetails"] = {
         },
         "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-            "range": "EBiDAN!A1:B",
+            "range": "EBiDAN!A1:C",
             "columns": ARTIST_COLUMNS,
             "replaceGrid": {},
         },
