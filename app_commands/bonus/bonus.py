@@ -62,7 +62,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         time: Optional[:class:`BonusPeriod`]
             Time Period
         live_theme_bonus: Optional[:class:`int`]
-            Live Theme Bonus, default is 0
+            Live Theme Bonus, default is 0 unless configured
         """
 
         await itr.response.defer()
@@ -156,7 +156,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         game_choice: Choice[:class:`str`]
             Game
         live_theme_bonus: Optional[:class:`int`]
-            Live Theme Bonus, default is 0 (changing default to be implemented)
+            Live Theme Bonus, default is 0 unless configured
         """
         await itr.response.defer()
 
