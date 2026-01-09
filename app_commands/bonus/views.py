@@ -219,7 +219,7 @@ class BonusTopView(discord.ui.View):
         for child in self.children:
             if isinstance(child, discord.ui.Button):
                 if not child.row:
-                    child.disabled = not self.is_one_page
+                    child.disabled = self.is_one_page
         button.disabled = False
         await self.update_message(itr)
 
@@ -375,6 +375,7 @@ class BonusTopView(discord.ui.View):
                     f"{"~~" if bonus["bonusEnd"] < current_date else ""}\n"
                 )
                 text_count = len(text)
+                print([embed_count, field_count, text_count])
 
                 if embed_count + field_count + text_count > 6000:
                     embeds.append(discord.Embed(color=game_details["color"]))
@@ -392,6 +393,7 @@ class BonusTopView(discord.ui.View):
                 field_value += text
                 field_count += text_count
 
+            print([embed_count, field_count])
             if embed_count + field_count > 6000:
                 embeds.append(discord.Embed(color=game_details["color"]))
             embeds[-1].add_field(name=field_name, value=field_value, inline=False)
