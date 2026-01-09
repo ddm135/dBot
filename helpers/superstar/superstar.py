@@ -370,8 +370,8 @@ class SuperStar(commands.Cog):
                     return None
 
                 xapk_file_name = disposition.split("filename=")[-1].strip('"')
-                if self.bot.basic[game]["version"] not in xapk_file_name:
-                    return None
+                # if self.bot.basic[game]["version"] not in xapk_file_name:
+                #     return None
 
                 xapk_path = xapk_folder_path / xapk_file_name
                 with open(xapk_path, "wb") as f:
