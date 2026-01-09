@@ -218,13 +218,16 @@ class BonusTopView(discord.ui.View):
             else []
         )
         self.max_page = (
-            max(self.pages) if self.is_condensed else len(self.condensed_pages)
+            len(self.condensed_pages) if self.is_condensed else max(self.pages)
         )
         self.current_page = 1
         await self.update_message(itr)
 
     @discord.ui.button(
-        label="Highest Bonuses Only", style=discord.ButtonStyle.secondary, row=1
+        label="Highest Bonuses Only",
+        style=discord.ButtonStyle.secondary,
+        row=1,
+        disabled=True,
     )
     async def show_highest(
         self, itr: discord.Interaction["dBot"], button: discord.ui.Button
@@ -239,7 +242,7 @@ class BonusTopView(discord.ui.View):
         self.bonuses = self.highest_bonuses
         self.pages = self.highest_pages
         self.max_page = (
-            max(self.pages) if self.is_condensed else len(self.condensed_pages)
+            len(self.condensed_pages) if self.is_condensed else max(self.pages)
         )
 
         if self.is_condensed:
@@ -277,7 +280,7 @@ class BonusTopView(discord.ui.View):
         self.bonuses = self.all_bonuses
         self.pages = self.all_pages
         self.max_page = (
-            max(self.pages) if self.is_condensed else len(self.condensed_pages)
+            len(self.condensed_pages) if self.is_condensed else max(self.pages)
         )
 
         if self.is_condensed:
