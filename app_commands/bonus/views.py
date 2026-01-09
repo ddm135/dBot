@@ -330,6 +330,7 @@ class BonusTopView(discord.ui.View):
             icon_url="attachment://icon.png" if isinstance(icon, Path) else icon,
         )
         embed_count = len(author)
+        embed_field_count = 0
 
         for artist_name, _bonuses in bonuses.items():
             field_name = (
@@ -338,7 +339,8 @@ class BonusTopView(discord.ui.View):
                 .replace(r"`", r"\`")
             )
             field_value = ""
-            field_count = len(field_name)
+            field_name_count = len(field_name)
+            field_value_count = 0
 
             for bonus in _bonuses:
                 text = (
@@ -375,27 +377,40 @@ class BonusTopView(discord.ui.View):
                     f"{"~~" if bonus["bonusEnd"] < current_date else ""}\n"
                 )
                 text_count = len(text)
-                print([embed_count, field_count, text_count])
+                print([embed_count, field_name_count, field_value_count, text_count])
 
-                if embed_count + field_count + text_count > 6000:
+                if (
+                    embed_count + field_name_count + field_value_count + text_count
+                    > 6000
+                    or embed_field_count > 25
+                ):
                     embeds.append(discord.Embed(color=game_details["color"]))
                     embed_count = 0
-                if field_count + text_count > 1024:
+                    embed_field_count = 0
+                if field_value_count + text_count > 1024:
                     embeds[-1].add_field(
                         name=field_name, value=field_value, inline=False
                     )
-                    embed_count += field_count
+                    embed_count += field_name_count + field_value_count
 
                     field_name = ""
                     field_value = ""
-                    field_count = 0
+                    field_name_count = 0
+                    field_value_count = 0
 
                 field_value += text
-                field_count += text_count
+                field_value_count += text_count
 
-            print([embed_count, field_count])
-            if embed_count + field_count > 6000:
+            print([embed_count, field_name_count, field_value_count])
+            if (
+                embed_count + field_name_count + field_value_count > 6000
+                or embed_field_count > 25
+            ):
                 embeds.append(discord.Embed(color=game_details["color"]))
+                embed_count = 0
+                embed_field_count = 0
+
             embeds[-1].add_field(name=field_name, value=field_value, inline=False)
+            embed_count += field_name_count + field_value_count
 
         return embeds
