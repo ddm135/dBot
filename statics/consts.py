@@ -114,11 +114,7 @@ BONUS_COLUMNS = (
     "bonus_end",
 )
 PING_COLUMNS = ("users", "artist_name")
-
-
-class ArtistColumns(Enum):
-    STANDARD = ("artist_name", "emblem", "max_score")
-    OTHER = ("artist_name", "emblem")
+ARTIST_COLUMNS = ("artist_name", "artist_code", "member_count")
 
 
 class AssetScheme(Enum):
@@ -126,6 +122,11 @@ class AssetScheme(Enum):
     DIRECT_URL = 2
     JSON_CATALOG = 3
     BINARY_CATALOG = 4
+
+
+class BaseScore(Enum):
+    NORMAL = 6_358_000
+    PRISM = 6_909_000
 
 
 GAMES: dict[str, "GameDetails"] = {
@@ -168,9 +169,10 @@ GAMES: dict[str, "GameDetails"] = {
         "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
             "range": "SM!A1:C",
-            "columns": ArtistColumns.STANDARD.value,
+            "columns": ARTIST_COLUMNS,
             "replaceGrid": {},
         },
+        "base_score": BaseScore.NORMAL.value,
         "pinChannelIds": {
             SSRG_GUILD: 401291379810107394,
             TEST_GUILD: 1336210286289616917,
@@ -238,9 +240,10 @@ GAMES: dict[str, "GameDetails"] = {
         "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
             "range": "JYP!A1:C",
-            "columns": ArtistColumns.STANDARD.value,
+            "columns": ARTIST_COLUMNS,
             "replaceGrid": {},
         },
+        "base_score": BaseScore.NORMAL.value,
         "pinChannelIds": {
             SSRG_GUILD: 360109303199432705,
             TEST_GUILD: 1354222667384885329,
@@ -309,9 +312,10 @@ GAMES: dict[str, "GameDetails"] = {
         "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
             "range": "STARSHIP!A1:C",
-            "columns": ArtistColumns.STANDARD.value,
+            "columns": ARTIST_COLUMNS,
             "replaceGrid": {},
         },
+        "base_score": BaseScore.NORMAL.value,
         "pinChannelIds": {},
         "pinRoles": {},
         "forward": {
@@ -379,7 +383,7 @@ GAMES: dict[str, "GameDetails"] = {
         "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
             "range": "KD!A1:B",
-            "columns": ArtistColumns.OTHER.value,
+            "columns": ARTIST_COLUMNS,
             "replaceGrid": {
                 "sheetId": 1200216146,
                 "startRowIndex": 0,
@@ -433,9 +437,10 @@ GAMES: dict[str, "GameDetails"] = {
         "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
             "range": "ATEEZ!A1:C",
-            "columns": ArtistColumns.STANDARD.value,
+            "columns": ARTIST_COLUMNS,
             "replaceGrid": {},
         },
+        "base_score": BaseScore.PRISM.value,
         "pinChannelIds": {},
         "pinRoles": {},
         "forward": {
@@ -495,9 +500,10 @@ GAMES: dict[str, "GameDetails"] = {
         "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
             "range": "STAYC!A1:C",
-            "columns": ArtistColumns.STANDARD.value,
+            "columns": ARTIST_COLUMNS,
             "replaceGrid": {},
         },
+        "base_score": BaseScore.PRISM.value,
         "pinChannelIds": {},
         "pinRoles": {},
         "forward": {
@@ -541,7 +547,7 @@ GAMES: dict[str, "GameDetails"] = {
         "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
             "range": "W1!A1:B",
-            "columns": ArtistColumns.OTHER.value,
+            "columns": ARTIST_COLUMNS,
             "replaceGrid": {
                 "sheetId": 1164880075,
                 "startRowIndex": 0,
@@ -612,9 +618,10 @@ GAMES: dict[str, "GameDetails"] = {
         "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
             "range": "SMTOWN!A1:C",
-            "columns": ArtistColumns.STANDARD.value,
+            "columns": ARTIST_COLUMNS,
             "replaceGrid": {},
         },
+        "base_score": BaseScore.NORMAL.value,
         "pinChannelIds": {
             SSRG_GUILD: 481907573948153857,
             TEST_GUILD: 1343840449357418516,
@@ -664,19 +671,19 @@ GAMES: dict[str, "GameDetails"] = {
         },
         "ping": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-            "range": "JYPNATION!C1:D",
+            "range": "JYPNATION!D1:E",
             "columns": PING_COLUMNS,
             "replaceGrid": {
                 "sheetId": 735198271,
                 "startRowIndex": 0,
-                "startColumnIndex": 3,
-                "endColumnIndex": 4,
+                "startColumnIndex": 4,
+                "endColumnIndex": 5,
             },
         },
         "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
             "range": "JYPNATION!A1:B",
-            "columns": ArtistColumns.OTHER.value,
+            "columns": ARTIST_COLUMNS,
             "replaceGrid": {},
         },
         "pinChannelIds": {
@@ -724,7 +731,7 @@ GAMES: dict[str, "GameDetails"] = {
         "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
             "range": "LAPONE!A1:B",
-            "columns": ArtistColumns.OTHER.value,
+            "columns": ARTIST_COLUMNS,
             "replaceGrid": {},
         },
         "pinChannelIds": {
@@ -765,19 +772,19 @@ GAMES: dict[str, "GameDetails"] = {
         },
         "ping": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-            "range": "EBiDAN!C1:D",
+            "range": "EBiDAN!D1:E",
             "columns": PING_COLUMNS,
             "replaceGrid": {
                 "sheetId": 1872493199,
                 "startRowIndex": 0,
-                "startColumnIndex": 3,
-                "endColumnIndex": 4,
+                "startColumnIndex": 4,
+                "endColumnIndex": 5,
             },
         },
         "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
             "range": "EBiDAN!A1:B",
-            "columns": ArtistColumns.OTHER.value,
+            "columns": ARTIST_COLUMNS,
             "replaceGrid": {},
         },
         "pinChannelIds": {},
@@ -834,9 +841,10 @@ GAMES: dict[str, "GameDetails"] = {
         "artist": {
             "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
             "range": "Philippines!A1:C",
-            "columns": ArtistColumns.STANDARD.value,
+            "columns": ARTIST_COLUMNS,
             "replaceGrid": {},
         },
+        "base_score": BaseScore.PRISM.value,
         "pinChannelIds": {},
         "pinRoles": {},
         "forward": {

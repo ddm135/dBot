@@ -12,7 +12,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from statics.consts import BONUS_OFFSET, GAMES, ArtistColumns
+from statics.consts import BONUS_OFFSET, GAMES
 
 from .autocompletes import artist_autocomplete
 from .commons import STEP, bonus_top_embeds
@@ -130,7 +130,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         game_choice=[
             choice
             for choice in GAME_CHOICES
-            if GAMES[choice.value]["artist"]["columns"] == ArtistColumns.STANDARD.value
+            if {"base_score"} <= set(GAMES[choice.value])
         ]
     )
     @app_commands.rename(game_choice="game")

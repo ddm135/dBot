@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 from discord.ext import commands, tasks
 
-from statics.consts import GAMES, ArtistColumns
+from statics.consts import GAMES
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -45,29 +45,31 @@ class ArtistSync(commands.Cog):
 
         artist_columns = artist_details["columns"]
         artist_name_index = artist_columns.index("artist_name")
-        emblem_index = artist_columns.index("emblem")
-        max_score_index = (
-            artist_columns.index("max_score")
-            if artist_columns == ArtistColumns.STANDARD.value
-            else None
-        )
+        artist_code_index = artist_columns.index("artist_code")
+        member_count_index = artist_columns.index("member_count")
 
         data: dict[str, "ArtistDetails"] = {}
         ss_cog: "SuperStar" = self.bot.get_cog("SuperStar")
         for row in artist:
             artist_name = row[artist_name_index]
-            emblem_value = row[emblem_index]
-            max_score = int(row[max_score_index]) if max_score_index else 0
-
-            try:
-                emblem_final = (
-                    await ss_cog.get_attributes(
-                        game, "GroupData", int(emblem_value), {"emblemImage": True}
-                    )
-                )["emblemImage"]
-            except ValueError:
-                emblem_final = emblem_value
-            data[artist_name] = {"emblem": emblem_final, "score": max_score}
+            artist_code = int(row[artist_code_index])
+            member_count = int(row[member_count_index])
+            max_score = (
+                game_details["base_score"] + 15_000 * (member_count - 3)
+                if "base_score" in game_details
+                else 0
+            )
+            emblem = (
+                await ss_cog.get_attributes(
+                    game, "GroupData", artist_code, {"emblemImage": True}
+                )
+            )["emblemImage"]
+            data[artist_name] = {
+                "code": artist_code,
+                "emblem": emblem,
+                "count": member_count,
+                "score": max_score,
+            }
 
         self.bot.artist[game] = data
 

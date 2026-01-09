@@ -29,6 +29,7 @@ class GameDetails(TypedDict):
     bonus: NotRequired[SpreadsheetDetails]
     ping: NotRequired[SpreadsheetDetails]
     artist: SpreadsheetDetails
+    base_score: NotRequired[int]
     pinChannelIds: dict[int, int | None]
     pinRoles: dict[int, int | None]
     forward: NotRequired[ForwardUpdateDetails]
@@ -57,7 +58,9 @@ class BasicDetails(TypedDict):
 
 
 class ArtistDetails(TypedDict):
+    code: int
     emblem: str | Path | None
+    count: int
     score: int
 
 
