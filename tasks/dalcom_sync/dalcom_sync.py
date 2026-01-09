@@ -84,8 +84,10 @@ class DalcomSync(commands.Cog):
                     continue
 
                 data_files = [
-                    "GroupData",
                     "LocaleData",
+                    "GroupData",
+                    "ArtistData",
+                    "ArtistTypeData",
                     "MusicData",
                     "ThemeData",
                     "ThemeTypeData",

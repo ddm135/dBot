@@ -57,6 +57,8 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
             Artist Name
         time: Optional[:class:`BonusPeriod`]
             Time Period
+        live_theme_bonus: Optional[:class:`int`]
+            Live Theme Bonus, default is 0 (changing default to be implemented)
         """
 
         await itr.response.defer()
@@ -145,6 +147,8 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         -----------
         game_choice: Choice[:class:`str`]
             Game
+        live_theme_bonus: Optional[:class:`int`]
+            Live Theme Bonus, default is 0 (changing default to be implemented)
         """
         await itr.response.defer()
         bonus_data = self.bot.bonus[game_choice.value]
@@ -179,7 +183,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         }
 
         all_scores = {
-            artist_name: details["score"]
+            artist_name: details["score"] + live_theme_bonus
             for artist_name, details in self.bot.artist[game_choice.value].items()
         }
         for artist_name, bonuses in highest_bonuses.items():
