@@ -130,7 +130,8 @@ class BonusTopView(discord.ui.View):
         self.icon = icon
         self.current_page = 1
         self.max_page = max(self.pages)
-        self.is_one_page = False
+        self.is_condensed = False
+        self.condensed_pages: list[discord.Embed] = []
         super().__init__()
 
     async def on_timeout(self) -> None:
@@ -153,19 +154,8 @@ class BonusTopView(discord.ui.View):
                     self.current_page,
                     self.max_page,
                 )
-                if not self.is_one_page
-                else discord.utils.MISSING
-            ),
-            embeds=(
-                self.one_page(
-                    self.game_details,
-                    self.bonuses,
-                    self.current_date,
-                    self.last_date,
-                    self.icon,
-                )
-                if self.is_one_page
-                else discord.utils.MISSING
+                if not self.is_condensed
+                else self.condensed_pages[self.current_page]
             ),
             view=self,
         )
@@ -203,10 +193,10 @@ class BonusTopView(discord.ui.View):
         await self.update_message(itr)
 
     @discord.ui.button(
-        label="Toggle One-Page Mode", style=discord.ButtonStyle.success, row=0
+        label="Toggle Condensed Mode", style=discord.ButtonStyle.secondary, row=0
     )
-    async def toggle_one_page(
-        self, itr: discord.Interaction["dBot"], button: discord.ui.Button
+    async def toggle_condensed(
+        self, itr: discord.Interaction["dBot"], _: discord.ui.Button
     ) -> None:
         await itr.response.defer()
         if itr.user.id != self.user.id:
@@ -215,12 +205,18 @@ class BonusTopView(discord.ui.View):
             )
             return
 
-        self.is_one_page = not self.is_one_page
-        for child in self.children:
-            if isinstance(child, discord.ui.Button):
-                if not child.row:
-                    child.disabled = self.is_one_page
-        button.disabled = False
+        self.is_condensed = not self.is_condensed
+        self.condensed_pages = self.condensed(
+            self.game_details,
+            self.bonuses,
+            self.current_date,
+            self.last_date,
+            self.icon,
+        ) if self.is_condensed else []
+        self.max_page = (
+            max(self.pages) if self.is_condensed else len(self.condensed_pages)
+        )
+        self.current_page = 1
         await self.update_message(itr)
 
     @discord.ui.button(
@@ -230,7 +226,7 @@ class BonusTopView(discord.ui.View):
         disabled=True,
     )
     async def show_highest(
-        self, itr: discord.Interaction["dBot"], button: discord.ui.Button
+        self, itr: discord.Interaction["dBot"], _: discord.ui.Button
     ) -> None:
         await itr.response.defer()
         if itr.user.id != self.user.id:
@@ -239,19 +235,27 @@ class BonusTopView(discord.ui.View):
             )
             return
 
-        active_page = self.pages[self.current_page]
         self.bonuses = self.highest_bonuses
         self.pages = self.highest_pages
-        self.max_page = max(self.pages)
-        for page_number, page_details in self.pages.items():
-            if page_details["artist"] == active_page["artist"]:
-                self.current_page = page_number
-                break
+        self.max_page = (
+            max(self.pages) if self.is_condensed else len(self.condensed_pages)
+        )
 
-        for child in self.children:
-            if isinstance(child, discord.ui.Button):
-                child.disabled = False
-        button.disabled = True
+        if self.is_condensed:
+            self.condensed_pages = self.condensed(
+                self.game_details,
+                self.bonuses,
+                self.current_date,
+                self.last_date,
+                self.icon,
+            )
+        else:
+            active_page = self.pages[self.current_page]
+            for page_number, page_details in self.pages.items():
+                if page_details["artist"] == active_page["artist"]:
+                    self.current_page = page_number
+                    break
+
         await self.update_message(itr)
 
     @discord.ui.button(
@@ -260,7 +264,7 @@ class BonusTopView(discord.ui.View):
         row=1,
     )
     async def show_all(
-        self, itr: discord.Interaction["dBot"], button: discord.ui.Button
+        self, itr: discord.Interaction["dBot"], _: discord.ui.Button
     ) -> None:
         await itr.response.defer()
         if itr.user.id != self.user.id:
@@ -269,19 +273,26 @@ class BonusTopView(discord.ui.View):
             )
             return
 
-        active_page = self.pages[self.current_page]
         self.bonuses = self.all_bonuses
         self.pages = self.all_pages
-        self.max_page = max(self.pages)
-        for page_number, page_details in self.pages.items():
-            if page_details["artist"] == active_page["artist"]:
-                self.current_page = page_number
-                break
+        self.max_page = (
+            max(self.pages) if self.is_condensed else len(self.condensed_pages)
+        )
 
-        for child in self.children:
-            if isinstance(child, discord.ui.Button):
-                child.disabled = False
-        button.disabled = True
+        if self.is_condensed:
+            self.condensed_pages = self.condensed(
+                self.game_details,
+                self.bonuses,
+                self.current_date,
+                self.last_date,
+                self.icon,
+            )
+        else:
+            active_page = self.pages[self.current_page]
+            for page_number, page_details in self.pages.items():
+                if page_details["artist"] == active_page["artist"]:
+                    self.current_page = page_number
+                    break
         await self.update_message(itr)
 
     @discord.ui.button(
@@ -314,7 +325,7 @@ class BonusTopView(discord.ui.View):
             view=self,
         )
 
-    def one_page(
+    def condensed(
         self,
         game_details: "GameDetails",
         bonuses: dict[str, list[BonusDict]],
@@ -377,7 +388,6 @@ class BonusTopView(discord.ui.View):
                     f"{"~~" if bonus["bonusEnd"] < current_date else ""}\n"
                 )
                 text_count = len(text)
-                print([embed_count, field_name_count, field_value_count, text_count])
 
                 if (
                     embed_count + field_name_count + field_value_count + text_count
@@ -401,7 +411,6 @@ class BonusTopView(discord.ui.View):
                 field_value += text
                 field_value_count += text_count
 
-            print([embed_count, field_name_count, field_value_count])
             if (
                 embed_count + field_name_count + field_value_count > 6000
                 or embed_field_count > 25
@@ -412,5 +421,9 @@ class BonusTopView(discord.ui.View):
 
             embeds[-1].add_field(name=field_name, value=field_value, inline=False)
             embed_count += field_name_count + field_value_count
+
+        page_count = len(embeds)
+        for index, embed in enumerate(embeds, 1):
+            embed.set_footer(text=f"Page {index}/{page_count}")
 
         return embeds
