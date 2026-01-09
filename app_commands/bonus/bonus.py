@@ -15,7 +15,7 @@ from discord.ext import commands
 from statics.consts import BONUS_OFFSET, GAMES, Data
 
 from .autocompletes import artist_autocomplete
-from .commons import STEP, bonus_top_embeds
+from .commons import MAX_POSITIONS, STEP, bonus_top_embeds
 from .embeds import BonusListEmbed, BonusPingsEmbed
 from .types import BonusDict
 from .views import BonusListView, BonusTopView
@@ -209,14 +209,14 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         sorted_scores = dict(sorted(all_scores.items(), key=lambda x: -x[1]))
 
         score_position = 1
-        remaining_positions = 5
+        remaining_positions = MAX_POSITIONS
         highest_score = 0
         total_score = 0
         highest_scores: dict[int, list] = {}
         for artist_name, score in sorted_scores.items():
             if score < highest_score:
                 score_position += len(highest_scores[highest_score])
-            if score_position > 5:
+            if score_position > MAX_POSITIONS:
                 break
 
             highest_score = score

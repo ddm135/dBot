@@ -7,7 +7,7 @@ import discord
 
 from statics.consts import BONUS_OFFSET, GAMES
 
-from .commons import STEP
+from .commons import MAX_POSITIONS, STEP
 from .types import BonusDict
 
 
@@ -146,7 +146,7 @@ class BonusMaxEmbed(discord.Embed):
 
         score_position = 1
         for score, artists in highest_scores.items():
-            last_position = min(score_position + len(artists) - 1, 5)
+            last_position = min(score_position + len(artists) - 1, MAX_POSITIONS)
             self.add_field(
                 name=(
                     f"**Top {score_position}"
@@ -160,6 +160,6 @@ class BonusMaxEmbed(discord.Embed):
                 inline=False,
             )
 
-            if last_position >= 5:
+            if last_position >= MAX_POSITIONS:
                 break
             score_position = last_position + 1

@@ -9,6 +9,8 @@ from .types import BonusDict
 
 STEP = 5
 
+MAX_POSITIONS = 5
+
 
 def bonus_top_embeds(
     game: str,
