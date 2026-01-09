@@ -71,6 +71,7 @@ class Data(Enum):
     ROLES = Path("data/roles.json")
     SSLEAGUES = Path("data/ssleagues.json")
     LAST_MODIFIED = Path("data/last_modified.json")
+    LIVE_THEME = Path("data/live_theme.json")
 
 
 class InfoColumns(Enum):

@@ -132,6 +132,20 @@ class DataSync(commands.Cog):
             Data.SSLEAGUES.value.parent.mkdir(parents=True, exist_ok=True)
             self.save_data(Data.SSLEAGUES)
 
+        if Data.LIVE_THEME.value.exists():
+            self.bot.live_theme.clear()
+            with open(Data.LIVE_THEME.value, "r", encoding="utf-8") as f:
+                self.bot.live_theme = json.load(f)
+
+            self.bot.live_theme = defaultdict(
+                lambda: defaultdict(int), self.bot.live_theme
+            )
+            for key in self.bot.live_theme:
+                self.bot.live_theme[key] = defaultdict(int, self.bot.live_theme[key])
+        else:
+            Data.LIVE_THEME.value.parent.mkdir(parents=True, exist_ok=True)
+            self.save_data(Data.LIVE_THEME)
+
     @tasks.loop(time=[time(hour=h, minute=30) for h in range(24)])
     async def data_upload(self) -> None:
         cog: "GoogleDrive" = self.bot.get_cog("GoogleDrive")

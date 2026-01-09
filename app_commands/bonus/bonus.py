@@ -12,7 +12,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from statics.consts import BONUS_OFFSET, GAMES
+from statics.consts import BONUS_OFFSET, GAMES, Data
 
 from .autocompletes import artist_autocomplete
 from .commons import STEP, bonus_top_embeds
@@ -23,6 +23,7 @@ from .views import BonusListView, BonusTopView
 if TYPE_CHECKING:
     from dBot import dBot
     from helpers.google_sheets import GoogleSheets
+    from tasks.data_sync import DataSync
 
 
 class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings"):
@@ -30,6 +31,9 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         app_commands.Choice(name=game_details["name"], value=game)
         for game, game_details in GAMES.items()
         if {"bonus", "ping"} <= set(game_details)
+    ]
+    FILTERED_GAME_CHOICES = [
+        choice for choice in GAME_CHOICES if {"base_score"} <= set(GAMES[choice.value])
     ]
 
     def __init__(self, bot: "dBot") -> None:
@@ -45,7 +49,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         game_choice: app_commands.Choice[str],
         artist_choice: str | None = None,
         time: Literal["current week", "next week", "current month"] | None = None,
-        live_theme_bonus: int = 0,
+        live_theme_bonus: int | None = None,
     ) -> None:
         """View bonus information, sorted by end date then start date
 
@@ -58,10 +62,20 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         time: Optional[:class:`BonusPeriod`]
             Time Period
         live_theme_bonus: Optional[:class:`int`]
-            Live Theme Bonus, default is 0 (changing default to be implemented)
+            Live Theme Bonus, default is 0
         """
 
         await itr.response.defer()
+
+        live_theme_bonus = (
+            live_theme_bonus or self.bot.live_theme[game_choice.value][str(itr.user.id)]
+        )
+        if (
+            live_theme_bonus < 0
+            or live_theme_bonus > self.bot.live_theme[game_choice.value]["max"]
+        ):
+            return await itr.followup.send("Invalid live theme bonus amount.")
+
         bonus_data = self.bot.bonus[game_choice.value]
         artists: Iterable[str]
         icon: str | Path | None
@@ -126,19 +140,13 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         await msg.edit(view=view)
 
     @app_commands.command(name="top")
-    @app_commands.choices(
-        game_choice=[
-            choice
-            for choice in GAME_CHOICES
-            if {"base_score"} <= set(GAMES[choice.value])
-        ]
-    )
+    @app_commands.choices(game_choice=FILTERED_GAME_CHOICES)
     @app_commands.rename(game_choice="game")
     async def bonus_top(
         self,
         itr: discord.Interaction["dBot"],
         game_choice: app_commands.Choice[str],
-        live_theme_bonus: int = 0,
+        live_theme_bonus: int | None = None,
     ) -> None:
         """View bonuses that yield the highest score with
         max Top 5 score and groups of the week
@@ -151,6 +159,16 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
             Live Theme Bonus, default is 0 (changing default to be implemented)
         """
         await itr.response.defer()
+
+        live_theme_bonus = (
+            live_theme_bonus or self.bot.live_theme[game_choice.value][str(itr.user.id)]
+        )
+        if (
+            live_theme_bonus < 0
+            or live_theme_bonus > self.bot.live_theme[game_choice.value]["max"]
+        ):
+            return await itr.followup.send("Invalid live theme bonus amount.")
+
         bonus_data = self.bot.bonus[game_choice.value]
         icon = self.bot.basic[game_choice.value]["iconUrl"]
 
@@ -333,11 +351,39 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
     )
 
     @bonus_live_theme.command(name="set")
+    @app_commands.choices(game_choice=FILTERED_GAME_CHOICES)
+    @app_commands.rename(game_choice="game")
     async def live_theme_set(
         self,
         itr: discord.Interaction["dBot"],
+        game_choice: app_commands.Choice[str],
+        live_theme_bonus: int,
     ) -> None:
-        """SoonTM"""
+        """Set the default Live Theme Bonus amount
+        when using bonus commands
+
+        Parameters
+        -----------
+        game_choice: Choice[:class:`str`]
+            Game
+        live_theme_bonus: :class:`int`
+            Live Theme Bonus
+        """
+
+        await itr.response.defer(ephemeral=True)
+        if (
+            live_theme_bonus < 0
+            or live_theme_bonus > self.bot.live_theme[game_choice.value]["max"]
+        ):
+            return await itr.followup.send("Invalid live theme bonus amount.")
+
+        self.bot.live_theme[game_choice.value][str(itr.user.id)] = live_theme_bonus
+        cog: "DataSync" = self.bot.get_cog("DataSync")
+        cog.save_data(Data.LIVE_THEME)
+        return await itr.followup.send(
+            f"{GAMES[game_choice.value]["name"]} Live Theme Bonus "
+            f"has been set to {live_theme_bonus:,}!"
+        )
 
     async def handle_bonus_command(
         self,

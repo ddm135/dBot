@@ -1,8 +1,10 @@
 # mypy: disable-error-code="assignment"
 # pyright: reportAssignmentType=false
 
+import json
 import logging
 from datetime import time
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from discord.ext import commands, tasks
@@ -48,6 +50,13 @@ class ArtistSync(commands.Cog):
         artist_code_index = artist_columns.index("artist_code")
         member_count_index = artist_columns.index("member_count")
 
+        ltd = max_live = None
+        if (ltd_path := Path(f"data/dalcom/{game}/LiveThemeData.json")).exists():
+            with open(ltd_path, "r", encoding="utf-8") as f:
+                ltd = json.load(f)
+            if "collectRewardID" in ltd[0]:
+                max_live = 0
+
         data: dict[str, "ArtistDetails"] = {}
         ss_cog: "SuperStar" = self.bot.get_cog("SuperStar")
         for row in artist:
@@ -64,6 +73,12 @@ class ArtistSync(commands.Cog):
                     game, "GroupData", artist_code, {"emblemImage": True}
                 )
             )["emblemImage"]
+
+            if ltd and max_live is not None:
+                for theme in ltd:
+                    if theme["groupID"] == artist_code:
+                        max_live += 15_000 * member_count
+
             data[artist_name] = {
                 "code": artist_code,
                 "emblem": emblem,
@@ -72,6 +87,7 @@ class ArtistSync(commands.Cog):
             }
 
         self.bot.artist[game] = data
+        self.bot.live_theme[game]["max"] = max_live if max_live else 0
 
 
 async def setup(bot: "dBot") -> None:

@@ -41,6 +41,10 @@ class dBot(commands.Bot):
     )
     ssleague_manual: dict[str, LastAppearanceManual] = {}
 
+    live_theme: defaultdict[str, defaultdict[str, int]] = defaultdict(
+        lambda: defaultdict(int)
+    )
+
     async def setup_hook(self) -> None:
         for ext in EXTENSIONS:
             await self.load_extension(ext)
