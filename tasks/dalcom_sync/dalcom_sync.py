@@ -65,7 +65,7 @@ class DalcomSync(commands.Cog):
 
                 self.LOGGER.info("Downloading Dalcom data: %s...", game_details["name"])
                 if "lastVersion" in game_details:
-                    ajs = stored_ajs
+                    ajs = {"code": 1000, "result": stored_ajs}
                 else:
                     ajs = await ss_cog.get_a_json(game)
                 refresh = False
