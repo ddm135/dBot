@@ -227,7 +227,7 @@ class BonusTopView(discord.ui.View):
         label="Highest Bonuses Only", style=discord.ButtonStyle.secondary, row=1
     )
     async def show_highest(
-        self, itr: discord.Interaction["dBot"], _: discord.ui.Button
+        self, itr: discord.Interaction["dBot"], button: discord.ui.Button
     ) -> None:
         await itr.response.defer()
         if itr.user.id != self.user.id:
@@ -257,11 +257,15 @@ class BonusTopView(discord.ui.View):
                     self.current_page = page_number
                     break
 
+        for child in self.children:
+            if isinstance(child, discord.ui.Button):
+                child.disabled = False
+        button.disabled = True
         await self.update_message(itr)
 
     @discord.ui.button(label="All Bonuses", style=discord.ButtonStyle.secondary, row=1)
     async def show_all(
-        self, itr: discord.Interaction["dBot"], _: discord.ui.Button
+        self, itr: discord.Interaction["dBot"], button: discord.ui.Button
     ) -> None:
         await itr.response.defer()
         if itr.user.id != self.user.id:
@@ -290,6 +294,11 @@ class BonusTopView(discord.ui.View):
                 if page_details["artist"] == active_page["artist"]:
                     self.current_page = page_number
                     break
+
+        for child in self.children:
+            if isinstance(child, discord.ui.Button):
+                child.disabled = False
+        button.disabled = True
         await self.update_message(itr)
 
     @discord.ui.button(
