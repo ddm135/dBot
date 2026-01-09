@@ -45,6 +45,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         game_choice: app_commands.Choice[str],
         artist_choice: str | None = None,
         time: Literal["current week", "next week", "current month"] | None = None,
+        live_theme_bonus: int = 0,
     ) -> None:
         """View bonus information, sorted by end date then start date
 
@@ -71,7 +72,9 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
             artists = [artist_choice]
             icon = self.bot.artist[game_choice.value][artist_choice]["emblem"]
 
-        results = self.get_period_bonuses(game_choice.value, artists, time)
+        results = self.get_period_bonuses(
+            game_choice.value, artists, time, live_theme_bonus
+        )
         if not results:
             return await itr.followup.send("Invalid time period.")
         period_bonuses, first_date, current_date, last_date = results
@@ -133,6 +136,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         self,
         itr: discord.Interaction["dBot"],
         game_choice: app_commands.Choice[str],
+        live_theme_bonus: int = 0,
     ) -> None:
         """View bonuses that yield the highest score with
         max Top 5 score and groups of the week
@@ -147,7 +151,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         icon = self.bot.basic[game_choice.value]["iconUrl"]
 
         results = self.get_period_bonuses(
-            game_choice.value, bonus_data.keys(), "current week"
+            game_choice.value, bonus_data.keys(), "current week", live_theme_bonus
         )
         if not results:
             return await itr.followup.send("Invalid time period.")
@@ -319,6 +323,18 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
             "Check your DMs for the list of artists you are pinged for!"
         )
 
+    bonus_live_theme = app_commands.Group(
+        name="live_theme",
+        description="Manage live theme bonus score",
+    )
+
+    @bonus_live_theme.command(name="set")
+    async def live_theme_set(
+        self,
+        itr: discord.Interaction["dBot"],
+    ) -> None:
+        """SoonTM"""
+
     async def handle_bonus_command(
         self,
         itr: discord.Interaction["dBot"],
@@ -384,6 +400,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         game: str,
         artists: Iterable[str],
         time: Literal["current week", "next week", "current month"] | None,
+        live_theme_bonus: int = 0,
     ) -> tuple[list[BonusDict], datetime, datetime, datetime] | None:
         game_details = GAMES[game]
         bonus_data = self.bot.bonus[game]
@@ -519,7 +536,9 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                         bonusEnd=birthday_end,
                         bonusAmount=birthday_total,
                         maxScore=(
-                            max_score + max_score * birthday_total // 100
+                            max_score
+                            + max_score * birthday_total // 100
+                            + live_theme_bonus
                             if max_score
                             else 0
                         ),
@@ -547,7 +566,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                         bonusEnd=song_end,
                         bonusAmount=song_total,
                         maxScore=(
-                            max_score + max_score * song_total // 100
+                            max_score + max_score * song_total // 100 + live_theme_bonus
                             if max_score
                             else 0
                         ),

@@ -89,9 +89,11 @@ class DalcomSync(commands.Cog):
                     "MusicData",
                     "ThemeData",
                     "ThemeTypeData",
+                    "WorldRecordData",
                 ]
-                if "SeqData" in ajs["result"]["context"]:
-                    data_files.append("SeqData")
+                for data_file in ("SeqData", "LiveThemeCollectRewardData"):
+                    if data_file in ajs["result"]["context"]:
+                        data_files.append(data_file)
                 if game_details["assetScheme"] == AssetScheme.JSON_URL:
                     data_files.append("URLs")
                 dalcom_data = {}
