@@ -130,6 +130,7 @@ class BonusTopView(discord.ui.View):
         self.icon = icon
         self.current_page = 1
         self.max_page = max(self.pages)
+        self.is_one_page = False
         super().__init__()
 
     async def on_timeout(self) -> None:
@@ -141,24 +142,30 @@ class BonusTopView(discord.ui.View):
     async def update_message(self, itr: discord.Interaction) -> None:
         await itr.followup.edit_message(
             message_id=self.message.id,
-            # embeds=[
-            #     BonusTopEmbed(
-            #         self.game_details,
-            #         self.bonuses,
-            #         self.current_date,
-            #         self.last_date,
-            #         self.icon,
-            #         self.pages,
-            #         self.current_page,
-            #         self.max_page,
-            #     )
-            # ],
-            embeds=self.one_page(
-                self.game_details,
-                self.bonuses,
-                self.current_date,
-                self.last_date,
-                self.icon,
+            embed=(
+                BonusTopEmbed(
+                    self.game_details,
+                    self.bonuses,
+                    self.current_date,
+                    self.last_date,
+                    self.icon,
+                    self.pages,
+                    self.current_page,
+                    self.max_page,
+                )
+                if not self.is_one_page
+                else discord.utils.MISSING
+            ),
+            embeds=(
+                self.one_page(
+                    self.game_details,
+                    self.bonuses,
+                    self.current_date,
+                    self.last_date,
+                    self.icon,
+                )
+                if self.is_one_page
+                else discord.utils.MISSING
             ),
             view=self,
         )
@@ -193,6 +200,27 @@ class BonusTopView(discord.ui.View):
         self.current_page += 1
         if self.current_page > self.max_page:
             self.current_page = 1
+        await self.update_message(itr)
+
+    @discord.ui.button(
+        label="Toggle One-Page Mode", style=discord.ButtonStyle.success, row=0
+    )
+    async def toggle_one_page(
+        self, itr: discord.Interaction["dBot"], button: discord.ui.Button
+    ) -> None:
+        await itr.response.defer()
+        if itr.user.id != self.user.id:
+            await itr.followup.send(
+                "You are not the original requester.", ephemeral=True
+            )
+            return
+
+        self.is_one_page = not self.is_one_page
+        for child in self.children:
+            if isinstance(child, discord.ui.Button):
+                if not child.row:
+                    child.disabled = not self.is_one_page
+        button.disabled = False
         await self.update_message(itr)
 
     @discord.ui.button(
@@ -280,11 +308,9 @@ class BonusTopView(discord.ui.View):
         button.disabled = True
         await itr.followup.edit_message(
             message_id=self.message.id,
-            embeds=[
-                BonusMaxEmbed(
-                    self.game_details, self.highest_scores, self.total_score, self.icon
-                )
-            ],
+            embed=BonusMaxEmbed(
+                self.game_details, self.highest_scores, self.total_score, self.icon
+            ),
             view=self,
         )
 
@@ -354,7 +380,9 @@ class BonusTopView(discord.ui.View):
                     embeds.append(discord.Embed(color=game_details["color"]))
                     embed_count = 0
                 if field_count + text_count > 1024:
-                    embeds[-1].add_field(name=field_name, value=field_value)
+                    embeds[-1].add_field(
+                        name=field_name, value=field_value, inline=False
+                    )
                     embed_count += field_count
 
                     field_name = ""
@@ -364,6 +392,8 @@ class BonusTopView(discord.ui.View):
                 field_value += text
                 field_count += text_count
 
-            embeds[-1].add_field(name=field_name, value=field_value)
+            if embed_count + field_count > 6000:
+                embeds.append(discord.Embed(color=game_details["color"]))
+            embeds[-1].add_field(name=field_name, value=field_value, inline=False)
 
         return embeds
