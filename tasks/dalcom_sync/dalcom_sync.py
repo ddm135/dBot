@@ -58,7 +58,7 @@ class DalcomSync(commands.Cog):
             try:
                 ajs_path = Path(f"data/dalcom/{game}/a.json")
                 if ajs_path.exists():
-                    with open(ajs_path, "r", encoding="utf-8") as f:
+                    with open(ajs_path, "r", encoding="utf-8-sig") as f:
                         stored_ajs = json.load(f)
                 else:
                     stored_ajs = defaultdict(lambda: defaultdict(dict))
