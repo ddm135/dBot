@@ -136,7 +136,7 @@ class BonusMaxEmbed(discord.Embed):
         game_details = GAMES[game]
         super().__init__(
             title="Max Score of This Week",
-            description=f"{total_score:,}",
+            description=f"**{total_score:,}**",
             color=game_details["color"],
         )
         self.set_author(
