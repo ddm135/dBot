@@ -155,7 +155,7 @@ class BonusTopView(discord.ui.View):
                     self.max_page,
                 )
                 if not self.is_condensed
-                else self.condensed_pages[self.current_page]
+                else self.condensed_pages[self.current_page - 1]
             ),
             view=self,
         )
@@ -206,13 +206,17 @@ class BonusTopView(discord.ui.View):
             return
 
         self.is_condensed = not self.is_condensed
-        self.condensed_pages = self.condensed(
-            self.game_details,
-            self.bonuses,
-            self.current_date,
-            self.last_date,
-            self.icon,
-        ) if self.is_condensed else []
+        self.condensed_pages = (
+            self.condensed(
+                self.game_details,
+                self.bonuses,
+                self.current_date,
+                self.last_date,
+                self.icon,
+            )
+            if self.is_condensed
+            else []
+        )
         self.max_page = (
             max(self.pages) if self.is_condensed else len(self.condensed_pages)
         )
@@ -220,10 +224,7 @@ class BonusTopView(discord.ui.View):
         await self.update_message(itr)
 
     @discord.ui.button(
-        label="Highest Bonuses Only",
-        style=discord.ButtonStyle.secondary,
-        row=1,
-        disabled=True,
+        label="Highest Bonuses Only", style=discord.ButtonStyle.secondary, row=1
     )
     async def show_highest(
         self, itr: discord.Interaction["dBot"], _: discord.ui.Button
@@ -258,11 +259,7 @@ class BonusTopView(discord.ui.View):
 
         await self.update_message(itr)
 
-    @discord.ui.button(
-        label="All Bonuses",
-        style=discord.ButtonStyle.secondary,
-        row=1,
-    )
+    @discord.ui.button(label="All Bonuses", style=discord.ButtonStyle.secondary, row=1)
     async def show_all(
         self, itr: discord.Interaction["dBot"], _: discord.ui.Button
     ) -> None:
@@ -296,9 +293,7 @@ class BonusTopView(discord.ui.View):
         await self.update_message(itr)
 
     @discord.ui.button(
-        label="Max Weekly Score",
-        style=discord.ButtonStyle.secondary,
-        row=1,
+        label="Max Weekly Score", style=discord.ButtonStyle.secondary, row=1
     )
     async def show_score(
         self, itr: discord.Interaction["dBot"], button: discord.ui.Button
