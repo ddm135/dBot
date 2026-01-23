@@ -331,12 +331,12 @@ GAMES: dict[str, "GameDetails"] = {
         "lookupQuery": "id=1480181152&country=kr",
         "manifestUrl": (
             "https://superstar-starship.s3.amazonaws.com"
-            "/version/real/manifest/{version}.txt"
+            "/version/live/manifest/{version}.txt"
         ),
         "packageName": "com.dalcomsoft.sss",
         "assetScheme": AssetScheme.BINARY_CATALOG,
         "catalogUrl": (
-            "http://d1869m1xmsv4ed.cloudfront.net/assets"
+            "https://sss-cdn.dalcomsoft.net/assets"
             "/LIVE/Android/2.7.4/catalog_{version}.bin"
         ),
         "authorization": "bnZQb1RweVg4WVlyUlZERE85Zkc6WVBrQklrNFdhcQ==",
@@ -456,12 +456,12 @@ GAMES: dict[str, "GameDetails"] = {
         "lookupQuery": "id=1571479814&country=kr",
         "manifestUrl": (
             "https://superstar-ateez.s3.amazonaws.com"
-            "/version/real/manifest/{version}.txt"
+            "/version/live/manifest/{version}.txt"
         ),
         "packageName": "com.dalcomsoft.ssat",
         "assetScheme": AssetScheme.BINARY_CATALOG,
         "catalogUrl": (
-            "http://d3kmsky8b54x07.cloudfront.net/assets"
+            "https://ssat-cdn.dalcomsoft.net/assets"
             "/LIVE/Android/2.7.4/catalog_{version}.bin"
         ),
         "authorization": "QWVob3JZcmxGanJ2dmRtTXY4S0w6SVJLR0lqTlRyRw==",
