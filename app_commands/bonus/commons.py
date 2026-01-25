@@ -76,7 +76,7 @@ def bonus_top_embeds(
 
             if (
                 embed_count + field_name_count + field_value_count + text_count > 6000
-                or embed_field_count > 25
+                or embed_field_count >= 25
             ):
                 embeds.append(discord.Embed(color=game_details["color"]))
                 embed_count = 0
@@ -96,7 +96,7 @@ def bonus_top_embeds(
 
         if (
             embed_count + field_name_count + field_value_count > 6000
-            or embed_field_count > 25
+            or embed_field_count >= 25
         ):
             embeds.append(discord.Embed(color=game_details["color"]))
             embed_count = 0
