@@ -103,9 +103,13 @@ class Info(commands.Cog):
                     else game_details["color"]
                 )
 
-                file_info = self.bot.info_from_file[game_choice.value][
-                    song[song_id_index]
-                ]
+                file_info = self.bot.info_from_file[game_choice.value].get(
+                    song_id,
+                    {
+                        "sound": {"duration": "Unknown"},
+                        "seq": {"Unknown": {"count": "Unknown"}},
+                    },
+                )
 
                 album_info: list[str] | dict[str, str]
                 if "bonus" in game_details:
@@ -166,9 +170,9 @@ class Info(commands.Cog):
 
         sorted_songs = sorted(
             songs,
-            key=lambda x: self.bot.info_from_file[game_choice.value][x[song_id_index]][
-                "sound"
-            ]["duration"],
+            key=lambda x: self.bot.info_from_file[game_choice.value].get(
+                x[song_id_index], {"sound": {"duration": "Unknown"}}
+            )["sound"]["duration"],
         )
         msg = await itr.followup.send(
             embed=InfoEmbed(
