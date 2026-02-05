@@ -58,15 +58,14 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         game_choice: Choice[:class:`str`]
             Game
         artist_choice: Optional[:class:`str`]
-            Artist Name
+            Artist/Album
         time: Optional[:class:`BonusPeriod`]
             Time Period
         live_theme_bonus: Optional[:class:`int`]
-            Live Theme Bonus, default is 0 unless configured
+            Live Theme Bonus (configure default with /bonus live_theme set)
         """
 
         await itr.response.defer()
-
         live_theme_bonus = (
             live_theme_bonus or self.bot.live_theme[game_choice.value][str(itr.user.id)]
         )
@@ -156,10 +155,10 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         game_choice: Choice[:class:`str`]
             Game
         live_theme_bonus: Optional[:class:`int`]
-            Live Theme Bonus, default is 0 unless configured
+            Live Theme Bonus (configure default with /bonus live_theme set)
         """
-        await itr.response.defer()
 
+        await itr.response.defer()
         live_theme_bonus = (
             live_theme_bonus or self.bot.live_theme[game_choice.value][str(itr.user.id)]
         )
@@ -277,7 +276,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         game_choice: Choice[:class:`str`]
             Game
         artist_choice: :class:`str`
-            Artist Name
+            Artist/Album
         """
 
         assert itr.command
@@ -302,7 +301,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         game_choice: Choice[:class:`str`]
             Game
         artist_choice: :class:`str`
-            Artist Name
+            Artist/Album
         """
 
         assert itr.command
@@ -323,7 +322,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         Parameters
         -----------
         game_choice: Optional[Choice[:class:`str`]]
-            Game. If left empty, will list all games.
+            Game
         """
 
         await itr.response.defer(ephemeral=True)

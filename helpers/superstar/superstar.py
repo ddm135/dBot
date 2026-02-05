@@ -248,17 +248,21 @@ class SuperStar(commands.Cog):
                 found_data[attribute] = None
             return found_data
 
+        def find_url(attribute: str) -> str | None:
+            if not url_data:
+                return None
+
+            for url in url_data:
+                if url["code"] == found_data[attribute]:
+                    return url["url"]
+            return None
+
         for attribute, is_file in attributes.items():
             if not is_file:
                 continue
 
             if url_data:
-                for url in url_data:
-                    if url["code"] == found_data[attribute]:
-                        found_data[attribute] = url["url"]
-                        break
-                else:
-                    found_data[attribute] = None
+                found_data[attribute] = await asyncio.to_thread(find_url, attribute)
             elif GAMES[game]["assetScheme"] in (
                 AssetScheme.BINARY_CATALOG,
                 AssetScheme.JSON_CATALOG,
@@ -403,11 +407,7 @@ class SuperStar(commands.Cog):
 
         pins = await pin_channel.pins()
         for pin in pins:
-            if (
-                pin.id == new_pin
-                or self.bot.user
-                and pin.author.id != self.bot.user.id
-            ):
+            if pin.id == new_pin or self.bot.user and pin.author.id != self.bot.user.id:
                 continue
 
             embeds = pin.embeds

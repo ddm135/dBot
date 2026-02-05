@@ -41,16 +41,17 @@ class Info(commands.Cog):
         artist_choice: str | None = None,
         song_name: str | None = None,
     ) -> None:
-        """View song information, sorted by duration
+        """View song durations from shortest to longest.
+        If song name is provided, view detailed information about the song.
 
         Parameters
         -----------
         game_choice: Choice[:class:`str`]
             Game
         artist_choice: Optional[:class:`str`]
-            Artist Name
+            Artist/Album
         song_name: Optional[:class:`str`]
-            Song Name
+            Song (requires artist/album to be set)
         """
 
         await itr.response.defer()
@@ -140,6 +141,7 @@ class Info(commands.Cog):
                             results["releaseDate"] / 1000, tz=game_details["timezone"]
                         ).strftime(game_details["dateFormat"]),
                     }
+
                 return await itr.followup.send(
                     embed=InfoDetailsEmbed(
                         game_choice.value,

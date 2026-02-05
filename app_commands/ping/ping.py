@@ -29,12 +29,12 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
         itr: discord.Interaction["dBot"],
         word: str,
     ) -> None:
-        """Add a word to be pinged for
+        """Add a word to the ping list
 
         Parameters
         -----------
         word: :class:`str`
-            Word to be pinged for
+            Word to add to the ping list
         """
         await itr.response.defer(ephemeral=True)
         guild_id = str(itr.guild_id)
@@ -67,7 +67,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage words pings"):
         Parameters
         -----------
         word: :class:`str`
-            Word to be removed from the ping list
+            Word to remove from the ping list
         """
         await itr.response.defer(ephemeral=True)
         guild_id = str(itr.guild_id)

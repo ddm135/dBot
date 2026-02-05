@@ -192,11 +192,13 @@ GAMES: dict[str, "GameDetails"] = {
         "dateFormat": "%Y-%m-%d",
         "timezone": TIMEZONES["KST"],
         "lookupQuery": "id=890937532&country=kr",
-        "manifestUrl": "https://super-star.s3.amazonaws.com/version/{version}.txt",
+        "manifestUrl": (
+            "https://super-star.s3.amazonaws.com/version/live/manifest/{version}.txt"
+        ),
         "packageName": "kr.co.dalcomsoft.superstar.a",
         "assetScheme": AssetScheme.BINARY_CATALOG,
         "catalogUrl": (
-            "https://d13i7sjdvvio90.cloudfront.net/assets"
+            "https://ssm-cdn.dalcomsoft.net/assets"
             "/LIVE/Android/2.7.4/catalog_{version}.bin"
         ),
         "authorization": "SFFINkh6ckdwRkZiRmlYeis1Mi86U1cwU0JxdWg1dw==",
@@ -263,12 +265,13 @@ GAMES: dict[str, "GameDetails"] = {
         "timezone": TIMEZONES["KST"],
         "lookupQuery": "id=1086866467&country=kr",
         "manifestUrl": (
-            "https://superstar-jyp-resource.s3.amazonaws.com/version/j_{version}.txt"
+            "https://superstar-jyp-resource.s3.amazonaws.com"
+            "/version/live/manifest/j_{version}.txt"
         ),
         "packageName": "com.dalcomsoft.ss.jyp",
         "assetScheme": AssetScheme.BINARY_CATALOG,
         "catalogUrl": (
-            "https://d2hl696dqqmbgp.cloudfront.net/live/assets"
+            "https://ssj-cdn.dalcomsoft.net/live/assets"
             "/LIVE/Android/2.7.4/catalog_{version}.bin"
         ),
         "authorization": "MHhYTEhMQnV1aGpqY3ZRd1JHbUY6SlE0VFZZaVhXYw==",
@@ -520,12 +523,12 @@ GAMES: dict[str, "GameDetails"] = {
         "lookupQuery": "id=6446679596&country=kr",
         "manifestUrl": (
             "https://superstar-stayc.s3.amazonaws.com"
-            "/version/real/manifest/{version}.txt"
+            "/version/live/manifest/{version}.txt"
         ),
         "packageName": "com.dalcomsoft.stayc",
         "assetScheme": AssetScheme.BINARY_CATALOG,
         "catalogUrl": (
-            "https://d4ybtwjh1nw39.cloudfront.net/assets"
+            "https://sssc-cdn.dalcomsoft.net/assets"
             "/LIVE/Android/2.7.4/catalog_{version}.bin"
         ),
         "authorization": "WW5yI0VCPmlKM182fG5qXllrMzQ6THpULVQ3UF9dfg==",
@@ -570,12 +573,12 @@ GAMES: dict[str, "GameDetails"] = {
         "lookupQuery": "id=6523424185&country=kr",
         "manifestUrl": (
             "https://superstar-wakeone.s3.amazonaws.com"
-            "/version/real/manifest/{version}.txt"
+            "/version/live/manifest/{version}.txt"
         ),
         "packageName": "com.dalcomsoft.sswo",
         "assetScheme": AssetScheme.BINARY_CATALOG,
         "catalogUrl": (
-            "https://d189x7hw581nsg.cloudfront.net/assets"
+            "https://sswo-cdn.dalcomsoft.net/assets"
             "/LIVE/Android/2.7.4/catalog_{version}.bin"
         ),
         "target_audience": "259379396797-tfc19vpi39fosa2sic420po6l67p9ltu",

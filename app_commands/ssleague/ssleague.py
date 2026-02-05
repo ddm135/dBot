@@ -46,16 +46,16 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         artist_choice: str,
         song_name: str,
     ) -> None:
-        """Pin SSL song of the day using Artist Name and Song Name
+        """Pin SSL song of the day using Artist/Album and Song
 
         Parameters
         -----------
         game_choice: Choice[:class:`str`]
             Game
         artist_choice: :class:`str`
-            Artist Name
+            Artist/Album
         song_name: :class:`str`
-            Song Name
+            Song
         """
 
         await itr.response.defer(ephemeral=True)
