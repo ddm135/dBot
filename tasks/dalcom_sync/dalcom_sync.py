@@ -120,11 +120,13 @@ class DalcomSync(commands.Cog):
                         with open(data_path, "w", encoding="utf-8") as f:
                             json.dump(data, f, indent=4)
                     else:
-                        with open(data_path, "r+", encoding="utf-8") as f:
+                        with open(data_path, "r", encoding="utf-8") as f:
                             data = json.load(f)
-                            if isinstance(data, list):
-                                new_data = {str(item["code"]): item for item in data}
+                        if isinstance(data, list):
+                            new_data = {str(item["code"]): item for item in data}
+                            with open(data_path, "w", encoding="utf-8") as f:
                                 json.dump(new_data, f, indent=4)
+                            data = new_data
                     dalcom_data[data_file] = data
 
                 music_info_file = Path(f"data/MusicData/{game}.json")
