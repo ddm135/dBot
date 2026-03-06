@@ -54,7 +54,7 @@ class ArtistSync(commands.Cog):
         if (ltd_path := Path(f"data/dalcom/{game}/LiveThemeData.json")).exists():
             with open(ltd_path, "r", encoding="utf-8") as f:
                 ltd = json.load(f)
-            if "collectRewardID" in ltd[0]:
+            if "collectRewardID" in next(iter(ltd.values())):
                 max_live = 0
 
         data: dict[str, "ArtistDetails"] = {}
@@ -75,7 +75,7 @@ class ArtistSync(commands.Cog):
             )["emblemImage"]
 
             if ltd and max_live is not None:
-                for theme in ltd:
+                for theme in ltd.values():
                     if theme["groupID"] == artist_code:
                         max_live += 15_000 * member_count
 

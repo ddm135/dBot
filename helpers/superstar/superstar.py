@@ -5,8 +5,9 @@ import asyncio
 import gzip
 import json
 import zipfile
+from datetime import datetime, timedelta
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Iterable, Literal
 from zipfile import ZipFile
 
 import aiohttp
@@ -17,7 +18,8 @@ from google.auth.transport import requests
 from google.oauth2.service_account import IDTokenCredentials
 
 from helpers.superstar.commons import APKPURE_URL
-from statics.consts import CHUNK_SIZE, GAMES, STATUS_CHANNEL, AssetScheme
+from statics.consts import BONUS_OFFSET, CHUNK_SIZE, GAMES, STATUS_CHANNEL, AssetScheme
+from statics.types import BonusDict
 
 from .embeds import SSLeagueEmbed as _SSLeagueEmbed
 from .types import SuperStarHeaders
@@ -36,7 +38,8 @@ class SuperStar(commands.Cog):
             while True:
                 async with session.get(
                     GAMES[game]["manifestUrl"].format(
-                        version=version or self.bot.basic[game]["version"]
+                        version=version
+                        or self.bot.basic[game]["manifest"]["ActiveVersion_Android"]
                     )
                 ) as r:
                     manifest = await r.json(content_type=None)
@@ -75,7 +78,7 @@ class SuperStar(commands.Cog):
                 headers=headers,
                 data=cog.encrypt_cbc(
                     credentials["account"].format(
-                        version=basic_details["version"],
+                        version=basic_details["manifest"]["ActiveVersion_Android"],
                         **credentials,
                     ),
                     iv,
@@ -109,7 +112,7 @@ class SuperStar(commands.Cog):
                 headers=headers,
                 data=cog.encrypt_cbc(
                     credentials["account"].format(
-                        version=basic_details["version"],
+                        version=basic_details["manifest"]["ActiveVersion_Android"],
                         id_token=id_token,
                         **credentials,
                     ),
@@ -152,7 +155,7 @@ class SuperStar(commands.Cog):
                 headers=headers,
                 data=cog.encrypt_cbc(
                     credentials["account"].format(
-                        version=basic_details["version"],
+                        version=basic_details["manifest"]["ActiveVersion_Android"],
                         access_token=access_token,
                         **credentials,
                     ),
@@ -196,15 +199,16 @@ class SuperStar(commands.Cog):
             result = json.loads(cog.decrypt_cbc(await response.text(), iv))
         return result
 
-    async def get_data(self, url: str) -> list[dict]:
+    async def get_data(self, url: str) -> dict[str, dict]:
         async with aiohttp.ClientSession() as session:
             async with session.get(url=url) as r:
                 content = await r.read()
 
         cog: "Cryptographic" = self.bot.get_cog("Cryptographic")
-        return json.loads(
+        data = json.loads(
             cog.decrypt_ecb(gzip.decompress(content)).replace(rb"\/", rb"/")
         )
+        return {str(item["code"]): item for item in data}
 
     async def get_attributes(
         self,
@@ -219,7 +223,7 @@ class SuperStar(commands.Cog):
                 "SeqData",
                 "URLs",
             ]
-            | tuple[list[dict], list[dict] | None]
+            | tuple[dict[str, dict], dict[str, dict] | None]
         ),
         item_id: int,
         attributes: dict[str, bool],
@@ -238,31 +242,17 @@ class SuperStar(commands.Cog):
             url_data = search[1]
 
         found_data = {}
-        for item in data:
-            if item["code"] == item_id:
-                for attribute in attributes:
-                    found_data[attribute] = item[attribute]
-                break
-        else:
-            for attribute in attributes:
-                found_data[attribute] = None
-            return found_data
-
-        def find_url(attribute: str) -> str | None:
-            if not url_data:
-                return None
-
-            for url in url_data:
-                if url["code"] == found_data[attribute]:
-                    return url["url"]
-            return None
+        for attribute in attributes:
+            found_data[attribute] = data.get(str(item_id), {}).get(attribute)
 
         for attribute, is_file in attributes.items():
             if not is_file:
                 continue
 
             if url_data:
-                found_data[attribute] = await asyncio.to_thread(find_url, attribute)
+                found_data[attribute] = url_data.get(
+                    str(found_data[attribute]), {}
+                ).get("url")
             elif GAMES[game]["assetScheme"] in (
                 AssetScheme.BINARY_CATALOG,
                 AssetScheme.JSON_CATALOG,
@@ -345,7 +335,9 @@ class SuperStar(commands.Cog):
         xapk_folder_path = Path(f"data/xapks/{game}")
         xapk_folder_path.mkdir(parents=True, exist_ok=True)
         xapks = list(
-            xapk_folder_path.rglob(f"*{self.bot.basic[game]["version"]}*.xapk")
+            xapk_folder_path.rglob(
+                f"*{self.bot.basic[game]["manifest"]["ActiveVersion_Android"]}*.xapk"
+            )
         )
         if xapks:
             xapk_path = xapks[0]
@@ -374,7 +366,10 @@ class SuperStar(commands.Cog):
                     return None
 
                 xapk_file_name = disposition.split("filename=")[-1].strip('"')
-                # if self.bot.basic[game]["version"] not in xapk_file_name:
+                # if (
+                #     self.bot.basic[game]["manifest"]["ActiveVersion_Android"]
+                #     not in xapk_file_name
+                # ):
                 #     return None
 
                 xapk_path = xapk_folder_path / xapk_file_name

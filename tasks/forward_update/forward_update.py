@@ -54,7 +54,7 @@ class ForwardUpdate(commands.Cog):
                 current_time = datetime.now(tz=game_details["timezone"])
                 with open(msd_path, "r", encoding="utf-8") as f:
                     msd = json.load(f)
-                for song in msd:
+                for song in msd.values():
                     if (display_start := song.get("displayStartAt")) and (
                         (
                             start_time := datetime.fromtimestamp(
@@ -77,7 +77,7 @@ class ForwardUpdate(commands.Cog):
                     ).exists():
                         with open(grd_path, "r", encoding="utf-8") as f:
                             grd = json.load(f)
-                        for group in grd:
+                        for group in grd.values():
                             if (display_start := group.get("displayStartAt")) and (
                                 (
                                     start_time := datetime.fromtimestamp(

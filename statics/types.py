@@ -52,7 +52,6 @@ class CatalogDetails(TypedDict):
 
 
 class BasicDetails(TypedDict):
-    version: str
     iconUrl: str
     manifest: dict[str, str]
     catalog: NotRequired[dict[str, CatalogDetails]]

@@ -68,7 +68,6 @@ class BasicSync(commands.Cog):
             # Get manifest
             manifest = await cog.get_manifest(game, version)
             self.bot.basic[game] = BasicDetails(
-                version=version,
                 iconUrl=iconUrl,
                 manifest=manifest,
             )

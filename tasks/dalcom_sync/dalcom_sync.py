@@ -85,6 +85,7 @@ class DalcomSync(commands.Cog):
                     continue
 
                 data_files = [
+                    "ArtistData"
                     "LocaleData",
                     "GroupData",
                     "MusicData",
@@ -132,7 +133,7 @@ class DalcomSync(commands.Cog):
                         self.bot.info_from_file[game] = {}
 
                 bundle_folders: set[Path] = set()
-                for music in dalcom_data["MusicData"]:
+                for music in dalcom_data["MusicData"].values():
                     if music["isHidden"]:
                         continue
 
@@ -221,7 +222,7 @@ class DalcomSync(commands.Cog):
                         }
 
                 if "SeqData" in dalcom_data:
-                    for seq in dalcom_data["SeqData"]:
+                    for seq in dalcom_data["SeqData"].values():
                         results = await ss_cog.get_attributes(
                             game,
                             (dalcom_data["MusicData"], dalcom_data.get("URLs")),
@@ -288,12 +289,12 @@ class DalcomSync(commands.Cog):
                     continue
 
                 borders = {}
-                for border in dalcom_data["ThemeTypeData"]:
+                for border in dalcom_data["ThemeTypeData"].values():
                     if not border["code"]:
                         continue
 
                     suffixes = {"_Large": ""}
-                    for theme in dalcom_data["ThemeData"]:
+                    for theme in dalcom_data["ThemeData"].values():
                         if theme["themeTypeCode"] == border["code"]:
                             if theme["nameImageZoom"]:
                                 suffixes["_Zoom"] = "z"
@@ -304,11 +305,14 @@ class DalcomSync(commands.Cog):
                     if not theme["limitedType"]:
                         continue
 
-                    for locale in dalcom_data["LocaleData"]:
-                        if theme["localeName"] == locale["code"]:
-                            name = locale["enUS"]
-                            break
-                    else:
+                    results = await ss_cog.get_attributes(
+                        game,
+                        (dalcom_data["LocaleData"], None),
+                        theme["localeName"],
+                        {"enUS": False},
+                    )
+                    name = results["enUS"]
+                    if not name:
                         continue
 
                     catalog_key = Path(border["gradeR"])
