@@ -229,8 +229,7 @@ class SuperStar(commands.Cog):
         attributes: dict[str, bool],
     ) -> dict:
         if isinstance(search, str):
-            data_path = Path(f"data/dalcom/{game}/{search}.json")
-            with open(data_path, "r", encoding="utf-8") as f:
+            with open(f"data/dalcom/{game}/{search}.json", "r", encoding="utf-8") as f:
                 data = json.load(f)
             if GAMES[game]["assetScheme"] == AssetScheme.JSON_URL:
                 with open(f"data/dalcom/{game}/URLs.json", "r", encoding="utf-8") as f:
@@ -270,7 +269,6 @@ class SuperStar(commands.Cog):
     ) -> Path | None:
         catalog = self.bot.basic[game]["catalog"]
         file_extract_path = ""
-        # file_name = Path(catalog_key).name
         while dependency := catalog[catalog_key]["dependency"]:
             file_extract_path = catalog[catalog_key]["internalId"]
             catalog_key = dependency
