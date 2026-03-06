@@ -6,9 +6,9 @@ from pathlib import Path
 import discord
 
 from statics.consts import BONUS_OFFSET, GAMES
+from statics.types import BonusDict
 
 from .commons import MAX_POSITIONS, STEP
-from .types import BonusDict
 
 
 class BonusPingsEmbed(discord.Embed):

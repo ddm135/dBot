@@ -44,9 +44,11 @@ class BasicSync(commands.Cog):
 
         async with aiohttp.ClientSession() as session:
             if {"iconUrl", "lastVersion"} <= set(game_details):
+                # If game has been unlisted
                 version = game_details["lastVersion"]
                 iconUrl = game_details["iconUrl"]
             else:
+                # Get latest version and icon from iTunes
                 query = game_details.get("lookupQuery")
                 while True:
                     try:
@@ -63,6 +65,7 @@ class BasicSync(commands.Cog):
                         self.LOGGER.exception("?")
                         continue
 
+            # Get manifest
             manifest = await cog.get_manifest(game, version)
             self.bot.basic[game] = BasicDetails(
                 version=version,
@@ -75,6 +78,7 @@ class BasicSync(commands.Cog):
             ) or not (catalog_url := game_details.get("catalogUrl")):
                 return
 
+            # Get Unity Addressables Catalog
             resource_version = manifest["ResourceVersion"]
             catalog_folder_path = Path(f"data/catalogs/{game}")
             catalog_folder_path.mkdir(parents=True, exist_ok=True)
@@ -98,24 +102,21 @@ class BasicSync(commands.Cog):
                     async with session.get(
                         catalog_url.format(version=resource_version)
                     ) as r:
+                        if r.status == 403:
+                            resource_version = str(int(resource_version) - 1)
+                            catalog_packaged_path = (
+                                catalog_folder_path
+                                / f"{resource_version}.{extension}"
+                            )
+                            catalog_extracted_path = (
+                                catalog_folder_path
+                                / f"{resource_version}_extracted.json"
+                            )
+                            continue
                         with open(catalog_packaged_path, "wb") as f:
-                            try:
-                                text_result = await r.text()
-                                if "AccessDenied" in text_result:
-                                    resource_version = str(int(resource_version) - 1)
-                                    catalog_packaged_path = (
-                                        catalog_folder_path
-                                        / f"{resource_version}.{extension}"
-                                    )
-                                    catalog_extracted_path = (
-                                        catalog_folder_path
-                                        / f"{resource_version}_extracted.json"
-                                    )
-                                    continue
-                            except UnicodeDecodeError:
-                                pass
                             f.write(await r.read())
 
+                    # Convert catalog to readable format
                     process = await asyncio.create_subprocess_exec(
                         f"utils/catalog-{extension}",
                         str(catalog_packaged_path),

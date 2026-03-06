@@ -4,8 +4,7 @@ from pathlib import Path
 import discord
 
 from statics.consts import BONUS_OFFSET, GAMES
-
-from .types import BonusDict
+from statics.types import BonusDict
 
 STEP = 5
 

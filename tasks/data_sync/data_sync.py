@@ -29,23 +29,14 @@ class DataSync(commands.Cog):
         self.bot = bot
 
     async def cog_load(self) -> None:
-        try:
-            await self.bot.load_extension("helpers.google_drive")
-        except commands.ExtensionAlreadyLoaded:
-            pass
         await self.data_download()
         self.data_upload.start()
 
     async def cog_unload(self) -> None:
-        try:
-            await self.bot.load_extension("helpers.google_drive")
-        except commands.ExtensionAlreadyLoaded:
-            pass
         self.save_last_appearance()
         self.save_data(Data.SSLEAGUES)
         self.data_upload.cancel()
         await self.data_upload()
-        await self.bot.unload_extension("helpers.google_drive")
 
     async def data_download(self) -> None:
         cog: "GoogleDrive" = self.bot.get_cog("GoogleDrive")

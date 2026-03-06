@@ -105,8 +105,15 @@ class PinSSLeague(commands.Cog):
 
         artist_name = ssl_song[artist_name_index]
         song_name = ssl_song[song_name_index]
-        duration = self.bot.info_from_file[game][str(song_id)]["sound"]["duration"]
-        note_count = self.bot.info_from_file[game][str(song_id)]["seq"]
+        file_info = self.bot.info_from_file[game].get(
+            str(song_id),
+            {
+                "sound": {"duration": "Unknown"},
+                "seq": {"Unknown": {"count": "Unknown"}},
+            },
+        )
+        duration = file_info["sound"]["duration"]
+        note_count = file_info["seq"]
         skills = ssl_song[skills_index] if skills_index is not None else None
 
         results = await cog.get_attributes(

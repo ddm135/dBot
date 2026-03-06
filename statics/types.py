@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, NotRequired, TypedDict
 from zoneinfo import ZoneInfo
@@ -73,3 +74,13 @@ class LastAppearanceManual(TypedDict):
     artist: str
     songId: str
     date: str
+
+
+class BonusDict(TypedDict):
+    artist: str
+    members: str | None
+    song: str | None
+    bonusStart: datetime
+    bonusEnd: datetime
+    bonusAmount: int
+    maxScore: int

@@ -5,9 +5,9 @@ from typing import TYPE_CHECKING
 import discord
 
 from app_commands.bonus.commons import bonus_top_embeds
+from statics.types import BonusDict
 
 from .embeds import BonusListEmbed, BonusMaxEmbed
-from .types import BonusDict
 
 if TYPE_CHECKING:
     from dBot import dBot

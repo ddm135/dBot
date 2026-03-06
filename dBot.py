@@ -77,6 +77,11 @@ class dBot(commands.Bot):
         except Exception:
             pass
         finally:
+            for ext in reversed(EXTENSIONS):
+                try:
+                    await self.unload_extension(ext)
+                except commands.ExtensionNotLoaded:
+                    pass
             await super().close()
             LOCK.unlink(missing_ok=True)
 
