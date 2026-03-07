@@ -118,13 +118,6 @@ PING_COLUMNS = ("users", "artist_name")
 ARTIST_COLUMNS = ("artist_name", "artist_code", "member_count")
 
 
-class AssetScheme(Enum):
-    JSON_URL = 1
-    DIRECT_URL = 2
-    JSON_CATALOG = 3
-    BINARY_CATALOG = 4
-
-
 class BaseScore(Enum):
     NORMAL = 6_358_000
     PRISM = 6_909_000
@@ -196,7 +189,6 @@ GAMES: dict[str, "GameDetails"] = {
             "https://super-star.s3.amazonaws.com/version/live/manifest/{version}.txt"
         ),
         "packageName": "kr.co.dalcomsoft.superstar.a",
-        "assetScheme": AssetScheme.BINARY_CATALOG,
         "catalogUrl": (
             "https://ssm-cdn.dalcomsoft.net/assets"
             "/LIVE/Android/2.7.4/catalog_{version}.bin"
@@ -269,7 +261,6 @@ GAMES: dict[str, "GameDetails"] = {
             "/version/live/manifest/j_{version}.txt"
         ),
         "packageName": "com.dalcomsoft.ss.jyp",
-        "assetScheme": AssetScheme.BINARY_CATALOG,
         "catalogUrl": (
             "https://ssj-cdn.dalcomsoft.net/live/assets"
             "/LIVE/Android/2.7.4/catalog_{version}.bin"
@@ -337,7 +328,6 @@ GAMES: dict[str, "GameDetails"] = {
             "/version/live/manifest/{version}.txt"
         ),
         "packageName": "com.dalcomsoft.sss",
-        "assetScheme": AssetScheme.BINARY_CATALOG,
         "catalogUrl": (
             "https://sss-cdn.dalcomsoft.net/assets"
             "/LIVE/Android/2.7.4/catalog_{version}.bin"
@@ -462,7 +452,6 @@ GAMES: dict[str, "GameDetails"] = {
             "/version/live/manifest/{version}.txt"
         ),
         "packageName": "com.dalcomsoft.ssat",
-        "assetScheme": AssetScheme.BINARY_CATALOG,
         "catalogUrl": (
             "https://ssat-cdn.dalcomsoft.net/assets"
             "/LIVE/Android/2.7.4/catalog_{version}.bin"
@@ -526,7 +515,6 @@ GAMES: dict[str, "GameDetails"] = {
             "/version/live/manifest/{version}.txt"
         ),
         "packageName": "com.dalcomsoft.stayc",
-        "assetScheme": AssetScheme.BINARY_CATALOG,
         "catalogUrl": (
             "https://sssc-cdn.dalcomsoft.net/assets"
             "/LIVE/Android/2.7.4/catalog_{version}.bin"
@@ -576,7 +564,6 @@ GAMES: dict[str, "GameDetails"] = {
             "/version/live/manifest/{version}.txt"
         ),
         "packageName": "com.dalcomsoft.sswo",
-        "assetScheme": AssetScheme.BINARY_CATALOG,
         "catalogUrl": (
             "https://sswo-cdn.dalcomsoft.net/assets"
             "/LIVE/Android/2.7.4/catalog_{version}.bin"
@@ -645,7 +632,6 @@ GAMES: dict[str, "GameDetails"] = {
             "https://superstar-smtown-real.s3.amazonaws.com/version/{version}.txt"
         ),
         "packageName": "jp.co.ponos.superstarsmtown",
-        "assetScheme": AssetScheme.DIRECT_URL,
         "target_audience": "28835016655-choauh766oss3ht8ddqiamavvtfm05ur",
     },
     "JYPNATION": {
@@ -710,7 +696,6 @@ GAMES: dict[str, "GameDetails"] = {
             "/version/manifest/{version}.txt"
         ),
         "packageName": "jp.co.dalcomsoft.superstarjypnation",
-        "assetScheme": AssetScheme.JSON_URL,
         "target_audience": "776124120237-r7q2lcrob52mp0asch12hbmkd52elej5",
     },
     "LP": {
@@ -751,7 +736,6 @@ GAMES: dict[str, "GameDetails"] = {
         ),
         "lastVersion": "1.9.4",
         "packageName": "jp.co.dalcomsoft.superstarlapone",
-        "assetScheme": AssetScheme.JSON_URL,
         "target_audience": "668693032380-fmhat079lhao0o335ov5uk4jkl6kget6",
     },
     "EB": {
@@ -808,7 +792,6 @@ GAMES: dict[str, "GameDetails"] = {
             "/version/manifest/{version}.txt"
         ),
         "packageName": "jp.co.dalcomsoft.superstarebidan",
-        "assetScheme": AssetScheme.JSON_URL,
         "target_audience": "1006848262784-luosgb8o1hrjvbu6v8mjgh35b5oiimli",
     },
     "PH": {
@@ -867,7 +850,6 @@ GAMES: dict[str, "GameDetails"] = {
             "/version/real/manifest/{version}.txt"
         ),
         "packageName": "com.dalcomsoft.ssph",
-        "assetScheme": AssetScheme.JSON_URL,
         "authorization": "WWFeNnhxVldSJWFkVWp4Z3ViOFY6WmJRcy1uZ1YyQQ==",
         "target_audience": "234980834479-creie63p99odjttcv9pvifjelsuf983i",
     },
