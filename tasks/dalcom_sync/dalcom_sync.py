@@ -16,7 +16,7 @@ import soundfile
 from discord.ext import commands, tasks
 from googleapiclient.http import MediaFileUpload
 
-from statics.consts import GAMES, AssetScheme
+from statics.consts import GAMES
 
 from .commons import BORDER_CHANNEL, BORDER_FOLDER, FOLDER_MIME
 from .types import Seq
@@ -94,14 +94,13 @@ class DalcomSync(commands.Cog):
                     "WorldRecordData",
                 ]
                 for data_file in (
+                    "URLs"
                     "SeqData",
                     "LiveThemeData",
                     "LiveThemeCollectRewardData",
                 ):
                     if data_file in ajs["result"]["context"]:
                         data_files.append(data_file)
-                if game_details["assetScheme"] == AssetScheme.JSON_URL:
-                    data_files.append("URLs")
                 dalcom_data = {}
 
                 for data_file in data_files:
@@ -287,10 +286,7 @@ class DalcomSync(commands.Cog):
                     shutil.rmtree(path)
 
                 # TODO: Check if key has been changed
-                if game_details["assetScheme"] not in (
-                    AssetScheme.BINARY_CATALOG,
-                    AssetScheme.JSON_CATALOG,
-                ):
+                if "catalogUrl" not in game_details:
                     continue
 
                 borders = {}

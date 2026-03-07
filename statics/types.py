@@ -6,8 +6,6 @@ from zoneinfo import ZoneInfo
 if TYPE_CHECKING:
     from googleapiclient._apis.sheets.v4 import GridRange
 
-    from statics.consts import AssetScheme
-
 
 class SpreadsheetDetails(TypedDict):
     spreadsheetId: str
@@ -40,7 +38,6 @@ class GameDetails(TypedDict):
     manifestUrl: NotRequired[str]
     lastVersion: NotRequired[str]
     packageName: str
-    assetScheme: "AssetScheme"
     catalogUrl: NotRequired[str]
     authorization: NotRequired[str]
     target_audience: NotRequired[str]

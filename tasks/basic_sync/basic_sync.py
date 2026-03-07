@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 import aiohttp
 from discord.ext import commands, tasks
 
-from statics.consts import GAMES, AssetScheme
+from statics.consts import GAMES
 from statics.types import BasicDetails
 
 if TYPE_CHECKING:
@@ -71,10 +71,7 @@ class BasicSync(commands.Cog):
                 iconUrl=iconUrl,
                 manifest=manifest,
             )
-            if game_details["assetScheme"] not in (
-                AssetScheme.BINARY_CATALOG,
-                AssetScheme.JSON_CATALOG,
-            ) or not (catalog_url := game_details.get("catalogUrl")):
+            if not (catalog_url := game_details.get("catalogUrl")):
                 return
 
             # Get Unity Addressables Catalog
@@ -83,7 +80,7 @@ class BasicSync(commands.Cog):
             catalog_folder_path.mkdir(parents=True, exist_ok=True)
             extension = (
                 "bin"
-                if game_details["assetScheme"] == AssetScheme.BINARY_CATALOG
+                if catalog_url.endswith("bin")
                 else "json"
             )
             catalog_packaged_path = (
@@ -104,8 +101,7 @@ class BasicSync(commands.Cog):
                         if r.status == 403:
                             resource_version = str(int(resource_version) - 1)
                             catalog_packaged_path = (
-                                catalog_folder_path
-                                / f"{resource_version}.{extension}"
+                                catalog_folder_path / f"{resource_version}.{extension}"
                             )
                             catalog_extracted_path = (
                                 catalog_folder_path

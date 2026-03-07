@@ -18,7 +18,7 @@ from google.auth.transport import requests
 from google.oauth2.service_account import IDTokenCredentials
 
 from helpers.superstar.commons import APKPURE_URL
-from statics.consts import BONUS_OFFSET, CHUNK_SIZE, GAMES, STATUS_CHANNEL, AssetScheme
+from statics.consts import BONUS_OFFSET, CHUNK_SIZE, GAMES, STATUS_CHANNEL
 from statics.types import BonusDict
 
 from .embeds import SSLeagueEmbed as _SSLeagueEmbed
@@ -231,10 +231,10 @@ class SuperStar(commands.Cog):
         if isinstance(search, str):
             with open(f"data/dalcom/{game}/{search}.json", "r", encoding="utf-8") as f:
                 data = json.load(f)
-            if GAMES[game]["assetScheme"] == AssetScheme.JSON_URL:
+            try:
                 with open(f"data/dalcom/{game}/URLs.json", "r", encoding="utf-8") as f:
                     url_data = json.load(f)
-            else:
+            except FileNotFoundError:
                 url_data = None
         else:
             data = search[0]
@@ -248,14 +248,11 @@ class SuperStar(commands.Cog):
             if not is_file:
                 continue
 
-            if url_data:
+            if isinstance(found_data[attribute], int) and url_data:
                 found_data[attribute] = url_data.get(
                     str(found_data[attribute]), {}
                 ).get("url")
-            elif GAMES[game]["assetScheme"] in (
-                AssetScheme.BINARY_CATALOG,
-                AssetScheme.JSON_CATALOG,
-            ):
+            elif "catalogUrl" in GAMES[game]:
                 found_data[attribute] = await self.extract_file_from_bundle(
                     game, found_data[attribute]
                 )
