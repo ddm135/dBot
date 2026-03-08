@@ -280,7 +280,7 @@ class NotifyBonus(commands.Cog):
                     str_user_id
                 ]["reend"]
             cog: "DataSync" = self.bot.get_cog("DataSync")  # type: ignore[assignment]
-            await cog.save_data(Data.NOTIFY_BONUS)
+            cog.save_data(Data.NOTIFY_BONUS)
 
     @notify_bonus.before_loop
     async def before_notify_bonus(self) -> None:
