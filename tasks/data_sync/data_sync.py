@@ -150,7 +150,7 @@ class DataSync(commands.Cog):
                     list[int], self.bot.notify_bonus[key]
                 )
 
-    @tasks.loop(time=[time(hour=h, minute=30) for h in range(24)])
+    @tasks.loop(time=[time(hour=h, minute=25) for h in range(24)])
     async def data_upload(self) -> None:
         cog: "GoogleDrive" = self.bot.get_cog("GoogleDrive")
         drive_files = await cog.get_file_list(DATA_FOLDER)

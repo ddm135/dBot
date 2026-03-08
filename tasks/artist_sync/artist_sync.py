@@ -32,7 +32,7 @@ class ArtistSync(commands.Cog):
         self.artist_sync.cancel()
         self.bot.artist.clear()
 
-    @tasks.loop(time=[time(hour=h, minute=25) for h in range(24)])
+    @tasks.loop(time=[time(hour=h, minute=30) for h in range(24)])
     async def artist_sync(self) -> None:
         for game, game_details in GAMES.items():
             await self.get_artist_data(game, game_details)
@@ -54,7 +54,7 @@ class ArtistSync(commands.Cog):
         if (ltd_path := Path(f"data/dalcom/{game}/LiveThemeData.json")).exists():
             with open(ltd_path, "r", encoding="utf-8") as f:
                 ltd = json.load(f)
-            if "collectRewardID" in next(iter(ltd.values())):
+            if "collectRewardID" in next(ltd.values()):
                 max_live = 0
 
         data: dict[str, "ArtistDetails"] = {}
@@ -73,6 +73,7 @@ class ArtistSync(commands.Cog):
                     game, "GroupData", artist_code, {"emblemImage": True}
                 )
             )["emblemImage"]
+            print(artist_name)
 
             if ltd and max_live is not None:
                 for theme in ltd.values():
