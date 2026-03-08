@@ -373,26 +373,25 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         cog.save_data(Data.NOTIFY_BONUS)
         return await itr.followup.send(
             (
-                "The following settings will be applied at the end of the day:\n"
+                "The following settings will be applied at the end of the day:"
                 + (
                     ""
                     if start_offset is None
                     else (
-                        "- Start pings will be disabled"
+                        "\n- Start pings will be disabled"
                         if not start_offset
-                        else f"- Start pings offset will be set to {start_offset} hour"
-                        f"{"" if start_offset == 1 else "s"}"
+                        else f"\n- Start pings offset will be set to {start_offset}"
+                        f"hour{"" if start_offset == 1 else "s"}"
                     )
                 )
-                + "\n"
                 + (
                     ""
                     if end_offset is None
                     else (
-                        "- End pings will be disabled"
+                        "\n- End pings will be disabled"
                         if not end_offset
-                        else f"- End pings offset will be set to {end_offset} hour"
-                        f"{"" if end_offset == 1 else "s"}"
+                        else f"\n- End pings offset will be set to {end_offset}"
+                        f"hour{"" if end_offset == 1 else "s"}"
                     )
                 )
             ),
