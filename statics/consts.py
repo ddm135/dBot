@@ -395,7 +395,6 @@ GAMES: dict[str, "GameDetails"] = {
         ),
         "lastVersion": "4.0.0",
         "packageName": "com.dalcomsoft.kangdaniel",
-        "assetScheme": AssetScheme.JSON_URL,
     },
     "ATZ": {
         "name": "SUPERSTAR ATEEZ",

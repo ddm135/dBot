@@ -45,6 +45,10 @@ class dBot(commands.Bot):
         lambda: defaultdict(int)
     )
 
+    notify: defaultdict[str, defaultdict[str, list[int]]] = defaultdict(
+        lambda: defaultdict(list[int])
+    )
+
     async def setup_hook(self) -> None:
         for ext in EXTENSIONS:
             await self.load_extension(ext)

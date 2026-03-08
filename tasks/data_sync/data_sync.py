@@ -145,6 +145,7 @@ class DataSync(commands.Cog):
 
         for data_name in Data:
             data = data_name.value
+            data.touch(exist_ok=True)
             self.LOGGER.info("Uploading %s...", data.name)
             media = MediaFileUpload(data)
 
@@ -159,7 +160,6 @@ class DataSync(commands.Cog):
                 last_modified[data.name] = (await cog.create_file(metadata, media))[
                     1
                 ].timestamp()
-            data.touch(exist_ok=True)
 
         self.save_data(Data.LAST_MODIFIED, last_modified)
 
