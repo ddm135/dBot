@@ -380,7 +380,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                     else (
                         "\n- Start pings will be disabled"
                         if not start_offset
-                        else f"\n- Start pings offset will be set to {start_offset}"
+                        else f"\n- Start pings offset will be set to {start_offset} "
                         f"hour{"" if start_offset == 1 else "s"}"
                     )
                 )
@@ -390,7 +390,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
                     else (
                         "\n- End pings will be disabled"
                         if not end_offset
-                        else f"\n- End pings offset will be set to {end_offset}"
+                        else f"\n- End pings offset will be set to {end_offset} "
                         f"hour{"" if end_offset == 1 else "s"}"
                     )
                 )

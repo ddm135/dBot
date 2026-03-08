@@ -5,12 +5,13 @@ from typing import TYPE_CHECKING
 import discord
 from discord.ext import commands, tasks
 
-from statics.consts import BONUS_OFFSET, GAMES, STATUS_CHANNEL, TIMEZONES
+from statics.consts import BONUS_OFFSET, GAMES, STATUS_CHANNEL, TIMEZONES, Data
 
 from .embeds import NotifyBonusEmbed
 
 if TYPE_CHECKING:
     from dBot import dBot
+    from tasks.data_sync import DataSync
 
 
 class NotifyBonus(commands.Cog):
@@ -278,6 +279,8 @@ class NotifyBonus(commands.Cog):
                 self.bot.notify_bonus[str_user_id]["end"] = self.bot.notify_bonus[
                     str_user_id
                 ]["reend"]
+            cog: "DataSync" = self.bot.get_cog("DataSync")  # type: ignore[assignment]
+            await cog.save_data(Data.NOTIFY_BONUS)
 
     @notify_bonus.before_loop
     async def before_notify_bonus(self) -> None:
