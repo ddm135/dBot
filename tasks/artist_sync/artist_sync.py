@@ -74,7 +74,6 @@ class ArtistSync(commands.Cog):
                 else 0
             )
             emblem = results[artist_code]["emblemImage"]
-            print(artist_name)
 
             if ltd and max_live is not None:
                 for theme in ltd.values():
