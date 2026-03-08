@@ -54,7 +54,7 @@ class ArtistSync(commands.Cog):
         if (ltd_path := Path(f"data/dalcom/{game}/LiveThemeData.json")).exists():
             with open(ltd_path, "r", encoding="utf-8") as f:
                 ltd = json.load(f)
-            if "collectRewardID" in next(ltd.values()):
+            if "collectRewardID" in next(iter(ltd.values())):
                 max_live = 0
 
         data: dict[str, "ArtistDetails"] = {}
