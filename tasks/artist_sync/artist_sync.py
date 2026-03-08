@@ -57,8 +57,13 @@ class ArtistSync(commands.Cog):
             if "collectRewardID" in next(iter(ltd.values())):
                 max_live = 0
 
-        data: dict[str, "ArtistDetails"] = {}
         ss_cog: "SuperStar" = self.bot.get_cog("SuperStar")
+        artist_codes = [int(row[artist_code_index]) for row in artist]
+        results = await ss_cog.get_attributes(
+            game, "GroupData", artist_codes, {"emblemImage": True}
+        )
+
+        data: dict[str, "ArtistDetails"] = {}
         for row in artist:
             artist_name = row[artist_name_index]
             artist_code = int(row[artist_code_index])
@@ -68,11 +73,7 @@ class ArtistSync(commands.Cog):
                 if "base_score" in game_details
                 else 0
             )
-            emblem = (
-                await ss_cog.get_attributes(
-                    game, "GroupData", artist_code, {"emblemImage": True}
-                )
-            )["emblemImage"]
+            emblem = results[artist_code]["emblemImage"]
             print(artist_name)
 
             if ltd and max_live is not None:

@@ -86,10 +86,11 @@ class Info(commands.Cog):
                     "SuperStar",
                 )  # type: ignore[assignment]
                 song_id = song[song_id_index]
+                int_song_id = int(song_id)
                 results = await cog.get_attributes(
                     game_choice.value,
                     "MusicData",
-                    int(song_id),
+                    [int_song_id],
                     {
                         "album": True,
                         "albumName": False,
@@ -99,8 +100,8 @@ class Info(commands.Cog):
                     },
                 )
                 color = (
-                    int(results["albumBgColor"][:-2], 16)
-                    if results["albumBgColor"]
+                    int(results[int_song_id]["albumBgColor"][:-2], 16)
+                    if results[int_song_id]["albumBgColor"]
                     else game_details["color"]
                 )
 
@@ -133,12 +134,13 @@ class Info(commands.Cog):
                             await cog.get_attributes(
                                 game_choice.value,
                                 "LocaleData",
-                                results["albumName"],
+                                [results[int_song_id]["albumName"]],
                                 {"enUS": False},
                             )
-                        )["enUS"],
+                        )[results[int_song_id]["albumName"]]["enUS"],
                         "release_date": datetime.fromtimestamp(
-                            results["releaseDate"] / 1000, tz=game_details["timezone"]
+                            results[int_song_id]["releaseDate"] / 1000,
+                            tz=game_details["timezone"],
                         ).strftime(game_details["dateFormat"]),
                     }
 
@@ -149,7 +151,7 @@ class Info(commands.Cog):
                         song_name,
                         file_info["sound"]["duration"],
                         file_info["seq"],
-                        results["album"],
+                        results[int_song_id]["album"],
                         icon,
                         color,
                         album_info,
@@ -158,12 +160,12 @@ class Info(commands.Cog):
                             if info_columns == InfoColumns.SKILLS.value
                             else None
                         ),
-                        results["myrecordQualifyingScore"],
+                        results[int_song_id]["myrecordQualifyingScore"],
                     ),
                     files=[
                         discord.File(file, filename=filename)
                         for filename, file in {
-                            "album.png": results["album"],
+                            "album.png": results[int_song_id]["album"],
                             "icon.png": icon,
                         }.items()
                         if isinstance(file, Path)

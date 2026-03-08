@@ -223,9 +223,9 @@ class SuperStar(commands.Cog):
             ]
             | tuple[dict[str, dict], dict[str, dict] | None]
         ),
-        item_id: int,
+        item_ids: list[int],
         attributes: dict[str, bool],
-    ) -> dict:
+    ) -> dict[int, dict]:
         if isinstance(search, str):
             with open(f"data/dalcom/{game}/{search}.json", "r", encoding="utf-8") as f:
                 data = json.load(f)
@@ -239,21 +239,26 @@ class SuperStar(commands.Cog):
             url_data = search[1]
 
         found_data = {}
-        for attribute in attributes:
-            found_data[attribute] = data.get(str(item_id), {}).get(attribute)
-
-        for attribute, is_file in attributes.items():
-            if not is_file:
-                continue
-
-            if isinstance(found_data[attribute], int) and url_data:
-                found_data[attribute] = url_data.get(
-                    str(found_data[attribute]), {}
-                ).get("url")
-            elif "catalogUrl" in GAMES[game]:
-                found_data[attribute] = await self.extract_file_from_bundle(
-                    game, found_data[attribute]
+        for item_id in item_ids:
+            found_data[item_id] = {}
+            for attribute, is_file in attributes.items():
+                found_data[item_id][attribute] = data.get(str(item_id), {}).get(
+                    attribute
                 )
+
+                if not is_file:
+                    continue
+
+                if isinstance(found_data[item_id][attribute], int) and url_data:
+                    found_data[item_id][attribute] = url_data.get(
+                        str(found_data[item_id][attribute]), {}
+                    ).get("url")
+                elif "catalogUrl" in GAMES[game]:
+                    found_data[item_id][attribute] = (
+                        await self.extract_file_from_bundle(
+                            game, found_data[item_id][attribute]
+                        )
+                    )
 
         return found_data
 

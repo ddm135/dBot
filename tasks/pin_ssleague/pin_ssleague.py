@@ -117,14 +117,14 @@ class PinSSLeague(commands.Cog):
         skills = ssl_song[skills_index] if skills_index is not None else None
 
         results = await cog.get_attributes(
-            game, "MusicData", song_id, {"albumBgColor": False, "album": True}
+            game, "MusicData", [song_id], {"albumBgColor": False, "album": True}
         )
         color = (
-            int(results["albumBgColor"][:-2], 16)
-            if results["albumBgColor"]
+            int(results[song_id]["albumBgColor"][:-2], 16)
+            if results[song_id]["albumBgColor"]
             else game_details["color"]
         )
-        album = results["album"]
+        album = results[song_id]["album"]
         icon = self.bot.artist[game][artist_name]["emblem"]
 
         artist_last_str = self.bot.ssleagues[game][artist_name]["date"]

@@ -159,14 +159,14 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
 
         cog: "SuperStar" = self.bot.get_cog("SuperStar")  # type: ignore[assignment]
         results = await cog.get_attributes(
-            game, "MusicData", song_id, {"albumBgColor": False, "album": True}
+            game, "MusicData", [song_id], {"albumBgColor": False, "album": True}
         )
         color = (
-            int(results["albumBgColor"][:-2], 16)
-            if results["albumBgColor"]
+            int(results[song_id]["albumBgColor"][:-2], 16)
+            if results[song_id]["albumBgColor"]
             else game_details["color"]
         )
-        album = results["album"]
+        album = results[song_id]["album"]
         icon = self.bot.artist[game][artist_name]["emblem"]
 
         timezone = game_details["timezone"]

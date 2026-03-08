@@ -150,18 +150,21 @@ class DalcomSync(commands.Cog):
                     found_key = music["sound"]
                     if isinstance(found_key, int):
                         results = await ss_cog.get_attributes(
-                            game, (dalcom_data["URLs"], None), found_key, {"url": False}
+                            game,
+                            (dalcom_data["URLs"], None),
+                            [found_key],
+                            {"url": False},
                         )
-                        found_key = results["url"]
+                        found_key = results[found_key]["url"]
 
                     if not current_key or current_key != found_key:
                         results = await ss_cog.get_attributes(
                             game,
                             (dalcom_data["MusicData"], dalcom_data.get("URLs")),
-                            music["code"],
+                            [music["code"]],
                             {"sound": True},
                         )
-                        src_path = results["sound"]
+                        src_path = results[music["code"]]["sound"]
                         if not src_path:
                             continue
                         dst_path = Path(f"data/MusicData/{game}/{music["code"]}.ogg")
@@ -195,10 +198,10 @@ class DalcomSync(commands.Cog):
                             results = await ss_cog.get_attributes(
                                 game,
                                 (dalcom_data["URLs"], None),
-                                found_key,
+                                [found_key],
                                 {"url": False},
                             )
-                            found_key = results["url"]
+                            found_key = results[found_key]["url"]
 
                         if current_key and current_key == found_key:
                             continue
@@ -206,10 +209,10 @@ class DalcomSync(commands.Cog):
                         results = await ss_cog.get_attributes(
                             game,
                             (dalcom_data["MusicData"], dalcom_data.get("URLs")),
-                            music["code"],
+                            [music["code"]],
                             {difficulty: True},
                         )
-                        src_path = results[difficulty]
+                        src_path = results[music["code"]][difficulty]
                         if not src_path:
                             continue
                         dst_path = Path(
@@ -230,10 +233,10 @@ class DalcomSync(commands.Cog):
                         results = await ss_cog.get_attributes(
                             game,
                             (dalcom_data["MusicData"], dalcom_data.get("URLs")),
-                            seq["linkedMusic"],
+                            [seq["linkedMusic"]],
                             {"isHidden": False},
                         )
-                        if results["isHidden"]:
+                        if results[seq["linkedMusic"]]["isHidden"]:
                             continue
 
                         current_key = (
@@ -248,10 +251,10 @@ class DalcomSync(commands.Cog):
                             results = await ss_cog.get_attributes(
                                 game,
                                 (dalcom_data["URLs"], None),
-                                found_key,
+                                [found_key],
                                 {"url": False},
                             )
-                            found_key = results["url"]
+                            found_key = results[found_key]["url"]
 
                         if current_key and current_key == found_key:
                             continue
@@ -259,10 +262,10 @@ class DalcomSync(commands.Cog):
                         results = await ss_cog.get_attributes(
                             game,
                             (dalcom_data["SeqData"], dalcom_data.get("URLs")),
-                            seq["code"],
+                            [seq["code"]],
                             {"seqPath": True},
                         )
-                        src_path = results["seqPath"]
+                        src_path = results[seq["code"]]["seqPath"]
                         if not src_path:
                             continue
                         dst_path = Path(
@@ -309,10 +312,10 @@ class DalcomSync(commands.Cog):
                     results = await ss_cog.get_attributes(
                         game,
                         (dalcom_data["LocaleData"], None),
-                        theme["localeName"],
+                        [theme["localeName"]],
                         {"enUS": False},
                     )
-                    name = results["enUS"]
+                    name = results[theme["localeName"]]["enUS"]
                     if not name:
                         continue
 
