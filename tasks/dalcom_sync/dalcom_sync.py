@@ -94,7 +94,7 @@ class DalcomSync(commands.Cog):
                     "WorldRecordData",
                 ]
                 for data_file in (
-                    "URLs"
+                    "URLs",
                     "SeqData",
                     "LiveThemeData",
                     "LiveThemeCollectRewardData",
