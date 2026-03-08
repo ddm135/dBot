@@ -2,7 +2,6 @@
 # pyright: reportAssignmentType=false, reportTypedDictNotRequiredAccess=false
 
 import math
-import re
 from datetime import datetime, timedelta
 from itertools import groupby
 from pathlib import Path
@@ -22,7 +21,6 @@ from .views import BonusListView, BonusTopView
 
 if TYPE_CHECKING:
     from dBot import dBot
-    from helpers.google_sheets import GoogleSheets
     from tasks.data_sync import DataSync
 
 
@@ -328,18 +326,75 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
 
         await itr.user.send("## Bonus Ping List")
 
-        cog: "GoogleSheets" = self.bot.get_cog("GoogleSheets")
         for game in games:
-            game_details = GAMES[game.value]
-            ping_data = await cog.get_sheet_data(
-                game_details["ping"]["spreadsheetId"], game_details["ping"]["range"]
+            embed = BonusPingsEmbed(
+                game.value,
+                self.bot.info_by_name[game.value].keys(),
+                self.bot.notify_bonus[game.value],
+                itr.user.id,
+                self.bot.basic[game.value]["iconUrl"],
             )
-            icon = self.bot.basic[game.value]["iconUrl"]
-            embed = BonusPingsEmbed(game.value, ping_data, str(itr.user.id), icon)
             await itr.user.send(embed=embed, silent=True)
 
         return await itr.followup.send(
             "Check your DMs for the list of artists you are pinged for!"
+        )
+
+    @bonus_ping.command(name="time")
+    async def bonus_ping_time(
+        self,
+        itr: discord.Interaction["dBot"],
+        start_offset: app_commands.Range[int, 0, 23] | None = None,
+        end_offset: app_commands.Range[int, 0, 23] | None = None,
+    ) -> None:
+        """Set the time you get pinged before bonuses start and end
+        (Set to 0 to disable)
+
+        Parameters
+        -----------
+        start_offset: :class:`int`
+            Hours before the day bonus start
+        end_offset: :class:`int`
+            Hours before the day bonus end
+        """
+
+        await itr.response.defer(ephemeral=True)
+        user_id = str(itr.user.id)
+
+        if start_offset is None and end_offset is None:
+            return await itr.followup.send("No changes made.")
+        if start_offset is not None:
+            self.bot.notify_bonus[user_id]["restart"] = [start_offset]
+        if end_offset is not None:
+            self.bot.notify_bonus[user_id]["reend"] = [end_offset]
+
+        cog: "DataSync" = self.bot.get_cog("DataSync")
+        cog.save_data(Data.NOTIFY_BONUS)
+        return await itr.followup.send(
+            (
+                "The following settings will be applied at the end of the day:\n"
+                + (
+                    ""
+                    if start_offset is None
+                    else (
+                        "- Start pings will be disabled"
+                        if not start_offset
+                        else f"- Start pings offset will be set to {start_offset} hour"
+                        f"{"" if start_offset == 1 else "s"}"
+                    )
+                )
+                + "\n"
+                + (
+                    ""
+                    if end_offset is None
+                    else (
+                        "- End pings will be disabled"
+                        if not end_offset
+                        else f"- End pings offset will be set to {end_offset} hour"
+                        f"{"" if end_offset == 1 else "s"}"
+                    )
+                )
+            ),
         )
 
     bonus_live_theme = app_commands.Group(
@@ -390,57 +445,38 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         operation: str,
     ) -> None:
         await itr.response.defer(ephemeral=True)
-        user_id = str(itr.user.id)
+        if not self.bot.bonus[game].get(artist_name):
+            return await itr.followup.send("Artist not found.")
 
-        cog: "GoogleSheets" = self.bot.get_cog("GoogleSheets")
-        game_details = GAMES[game]
-        ping_columns = game_details["ping"]["columns"]
-        artist_name_index = ping_columns.index("artist_name")
-        users_index = ping_columns.index("users")
-        ping_data = await cog.get_sheet_data(
-            game_details["ping"]["spreadsheetId"], game_details["ping"]["range"]
-        )
-
-        for i, row in enumerate(ping_data, start=1):
-            _artist_name = row[artist_name_index]
-            if _artist_name.lower() != artist_name.lower():
-                continue
-
-            users = set(row[users_index].split(","))
-            users.discard("")
-
-            if operation == "add":
-                if user_id not in users:
-                    users.add(user_id)
-                    message_prefix = "Added to"
-                else:
-                    message_prefix = "Already in"
-            elif operation == "remove":
-                if user_id in users:
-                    users.remove(user_id)
-                    message_prefix = "Removed from"
-                else:
-                    message_prefix = "Already not in"
+        if operation == "add":
+            if itr.user.id not in self.bot.notify_bonus[game][artist_name]:
+                self.bot.notify_bonus[game][artist_name].append(itr.user.id)
+                message_prefix = "Added to"
             else:
-                message_prefix = None
+                message_prefix = "Already in"
+        elif operation == "remove":
+            if itr.user.id in self.bot.notify_bonus[game][artist_name]:
+                self.bot.notify_bonus[game][artist_name].remove(itr.user.id)
+                message_prefix = "Removed from"
+            else:
+                message_prefix = "Already not in"
+        else:
+            message_prefix = None
 
-            if not message_prefix:
-                return await itr.followup.send("Internal error.")
+        if not message_prefix:
+            return await itr.followup.send("Internal error.")
 
-            if not message_prefix.startswith("Already"):
-                await cog.update_sheet_data(
-                    game_details["ping"]["spreadsheetId"],
-                    f"{re.split(r"\d+:", game_details["ping"]["range"])[0]}{i}",
-                    [[",".join(users)]],
-                )
+        if not message_prefix.startswith("Already"):
+            str_user_id = str(itr.user.id)
+            self.bot.notify_bonus[str_user_id].setdefault("start", [1])
+            self.bot.notify_bonus[str_user_id].setdefault("end", [1])
+            self.bot.notify_bonus[str_user_id].setdefault("restart", [1])
+            self.bot.notify_bonus[str_user_id].setdefault("reend", [1])
 
-            return await itr.followup.send(
-                f"{message_prefix} {_artist_name} ping list!"
-            )
+            cog: "DataSync" = self.bot.get_cog("DataSync")
+            cog.save_data(Data.NOTIFY_BONUS)
 
-        await itr.followup.send(
-            f"{artist_name} is not a valid artist for {game_details["name"]}"
-        )
+        return await itr.followup.send(f"{message_prefix} {artist_name} ping list!")
 
     def get_period_bonuses(
         self,

@@ -26,7 +26,6 @@ class GameDetails(TypedDict):
     color: int
     info: NotRequired[SpreadsheetDetails]
     bonus: NotRequired[SpreadsheetDetails]
-    ping: NotRequired[SpreadsheetDetails]
     artist: SpreadsheetDetails
     base_score: NotRequired[int]
     pinChannelIds: dict[int, int | None]

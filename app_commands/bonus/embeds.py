@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from pathlib import Path
+from typing import Iterable
 
 import discord
 
@@ -15,24 +16,17 @@ class BonusPingsEmbed(discord.Embed):
     def __init__(
         self,
         game: str,
-        ping_data: list[list[str]],
-        user_id: str,
+        artists: Iterable[str],
+        ping_data: dict[str, list[int]],
+        user_id: int,
         icon: str,
     ) -> None:
         game_details = GAMES[game]
-        ping_columns = game_details["ping"]["columns"]
-        artist_name_index = ping_columns.index("artist_name")
-        users_index = ping_columns.index("users")
         description = ""
 
-        for row in ping_data:
-            _artist_name = row[artist_name_index]
-            users = row[users_index].split(",")
-            if "" in users:
-                users.remove("")
-
-            if user_id in users:
-                description += f"- {_artist_name}\n"
+        for artist in artists:
+            if user_id in ping_data[artist]:
+                description += f"- {artist}\n"
 
         if not description:
             description = "None"

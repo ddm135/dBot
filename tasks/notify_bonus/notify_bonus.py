@@ -5,13 +5,12 @@ from typing import TYPE_CHECKING
 import discord
 from discord.ext import commands, tasks
 
-from statics.consts import BONUS_OFFSET, GAMES, STATUS_CHANNEL
+from statics.consts import BONUS_OFFSET, GAMES, STATUS_CHANNEL, TIMEZONES
 
 from .embeds import NotifyBonusEmbed
 
 if TYPE_CHECKING:
     from dBot import dBot
-    from helpers.google_sheets import GoogleSheets
 
 
 class NotifyBonus(commands.Cog):
@@ -26,53 +25,28 @@ class NotifyBonus(commands.Cog):
 
     @tasks.loop(time=[time(hour=h) for h in range(24)])
     async def notify_bonus(self) -> None:
-        cog: "GoogleSheets" = self.bot.get_cog(
-            "GoogleSheets"
-        )  # type: ignore[assignment]
         channel = self.bot.get_channel(STATUS_CHANNEL) or await self.bot.fetch_channel(
             STATUS_CHANNEL
         )
         assert isinstance(channel, discord.TextChannel)
 
         for game, game_details in GAMES.items():
-            if not (bonus_details := game_details.get("bonus")) or not (
-                ping_details := game_details.get("ping")
-            ):
+            if not (bonus_details := game_details.get("bonus")):
                 continue
 
             timezone = game_details["timezone"]
             current_date = datetime.now(tz=timezone)
-            if current_date.hour != 23:
-                continue
 
             game_name = game_details["name"]
-            current_date = (
+            notify_date = (
                 current_date.replace(hour=0, minute=0, second=0, microsecond=0)
                 + BONUS_OFFSET
             )
             initial_msg = (
                 f"## Bonus Reminder for {game_name} on "
-                f"<t:{int(current_date.timestamp())}:f>"
+                f"<t:{int(notify_date.timestamp())}:f>"
             )
-
-            ping_columns = ping_details["columns"]
-            ping_users_index = ping_columns.index("users")
-            ping_artist_index = ping_columns.index("artist_name")
-
-            ping_data = await cog.get_sheet_data(
-                ping_details["spreadsheetId"], ping_details["range"]
-            )
-            game_ping_dict = dict.fromkeys(
-                (
-                    user
-                    for users in tuple(zip(*ping_data))[ping_users_index]
-                    for user in users.split(",")
-                ),
-                False,
-            )
-            game_ping_dict.pop("", None)
-            if not game_ping_dict:
-                continue
+            to_send: dict[int, dict[str, bool]] = {}
 
             bonus_columns = bonus_details["columns"]
             song_id_index = bonus_columns.index("song_id")
@@ -84,18 +58,8 @@ class NotifyBonus(commands.Cog):
             bonus_amount_index = bonus_columns.index("bonus_amount")
 
             bonus_data = self.bot.bonus[game]
-            artists = bonus_data.keys()
-            for artist in artists:
-                artist_pings = next(
-                    (ping for ping in ping_data if ping[ping_artist_index] == artist),
-                    None,
-                )
-                if not artist_pings:
-                    continue
-                artist_ping_list = artist_pings[ping_users_index].split(",")
-                if "" in artist_ping_list:
-                    artist_ping_list.remove("")
-                if not artist_ping_list:
+            for artist in bonus_data.keys():
+                if not (artist_pings := self.bot.notify_bonus[game][artist]):
                     continue
 
                 birthday_bonuses = []
@@ -110,27 +74,27 @@ class NotifyBonus(commands.Cog):
                     start_date = bonus[bonus_start_index]
                     end_date = bonus[bonus_end_index]
 
-                    if start_date < current_date and bonus[member_name_index]:
+                    if start_date < notify_date and bonus[member_name_index]:
                         last_birthday_start = start_date
 
-                    if end_date < current_date and bonus[member_name_index]:
+                    if end_date < notify_date and bonus[member_name_index]:
                         last_birthday_end = end_date + BONUS_OFFSET
 
                     if (
                         not next_birthday_start
-                        and current_date < start_date
+                        and notify_date < start_date
                         and bonus[member_name_index]
                     ):
                         next_birthday_start = start_date - BONUS_OFFSET
 
                     if (
                         not next_birthday_end
-                        and current_date < end_date
+                        and notify_date < end_date
                         and bonus[member_name_index]
                     ):
                         next_birthday_end = end_date
 
-                    if start_date <= current_date <= end_date:
+                    if start_date <= notify_date <= end_date:
                         if bonus[member_name_index]:
                             birthday_bonuses.append(bonus)
                         else:
@@ -180,18 +144,18 @@ class NotifyBonus(commands.Cog):
                     default=None,
                 )
 
-                start_check = last_birthday_end != current_date
-                end_check = next_birthday_start != current_date
+                start_check = last_birthday_end != notify_date
+                end_check = next_birthday_start != notify_date
 
                 if birthday_bonuses and birthday_start and birthday_end:
-                    if birthday_end == current_date and end_check:
+                    if birthday_end == notify_date and end_check:
                         msg = (
                             f"> {birthday_members} - **All Songs**\n> {birthday_total}%"
                             f" | {birthday_start.strftime("%B %d").replace(" 0", " ")} "
                             f"- {birthday_end.strftime("%B %d").replace(" 0", " ")}\n"
                         )
                         notify_end.append(msg)
-                    elif birthday_start == current_date and start_check:
+                    elif birthday_start == notify_date and start_check:
                         msg = (
                             f"> {birthday_members} - **All Songs**\n> {birthday_total}%"
                             f" | {birthday_start.strftime("%B %d").replace(" 0", " ")} "
@@ -206,7 +170,7 @@ class NotifyBonus(commands.Cog):
                     song_start = max(x for x in (start_date, birthday_start) if x)
                     song_end = min(x for x in (end_date, birthday_end) if x)
 
-                    if song_start == current_date or song_end == current_date:
+                    if song_start == notify_date or song_end == notify_date:
                         song_total = birthday_total + bonus[bonus_amount_index]
                         album_name = (
                             bonus[album_name_index]
@@ -224,7 +188,7 @@ class NotifyBonus(commands.Cog):
                             bonus[song_id_index]
                         ]["sound"]["duration"]
 
-                        if song_end == current_date and end_check:
+                        if song_end == notify_date and end_check:
                             msg = (
                                 f"> {album_name} - **{song_name}** ({song_duration})\n"
                                 f"> {song_total}% | "
@@ -232,7 +196,7 @@ class NotifyBonus(commands.Cog):
                                 f"- {song_end.strftime("%B %d").replace(" 0", " ")}\n"
                             )
                             notify_end.append(msg)
-                        elif song_start == current_date and start_check:
+                        elif song_start == notify_date and start_check:
                             msg = (
                                 f"> {album_name} - **{song_name}** ({song_duration})\n"
                                 f"> {song_total}% | "
@@ -241,52 +205,79 @@ class NotifyBonus(commands.Cog):
                             )
                             notify_start.append(msg)
 
-                if notify_start or notify_end:
-                    icon = self.bot.artist[game][artist]["emblem"]
+                if not notify_start and not notify_end:
+                    continue
+
+                icon = self.bot.artist[game][artist]["emblem"]
+                for user_id in artist_pings:
+                    try:
+                        user = self.bot.get_user(user_id) or await self.bot.fetch_user(
+                            user_id
+                        )
+                    except discord.NotFound:
+                        continue
+
+                    to_send.setdefault(
+                        user_id,
+                        {
+                            "start": 24
+                            - self.bot.notify_bonus[str(user_id)]["start"][0]
+                            == current_date.hour,
+                            "end": 24 - self.bot.notify_bonus[str(user_id)]["end"][0]
+                            == current_date.hour,
+                            "init": True,
+                        },
+                    )
+
+                    if not (to_send[user_id]["start"] and notify_start) and not (
+                        to_send[user_id]["end"] and notify_end
+                    ):
+                        continue
+
                     embed = NotifyBonusEmbed(
                         artist,
                         icon,
-                        current_date,
-                        notify_start,
-                        notify_end,
+                        notify_date,
+                        notify_start if to_send[user_id]["start"] else [],
+                        notify_end if to_send[user_id]["end"] else [],
                         game_details["color"],
                     )
 
-                    for user_id in artist_ping_list:
-                        int_user_id = int(user_id)
-                        try:
-                            user = self.bot.get_user(
-                                int_user_id
-                            ) or await self.bot.fetch_user(int_user_id)
-                        except discord.NotFound:
-                            continue
+                    try:
+                        if to_send[user_id]["init"]:
+                            await user.send(initial_msg)
+                            to_send[user_id]["init"] = False
 
-                        try:
-                            if not game_ping_dict[user_id]:
-                                game_ping_dict[user_id] = True
-                                await user.send(initial_msg)
+                        await user.send(
+                            embed=embed,
+                            files=(
+                                [discord.File(icon, filename="icon.png")]
+                                if isinstance(icon, Path)
+                                else []
+                            ),
+                            silent=True,
+                        )
+                    except discord.Forbidden:
+                        await channel.send(
+                            f"<@{self.bot.owner_id}> Failed to send bonus ping to"
+                            f" {user.name} ({user.id}) for {game_name} - {artist}."
+                        )
+                    except discord.HTTPException as e:
+                        await channel.send(
+                            f"<@{self.bot.owner_id}> Failed to send bonus ping for"
+                            f" {game_name} - {artist}. Check console for details."
+                        )
+                        print(e)
+                        break
 
-                            await user.send(
-                                embed=embed,
-                                files=(
-                                    [discord.File(icon, filename="icon.png")]
-                                    if isinstance(icon, Path)
-                                    else []
-                                ),
-                                silent=True,
-                            )
-                        except discord.Forbidden:
-                            await channel.send(
-                                f"<@{self.bot.owner_id}> Failed to send bonus ping to"
-                                f" {user.name} ({user.id}) for {game_name} - {artist}."
-                            )
-                        except discord.HTTPException as e:
-                            await channel.send(
-                                f"<@{self.bot.owner_id}> Failed to send bonus ping for"
-                                f" {game_name} - {artist}. Check console for details."
-                            )
-                            print(e)
-                            break
+        if not datetime.now(tz=TIMEZONES["KST"]):
+            for str_user_id in self.bot.notify_bonus:
+                self.bot.notify_bonus[str_user_id]["start"] = self.bot.notify_bonus[
+                    str_user_id
+                ]["restart"]
+                self.bot.notify_bonus[str_user_id]["end"] = self.bot.notify_bonus[
+                    str_user_id
+                ]["reend"]
 
     @notify_bonus.before_loop
     async def before_notify_bonus(self) -> None:
