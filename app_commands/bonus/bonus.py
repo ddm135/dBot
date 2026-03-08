@@ -347,7 +347,8 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         start_offset: app_commands.Range[int, 0, 23] | None = None,
         end_offset: app_commands.Range[int, 0, 23] | None = None,
     ) -> None:
-        """Set the time you get pinged before bonuses start and end
+        """Set how many hours (1 - 23) before bonuses start and end
+        when you get pinged
         (Set to 0 to disable)
 
         Parameters
