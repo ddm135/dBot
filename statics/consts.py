@@ -72,6 +72,7 @@ class Data(Enum):
     SSLEAGUES = Path("data/ssleagues.json")
     LAST_MODIFIED = Path("data/last_modified.json")
     LIVE_THEME = Path("data/live_theme.json")
+    NOTIFY_BONUS = Path("data/notify_bonus.json")
 
 
 class InfoColumns(Enum):

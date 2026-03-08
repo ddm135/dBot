@@ -78,11 +78,7 @@ class BasicSync(commands.Cog):
             resource_version = manifest["ResourceVersion"]
             catalog_folder_path = Path(f"data/catalogs/{game}")
             catalog_folder_path.mkdir(parents=True, exist_ok=True)
-            extension = (
-                "bin"
-                if catalog_url.endswith("bin")
-                else "json"
-            )
+            extension = "bin" if catalog_url.endswith("bin") else "json"
             catalog_packaged_path = (
                 catalog_folder_path / f"{resource_version}.{extension}"
             )

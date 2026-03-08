@@ -30,7 +30,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
     GAME_CHOICES = [
         app_commands.Choice(name=game_details["name"], value=game)
         for game, game_details in GAMES.items()
-        if {"bonus", "ping"} <= set(game_details)
+        if {"bonus"} <= set(game_details) and not {"lastVersion"} <= set(game_details)
     ]
     FILTERED_GAME_CHOICES = [
         choice for choice in GAME_CHOICES if {"base_score"} <= set(GAMES[choice.value])
@@ -268,8 +268,6 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         artist_choice: str,
     ) -> None:
         """Add an artist to your bonus ping list
-        (1 hour before bonus starts,
-        1 day 1 hour before bonus ends)
 
         Parameters
         -----------

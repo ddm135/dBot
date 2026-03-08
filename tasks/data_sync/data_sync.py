@@ -137,6 +137,19 @@ class DataSync(commands.Cog):
             Data.LIVE_THEME.value.parent.mkdir(parents=True, exist_ok=True)
             self.save_data(Data.LIVE_THEME)
 
+        if Data.NOTIFY_BONUS.value.exists():
+            self.bot.notify_bonus.clear()
+            with open(Data.NOTIFY_BONUS.value, "r", encoding="utf-8") as f:
+                self.bot.notify_bonus = json.load(f)
+
+            self.bot.notify_bonus = defaultdict(
+                lambda: defaultdict(list[int]), self.bot.notify_bonus
+            )
+            for key in self.bot.notify_bonus:
+                self.bot.notify_bonus[key] = defaultdict(
+                    list[int], self.bot.notify_bonus[key]
+                )
+
     @tasks.loop(time=[time(hour=h, minute=30) for h in range(24)])
     async def data_upload(self) -> None:
         cog: "GoogleDrive" = self.bot.get_cog("GoogleDrive")

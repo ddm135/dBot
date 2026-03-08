@@ -223,8 +223,9 @@ class Administrative(commands.Cog):
         text = f"Renaming {old_name} to {new_name} in {game_details["name"]}..."
         msg = await ctx.send(text)
         sheets_cog: "GoogleSheets" = self.bot.get_cog("GoogleSheets")
+        data_cog: "DataSync" = self.bot.get_cog("DataSync")
 
-        for data in ("info", "bonus", "ping", "artist"):
+        for data in ("info", "bonus", "artist"):
             if (details := game_details.get(data)) and (
                 replace_grid := details["replaceGrid"]  # type: ignore[index]
             ):
@@ -246,9 +247,14 @@ class Administrative(commands.Cog):
                 and self.bot.ssleague_manual[game]["artist"] == old_name
             ):
                 self.bot.ssleague_manual[game]["artist"] = new_name
-
-                data_cog: "DataSync" = self.bot.get_cog("DataSync")
                 data_cog.save_data(Data.SSLEAGUES)
+
+        await msg.edit(content=f"{text}\nEditing bonus ping data...")
+        if old_name in self.bot.notify_bonus[game]:
+            self.bot.notify_bonus[game][new_name] = self.bot.notify_bonus[game].pop(
+                old_name
+            )
+            data_cog.save_data(Data.NOTIFY_BONUS)
 
         await msg.edit(content=f"{text}\nDownloading info data...")
         info_cog: "InfoSync" = self.bot.get_cog("InfoSync")

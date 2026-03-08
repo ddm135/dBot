@@ -43,15 +43,10 @@ class GameDetails(TypedDict):
     target_audience: NotRequired[str]
 
 
-class CatalogDetails(TypedDict):
-    internalId: str
-    dependency: str | None
-
-
 class BasicDetails(TypedDict):
     iconUrl: str
     manifest: dict[str, str]
-    catalog: NotRequired[dict[str, CatalogDetails]]
+    catalog: NotRequired[dict[str, dict[str, str]]]
 
 
 class ArtistDetails(TypedDict):

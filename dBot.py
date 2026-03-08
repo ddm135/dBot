@@ -45,7 +45,7 @@ class dBot(commands.Bot):
         lambda: defaultdict(int)
     )
 
-    notify: defaultdict[str, defaultdict[str, list[int]]] = defaultdict(
+    notify_bonus: defaultdict[str, defaultdict[str, list[int]]] = defaultdict(
         lambda: defaultdict(list[int])
     )
 
