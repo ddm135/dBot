@@ -41,9 +41,8 @@ EXTENSIONS = (
     "helpers.google_drive",
     "helpers.superstar",
     "commands.administrative",
+    "tasks.data_sync",
     "tasks.basic_sync",
-    "tasks.dalcom_sync",
-    "tasks.forward_update",
     "tasks.info_sync",
     "tasks.pin_ssleague",
     "app_commands.info",
@@ -51,8 +50,8 @@ EXTENSIONS = (
     "tasks.bonus_sync",
     "tasks.notify_bonus",
     "app_commands.bonus",
-    "tasks.data_sync",
-    "tasks.artist_sync",
+    "tasks.dalcom_sync",
+    "tasks.forward_update",
     "app_commands.ping",
     "app_commands.role",
     "tasks.clock",
@@ -116,7 +115,6 @@ BONUS_COLUMNS = (
     "bonus_end",
 )
 PING_COLUMNS = ("users", "artist_name")
-ARTIST_COLUMNS = ("artist_name", "artist_code", "member_count")
 
 
 class BaseScore(Enum):
@@ -148,17 +146,6 @@ GAMES: dict[str, "GameDetails"] = {
                 "startRowIndex": 1,
                 "startColumnIndex": 2,
                 "endColumnIndex": 3,
-            },
-        },
-        "artist": {
-            "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-            "range": "SM!A1:C",
-            "columns": ARTIST_COLUMNS,
-            "replaceGrid": {
-                "sheetId": 2033296248,
-                "startRowIndex": 0,
-                "startColumnIndex": 0,
-                "endColumnIndex": 1,
             },
         },
         "base_score": BaseScore.NORMAL.value,
@@ -216,17 +203,6 @@ GAMES: dict[str, "GameDetails"] = {
                 "endColumnIndex": 3,
             },
         },
-        "artist": {
-            "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-            "range": "JYP!A1:C",
-            "columns": ARTIST_COLUMNS,
-            "replaceGrid": {
-                "sheetId": 138125467,
-                "startRowIndex": 0,
-                "startColumnIndex": 0,
-                "endColumnIndex": 1,
-            },
-        },
         "base_score": BaseScore.NORMAL.value,
         "pinChannelIds": {
             SSRG_GUILD: 360109303199432705,
@@ -280,17 +256,6 @@ GAMES: dict[str, "GameDetails"] = {
                 "startRowIndex": 1,
                 "startColumnIndex": 2,
                 "endColumnIndex": 3,
-            },
-        },
-        "artist": {
-            "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-            "range": "STARSHIP!A1:C",
-            "columns": ARTIST_COLUMNS,
-            "replaceGrid": {
-                "sheetId": 2107313752,
-                "startRowIndex": 0,
-                "startColumnIndex": 0,
-                "endColumnIndex": 1,
             },
         },
         "base_score": BaseScore.NORMAL.value,
@@ -357,17 +322,6 @@ GAMES: dict[str, "GameDetails"] = {
                 "endColumnIndex": 2,
             },
         },
-        "artist": {
-            "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-            "range": "KD!A1:C",
-            "columns": ARTIST_COLUMNS,
-            "replaceGrid": {
-                "sheetId": 1200216146,
-                "startRowIndex": 0,
-                "startColumnIndex": 0,
-                "endColumnIndex": 1,
-            },
-        },
         "pinChannelIds": {},
         "pinRoles": {},
         "dateFormat": "%Y-%m-%d",
@@ -397,17 +351,6 @@ GAMES: dict[str, "GameDetails"] = {
                 "startRowIndex": 1,
                 "startColumnIndex": 2,
                 "endColumnIndex": 3,
-            },
-        },
-        "artist": {
-            "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-            "range": "ATEEZ!A1:C",
-            "columns": ARTIST_COLUMNS,
-            "replaceGrid": {
-                "sheetId": 1373177550,
-                "startRowIndex": 0,
-                "startColumnIndex": 0,
-                "endColumnIndex": 1,
             },
         },
         "base_score": BaseScore.PRISM.value,
@@ -455,17 +398,6 @@ GAMES: dict[str, "GameDetails"] = {
                 "endColumnIndex": 3,
             },
         },
-        "artist": {
-            "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-            "range": "STAYC!A1:C",
-            "columns": ARTIST_COLUMNS,
-            "replaceGrid": {
-                "sheetId": 1795572100,
-                "startRowIndex": 0,
-                "startColumnIndex": 0,
-                "endColumnIndex": 1,
-            },
-        },
         "base_score": BaseScore.PRISM.value,
         "pinChannelIds": {},
         "pinRoles": {},
@@ -505,17 +437,6 @@ GAMES: dict[str, "GameDetails"] = {
             },
             "range": "Songs (Note Count)!A2:C",
             "columns": InfoColumns.NO_SSL.value,
-        },
-        "artist": {
-            "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-            "range": "W1!A1:C",
-            "columns": ARTIST_COLUMNS,
-            "replaceGrid": {
-                "sheetId": 1164880075,
-                "startRowIndex": 0,
-                "startColumnIndex": 0,
-                "endColumnIndex": 1,
-            },
         },
         "pinChannelIds": {},
         "pinRoles": {},
@@ -565,17 +486,6 @@ GAMES: dict[str, "GameDetails"] = {
                 "endColumnIndex": 3,
             },
         },
-        "artist": {
-            "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-            "range": "SMTOWN!A1:C",
-            "columns": ARTIST_COLUMNS,
-            "replaceGrid": {
-                "sheetId": 755434019,
-                "startRowIndex": 0,
-                "startColumnIndex": 0,
-                "endColumnIndex": 1,
-            },
-        },
         "base_score": BaseScore.NORMAL.value,
         "pinChannelIds": {
             SSRG_GUILD: 481907573948153857,
@@ -623,17 +533,6 @@ GAMES: dict[str, "GameDetails"] = {
                 "endColumnIndex": 3,
             },
         },
-        "artist": {
-            "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-            "range": "JYPNATION!A1:C",
-            "columns": ARTIST_COLUMNS,
-            "replaceGrid": {
-                "sheetId": 735198271,
-                "startRowIndex": 0,
-                "startColumnIndex": 0,
-                "endColumnIndex": 1,
-            },
-        },
         "pinChannelIds": {
             SSRG_GUILD: 951350075190313010,
             TEST_GUILD: 1335936325685084242,
@@ -675,12 +574,6 @@ GAMES: dict[str, "GameDetails"] = {
             "range": "Songs!A2:E",
             "columns": InfoColumns.SKILLS.value,
         },
-        "artist": {
-            "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-            "range": "LAPONE!A1:C",
-            "columns": ARTIST_COLUMNS,
-            "replaceGrid": {},
-        },
         "pinChannelIds": {
             SSRG_GUILD: 1039132737979813908,
             TEST_GUILD: 1340868523957813348,
@@ -714,17 +607,6 @@ GAMES: dict[str, "GameDetails"] = {
                 "startRowIndex": 1,
                 "startColumnIndex": 2,
                 "endColumnIndex": 3,
-            },
-        },
-        "artist": {
-            "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-            "range": "EBiDAN!A1:C",
-            "columns": ARTIST_COLUMNS,
-            "replaceGrid": {
-                "sheetId": 1872493199,
-                "startRowIndex": 0,
-                "startColumnIndex": 0,
-                "endColumnIndex": 1,
             },
         },
         "pinChannelIds": {},
@@ -764,17 +646,6 @@ GAMES: dict[str, "GameDetails"] = {
                 "startRowIndex": 1,
                 "startColumnIndex": 2,
                 "endColumnIndex": 3,
-            },
-        },
-        "artist": {
-            "spreadsheetId": "1GYcHiRvR_VZiH1w51ISgjbE63WUvMXH32bNZl3dWV_s",
-            "range": "Philippines!A1:C",
-            "columns": ARTIST_COLUMNS,
-            "replaceGrid": {
-                "sheetId": 564410793,
-                "startRowIndex": 0,
-                "startColumnIndex": 0,
-                "endColumnIndex": 1,
             },
         },
         "base_score": BaseScore.PRISM.value,

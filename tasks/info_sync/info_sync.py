@@ -27,19 +27,17 @@ class InfoSync(commands.Cog):
         self.bot.info_by_name.clear()
         self.bot.info_by_id.clear()
 
-    @tasks.loop(time=[time(hour=h, minute=15) for h in range(24)])
+    @tasks.loop(time=[time(hour=h, minute=10) for h in range(24)])
     async def info_sync(self) -> None:
         for game, game_details in GAMES.items():
             await self.get_info_data(game, game_details)
 
     async def get_info_data(self, game: str, game_details: "GameDetails") -> None:
         self.LOGGER.info("Downloading info data: %s...", game_details["name"])
-        if not (info_details := game_details.get("info")):
-            return
-
         cog: "GoogleSheets" = self.bot.get_cog(
             "GoogleSheets"
         )  # type: ignore[assignment]
+        info_details = game_details["info"]
         info = await cog.get_sheet_data(
             info_details["spreadsheetId"], info_details["range"]
         )

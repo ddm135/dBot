@@ -17,7 +17,6 @@ from statics.consts import EXTENSIONS, GAMES, STATIC_MODULES, STATUS_CHANNEL, Da
 if TYPE_CHECKING:
     from dBot import dBot
     from helpers.google_sheets import GoogleSheets
-    from tasks.artist_sync import ArtistSync
     from tasks.bonus_sync import BonusSync
     from tasks.data_sync import DataSync
     from tasks.info_sync import InfoSync
@@ -263,10 +262,6 @@ class Administrative(commands.Cog):
         await msg.edit(content=f"{text}\nDownloading bonus data...")
         bonus_cog: "BonusSync" = self.bot.get_cog("BonusSync")
         await bonus_cog.get_bonus_data(game, game_details)
-
-        await msg.edit(content=f"{text}\nDownloading artist data...")
-        artist_cog: "ArtistSync" = self.bot.get_cog("ArtistSync")
-        await artist_cog.get_artist_data(game, game_details)
 
         await msg.edit(
             content=f"Renamed {old_name} to {new_name} in {game_details["name"]}!"

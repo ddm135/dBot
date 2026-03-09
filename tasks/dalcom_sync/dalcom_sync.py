@@ -42,7 +42,7 @@ class DalcomSync(commands.Cog):
     async def cog_unload(self) -> None:
         self.dalcom_sync.cancel()
 
-    @tasks.loop(time=[time(hour=h, minute=10) for h in range(24)])
+    @tasks.loop(time=[time(hour=h, minute=20) for h in range(24)])
     async def dalcom_sync(self) -> None:
         drive_cog: "GoogleDrive" = self.bot.get_cog("GoogleDrive")
         ss_cog: "SuperStar" = self.bot.get_cog("SuperStar")
@@ -127,6 +127,63 @@ class DalcomSync(commands.Cog):
                                 json.dump(new_data, f, indent=4)
                             data = new_data
                     dalcom_data[data_file] = data
+
+                max_live = None
+                if "LiveThemeData" in dalcom_data and "collectRewardID" in next(
+                    iter(dalcom_data["LiveThemeData"].values())
+                ):
+                    max_live = 0
+
+                artist_name_index = game_details["info"]["columns"].index("artist_name")
+                for song_id, song in self.bot.info_by_id[game].items():
+                    artist_name = song[artist_name_index]
+                    if artist_name in self.bot.artist.setdefault(game, {}):
+                        continue
+
+                    int_song_id = int(song_id)
+                    results = await ss_cog.get_attributes(
+                        game,
+                        (dalcom_data["MusicData"], dalcom_data.get("URLs")),
+                        [int_song_id],
+                        {"groupData": False},
+                    )
+                    artist_code = results[int_song_id]["groupData"]
+
+                    results = await ss_cog.get_attributes(
+                        game,
+                        (dalcom_data["GroupData"], dalcom_data.get("URLs")),
+                        [artist_code],
+                        {"emblemImage": True},
+                    )
+                    emblem = results[artist_code]["emblemImage"]
+
+                    member_count = 0
+                    for member in dalcom_data["ArtistData"].values():
+                        if (
+                            member["group"] == artist_code
+                            and member.get("artistType", 1) != 4
+                        ):
+                            member_count += 1
+
+                    max_score = (
+                        game_details["base_score"] + 15_000 * (member_count - 3)
+                        if "base_score" in game_details
+                        else 0
+                    )
+
+                    self.bot.artist[game][artist_name] = {
+                        "code": artist_code,
+                        "emblem": emblem,
+                        "count": member_count,
+                        "score": max_score,
+                    }
+
+                    if max_live is not None:
+                        for theme in dalcom_data["LiveThemeData"].values():
+                            if theme["groupID"] == artist_code:
+                                max_live += 15_000 * member_count
+
+                self.bot.live_theme[game]["max"] = max_live if max_live else 0
 
                 music_info_file = Path(f"data/MusicData/{game}.json")
                 if not self.bot.info_from_file.get(game):

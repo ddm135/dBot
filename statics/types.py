@@ -24,9 +24,8 @@ class GameDetails(TypedDict):
     name: str
     iconUrl: NotRequired[str]
     color: int
-    info: NotRequired[SpreadsheetDetails]
+    info: SpreadsheetDetails
     bonus: NotRequired[SpreadsheetDetails]
-    artist: SpreadsheetDetails
     base_score: NotRequired[int]
     pinChannelIds: dict[int, int | None]
     pinRoles: dict[int, int | None]
