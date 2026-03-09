@@ -168,8 +168,8 @@ class PinSSLeague(commands.Cog):
             }.items()
             if isinstance(file, Path)
         ]
-        pin_channels = game_details["pinChannelIds"]
-        pin_roles = game_details["pinRoles"]
+        pin_channels = game_details.get("pinChannelIds", {})
+        pin_roles = game_details.get("pinRoles", {})
         topic = f"[{current_time.strftime("%m.%d.%y")}] {artist_name} - {song_name}"
         for guild_id, channel_id in pin_channels.items():
             if not channel_id:

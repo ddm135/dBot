@@ -1,5 +1,3 @@
-# pyright: reportTypedDictNotRequiredAccess=false
-
 from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -28,7 +26,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
     GAME_CHOICES = [
         app_commands.Choice(name=game_details["name"], value=game)
         for game, game_details in GAMES.items()
-        if {"info"} <= set(game_details) and game_details["pinChannelIds"]
+        if {"pinChannelIds"} <= set(game_details)
     ]
 
     def __init__(self, bot: "dBot") -> None:
@@ -136,10 +134,10 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         song_id: int | None = None,
     ) -> bool:
         game_details = GAMES[game]
-        pin_channel_id = game_details["pinChannelIds"].get(guild_id)
+        pin_channel_id = game_details.get("pinChannelIds", {}).get(guild_id)
         if not pin_channel_id:
             return False
-        pin_role = game_details["pinRoles"].get(guild_id)
+        pin_role = game_details.get("pinRoles", {}).get(guild_id)
 
         info_columns = game_details["info"]["columns"]
         if artist_name is None:

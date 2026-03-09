@@ -235,7 +235,7 @@ class Administrative(commands.Cog):
                     old_name,
                     new_name,
                 )
-        if game_details["pinChannelIds"]:
+        if "pinChannelIds" in game_details:
             await msg.edit(content=f"{text}\nEditing last appearance data...")
             if old_name in self.bot.ssleagues[game]:
                 self.bot.ssleagues[game][new_name] = self.bot.ssleagues[game].pop(

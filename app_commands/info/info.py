@@ -23,7 +23,6 @@ class Info(commands.Cog):
     GAME_CHOICES = [
         app_commands.Choice(name=game_details["name"], value=game)
         for game, game_details in GAMES.items()
-        if {"info"} <= set(game_details)
     ]
 
     def __init__(self, bot: "dBot") -> None:

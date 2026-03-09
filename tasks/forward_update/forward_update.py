@@ -127,10 +127,6 @@ class ForwardUpdate(commands.Cog):
                 if datetime.now(tz=game_details["timezone"]) >= start_time:
                     break
         else:
-            if not (game_details.get("manifestUrl")):
-                self.queue.pop(game, None)
-                return
-
             source_id = forward_details["source_maint"]
             cog: "SuperStar" = self.bot.get_cog("SuperStar")  # type: ignore[assignment]
             while True:

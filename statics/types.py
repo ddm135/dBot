@@ -27,15 +27,15 @@ class GameDetails(TypedDict):
     info: SpreadsheetDetails
     bonus: NotRequired[SpreadsheetDetails]
     base_score: NotRequired[int]
-    pinChannelIds: dict[int, int | None]
-    pinRoles: dict[int, int | None]
+    pinChannelIds: NotRequired[dict[int, int | None]]
+    pinRoles: NotRequired[dict[int, int | None]]
     forward: NotRequired[ForwardUpdateDetails]
     dateFormat: str
     timezone: ZoneInfo
-    lookupQuery: NotRequired[str]
-    manifestUrl: NotRequired[str]
-    lastVersion: NotRequired[str]
     packageName: str
+    lookupQuery: NotRequired[str]
+    lastVersion: NotRequired[str]
+    manifestUrl: str
     catalogUrl: NotRequired[str]
     authorization: NotRequired[str]
     target_audience: NotRequired[str]
