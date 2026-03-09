@@ -271,7 +271,7 @@ class NotifyBonus(commands.Cog):
                         print(e)
                         break
 
-        if not datetime.now(tz=TIMEZONES["KST"]):
+        if not datetime.now(tz=TIMEZONES["KST"]).hour:
             for str_user_id in self.bot.notify_bonus:
                 self.bot.notify_bonus[str_user_id]["start"] = self.bot.notify_bonus[
                     str_user_id
