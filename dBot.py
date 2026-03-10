@@ -62,7 +62,7 @@ class dBot(commands.Bot):
             )
             assert isinstance(channel, discord.TextChannel)
             current_date = datetime.now(tz=ZoneInfo("Etc/GMT-8"))
-            if current_date.hour == 4 and not current_date.minute:
+            if current_date.hour == 4:
                 await self.change_presence(
                     status=discord.Status.dnd,
                     activity=discord.CustomActivity("Daily restart in progress..."),
