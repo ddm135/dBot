@@ -8,10 +8,10 @@ if TYPE_CHECKING:
 
 
 class SpreadsheetDetails(TypedDict):
-    spreadsheetId: str
-    range: str
-    columns: tuple[str, ...]
-    replaceGrid: "GridRange"
+    id: str
+    ranges: list[str]
+    columns: list[tuple[str, ...]]
+    replaceGrids: NotRequired[list["GridRange"]]
 
 
 class ForwardUpdateDetails(TypedDict):
@@ -24,8 +24,7 @@ class GameDetails(TypedDict):
     name: str
     iconUrl: NotRequired[str]
     color: int
-    info: SpreadsheetDetails
-    bonus: NotRequired[SpreadsheetDetails]
+    spreadsheet: SpreadsheetDetails
     base_score: NotRequired[int]
     pinChannelIds: NotRequired[dict[int, int | None]]
     pinRoles: NotRequired[dict[int, int | None]]

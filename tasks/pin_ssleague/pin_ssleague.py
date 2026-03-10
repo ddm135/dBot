@@ -94,12 +94,12 @@ class PinSSLeague(commands.Cog):
         if not (ssl_song := self.bot.info_by_id[game].get(str(song_id))):
             return
 
-        info_columns = game_details["info"]["columns"]
+        info_columns = game_details["spreadsheet"]["columns"][0]
         artist_name_index = info_columns.index("artist_name")
         song_name_index = info_columns.index("song_name")
         skills_index = (
             info_columns.index("skills")
-            if game_details["info"]["columns"] == InfoColumns.SKILLS.value
+            if game_details["spreadsheet"]["columns"][0] == InfoColumns.SKILLS.value
             else None
         )
 

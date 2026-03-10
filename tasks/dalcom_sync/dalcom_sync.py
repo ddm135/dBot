@@ -42,7 +42,7 @@ class DalcomSync(commands.Cog):
     async def cog_unload(self) -> None:
         self.dalcom_sync.cancel()
 
-    @tasks.loop(time=[time(hour=h, minute=20) for h in range(24)])
+    @tasks.loop(time=[time(hour=h, minute=15) for h in range(24)])
     async def dalcom_sync(self) -> None:
         drive_cog: "GoogleDrive" = self.bot.get_cog("GoogleDrive")
         ss_cog: "SuperStar" = self.bot.get_cog("SuperStar")
@@ -86,24 +86,22 @@ class DalcomSync(commands.Cog):
 
                 data_files = [
                     "ArtistData",
-                    "LocaleData",
                     "GroupData",
+                    "LiveThemeData",
+                    "LocaleData",
                     "MusicData",
                     "ThemeData",
+                    "SeqData",
                     "ThemeTypeData",
+                    "URLs",
                     "WorldRecordData",
                 ]
-                for data_file in (
-                    "URLs",
-                    "SeqData",
-                    "LiveThemeData",
-                    "LiveThemeCollectRewardData",
-                ):
-                    if data_file in ajs["result"]["context"]:
-                        data_files.append(data_file)
-                dalcom_data = {}
 
+                dalcom_data = {}
                 for data_file in data_files:
+                    if data_file not in ajs["result"]["context"]:
+                        continue
+
                     data_path = Path(f"data/dalcom/{game}/{data_file}.json")
                     if (
                         not stored_ajs
@@ -134,7 +132,9 @@ class DalcomSync(commands.Cog):
                 ):
                     max_live = 0
 
-                artist_name_index = game_details["info"]["columns"].index("artist_name")
+                artist_name_index = game_details["spreadsheet"]["columns"][0].index(
+                    "artist_name"
+                )
                 for song_id, song in self.bot.info_by_id[game].items():
                     artist_name = song[artist_name_index]
                     if artist_name in self.bot.artist.setdefault(game, {}):
@@ -195,9 +195,6 @@ class DalcomSync(commands.Cog):
 
                 bundle_folders: set[Path] = set()
                 for music in dalcom_data["MusicData"].values():
-                    if music["isHidden"]:
-                        continue
-
                     current_key = (
                         self.bot.info_from_file[game]
                         .setdefault(str(music["code"]), {})
@@ -287,15 +284,6 @@ class DalcomSync(commands.Cog):
 
                 if "SeqData" in dalcom_data:
                     for seq in dalcom_data["SeqData"].values():
-                        results = await ss_cog.get_attributes(
-                            game,
-                            (dalcom_data["MusicData"], dalcom_data.get("URLs")),
-                            [seq["linkedMusic"]],
-                            {"isHidden": False},
-                        )
-                        if results[seq["linkedMusic"]]["isHidden"]:
-                            continue
-
                         current_key = (
                             self.bot.info_from_file[game]
                             .setdefault(str(seq["linkedMusic"]), {})

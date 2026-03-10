@@ -34,7 +34,7 @@ async def song_autocomplete(
     if not (game := itr.namespace.game):
         return []
 
-    info_columns = GAMES[game]["info"]["columns"]
+    info_columns = GAMES[game]["spreadsheet"]["columns"][0]
     if "search_term" in info_columns:
         search_term_index = info_columns.index("search_term")
     else:

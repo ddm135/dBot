@@ -17,9 +17,8 @@ from statics.consts import EXTENSIONS, GAMES, STATIC_MODULES, STATUS_CHANNEL, Da
 if TYPE_CHECKING:
     from dBot import dBot
     from helpers.google_sheets import GoogleSheets
-    from tasks.bonus_sync import BonusSync
     from tasks.data_sync import DataSync
-    from tasks.info_sync import InfoSync
+    from tasks.spreadsheet_sync import SpreadsheetSync
 
 
 class Administrative(commands.Cog):
@@ -224,17 +223,15 @@ class Administrative(commands.Cog):
         sheets_cog: "GoogleSheets" = self.bot.get_cog("GoogleSheets")
         data_cog: "DataSync" = self.bot.get_cog("DataSync")
 
-        for data in ("info", "bonus", "artist"):
-            if (details := game_details.get(data)) and (
-                replace_grid := details["replaceGrid"]  # type: ignore[index]
-            ):
-                await msg.edit(content=f"{text}\nEditing {data} sheet...")
-                await sheets_cog.find_replace_sheet_data(
-                    details["spreadsheetId"],  # type: ignore[index]
-                    replace_grid,
-                    old_name,
-                    new_name,
-                )
+        if replace_grids := game_details["spreadsheet"].get("replaceGrids"):
+            await msg.edit(content=f"{text}\nEditing spreadsheets...")
+            await sheets_cog.find_replace_sheet_data(
+                game_details["spreadsheet"]["id"],
+                replace_grids,
+                old_name,
+                new_name,
+            )
+
         if "pinChannelIds" in game_details:
             await msg.edit(content=f"{text}\nEditing last appearance data...")
             if old_name in self.bot.ssleagues[game]:
@@ -255,13 +252,9 @@ class Administrative(commands.Cog):
             )
             data_cog.save_data(Data.NOTIFY_BONUS)
 
-        await msg.edit(content=f"{text}\nDownloading info data...")
-        info_cog: "InfoSync" = self.bot.get_cog("InfoSync")
-        await info_cog.get_info_data(game, game_details)
-
-        await msg.edit(content=f"{text}\nDownloading bonus data...")
-        bonus_cog: "BonusSync" = self.bot.get_cog("BonusSync")
-        await bonus_cog.get_bonus_data(game, game_details)
+        await msg.edit(content=f"{text}\nDownloading spreadsheet data...")
+        spreadsheet_cog: "SpreadsheetSync" = self.bot.get_cog("SpreadsheetSync")
+        await spreadsheet_cog.get_spreadsheet_data(game)
 
         await msg.edit(
             content=f"Renamed {old_name} to {new_name} in {game_details["name"]}!"

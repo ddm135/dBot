@@ -45,23 +45,27 @@ class GoogleSheets(commands.Cog):
         )
         return result.get("values", [])
 
-    async def update_sheet_data(
-        self, spreadsheet_id: str, range_str: str, data: list[list[str]]
-    ) -> None:
-        await asyncio.to_thread(
+    async def batch_get_sheet_data(
+        self, spreadsheet_id: str, range_strs: list[str]
+    ) -> list[list[list[str]]]:
+        result = await asyncio.to_thread(
             self.service.values()
-            .update(
+            .batchGet(
                 spreadsheetId=spreadsheet_id,
-                range=range_str,
-                valueInputOption="RAW",
-                body={"values": data},
+                ranges=range_strs,
             )
             .execute,
             num_retries=MAX_RETRIES,
         )
+        values = result.get("valueRanges", [])
+        return [value.get("values", []) for value in values]
 
     async def find_replace_sheet_data(
-        self, spreadsheet_id: str, range_grid: "GridRange", find: str, replace: str
+        self,
+        spreadsheet_id: str,
+        range_grids: list["GridRange"],
+        find: str,
+        replace: str,
     ) -> None:
         await asyncio.to_thread(
             self.service.batchUpdate(
@@ -79,6 +83,7 @@ class GoogleSheets(commands.Cog):
                                 "range": range_grid,
                             }
                         }
+                        for range_grid in range_grids
                     ],
                     "includeSpreadsheetInResponse": False,
                 },

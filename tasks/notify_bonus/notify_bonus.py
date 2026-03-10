@@ -32,7 +32,7 @@ class NotifyBonus(commands.Cog):
         assert isinstance(channel, discord.TextChannel)
 
         for game, game_details in GAMES.items():
-            if not (bonus_details := game_details.get("bonus")):
+            if game not in self.bot.bonus:
                 continue
 
             timezone = game_details["timezone"]
@@ -49,7 +49,7 @@ class NotifyBonus(commands.Cog):
             )
             to_send: dict[int, dict[str, bool]] = {}
 
-            bonus_columns = bonus_details["columns"]
+            bonus_columns = game_details["spreadsheet"]["columns"][-1]
             song_id_index = bonus_columns.index("song_id")
             member_name_index = bonus_columns.index("member_name")
             album_name_index = bonus_columns.index("album_name")

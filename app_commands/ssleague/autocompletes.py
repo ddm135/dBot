@@ -34,7 +34,7 @@ async def song_autocomplete(
     if not (game := itr.namespace.game):
         return []
 
-    search_term_index = GAMES[game]["info"]["columns"].index("search_term")
+    search_term_index = GAMES[game]["spreadsheet"]["columns"][0].index("search_term")
     if not (songs := itr.client.info_by_name[game].get(itr.namespace.artist, {})):
         return []
 
@@ -53,7 +53,7 @@ async def song_id_autocomplete(
 ) -> list[app_commands.Choice[str]]:
     if not (game := itr.namespace.game):
         return []
-    info_columns = GAMES[game]["info"]["columns"]
+    info_columns = GAMES[game]["spreadsheet"]["columns"][0]
     artist_name_index = info_columns.index("artist_name")
     song_name_index = info_columns.index("song_name")
 

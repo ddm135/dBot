@@ -43,8 +43,7 @@ EXTENSIONS = (
     "commands.administrative",
     "tasks.data_sync",
     "tasks.basic_sync",
-    "tasks.info_sync",
-    "tasks.bonus_sync",
+    "tasks.spreadsheet_sync",
     "tasks.dalcom_sync",
     "tasks.notify_bonus",
     "tasks.pin_ssleague",
@@ -93,14 +92,6 @@ class InfoColumns(Enum):
         "song_name",
         "skills",
     )
-    SHARED = (
-        "song_id",
-        "_",
-        "artist_name",
-        "member_name",
-        "album_name",
-        "song_name",
-    )
 
 
 BONUS_COLUMNS = (
@@ -125,27 +116,24 @@ GAMES: dict[str, "GameDetails"] = {
     "SM": {
         "name": "SUPERSTAR SM",
         "color": 0xE204DD,
-        "info": {
-            "spreadsheetId": "1dX_5lWxenT7CDVXpgyScTHDiwazUZIO3441RaNpN55g",
-            "replaceGrid": {
-                "sheetId": 0,
-                "startRowIndex": 1,
-                "startColumnIndex": 1,
-                "endColumnIndex": 2,
-            },
-            "range": "Songs!A2:D",
-            "columns": InfoColumns.CLASSIC.value,
-        },
-        "bonus": {
-            "spreadsheetId": "1dX_5lWxenT7CDVXpgyScTHDiwazUZIO3441RaNpN55g",
-            "range": "dBonuses!A2:I",
-            "columns": BONUS_COLUMNS,
-            "replaceGrid": {
-                "sheetId": 48988104,
-                "startRowIndex": 1,
-                "startColumnIndex": 2,
-                "endColumnIndex": 3,
-            },
+        "spreadsheet": {
+            "id": "1dX_5lWxenT7CDVXpgyScTHDiwazUZIO3441RaNpN55g",
+            "ranges": ["Songs!A2:D", "dBonuses!A2:I"],
+            "columns": [InfoColumns.CLASSIC.value, BONUS_COLUMNS],
+            "replaceGrids": [
+                {
+                    "sheetId": 0,
+                    "startRowIndex": 1,
+                    "startColumnIndex": 1,
+                    "endColumnIndex": 2,
+                },
+                {
+                    "sheetId": 48988104,
+                    "startRowIndex": 1,
+                    "startColumnIndex": 2,
+                    "endColumnIndex": 3,
+                },
+            ],
         },
         "base_score": BaseScore.NORMAL.value,
         "pinChannelIds": {
@@ -180,27 +168,24 @@ GAMES: dict[str, "GameDetails"] = {
     "JYP": {
         "name": "SUPERSTAR JYP",
         "color": 0x4977FB,
-        "info": {
-            "spreadsheetId": "1XgaSMje3TKa1bnekWzmpLRjr81QWoag_6w9SlzSwN0g",
-            "replaceGrid": {
-                "sheetId": 0,
-                "startRowIndex": 1,
-                "startColumnIndex": 1,
-                "endColumnIndex": 2,
-            },
-            "range": "Songs!A2:D",
-            "columns": InfoColumns.CLASSIC.value,
-        },
-        "bonus": {
-            "spreadsheetId": "1XgaSMje3TKa1bnekWzmpLRjr81QWoag_6w9SlzSwN0g",
-            "range": "dBonuses!A2:I",
-            "columns": BONUS_COLUMNS,
-            "replaceGrid": {
-                "sheetId": 1160780925,
-                "startRowIndex": 1,
-                "startColumnIndex": 2,
-                "endColumnIndex": 3,
-            },
+        "spreadsheet": {
+            "id": "1XgaSMje3TKa1bnekWzmpLRjr81QWoag_6w9SlzSwN0g",
+            "ranges": ["Songs!A2:D", "dBonuses!A2:I"],
+            "columns": [InfoColumns.CLASSIC.value, BONUS_COLUMNS],
+            "replaceGrids": [
+                {
+                    "sheetId": 0,
+                    "startRowIndex": 1,
+                    "startColumnIndex": 1,
+                    "endColumnIndex": 2,
+                },
+                {
+                    "sheetId": 1160780925,
+                    "startRowIndex": 1,
+                    "startColumnIndex": 2,
+                    "endColumnIndex": 3,
+                },
+            ],
         },
         "base_score": BaseScore.NORMAL.value,
         "pinChannelIds": {
@@ -235,27 +220,24 @@ GAMES: dict[str, "GameDetails"] = {
     "SS": {
         "name": "SUPERSTAR STARSHIP",
         "color": 0x484E8A,
-        "info": {
-            "spreadsheetId": "13MYqeey_Pd8_5vXsEQe94usC517WaMEduPte19xtQiU",
-            "replaceGrid": {
-                "sheetId": 0,
-                "startRowIndex": 1,
-                "startColumnIndex": 1,
-                "endColumnIndex": 2,
-            },
-            "range": "Songs!A2:D",
-            "columns": InfoColumns.CLASSIC.value,
-        },
-        "bonus": {
-            "spreadsheetId": "13MYqeey_Pd8_5vXsEQe94usC517WaMEduPte19xtQiU",
-            "range": "Bonuses!A2:I",
-            "columns": BONUS_COLUMNS,
-            "replaceGrid": {
-                "sheetId": 1039181707,
-                "startRowIndex": 1,
-                "startColumnIndex": 2,
-                "endColumnIndex": 3,
-            },
+        "spreadsheet": {
+            "id": "13MYqeey_Pd8_5vXsEQe94usC517WaMEduPte19xtQiU",
+            "ranges": ["Songs!A2:D", "Bonuses!A2:I"],
+            "columns": [InfoColumns.CLASSIC.value, BONUS_COLUMNS],
+            "replaceGrids": [
+                {
+                    "sheetId": 0,
+                    "startRowIndex": 1,
+                    "startColumnIndex": 1,
+                    "endColumnIndex": 2,
+                },
+                {
+                    "sheetId": 1039181707,
+                    "startRowIndex": 1,
+                    "startColumnIndex": 2,
+                    "endColumnIndex": 3,
+                },
+            ],
         },
         "base_score": BaseScore.NORMAL.value,
         "forward": {
@@ -308,16 +290,10 @@ GAMES: dict[str, "GameDetails"] = {
         "Cb-7GDlZLRqLX-TbDgqdLdRHk1UKEy0PXpVGOI2CrTkYWztMWlFA8UktLarSPA=w1920-h943?"
         "auditContext=prefetch",
         "color": 0xB72476,
-        "info": {
-            "spreadsheetId": "1QSCRXKtiwoMTLV8knHC_o4NwV3UZM6ZvL-l9ZCPxoRM",
-            "range": "Official Local Version!A2:C",
-            "columns": InfoColumns.NO_SSL.value,
-            "replaceGrid": {
-                "sheetId": 0,
-                "startRowIndex": 1,
-                "startColumnIndex": 1,
-                "endColumnIndex": 2,
-            },
+        "spreadsheet": {
+            "id": "1QSCRXKtiwoMTLV8knHC_o4NwV3UZM6ZvL-l9ZCPxoRM",
+            "ranges": ["Official Local Version!A2:C"],
+            "columns": [InfoColumns.NO_SSL.value],
         },
         "dateFormat": "%Y-%m-%d",
         "timezone": TIMEZONES["KST"],
@@ -331,22 +307,18 @@ GAMES: dict[str, "GameDetails"] = {
     "ATZ": {
         "name": "SUPERSTAR ATEEZ",
         "color": 0xDB811C,
-        "info": {
-            "spreadsheetId": "1ZRfm1D2sxV183umOvK4hdWUXIVWvd-Gc8nmRbnsmajY",
-            "replaceGrid": {},
-            "range": "Info!A2:F",
-            "columns": InfoColumns.SHARED.value,
-        },
-        "bonus": {
-            "spreadsheetId": "1ZRfm1D2sxV183umOvK4hdWUXIVWvd-Gc8nmRbnsmajY",
-            "range": "Info!A2:I",
-            "columns": BONUS_COLUMNS,
-            "replaceGrid": {
-                "sheetId": 0,
-                "startRowIndex": 1,
-                "startColumnIndex": 2,
-                "endColumnIndex": 3,
-            },
+        "spreadsheet": {
+            "id": "1ZRfm1D2sxV183umOvK4hdWUXIVWvd-Gc8nmRbnsmajY",
+            "ranges": ["Info!A2:I"],
+            "columns": [BONUS_COLUMNS],
+            "replaceGrids": [
+                {
+                    "sheetId": 0,
+                    "startRowIndex": 1,
+                    "startColumnIndex": 2,
+                    "endColumnIndex": 3,
+                },
+            ],
         },
         "base_score": BaseScore.PRISM.value,
         "forward": {
@@ -374,22 +346,18 @@ GAMES: dict[str, "GameDetails"] = {
     "SC": {
         "name": "SUPERSTAR STAYC",
         "color": 0x210630,
-        "info": {
-            "spreadsheetId": "1zEBkb3oAqP_VkilWfJt6x0nfcrweVn7Ray--wNHqxjg",
-            "replaceGrid": {},
-            "range": "Info!A2:F",
-            "columns": InfoColumns.SHARED.value,
-        },
-        "bonus": {
-            "spreadsheetId": "1zEBkb3oAqP_VkilWfJt6x0nfcrweVn7Ray--wNHqxjg",
-            "range": "Info!A2:I",
-            "columns": BONUS_COLUMNS,
-            "replaceGrid": {
-                "sheetId": 0,
-                "startRowIndex": 1,
-                "startColumnIndex": 2,
-                "endColumnIndex": 3,
-            },
+        "spreadsheet": {
+            "id": "1zEBkb3oAqP_VkilWfJt6x0nfcrweVn7Ray--wNHqxjg",
+            "ranges": ["Info!A2:I"],
+            "columns": [BONUS_COLUMNS],
+            "replaceGrids": [
+                {
+                    "sheetId": 0,
+                    "startRowIndex": 1,
+                    "startColumnIndex": 2,
+                    "endColumnIndex": 3,
+                },
+            ],
         },
         "base_score": BaseScore.PRISM.value,
         "forward": {
@@ -418,16 +386,18 @@ GAMES: dict[str, "GameDetails"] = {
     "W1": {
         "name": "SUPERSTAR WAKEONE",
         "color": 0x4E25D1,
-        "info": {
-            "spreadsheetId": "1HHBluEEcWmZMHjq3WlLbS9TeLfPktQ3WrfxpcgReWF0",
-            "replaceGrid": {
-                "sheetId": 0,
-                "startRowIndex": 1,
-                "startColumnIndex": 1,
-                "endColumnIndex": 2,
-            },
-            "range": "Songs (Note Count)!A2:C",
-            "columns": InfoColumns.NO_SSL.value,
+        "spreadsheet": {
+            "id": "1HHBluEEcWmZMHjq3WlLbS9TeLfPktQ3WrfxpcgReWF0",
+            "ranges": ["Songs (Note Count)!A2:C"],
+            "columns": [InfoColumns.NO_SSL.value],
+            "replaceGrids": [
+                {
+                    "sheetId": 0,
+                    "startRowIndex": 1,
+                    "startColumnIndex": 1,
+                    "endColumnIndex": 2,
+                },
+            ],
         },
         "forward": {
             "source_maint": 1413706817548189807,
@@ -453,27 +423,24 @@ GAMES: dict[str, "GameDetails"] = {
     "SMTOWN": {
         "name": "SUPERSTAR SMTOWN (JP/TW)",
         "color": 0xE10989,
-        "info": {
-            "spreadsheetId": "1kC38CLFd6xkDXD9qLHgnnv3s3jmM_4vf4RLsWuXs9NU",
-            "replaceGrid": {
-                "sheetId": 0,
-                "startRowIndex": 1,
-                "startColumnIndex": 1,
-                "endColumnIndex": 2,
-            },
-            "range": "Songs!A2:D",
-            "columns": InfoColumns.CLASSIC.value,
-        },
-        "bonus": {
-            "spreadsheetId": "1kC38CLFd6xkDXD9qLHgnnv3s3jmM_4vf4RLsWuXs9NU",
-            "range": "Bonuses!A2:I",
-            "columns": BONUS_COLUMNS,
-            "replaceGrid": {
-                "sheetId": 1118940800,
-                "startRowIndex": 1,
-                "startColumnIndex": 2,
-                "endColumnIndex": 3,
-            },
+        "spreadsheet": {
+            "id": "1kC38CLFd6xkDXD9qLHgnnv3s3jmM_4vf4RLsWuXs9NU",
+            "ranges": ["Songs!A2:D", "Bonuses!A2:I"],
+            "columns": [InfoColumns.CLASSIC.value, BONUS_COLUMNS],
+            "replaceGrids": [
+                {
+                    "sheetId": 0,
+                    "startRowIndex": 1,
+                    "startColumnIndex": 1,
+                    "endColumnIndex": 2,
+                },
+                {
+                    "sheetId": 1118940800,
+                    "startRowIndex": 1,
+                    "startColumnIndex": 2,
+                    "endColumnIndex": 3,
+                },
+            ],
         },
         "base_score": BaseScore.NORMAL.value,
         "pinChannelIds": {
@@ -499,27 +466,24 @@ GAMES: dict[str, "GameDetails"] = {
     "JYPNATION": {
         "name": "SUPERSTAR JYPNATION (JP)",
         "color": 0x2377E4,
-        "info": {
-            "spreadsheetId": "1eVjwi0GudyMixnZtam8TeupRd3DQ6mheyRKp2lDA6qw",
-            "replaceGrid": {
-                "sheetId": 1514100857,
-                "startRowIndex": 1,
-                "startColumnIndex": 1,
-                "endColumnIndex": 2,
-            },
-            "range": "Songs!A2:E",
-            "columns": InfoColumns.SKILLS.value,
-        },
-        "bonus": {
-            "spreadsheetId": "1eVjwi0GudyMixnZtam8TeupRd3DQ6mheyRKp2lDA6qw",
-            "range": "Bonuses!A2:I",
-            "columns": BONUS_COLUMNS,
-            "replaceGrid": {
-                "sheetId": 1285084831,
-                "startRowIndex": 1,
-                "startColumnIndex": 2,
-                "endColumnIndex": 3,
-            },
+        "spreadsheet": {
+            "id": "1eVjwi0GudyMixnZtam8TeupRd3DQ6mheyRKp2lDA6qw",
+            "ranges": ["Songs!A2:E", "Bonuses!A2:I"],
+            "columns": [InfoColumns.SKILLS.value, BONUS_COLUMNS],
+            "replaceGrids": [
+                {
+                    "sheetId": 1514100857,
+                    "startRowIndex": 1,
+                    "startColumnIndex": 1,
+                    "endColumnIndex": 2,
+                },
+                {
+                    "sheetId": 1285084831,
+                    "startRowIndex": 1,
+                    "startColumnIndex": 2,
+                    "endColumnIndex": 3,
+                },
+            ],
         },
         "pinChannelIds": {
             SSRG_GUILD: 951350075190313010,
@@ -550,16 +514,10 @@ GAMES: dict[str, "GameDetails"] = {
             "=w240-h480"
         ),
         "color": 0xEAA715,
-        "info": {
-            "spreadsheetId": "1Ng57BGCDj025bxwCBbQulYFhRjS5runy5HnbStY_xSw",
-            "replaceGrid": {
-                "sheetId": 0,
-                "startRowIndex": 1,
-                "startColumnIndex": 1,
-                "endColumnIndex": 2,
-            },
-            "range": "Songs!A2:E",
-            "columns": InfoColumns.SKILLS.value,
+        "spreadsheet": {
+            "id": "1Ng57BGCDj025bxwCBbQulYFhRjS5runy5HnbStY_xSw",
+            "ranges": ["Songs!A2:E"],
+            "columns": [InfoColumns.SKILLS.value],
         },
         "pinChannelIds": {
             SSRG_GUILD: 1039132737979813908,
@@ -578,22 +536,18 @@ GAMES: dict[str, "GameDetails"] = {
     "EB": {
         "name": "SUPERSTAR EBiDAN",
         "color": 0xC71D1B,
-        "info": {
-            "spreadsheetId": "1uwLl0MQM895xI4iBmdP-eVVn7HKOBisFaQCCjzJL4GQ",
-            "replaceGrid": {},
-            "range": "Songs!A2:D",
-            "columns": InfoColumns.CLASSIC.value,
-        },
-        "bonus": {
-            "spreadsheetId": "1uwLl0MQM895xI4iBmdP-eVVn7HKOBisFaQCCjzJL4GQ",
-            "range": "Bonuses!A2:I",
-            "columns": BONUS_COLUMNS,
-            "replaceGrid": {
-                "sheetId": 1685871960,
-                "startRowIndex": 1,
-                "startColumnIndex": 2,
-                "endColumnIndex": 3,
-            },
+        "spreadsheet": {
+            "id": "1uwLl0MQM895xI4iBmdP-eVVn7HKOBisFaQCCjzJL4GQ",
+            "ranges": ["Songs!A2:D", "Bonuses!A2:I"],
+            "columns": [InfoColumns.CLASSIC.value, BONUS_COLUMNS],
+            "replaceGrids": [
+                {
+                    "sheetId": 1685871960,
+                    "startRowIndex": 1,
+                    "startColumnIndex": 2,
+                    "endColumnIndex": 3,
+                },
+            ],
         },
         "forward": {
             "source_maint": 1415366753814577312,
@@ -615,22 +569,18 @@ GAMES: dict[str, "GameDetails"] = {
     "PH": {
         "name": "SuperStar PHILIPPINES",
         "color": 0x04102D,
-        "info": {
-            "spreadsheetId": "1Fz71pl3YCUIbCRcZRuKBjsDT4JEW0m9Uoj8wyJhUMOc",
-            "replaceGrid": {},
-            "range": "Songs!A2:D",
-            "columns": InfoColumns.CLASSIC.value,
-        },
-        "bonus": {
-            "spreadsheetId": "1Fz71pl3YCUIbCRcZRuKBjsDT4JEW0m9Uoj8wyJhUMOc",
-            "range": "Bonuses!A2:I",
-            "columns": BONUS_COLUMNS,
-            "replaceGrid": {
-                "sheetId": 0,
-                "startRowIndex": 1,
-                "startColumnIndex": 2,
-                "endColumnIndex": 3,
-            },
+        "spreadsheet": {
+            "id": "1Fz71pl3YCUIbCRcZRuKBjsDT4JEW0m9Uoj8wyJhUMOc",
+            "ranges": ["Songs!A2:D", "Bonuses!A2:I"],
+            "columns": [InfoColumns.CLASSIC.value, BONUS_COLUMNS],
+            "replaceGrids": [
+                {
+                    "sheetId": 0,
+                    "startRowIndex": 1,
+                    "startColumnIndex": 2,
+                    "endColumnIndex": 3,
+                },
+            ],
         },
         "base_score": BaseScore.PRISM.value,
         "forward": {

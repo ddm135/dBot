@@ -55,7 +55,7 @@ class Info(commands.Cog):
 
         await itr.response.defer()
         game_details = GAMES[game_choice.value]
-        info_columns = game_details["info"]["columns"]
+        info_columns = game_details["spreadsheet"]["columns"][0]
         song_id_index = info_columns.index("song_id")
 
         icon: str | Path | None
@@ -113,8 +113,10 @@ class Info(commands.Cog):
                 )
 
                 album_info: list[str] | dict[str, str]
-                if "bonus" in game_details:
-                    bonus_columns = GAMES[game_choice.value]["bonus"]["columns"]
+                if game_choice.value in self.bot.bonus:
+                    bonus_columns = GAMES[game_choice.value]["spreadsheet"]["columns"][
+                        -1
+                    ]
                     album_name_index = bonus_columns.index("album_name")
                     song_id_index = bonus_columns.index("song_id")
                     bonus_date_index = bonus_columns.index("bonus_date")

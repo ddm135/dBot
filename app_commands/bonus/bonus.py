@@ -28,7 +28,8 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
     GAME_CHOICES = [
         app_commands.Choice(name=game_details["name"], value=game)
         for game, game_details in GAMES.items()
-        if {"bonus"} <= set(game_details) and not {"lastVersion"} <= set(game_details)
+        if "bonus_amount" in game_details["spreadsheet"]["columns"][-1]
+        and not {"lastVersion"} <= set(game_details)
     ]
     FILTERED_GAME_CHOICES = [
         choice for choice in GAME_CHOICES if {"base_score"} <= set(GAMES[choice.value])
@@ -488,7 +489,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         game_details = GAMES[game]
         bonus_data = self.bot.bonus[game]
         timezone = game_details["timezone"]
-        bonus_columns = game_details["bonus"]["columns"]
+        bonus_columns = game_details["spreadsheet"]["columns"][-1]
         current_date = datetime.now(tz=timezone).replace(
             hour=0, minute=0, second=0, microsecond=0
         )

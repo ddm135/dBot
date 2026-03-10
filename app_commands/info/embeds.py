@@ -25,7 +25,7 @@ class InfoEmbed(discord.Embed):
         end = current_page * STEP
         start = end - STEP
         filtered_songs = songs[start:end]
-        info_columns = game_details["info"]["columns"]
+        info_columns = game_details["spreadsheet"]["columns"][0]
         song_id_index = info_columns.index("song_id")
         artist_name_index = info_columns.index("artist_name")
         song_name_index = info_columns.index("song_name")
