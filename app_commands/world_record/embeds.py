@@ -9,12 +9,12 @@ from statics.consts import GAMES
 from .commons import STEP
 
 
-class SongWorldRecordEmbed(discord.Embed):
+class LeaderboardEmbed(discord.Embed):
     def __init__(
         self,
         game: str,
         artist_name: str,
-        song_name: str,
+        song_name: str | None,
         season_code: int,
         world_records: list[dict],
         last_updated: datetime | None,
@@ -31,9 +31,9 @@ class SongWorldRecordEmbed(discord.Embed):
         super().__init__(
             title=(
                 f"{artist_name.replace(r"*", r"\*").replace(r"_", r"\_")
-                   .replace(r"`", r"\`")} - "
-                f"{song_name.replace(r"*", r"\*").replace(r"_", r"\_")
                    .replace(r"`", r"\`")}"
+                f"{f" - {song_name.replace(r"*", r"\*").replace(r"_", r"\_")
+                   .replace(r"`", r"\`")}" if song_name else ""}"
             ),
             description=(
                 "\n".join(
@@ -68,7 +68,7 @@ class SongWorldRecordEmbed(discord.Embed):
         )
 
 
-class ArtistWorldRecordEmbed(discord.Embed):
+class WorldRecordEmbed(discord.Embed):
     def __init__(
         self,
         game: str,

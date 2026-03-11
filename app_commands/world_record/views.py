@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 import discord
 
 from .commons import STEP
-from .embeds import ArtistWorldRecordEmbed, SongWorldRecordEmbed
+from .embeds import LeaderboardEmbed, WorldRecordEmbed
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -18,7 +18,7 @@ class SongWorldRecordView(discord.ui.View):
         message: discord.Message,
         game: str,
         artist_name: str,
-        song_name: str,
+        song_name: str | None,
         season_code: int,
         world_records: list[dict],
         last_updated: datetime | None,
@@ -49,7 +49,7 @@ class SongWorldRecordView(discord.ui.View):
     async def update_message(self, itr: discord.Interaction) -> None:
         await itr.followup.edit_message(
             message_id=self.message.id,
-            embed=SongWorldRecordEmbed(
+            embed=LeaderboardEmbed(
                 self.game,
                 self.artist_name,
                 self.song_name,
@@ -128,7 +128,7 @@ class ArtistWorldRecordView(discord.ui.View):
     async def update_message(self, itr: discord.Interaction) -> None:
         await itr.followup.edit_message(
             message_id=self.message.id,
-            embed=ArtistWorldRecordEmbed(
+            embed=WorldRecordEmbed(
                 self.game,
                 self.artist_name,
                 self.season_code,

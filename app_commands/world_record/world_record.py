@@ -1,4 +1,8 @@
+# mypy: disable-error-code="assignment"
+# pyright: reportAssignmentType=false, reportTypedDictNotRequiredAccess=false
+
 import asyncio
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -7,11 +11,11 @@ from discord import app_commands
 from discord.ext import commands
 
 from app_commands.world_record.embeds import (
-    ArtistWorldRecordEmbed,
-    SongWorldRecordEmbed,
+    LeaderboardEmbed,
+    WorldRecordEmbed,
 )
 from app_commands.world_record.views import ArtistWorldRecordView, SongWorldRecordView
-from statics.consts import GAMES
+from statics.consts import GAMES, TIMEZONES
 
 from .autocompletes import artist_autocomplete, season_autocomplete, song_autocomplete
 
@@ -88,9 +92,7 @@ class WorldRecord(commands.GroupCog, name="world_record"):
         game_details = GAMES[game_choice.value]
         info_columns = game_details["spreadsheet"]["columns"][0]
         song_id_index = info_columns.index("song_id")
-        cog: "SuperStar" = self.bot.get_cog(
-            "SuperStar",
-        )  # type: ignore[assignment]
+        cog: "SuperStar" = self.bot.get_cog("SuperStar")
 
         if song_choice:
             if not (
@@ -109,7 +111,7 @@ class WorldRecord(commands.GroupCog, name="world_record"):
             )
 
             msg = await itr.followup.send(
-                embed=SongWorldRecordEmbed(
+                embed=LeaderboardEmbed(
                     game_choice.value,
                     artist_choice,
                     song_choice,
@@ -168,7 +170,7 @@ class WorldRecord(commands.GroupCog, name="world_record"):
         )
 
         msg = await itr.followup.send(
-            embed=ArtistWorldRecordEmbed(
+            embed=WorldRecordEmbed(
                 game_choice.value,
                 artist_choice,
                 season_code,
@@ -191,6 +193,100 @@ class WorldRecord(commands.GroupCog, name="world_record"):
             world_records,
             last_updated,
             itr.user,
+            icon,
+        )
+        await msg.edit(view=view)
+
+    @app_commands.command(name="weekly")
+    @app_commands.choices(game_choice=WEEKLY_CHOICES)
+    @app_commands.autocomplete(artist_choice=artist_autocomplete)
+    @app_commands.autocomplete(season_autocomplete=season_autocomplete)
+    @app_commands.rename(
+        game_choice="game",
+        artist_choice="artist",
+        season_code="season",
+    )
+    async def weekly(
+        self,
+        itr: discord.Interaction["dBot"],
+        game_choice: app_commands.Choice[str],
+        artist_choice: str,
+        season_code: commands.Range[int, 20241202] | None = None,
+    ) -> None:
+        """View world records for games that follow
+        the weekly season system.
+
+        Parameters
+        -----------
+        game_choice: Choice[:class:`str`]
+            Game
+        artist_choice: :class:`str`
+            Artist/Album
+        season_code: :class:`int` | :class:`None`
+            Season code (YYYYMMDD, Mondays only, defaults to latest season)
+        """
+
+        await itr.response.defer()
+        if artist_choice not in self.bot.artist[game_choice.value]:
+            return await itr.followup.send("Artist not found.")
+        icon = self.bot.artist[game_choice.value][artist_choice]["emblem"]
+        game_details = GAMES[game_choice.value]
+
+        if season_code is None:
+            current_date = datetime.now()
+            current_monday = current_date - timedelta(days=current_date.weekday())
+            season_code = int(current_monday.strftime("%Y%m%d"))
+        else:
+            season_date = datetime.strptime(str(season_code), "%Y%m%d").replace(
+                hour=0,
+                minute=0,
+                second=0,
+                microsecond=0,
+                tzinfo=TIMEZONES[game_details["timezone"]],
+            )
+            if season_date.weekday():
+                return await itr.followup.send("Season code must be a Monday.")
+            if season_date > datetime.now(tz=TIMEZONES[game_details["timezone"]]):
+                return await itr.followup.send("Season code cannot be in the future.")
+            if season_date < game_details["firstSeason"]:
+                return await itr.followup.send(
+                    "Season code is before the first season."
+                )
+
+        cog: "SuperStar" = self.bot.get_cog("SuperStar")
+        artist_id = self.bot.artist[game_choice.value][artist_choice]["code"]
+        world_record, last_updated = await cog.get_world_record(
+            game_choice.value, season_code, artist_id
+        )
+
+        msg = await itr.followup.send(
+            embed=LeaderboardEmbed(
+                game_choice.value,
+                artist_choice,
+                None,
+                season_code,
+                world_record,
+                last_updated,
+                None,
+                icon,
+            ),
+            files=(
+                [discord.File(icon, filename="icon.png")]
+                if isinstance(icon, Path)
+                else []
+            ),
+            wait=True,
+        )
+        view = SongWorldRecordView(
+            msg,
+            game_choice.value,
+            artist_choice,
+            None,
+            season_code,
+            world_record,
+            last_updated,
+            itr.user,
+            None,
             icon,
         )
         await msg.edit(view=view)
