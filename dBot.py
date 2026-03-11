@@ -64,13 +64,13 @@ class dBot(commands.Bot):
             )
             assert isinstance(channel, discord.TextChannel)
             current_date = datetime.now(tz=ZoneInfo("Etc/GMT-8"))
-            if current_date.hour == 4:
+            if current_date.hour == 4 and not current_date.weekday():
                 await self.change_presence(
                     status=discord.Status.dnd,
-                    activity=discord.CustomActivity("Daily restart in progress..."),
+                    activity=discord.CustomActivity("Weekly restart in progress..."),
                 )
                 await channel.send(
-                    f"Daily restart at {datetime.now(tz=ZoneInfo("Etc/GMT-8"))}."
+                    f"Weekly restart at {datetime.now(tz=ZoneInfo("Etc/GMT-8"))}."
                 )
             else:
                 await self.change_presence(
