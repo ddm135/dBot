@@ -192,14 +192,13 @@ class SuperStar(commands.Cog):
         self, game: str, season: int, item_id: int
     ) -> tuple[list[dict], datetime | None]:
         world_record_base = self.bot.basic[game]["manifest"]["MusicRankServerUrl"]
-        world_record_latest = f"{world_record_base}/{season}/{item_id}/latest.json"
+        world_record_latest = f"{world_record_base}{season}/{item_id}/latest.json"
         world_record_latest_first = (
-            f"{world_record_base}/{season}/{item_id}/latest_first.json"
+            f"{world_record_base}{season}/{item_id}/latest_first.json"
         )
 
         async with aiohttp.ClientSession() as session:
             async with session.get(url=world_record_latest) as r:
-                print(world_record_latest)
                 if r.status == 200:
                     return await r.json(content_type=None), (
                         datetime.strptime(
@@ -211,7 +210,6 @@ class SuperStar(commands.Cog):
                     )
 
             async with session.get(url=world_record_latest_first) as r:
-                print(world_record_latest_first)
                 if r.status == 200:
                     return await r.json(content_type=None), (
                         datetime.strptime(
