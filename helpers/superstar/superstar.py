@@ -199,6 +199,7 @@ class SuperStar(commands.Cog):
 
         async with aiohttp.ClientSession() as session:
             async with session.get(url=world_record_latest) as r:
+                print(world_record_latest)
                 if r.status == 200:
                     return await r.json(content_type=None), (
                         datetime.strptime(
@@ -210,6 +211,7 @@ class SuperStar(commands.Cog):
                     )
 
             async with session.get(url=world_record_latest_first) as r:
+                print(world_record_latest_first)
                 if r.status == 200:
                     return await r.json(content_type=None), (
                         datetime.strptime(

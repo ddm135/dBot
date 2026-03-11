@@ -114,7 +114,7 @@ class WorldRecord(commands.GroupCog, name="world_record"):
                 itr.user,
                 icon,
             )
-            await msg.edit(view=view)
+            return await msg.edit(view=view)
 
         return await itr.followup.send("Currently not supported")
 
