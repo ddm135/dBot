@@ -70,6 +70,7 @@ async def season_autocomplete(
             value=code,
         )
         for code, season in seasons.items()
+        if current in str(code)
     )
 
     return list(islice(season_choices, MAX_AUTOCOMPLETE))
