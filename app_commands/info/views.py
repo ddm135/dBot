@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 class InfoView(discord.ui.View):
     def __init__(
         self,
-        message_id: discord.Message,
+        message: discord.Message,
         game: str,
         artist_name: str | None,
         songs: list[list[str]],
@@ -22,15 +22,15 @@ class InfoView(discord.ui.View):
         user: discord.User | discord.Member,
         icon: str | Path | None,
     ) -> None:
-        self.message = message_id
+        self.message = message
         self.game = game
         self.artist_name = artist_name
         self.songs = songs
         self.info = info
         self.user = user
         self.icon = icon
-        self.current = 1
-        self.max = math.ceil(len(songs) / STEP) or 1
+        self.current_page = 1
+        self.max_page = math.ceil(len(songs) / STEP) or 1
         super().__init__()
 
     async def on_timeout(self) -> None:
@@ -48,8 +48,8 @@ class InfoView(discord.ui.View):
                 self.songs,
                 self.info,
                 self.icon,
-                self.current,
-                self.max,
+                self.current_page,
+                self.max_page,
             ),
             view=self,
         )
@@ -64,9 +64,9 @@ class InfoView(discord.ui.View):
                 "You are not the original requester.", ephemeral=True
             )
 
-        self.current -= 1
-        if self.current < 1:
-            self.current = self.max
+        self.current_page -= 1
+        if self.current_page < 1:
+            self.current_page = self.max_page
         await self.update_message(itr)
 
     @discord.ui.button(label="Next Page", style=discord.ButtonStyle.success)
@@ -79,7 +79,7 @@ class InfoView(discord.ui.View):
                 "You are not the original requester.", ephemeral=True
             )
 
-        self.current += 1
-        if self.current > self.max:
-            self.current = 1
+        self.current_page += 1
+        if self.current_page > self.max_page:
+            self.current_page = 1
         await self.update_message(itr)

@@ -18,7 +18,7 @@ async def artist_autocomplete(
     if not (game := itr.namespace.game):
         return []
 
-    artists = itr.client.info_by_name[game].keys()
+    artists = itr.client.artist[game]
     artist_choices = (
         app_commands.Choice(name=artist, value=artist)
         for artist in artists

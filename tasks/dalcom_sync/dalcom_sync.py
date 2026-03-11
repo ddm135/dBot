@@ -6,7 +6,7 @@ import json
 import logging
 import shutil
 from collections import defaultdict
-from datetime import time
+from datetime import datetime, time
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -16,7 +16,7 @@ import soundfile
 from discord.ext import commands, tasks
 from googleapiclient.http import MediaFileUpload
 
-from statics.consts import GAMES
+from statics.consts import GAMES, TIMEZONES
 
 from .commons import BORDER_CHANNEL, BORDER_FOLDER, FOLDER_MIME
 from .types import Seq
@@ -126,6 +126,7 @@ class DalcomSync(commands.Cog):
                             data = new_data
                     dalcom_data[data_file] = data
 
+                # Check if game has Live Theme Collection Reward
                 max_live = None
                 if "LiveThemeData" in dalcom_data and "collectRewardID" in next(
                     iter(dalcom_data["LiveThemeData"].values())
@@ -140,6 +141,7 @@ class DalcomSync(commands.Cog):
                     if artist_name in self.bot.artist.setdefault(game, {}):
                         continue
 
+                    # Find artist code using song ID
                     int_song_id = int(song_id)
                     results = await ss_cog.get_attributes(
                         game,
@@ -149,6 +151,7 @@ class DalcomSync(commands.Cog):
                     )
                     artist_code = results[int_song_id]["groupData"]
 
+                    # Get artist emblem
                     results = await ss_cog.get_attributes(
                         game,
                         (dalcom_data["GroupData"], dalcom_data.get("URLs")),
@@ -157,6 +160,7 @@ class DalcomSync(commands.Cog):
                     )
                     emblem = results[artist_code]["emblemImage"]
 
+                    # Count members
                     member_count = 0
                     for member in dalcom_data["ArtistData"].values():
                         if (
@@ -165,6 +169,7 @@ class DalcomSync(commands.Cog):
                         ):
                             member_count += 1
 
+                    # Calculate base max score
                     max_score = (
                         game_details["base_score"] + 15_000 * (member_count - 3)
                         if "base_score" in game_details
@@ -332,6 +337,26 @@ class DalcomSync(commands.Cog):
 
                 for path in bundle_folders:
                     shutil.rmtree(path)
+
+                # Get World Record seasons and duration
+                if "firstSeason" not in game_details:
+                    for reward in dalcom_data["WorldRecordData"].values():
+                        season_code = reward["season"]
+                        if season_code in self.bot.world_record.setdefault(game, {}):
+                            continue
+
+                        start_date = datetime.fromtimestamp(
+                            reward["startAt"] / 1000,
+                            tz=TIMEZONES[game_details["timezone"]],
+                        )
+                        end_date = datetime.fromtimestamp(
+                            reward["endAt"] / 1000,
+                            tz=TIMEZONES[game_details["timezone"]],
+                        )
+                        self.bot.world_record[game][season_code] = {
+                            "start": start_date,
+                            "end": end_date,
+                        }
 
                 # TODO: Check if key has been changed
                 if "catalogUrl" not in game_details:

@@ -11,7 +11,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from statics.consts import BONUS_OFFSET, GAMES, Data
+from statics.consts import BONUS_OFFSET, GAMES, TIMEZONES, Data
 from statics.types import BonusDict
 
 from .autocompletes import artist_autocomplete
@@ -488,7 +488,7 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
     ) -> tuple[list[BonusDict], datetime, datetime, datetime] | None:
         game_details = GAMES[game]
         bonus_data = self.bot.bonus[game]
-        timezone = game_details["timezone"]
+        timezone = TIMEZONES[game_details["timezone"]]
         bonus_columns = game_details["spreadsheet"]["columns"][-1]
         current_date = datetime.now(tz=timezone).replace(
             hour=0, minute=0, second=0, microsecond=0

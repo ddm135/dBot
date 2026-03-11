@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -152,7 +152,7 @@ GAMES: dict[str, "GameDetails"] = {
             },
         },
         "dateFormat": "%Y-%m-%d",
-        "timezone": TIMEZONES["KST"],
+        "timezone": "KST",
         "packageName": "kr.co.dalcomsoft.superstar.a",
         "lookupQuery": "id=890937532&country=kr",
         "manifestUrl": (
@@ -203,7 +203,7 @@ GAMES: dict[str, "GameDetails"] = {
             },
         },
         "dateFormat": "%Y-%m-%d",
-        "timezone": TIMEZONES["KST"],
+        "timezone": "KST",
         "packageName": "com.dalcomsoft.ss.jyp",
         "lookupQuery": "id=1086866467&country=kr",
         "manifestUrl": (
@@ -248,7 +248,7 @@ GAMES: dict[str, "GameDetails"] = {
             },
         },
         "dateFormat": "%Y-%m-%d",
-        "timezone": TIMEZONES["KST"],
+        "timezone": "KST",
         "packageName": "com.dalcomsoft.sss",
         "lookupQuery": "id=1480181152&country=kr",
         "manifestUrl": (
@@ -296,7 +296,7 @@ GAMES: dict[str, "GameDetails"] = {
             "columns": [InfoColumns.NO_SSL.value],
         },
         "dateFormat": "%Y-%m-%d",
-        "timezone": TIMEZONES["KST"],
+        "timezone": "KST",
         "packageName": "com.dalcomsoft.kangdaniel",
         "lastVersion": "4.0.0",
         "manifestUrl": (
@@ -329,7 +329,7 @@ GAMES: dict[str, "GameDetails"] = {
             },
         },
         "dateFormat": "%Y-%m-%d",
-        "timezone": TIMEZONES["KST"],
+        "timezone": "KST",
         "packageName": "com.dalcomsoft.ssat",
         "lookupQuery": "id=1571479814&country=kr",
         "manifestUrl": (
@@ -369,7 +369,7 @@ GAMES: dict[str, "GameDetails"] = {
             },
         },
         "dateFormat": "%Y-%m-%d",
-        "timezone": TIMEZONES["KST"],
+        "timezone": "KST",
         "packageName": "com.dalcomsoft.stayc",
         "lookupQuery": "id=6446679596&country=kr",
         "manifestUrl": (
@@ -407,7 +407,8 @@ GAMES: dict[str, "GameDetails"] = {
             },
         },
         "dateFormat": "%Y-%m-%d",
-        "timezone": TIMEZONES["KST"],
+        "timezone": "KST",
+        "firstSeason": datetime(2024, 12, 2, tzinfo=TIMEZONES["KST"]),
         "packageName": "com.dalcomsoft.sswo",
         "lookupQuery": "id=6523424185&country=kr",
         "manifestUrl": (
@@ -455,7 +456,7 @@ GAMES: dict[str, "GameDetails"] = {
             },
         },
         "dateFormat": "%Y-%m-%d",
-        "timezone": TIMEZONES["JST"],
+        "timezone": "JST",
         "packageName": "jp.co.ponos.superstarsmtown",
         "lookupQuery": "id=1216136006&country=jp",
         "manifestUrl": (
@@ -497,7 +498,7 @@ GAMES: dict[str, "GameDetails"] = {
             },
         },
         "dateFormat": "%Y-%m-%d",
-        "timezone": TIMEZONES["JST"],
+        "timezone": "JST",
         "packageName": "jp.co.dalcomsoft.superstarjypnation",
         "lookupQuery": "id=1569554295&country=jp",
         "manifestUrl": (
@@ -524,7 +525,7 @@ GAMES: dict[str, "GameDetails"] = {
             TEST_GUILD: 1340868523957813348,
         },
         "dateFormat": "%Y-%m-%d",
-        "timezone": TIMEZONES["JST"],
+        "timezone": "JST",
         "packageName": "jp.co.dalcomsoft.superstarlapone",
         "lastVersion": "1.9.4",
         "manifestUrl": (
@@ -557,7 +558,7 @@ GAMES: dict[str, "GameDetails"] = {
             },
         },
         "dateFormat": "%Y-%m-%d",
-        "timezone": TIMEZONES["JST"],
+        "timezone": "JST",
         "packageName": "jp.co.dalcomsoft.superstarebidan",
         "lookupQuery": "id=6450412255&country=jp",
         "manifestUrl": (
@@ -592,7 +593,7 @@ GAMES: dict[str, "GameDetails"] = {
             },
         },
         "dateFormat": "%d-%m-%Y",
-        "timezone": TIMEZONES["PHT"],
+        "timezone": "PHT",
         "packageName": "com.dalcomsoft.ssph",
         "lookupQuery": "id=6451133069&country=us",
         "manifestUrl": (

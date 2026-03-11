@@ -35,7 +35,7 @@ class NotifyBonus(commands.Cog):
             if game not in self.bot.bonus:
                 continue
 
-            timezone = game_details["timezone"]
+            timezone = TIMEZONES[game_details["timezone"]]
             current_date = datetime.now(tz=timezone)
 
             game_name = game_details["name"]

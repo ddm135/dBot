@@ -6,7 +6,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from statics.consts import GAMES, RESET_OFFSET, InfoColumns
+from statics.consts import GAMES, RESET_OFFSET, TIMEZONES, InfoColumns
 from statics.types import LastAppearanceManual
 
 from .autocompletes import (
@@ -167,7 +167,7 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         album = results[song_id]["album"]
         icon = self.bot.artist[game][artist_name]["emblem"]
 
-        timezone = game_details["timezone"]
+        timezone = TIMEZONES[game_details["timezone"]]
         current_time = datetime.now(tz=timezone) - RESET_OFFSET
 
         artist_last_str = self.bot.ssleagues[game][artist_name]["date"]

@@ -49,6 +49,8 @@ class dBot(commands.Bot):
         lambda: defaultdict(list[int])
     )
 
+    world_record: dict[str, dict[int, dict[str, datetime]]] = {}
+
     async def setup_hook(self) -> None:
         for ext in EXTENSIONS:
             await self.load_extension(ext)

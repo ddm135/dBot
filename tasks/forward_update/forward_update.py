@@ -9,7 +9,7 @@ import aiohttp
 import discord
 from discord.ext import commands, tasks
 
-from statics.consts import GAMES
+from statics.consts import GAMES, TIMEZONES
 
 from .commons import NEXT_UPDATE_CHANNEL
 
@@ -51,14 +51,15 @@ class ForwardUpdate(commands.Cog):
                 )
                 self.queue[game] = task
             elif (msd_path := Path(f"data/dalcom/{game}/MusicData.json")).exists():
-                current_time = datetime.now(tz=game_details["timezone"])
+                current_time = datetime.now(tz=TIMEZONES[game_details["timezone"]])
                 with open(msd_path, "r", encoding="utf-8") as f:
                     msd = json.load(f)
                 for song in msd.values():
                     if (display_start := song.get("displayStartAt")) and (
                         (
                             start_time := datetime.fromtimestamp(
-                                display_start / 1000, tz=game_details["timezone"]
+                                display_start / 1000,
+                                tz=TIMEZONES[game_details["timezone"]],
                             )
                         )
                         > current_time
@@ -82,7 +83,7 @@ class ForwardUpdate(commands.Cog):
                                 (
                                     start_time := datetime.fromtimestamp(
                                         display_start / 1000,
-                                        tz=game_details["timezone"],
+                                        tz=TIMEZONES[game_details["timezone"]],
                                     )
                                 )
                                 > current_time
@@ -124,7 +125,7 @@ class ForwardUpdate(commands.Cog):
 
             while True:
                 await asyncio.sleep(60)
-                if datetime.now(tz=game_details["timezone"]) >= start_time:
+                if datetime.now(tz=TIMEZONES[game_details["timezone"]]) >= start_time:
                     break
         else:
             source_id = forward_details["source_maint"]

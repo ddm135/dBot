@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from discord.ext import commands, tasks
 
-from statics.consts import GAMES
+from statics.consts import GAMES, TIMEZONES
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -73,7 +73,7 @@ class SpreadsheetSync(commands.Cog):
         bonus_end_index = bonus_columns.index("bonus_end")
         bonus_amount_index = bonus_columns.index("bonus_amount")
         date_format = game_details["dateFormat"]
-        timezone = game_details["timezone"]
+        timezone = TIMEZONES[game_details["timezone"]]
 
         bonus: dict[str, list[list]] = {}
         for row in results[-1]:

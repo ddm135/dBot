@@ -8,7 +8,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from statics.consts import GAMES, InfoColumns
+from statics.consts import GAMES, TIMEZONES, InfoColumns
 
 from .autocompletes import artist_autocomplete, song_autocomplete
 from .embeds import InfoDetailsEmbed, InfoEmbed
@@ -31,14 +31,14 @@ class Info(commands.Cog):
     @app_commands.command()
     @app_commands.choices(game_choice=GAME_CHOICES)
     @app_commands.autocomplete(artist_choice=artist_autocomplete)
-    @app_commands.autocomplete(song_name=song_autocomplete)
-    @app_commands.rename(game_choice="game", artist_choice="artist", song_name="song")
+    @app_commands.autocomplete(song_choice=song_autocomplete)
+    @app_commands.rename(game_choice="game", artist_choice="artist", song_choice="song")
     async def info(
         self,
         itr: discord.Interaction["dBot"],
         game_choice: app_commands.Choice[str],
         artist_choice: str | None = None,
-        song_name: str | None = None,
+        song_choice: str | None = None,
     ) -> None:
         """View song durations from shortest to longest.
         If song name is provided, view detailed information about the song.
@@ -49,7 +49,7 @@ class Info(commands.Cog):
             Game
         artist_choice: Optional[:class:`str`]
             Artist/Album
-        song_name: Optional[:class:`str`]
+        song_choice: Optional[:class:`str`]
             Song (requires artist/album to be set)
         """
 
@@ -73,11 +73,11 @@ class Info(commands.Cog):
                 return await itr.followup.send("Artist not found.")
             icon = self.bot.artist[game_choice.value][artist_choice]["emblem"]
 
-            if song_name:
+            if song_choice:
                 if not (
                     song := self.bot.info_by_name[game_choice.value]
                     .get(artist_choice, {})
-                    .get(song_name)
+                    .get(song_choice)
                 ):
                     return await itr.followup.send("Song not found.")
 
@@ -141,7 +141,7 @@ class Info(commands.Cog):
                         )[results[int_song_id]["albumName"]]["enUS"],
                         "release_date": datetime.fromtimestamp(
                             results[int_song_id]["releaseDate"] / 1000,
-                            tz=game_details["timezone"],
+                            tz=TIMEZONES[game_details["timezone"]],
                         ).strftime(game_details["dateFormat"]),
                     }
 
@@ -149,7 +149,7 @@ class Info(commands.Cog):
                     embed=InfoDetailsEmbed(
                         game_choice.value,
                         artist_choice,
-                        song_name,
+                        song_choice,
                         file_info["sound"]["duration"],
                         file_info["seq"],
                         results[int_song_id]["album"],

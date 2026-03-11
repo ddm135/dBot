@@ -1,7 +1,6 @@
 from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, NotRequired, TypedDict
-from zoneinfo import ZoneInfo
 
 if TYPE_CHECKING:
     from googleapiclient._apis.sheets.v4 import GridRange
@@ -30,7 +29,8 @@ class GameDetails(TypedDict):
     pinRoles: NotRequired[dict[int, int | None]]
     forward: NotRequired[ForwardUpdateDetails]
     dateFormat: str
-    timezone: ZoneInfo
+    timezone: str
+    firstSeason: NotRequired[datetime]
     packageName: str
     lookupQuery: NotRequired[str]
     lastVersion: NotRequired[str]

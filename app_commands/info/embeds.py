@@ -94,9 +94,7 @@ class InfoDetailsEmbed(discord.Embed):
         self.add_field(name="Duration", value=duration)
         if (
             (
-                difficulty_levels := " / ".join(
-                    difficulty for difficulty in note_count.keys()
-                )
+                difficulty_levels := " / ".join(note_count)
             )
         ) != "Easy / Normal / Hard":
             self.add_field(name="Difficulty Levels", value=difficulty_levels)

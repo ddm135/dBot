@@ -5,6 +5,7 @@ import asyncio
 import gzip
 import json
 import zipfile
+from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 from zipfile import ZipFile
@@ -17,7 +18,7 @@ from google.auth.transport import requests
 from google.oauth2.service_account import IDTokenCredentials
 
 from helpers.superstar.commons import APKPURE_URL
-from statics.consts import CHUNK_SIZE, GAMES, STATUS_CHANNEL
+from statics.consts import CHUNK_SIZE, GAMES, STATUS_CHANNEL, TIMEZONES
 
 from .embeds import SSLeagueEmbed as _SSLeagueEmbed
 from .types import SuperStarHeaders
@@ -186,6 +187,40 @@ class SuperStar(commands.Cog):
             ) as r:
                 ssleague = await self.read_dalcom_json(r, iv)
         return ssleague
+
+    async def get_world_record(
+        self, game: str, season: int, item_id: int
+    ) -> tuple[list[dict], datetime | None]:
+        world_record_base = self.bot.basic[game]["manifest"]["MusicRankServerUrl"]
+        world_record_latest = f"{world_record_base}/{season}/{item_id}/latest.json"
+        world_record_latest_first = (
+            f"{world_record_base}/{season}/{item_id}/latest_first.json"
+        )
+
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url=world_record_latest) as r:
+                if r.status == 200:
+                    return await r.json(content_type=None), (
+                        datetime.strptime(
+                            r.headers["Last-Modified"],
+                            "%a, %d %b %Y %H:%M:%S %Z",
+                        ).astimezone(tz=TIMEZONES[GAMES[game]["timezone"]])
+                        if "Last-Modified" in r.headers
+                        else None
+                    )
+
+            async with session.get(url=world_record_latest_first) as r:
+                if r.status == 200:
+                    return await r.json(content_type=None), (
+                        datetime.strptime(
+                            r.headers["Last-Modified"],
+                            "%a, %d %b %Y %H:%M:%S %Z",
+                        ).astimezone(tz=TIMEZONES[GAMES[game]["timezone"]])
+                        if "Last-Modified" in r.headers
+                        else None
+                    )
+
+        return [], None
 
     async def read_dalcom_json(
         self, response: aiohttp.ClientResponse, iv: str | bytes

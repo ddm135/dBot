@@ -13,7 +13,7 @@ import discord
 import discord.backoff
 from discord.ext import commands, tasks
 
-from statics.consts import GAMES, RESET_OFFSET, Data, InfoColumns
+from statics.consts import GAMES, RESET_OFFSET, TIMEZONES, Data, InfoColumns
 
 if TYPE_CHECKING:
     from dBot import dBot
@@ -51,7 +51,7 @@ class PinSSLeague(commands.Cog):
 
     async def pin_ssl(self, game: str, credentials: dict) -> None:
         game_details = GAMES[game]
-        timezone = game_details["timezone"]
+        timezone = TIMEZONES[game_details["timezone"]]
         current_time = datetime.now(tz=timezone) - RESET_OFFSET
         if current_time.hour:
             return
