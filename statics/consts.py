@@ -56,6 +56,7 @@ EXTENSIONS = (
     "tasks.clock",
     "commands.miscellaneous",
     # "entertainment.pinata",
+    "app_commands.world_record",
     "app_commands.coupon",
     "events.on_command_error",
     "events.on_message",
