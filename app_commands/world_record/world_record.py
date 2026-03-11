@@ -1,3 +1,4 @@
+import asyncio
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -5,8 +6,11 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from app_commands.world_record.embeds import SongWorldRecordEmbed
-from app_commands.world_record.views import SongWorldRecordView
+from app_commands.world_record.embeds import (
+    ArtistWorldRecordEmbed,
+    SongWorldRecordEmbed,
+)
+from app_commands.world_record.views import ArtistWorldRecordView, SongWorldRecordView
 from statics.consts import GAMES
 
 from .autocompletes import artist_autocomplete, season_autocomplete, song_autocomplete
@@ -65,6 +69,13 @@ class WorldRecord(commands.GroupCog, name="world_record"):
         elif season_code not in self.bot.world_record[game_choice.value]:
             return await itr.followup.send("Season not found.")
 
+        game_details = GAMES[game_choice.value]
+        info_columns = game_details["spreadsheet"]["columns"][0]
+        song_id_index = info_columns.index("song_id")
+        cog: "SuperStar" = self.bot.get_cog(
+            "SuperStar",
+        )  # type: ignore[assignment]
+
         if song_choice:
             if not (
                 song := self.bot.info_by_name[game_choice.value]
@@ -73,12 +84,6 @@ class WorldRecord(commands.GroupCog, name="world_record"):
             ):
                 return await itr.followup.send("Song not found.")
 
-            cog: "SuperStar" = self.bot.get_cog(
-                "SuperStar",
-            )  # type: ignore[assignment]
-            game_details = GAMES[game_choice.value]
-            info_columns = game_details["spreadsheet"]["columns"][0]
-            song_id_index = info_columns.index("song_id")
             int_song_id = int(song[song_id_index])
             world_record, last_updated = await cog.get_world_record(
                 game_choice.value, season_code, int_song_id
@@ -119,7 +124,63 @@ class WorldRecord(commands.GroupCog, name="world_record"):
             await msg.edit(view=view)
             return
 
-        return await itr.followup.send("Currently not supported")
+        tasks = [
+            cog.get_world_record(
+                game_choice.value, season_code, int(song[song_id_index]), True
+            )
+            for song in songs
+        ]
+        results = await asyncio.gather(*tasks)
+        world_records = {
+            song: (
+                "Error"
+                if isinstance(result, Exception)
+                else "None" if not result[0] else result[0][0]
+            )
+            for song, result in zip(
+                self.bot.info_by_name[game_choice.value][artist_choice], results
+            )
+        }
+        last_updated = max(
+            (
+                result[1]
+                for result in results
+                if not isinstance(result, Exception) and result[1]
+            ),
+            default=None,
+        )
+
+        msg = await itr.followup.send(
+            embed=ArtistWorldRecordEmbed(
+                game_choice.value,
+                artist_choice,
+                season_code,
+                self.bot.world_record[game_choice.value][season_code]["start"],
+                self.bot.world_record[game_choice.value][season_code]["end"],
+                world_records,
+                last_updated,
+                icon,
+            ),
+            files=(
+                [discord.File(icon, filename="icon.png")]
+                if isinstance(icon, Path)
+                else []
+            ),
+            wait=True,
+        )
+        view = ArtistWorldRecordView(
+            msg,
+            game_choice.value,
+            artist_choice,
+            season_code,
+            self.bot.world_record[game_choice.value][season_code]["start"],
+            self.bot.world_record[game_choice.value][season_code]["end"],
+            world_records,
+            last_updated,
+            itr.user,
+            icon,
+        )
+        await msg.edit(view=view)
 
 
 async def setup(bot: "dBot") -> None:

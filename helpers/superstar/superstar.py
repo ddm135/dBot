@@ -189,7 +189,7 @@ class SuperStar(commands.Cog):
         return ssleague
 
     async def get_world_record(
-        self, game: str, season: int, item_id: int
+        self, game: str, season: int, item_id: int, first_only: bool = False
     ) -> tuple[list[dict], datetime | None]:
         world_record_base = self.bot.basic[game]["manifest"]["MusicRankServerUrl"]
         world_record_latest = f"{world_record_base}{season}/{item_id}/latest.json"
@@ -198,18 +198,19 @@ class SuperStar(commands.Cog):
         )
 
         async with aiohttp.ClientSession() as session:
-            async with session.get(url=world_record_latest) as r:
-                if r.status == 200:
-                    return await r.json(content_type=None), (
-                        datetime.strptime(
-                            r.headers["Last-Modified"],
-                            "%a, %d %b %Y %H:%M:%S %Z",
+            if not first_only:
+                async with session.get(url=world_record_latest) as r:
+                    if r.status == 200:
+                        return await r.json(content_type=None), (
+                            datetime.strptime(
+                                r.headers["Last-Modified"],
+                                "%a, %d %b %Y %H:%M:%S %Z",
+                            )
+                            .replace(tzinfo=timezone.utc)
+                            .astimezone(tz=TIMEZONES[GAMES[game]["timezone"]])
+                            if "Last-Modified" in r.headers
+                            else None
                         )
-                        .replace(tzinfo=timezone.utc)
-                        .astimezone(tz=TIMEZONES[GAMES[game]["timezone"]])
-                        if "Last-Modified" in r.headers
-                        else None
-                    )
 
             async with session.get(url=world_record_latest_first) as r:
                 if r.status == 200:
