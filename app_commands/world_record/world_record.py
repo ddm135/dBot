@@ -211,7 +211,7 @@ class WorldRecord(commands.GroupCog, name="world_record"):
         itr: discord.Interaction["dBot"],
         game_choice: app_commands.Choice[str],
         artist_choice: str,
-        season_code: commands.Range[int, 20241202] | None = None,
+        season_code: app_commands.Range[int, 20241202] | None = None,
     ) -> None:
         """View world records for games that follow
         the weekly season system.
