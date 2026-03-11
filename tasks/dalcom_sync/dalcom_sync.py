@@ -341,7 +341,7 @@ class DalcomSync(commands.Cog):
                 # Get World Record seasons and duration
                 if "firstSeason" not in game_details:
                     for reward in dalcom_data["WorldRecordData"].values():
-                        season_code = reward["season"]
+                        season_code = reward["seasonCode"]
                         if season_code in self.bot.world_record.setdefault(game, {}):
                             continue
 
