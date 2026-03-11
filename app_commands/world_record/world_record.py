@@ -200,7 +200,6 @@ class WorldRecord(commands.GroupCog, name="world_record"):
     @app_commands.command(name="weekly")
     @app_commands.choices(game_choice=WEEKLY_CHOICES)
     @app_commands.autocomplete(artist_choice=artist_autocomplete)
-    @app_commands.autocomplete(season_autocomplete=season_autocomplete)
     @app_commands.rename(
         game_choice="game",
         artist_choice="artist",
