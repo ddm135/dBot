@@ -104,6 +104,9 @@ class WorldRecord(commands.GroupCog, name="world_record"):
             world_record, last_updated = await cog.get_world_record(
                 game_choice.value, season_code, int_song_id
             )
+            results = await cog.get_attributes(
+                game_choice.value, "MusicData", [int_song_id], {"album": True}
+            )
 
             msg = await itr.followup.send(
                 embed=SongWorldRecordEmbed(
@@ -111,10 +114,9 @@ class WorldRecord(commands.GroupCog, name="world_record"):
                     artist_choice,
                     song_choice,
                     season_code,
-                    self.bot.world_record[game_choice.value][season_code]["start"],
-                    self.bot.world_record[game_choice.value][season_code]["end"],
                     world_record,
                     last_updated,
+                    results[int_song_id]["album"],
                     icon,
                 ),
                 files=(
@@ -130,11 +132,10 @@ class WorldRecord(commands.GroupCog, name="world_record"):
                 artist_choice,
                 song_choice,
                 season_code,
-                self.bot.world_record[game_choice.value][season_code]["start"],
-                self.bot.world_record[game_choice.value][season_code]["end"],
                 world_record,
                 last_updated,
                 itr.user,
+                results[int_song_id]["album"],
                 icon,
             )
             await msg.edit(view=view)
@@ -171,8 +172,6 @@ class WorldRecord(commands.GroupCog, name="world_record"):
                 game_choice.value,
                 artist_choice,
                 season_code,
-                self.bot.world_record[game_choice.value][season_code]["start"],
-                self.bot.world_record[game_choice.value][season_code]["end"],
                 world_records,
                 last_updated,
                 icon,
@@ -189,8 +188,6 @@ class WorldRecord(commands.GroupCog, name="world_record"):
             game_choice.value,
             artist_choice,
             season_code,
-            self.bot.world_record[game_choice.value][season_code]["start"],
-            self.bot.world_record[game_choice.value][season_code]["end"],
             world_records,
             last_updated,
             itr.user,

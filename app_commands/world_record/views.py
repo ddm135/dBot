@@ -20,11 +20,10 @@ class SongWorldRecordView(discord.ui.View):
         artist_name: str,
         song_name: str,
         season_code: int,
-        start_date: datetime,
-        end_date: datetime,
         world_records: list[dict],
         last_updated: datetime | None,
         user: discord.User | discord.Member,
+        album: str | Path | None,
         icon: str | Path | None,
     ) -> None:
         self.message = message
@@ -32,11 +31,10 @@ class SongWorldRecordView(discord.ui.View):
         self.artist_name = artist_name
         self.song_name = song_name
         self.season_code = season_code
-        self.start_date = start_date
-        self.end_date = end_date
         self.world_records = world_records
         self.last_updated = last_updated
         self.user = user
+        self.album = album
         self.icon = icon
         self.current_page = 1
         self.max_page = math.ceil(len(world_records) / STEP) or 1
@@ -56,10 +54,9 @@ class SongWorldRecordView(discord.ui.View):
                 self.artist_name,
                 self.song_name,
                 self.season_code,
-                self.start_date,
-                self.end_date,
                 self.world_records,
                 self.last_updated,
+                self.album,
                 self.icon,
                 self.current_page,
                 self.max_page,
@@ -105,8 +102,6 @@ class ArtistWorldRecordView(discord.ui.View):
         game: str,
         artist_name: str,
         season_code: int,
-        start_date: datetime,
-        end_date: datetime,
         world_records: dict[str, dict | str],
         last_updated: datetime | None,
         user: discord.User | discord.Member,
@@ -116,8 +111,6 @@ class ArtistWorldRecordView(discord.ui.View):
         self.game = game
         self.artist_name = artist_name
         self.season_code = season_code
-        self.start_date = start_date
-        self.end_date = end_date
         self.world_records = world_records
         self.last_updated = last_updated
         self.user = user
@@ -139,8 +132,6 @@ class ArtistWorldRecordView(discord.ui.View):
                 self.game,
                 self.artist_name,
                 self.season_code,
-                self.start_date,
-                self.end_date,
                 self.world_records,
                 self.last_updated,
                 self.icon,

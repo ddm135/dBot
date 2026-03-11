@@ -16,10 +16,9 @@ class SongWorldRecordEmbed(discord.Embed):
         artist_name: str,
         song_name: str,
         season_code: int,
-        start_date: datetime,
-        end_date: datetime,
         world_records: list[dict],
         last_updated: datetime | None,
+        album: str | Path | None,
         icon: str | Path | None,
         current_page: int = 1,
         max_page: int | None = None,
@@ -51,12 +50,11 @@ class SongWorldRecordEmbed(discord.Embed):
         )
 
         self.set_author(
-            name=(
-                f"{game_details["name"]} - WR Season {season_code} "
-                f"({start_date.strftime(game_details["dateFormat"])} - "
-                f"{end_date.strftime(game_details["dateFormat"])})"
-            ),
+            name=f"{game_details["name"]} - World Record (Season {season_code})",
             icon_url="attachment://icon.png" if isinstance(icon, Path) else icon,
+        )
+        self.set_thumbnail(
+            url="attachment://album.png" if isinstance(album, Path) else album
         )
         self.set_footer(
             text=(
@@ -76,8 +74,6 @@ class ArtistWorldRecordEmbed(discord.Embed):
         game: str,
         artist_name: str,
         season_code: int,
-        start_date: datetime,
-        end_date: datetime,
         world_records: dict[str, dict | str],
         last_updated: datetime | None,
         icon: str | Path | None,
@@ -115,11 +111,7 @@ class ArtistWorldRecordEmbed(discord.Embed):
         )
 
         self.set_author(
-            name=(
-                f"{game_details["name"]} - WR Season {season_code} "
-                f"({start_date.strftime(game_details["dateFormat"])} - "
-                f"{end_date.strftime(game_details["dateFormat"])})"
-            ),
+            name=f"{game_details["name"]} - World Record (Season {season_code})",
             icon_url="attachment://icon.png" if isinstance(icon, Path) else icon,
         )
         self.set_footer(
