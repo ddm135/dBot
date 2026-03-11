@@ -87,6 +87,7 @@ class DalcomSync(commands.Cog):
                 data_files = [
                     "ArtistData",
                     "GroupData",
+                    "HiddenGameData",
                     "LiveThemeData",
                     "LocaleData",
                     "MusicData",

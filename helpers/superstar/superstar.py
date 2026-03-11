@@ -5,7 +5,7 @@ import asyncio
 import gzip
 import json
 import zipfile
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 from zipfile import ZipFile
@@ -204,7 +204,9 @@ class SuperStar(commands.Cog):
                         datetime.strptime(
                             r.headers["Last-Modified"],
                             "%a, %d %b %Y %H:%M:%S %Z",
-                        ).astimezone(tz=TIMEZONES[GAMES[game]["timezone"]])
+                        )
+                        .replace(tzinfo=timezone.utc)
+                        .astimezone(tz=TIMEZONES[GAMES[game]["timezone"]])
                         if "Last-Modified" in r.headers
                         else None
                     )
@@ -215,7 +217,9 @@ class SuperStar(commands.Cog):
                         datetime.strptime(
                             r.headers["Last-Modified"],
                             "%a, %d %b %Y %H:%M:%S %Z",
-                        ).astimezone(tz=TIMEZONES[GAMES[game]["timezone"]])
+                        )
+                        .replace(tzinfo=timezone.utc)
+                        .astimezone(tz=TIMEZONES[GAMES[game]["timezone"]])
                         if "Last-Modified" in r.headers
                         else None
                     )
