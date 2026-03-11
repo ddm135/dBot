@@ -69,17 +69,14 @@ class DalcomSync(commands.Cog):
                     stored_ajs = ajs
                 else:
                     ajs = await ss_cog.get_a_json(game)
-                refresh = False
 
+                refresh = False
                 if ajs["code"] != 1000:
                     ajs = stored_ajs
                 elif (
                     not stored_ajs
                     or ajs["result"]["version"] != stored_ajs["result"]["version"]
                 ):
-                    ajs_path.parent.mkdir(parents=True, exist_ok=True)
-                    with open(ajs_path, "w", encoding="utf-8") as f:
-                        json.dump(ajs, f, indent=4)
                     refresh = True
                 if not ajs:
                     continue
@@ -127,6 +124,11 @@ class DalcomSync(commands.Cog):
                                 json.dump(new_data, f, indent=4)
                             data = new_data
                     dalcom_data[data_file] = data
+
+                if refresh:
+                    ajs_path.parent.mkdir(parents=True, exist_ok=True)
+                    with open(ajs_path, "w", encoding="utf-8") as f:
+                        json.dump(ajs, f, indent=4)
 
                 # Check if game has Live Theme Collection Reward
                 max_live = None
