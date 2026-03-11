@@ -106,6 +106,7 @@ class DalcomSync(commands.Cog):
                     data_path = Path(f"data/dalcom/{game}/{data_file}.json")
                     if (
                         not stored_ajs
+                        or data_file not in stored_ajs["result"]["context"]
                         or ajs["result"]["context"][data_file]["version"]
                         != stored_ajs["result"]["context"][data_file]["version"]
                         or refresh
