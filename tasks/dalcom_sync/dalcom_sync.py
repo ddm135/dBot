@@ -339,6 +339,7 @@ class DalcomSync(commands.Cog):
                     shutil.rmtree(path)
 
                 # Get World Record seasons and duration
+                current_date = datetime.now(tz=TIMEZONES[game_details["timezone"]])
                 if "firstSeason" not in game_details:
                     for reward in dalcom_data["WorldRecordData"].values():
                         season_code = reward["seasonCode"]
@@ -349,6 +350,8 @@ class DalcomSync(commands.Cog):
                             reward["startAt"] / 1000,
                             tz=TIMEZONES[game_details["timezone"]],
                         )
+                        if start_date > current_date:
+                            continue
                         end_date = datetime.fromtimestamp(
                             reward["endAt"] / 1000,
                             tz=TIMEZONES[game_details["timezone"]],

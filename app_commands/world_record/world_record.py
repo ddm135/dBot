@@ -62,6 +62,8 @@ class WorldRecord(commands.GroupCog, name="world_record"):
 
         if season_code is None:
             season_code = max(self.bot.world_record[game_choice.value])
+        elif season_code not in self.bot.world_record[game_choice.value]:
+            return await itr.followup.send("Season not found.")
 
         if song_choice:
             if not (

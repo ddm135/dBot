@@ -37,9 +37,10 @@ class SongWorldRecordEmbed(discord.Embed):
                    .replace(r"`", r"\`")}"
             ),
             description="\n".join(
-                f"{record["rank"]}. **{record["nickname"].replace(r'*', r'\*')
-                                       .replace(r'_', r'\_').replace(r'`', r'\`')}**"
-                f" - {record["highscore"]:,}"
+                f"{record.get("rank", 1)}. **"
+                f"{record["nickname"].replace(r'*', r'\*')
+                   .replace(r'_', r'\_').replace(r'`', r'\`')}"
+                f"** - {record["highscore"]:,}"
                 for record in filtered_records
             ),
             color=game_details["color"],
@@ -47,7 +48,7 @@ class SongWorldRecordEmbed(discord.Embed):
 
         self.set_author(
             name=(
-                f"{game_details["name"]} - World Record Season {season_code} "
+                f"{game_details["name"]} - WR Season {season_code} "
                 f"({start_date.strftime(game_details["dateFormat"])} - "
                 f"{end_date.strftime(game_details["dateFormat"])})"
             ),
