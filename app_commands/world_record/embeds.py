@@ -102,10 +102,10 @@ class ArtistWorldRecordEmbed(discord.Embed):
                 "\n".join(
                     f"- {song.replace(r"*", r"\*").replace(r"_", r"\_")
                          .replace(r"`", r"\`")}: "
-                    f"{record if isinstance(record, str)
-                        else f"{record["nickname"].replace(r"*", r"\*")
-                                .replace(r"_", r"\_")
-                                .replace(r"`", r"\`")} - {record["highscore"]:,}"}"
+                    f"{f"**{record}**" if isinstance(record, str)
+                        else f"**{record["nickname"].replace(r"*", r"\*")
+                                  .replace(r"_", r"\_")
+                                  .replace(r"`", r"\`")}** - {record["highscore"]:,}"}"
                     for song, record in filtered_records.items()
                 )
                 if filtered_records
