@@ -54,8 +54,24 @@ class WorldRecord(commands.GroupCog, name="world_record"):
         song_choice: str | None = None,
         season_code: int | None = None,
     ) -> None:
-        await itr.response.defer()
+        """View world records for games that follow
+        the quarterly season system.
+        If song name is provided, view the Top 100,
+        else view the Top 1 for all songs.
 
+        Parameters
+        -----------
+        game_choice: Choice[:class:`str`]
+            Game
+        artist_choice: :class:`str`
+            Artist/Album
+        song_choice: Optional[:class:`str`]
+            Song (requires artist/album to be set)
+        season_code: Optional[:class:`int`]
+            Season code (defaults to latest season)
+        """
+
+        await itr.response.defer()
         if not (
             songs := (
                 self.bot.info_by_name[game_choice.value].get(artist_choice, {}).values()
