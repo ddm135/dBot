@@ -562,7 +562,6 @@ data/*
 !/data/dalcom/
 data/dalcom/*
 !data/dalcom/KD/
-!data/dalcom/LP/
 data/dalcom/*/*
 !/data/dalcom/*/a.json
 dBot*.json
