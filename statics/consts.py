@@ -508,33 +508,6 @@ GAMES: dict[str, "GameDetails"] = {
         ),
         "target_audience": "776124120237-r7q2lcrob52mp0asch12hbmkd52elej5",
     },
-    "LP": {
-        "name": "SUPERSTAR LAPONE",
-        "iconUrl": (
-            "https://play-lh.googleusercontent.com"
-            "/jd2Jh8aSU_0CfHLIq-NQILuzmgCJq7T3af6jgaL1PMkxjbiZN-ef7LSzFtT5glDhjQ"
-            "=w240-h480"
-        ),
-        "color": 0xEAA715,
-        "spreadsheet": {
-            "id": "1Ng57BGCDj025bxwCBbQulYFhRjS5runy5HnbStY_xSw",
-            "ranges": ["Songs!A2:E"],
-            "columns": [InfoColumns.SKILLS.value],
-        },
-        "pinChannelIds": {
-            SSRG_GUILD: 1039132737979813908,
-            TEST_GUILD: 1340868523957813348,
-        },
-        "dateFormat": "%Y-%m-%d",
-        "timezone": "JST",
-        "packageName": "jp.co.dalcomsoft.superstarlapone",
-        "lastVersion": "1.9.4",
-        "manifestUrl": (
-            "https://superstar-lapone-jp-real.s3.amazonaws.com"
-            "/version/manifest/{version}.txt"
-        ),
-        "target_audience": "668693032380-fmhat079lhao0o335ov5uk4jkl6kget6",
-    },
     "EB": {
         "name": "SUPERSTAR EBiDAN",
         "color": 0xC71D1B,
