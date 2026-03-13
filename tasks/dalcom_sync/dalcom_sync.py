@@ -140,9 +140,10 @@ class DalcomSync(commands.Cog):
                 artist_name_index = game_details["spreadsheet"]["columns"][0].index(
                     "artist_name"
                 )
+                artist = {}
                 for song_id, song in self.bot.info_by_id[game].items():
                     artist_name = song[artist_name_index]
-                    if artist_name in self.bot.artist.setdefault(game, {}):
+                    if artist_name in artist:
                         continue
 
                     # Find artist code using song ID
@@ -180,7 +181,7 @@ class DalcomSync(commands.Cog):
                         else 0
                     )
 
-                    self.bot.artist[game][artist_name] = {
+                    artist[artist_name] = {
                         "code": artist_code,
                         "emblem": emblem,
                         "count": member_count,
@@ -192,6 +193,7 @@ class DalcomSync(commands.Cog):
                             if theme["groupID"] == artist_code:
                                 max_live += 15_000 * member_count
 
+                self.bot.artist[game] = artist
                 self.bot.live_theme[game]["max"] = max_live if max_live else 0
 
                 music_info_file = Path(f"data/MusicData/{game}.json")
