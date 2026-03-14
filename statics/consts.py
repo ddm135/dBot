@@ -58,7 +58,7 @@ EXTENSIONS = (
     "app_commands.world_record",
     # "app_commands.coupon",
     "entertainment.pinata",
-    "entertainment.alice_in_eosland",
+    "entertainment.alice",
     "events.on_command_error",
     "events.on_message",
     "events.on_ready",
