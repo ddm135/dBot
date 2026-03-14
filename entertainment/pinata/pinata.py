@@ -124,7 +124,7 @@ class Pinata(commands.Cog):
                         if isinstance(reward["role"], int)
                         else reward["role"]
                     ),
-                    "of": reward["of"],
+                    "from": reward["from"],
                 }
             )
             for reward in rewards
@@ -132,13 +132,13 @@ class Pinata(commands.Cog):
 
         for reward in real_rewards:
             reward["mention"] = (
-                f"{f"{reward["of"]} " if reward["of"] else ""}"
+                f"{f"{reward["from"]} " if reward["from"] else ""}"
                 f"{(reward["role"].mention
                     if isinstance(reward["role"], discord.Role)
                     else reward["role"])}"
             )
             reward["label"] = (
-                f"{f"{reward["of"]} " if reward["of"] else ""}"
+                f"{f"{reward["from"]} " if reward["from"] else ""}"
                 f"{(reward["role"].name
                     if isinstance(reward["role"], discord.Role)
                     else reward["role"])}"
