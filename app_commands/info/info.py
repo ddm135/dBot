@@ -113,7 +113,7 @@ class Info(commands.Cog):
                 )
 
                 album_info: list[str] | dict[str, str]
-                if game_choice.value in self.bot.bonus:
+                try:
                     bonus_columns = GAMES[game_choice.value]["spreadsheet"]["columns"][
                         -1
                     ]
@@ -129,7 +129,7 @@ class Info(commands.Cog):
                         "album_name": bonus[album_name_index],
                         "release_date": bonus[bonus_date_index],
                     }
-                else:
+                except (ValueError, KeyError, StopIteration):
                     album_info = {
                         "album_name": (
                             await cog.get_attributes(

@@ -79,7 +79,7 @@ class PinataView(discord.ui.View):
         self.length = len(rewards)
         self.joined: dict[discord.User | discord.Member, list[bool]] = {}
         self.message = message
-        super().__init__(timeout=30)
+        super().__init__(timeout=300)
         self.add_item(JoinAll())
         for index, reward in enumerate(rewards):
             self.add_item(ToggleSpecific(label=reward["label"], index=index))
@@ -98,9 +98,12 @@ class Pinata(commands.Cog):
     async def cog_unload(self) -> None:
         self.pinata.cancel()
 
-    @tasks.loop(time=[time(hour=h, minute=m) for h in range(24) for m in range(60)])
+    @tasks.loop(
+        time=[time(hour=h, minute=m) for h in range(24) for m in range(0, 60, 10)]
+    )
     async def pinata(self) -> None:
-        current_date = datetime.now(tz=TIMEZONES["KST"]).strftime("%m%d")
+        # current_date = datetime.now(tz=TIMEZONES["KST"]).strftime("%m%d")
+        current_date = "0401"
         rewards = PINATA_REWARDS.get(current_date, [])
         if not rewards:
             return
@@ -147,7 +150,7 @@ class Pinata(commands.Cog):
             message=message,
         )
         await message.edit(view=pinata_view)
-        await asyncio.sleep(30)
+        await asyncio.sleep(300)
         for item in pinata_view.children:
             if isinstance(item, discord.ui.Button):
                 item.disabled = True
