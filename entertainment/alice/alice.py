@@ -36,9 +36,10 @@ class Alice(commands.Cog):
 
 
 class Q1(discord.ui.Modal, title="Question 1"):
-    def __init__(self, view: "TriviaView"):
-        self.view = view
+
+    def __init__(self):
         super().__init__()
+        self.submission = None
 
     date = discord.ui.Label(
         text="When was the first SSRG shutdown?",
@@ -60,10 +61,13 @@ class Q1(discord.ui.Modal, title="Question 1"):
     )
 
     async def on_submit(self, interaction: discord.Interaction) -> None:
-        self.view.submissions.setdefault(interaction.user.id, {})["Q1"] = {
+        self.submission = {
             "date": self.date.component.value,
             "game": self.game.component.values[0],
         }
+        await interaction.response.send_message(
+            "Response recorded, you can resubmit before the day ends", ephemeral=True
+        )
 
 
 class TriviaView(discord.ui.View):
@@ -73,7 +77,11 @@ class TriviaView(discord.ui.View):
     async def question_1(
         self, interaction: discord.Interaction["dBot"], button: discord.ui.Button
     ):
-        await interaction.response.send_modal(Q1(self))
+        q1 = Q1()
+        await interaction.response.send_modal(q1)
+        await q1.wait()
+        if q1.submission:
+            self.submissions.setdefault(interaction.user.id, {})["Q1"] = q1.submission
 
 
 # Q1: When was the first SSRG shutdown? (全民天团, 2017-04-27)
