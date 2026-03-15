@@ -146,7 +146,7 @@ class Pinata(commands.Cog):
 
         message = await channel.send(
             embed=generate_embed(real_rewards, {}),
-            file=discord.File("./guitar.png", filename="guitar.png"),
+            file=discord.File("entertainment/pinata/guitar.png", filename="guitar.png"),
         )
         pinata_view = PinataView(
             rewards=real_rewards,  # type: ignore[arg-type]
@@ -228,7 +228,9 @@ class Pinata(commands.Cog):
             )
             await channel.send(
                 embed=embed,
-                file=discord.File("./guitar.png", filename="guitar.png"),
+                file=discord.File(
+                    "entertainment/pinata/guitar.png", filename="guitar.png"
+                ),
             )
 
             if winner is not None:
