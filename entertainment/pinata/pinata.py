@@ -144,7 +144,10 @@ class Pinata(commands.Cog):
                     else reward["role"])}"
             )
 
-        message = await channel.send(embed=generate_embed(real_rewards, {}))
+        message = await channel.send(
+            embed=generate_embed(real_rewards, {}),
+            file=discord.File("pinata/guitar.png", filename="guitar.png"),
+        )
         pinata_view = PinataView(
             rewards=real_rewards,  # type: ignore[arg-type]
             message=message,
@@ -170,7 +173,7 @@ class Pinata(commands.Cog):
             if is_superstar:
                 min_roll = 99.5
             else:
-                min_roll = 99.0
+                min_roll = 99.99
 
             winner: discord.User | discord.Member | None = None
             yoink_list: list[discord.User | discord.Member] = []
@@ -193,7 +196,7 @@ class Pinata(commands.Cog):
                 attendees_str += "~~"
 
                 final_desc = (
-                    f"{winner.mention} broke the piñata "
+                    f"{winner.mention} opened the box "
                     f"and got **{reward["mention"]}**\n\n"
                 )
                 final_desc += attendees_str
@@ -206,10 +209,12 @@ class Pinata(commands.Cog):
                     f"**{rolls}** more rolls were needed "
                     f"to get a winner for **{reward["mention"]}**\n\n"
                 )
-                final_desc += attendees_str
+                final_desc += (
+                    attendees_str if attendees_str != "Attendees:\n" else "None"
+                )
 
             embed = discord.Embed(
-                title="Piñata Drop",
+                title="Guitar Collecting",
                 description=final_desc,
                 color=(
                     reward["role"].color
@@ -217,8 +222,14 @@ class Pinata(commands.Cog):
                     else None
                 ),
             )
-            embed.set_footer(text=f"Need to get {min_roll} or higher to win")
-            await channel.send(embed=embed)
+            embed.set_footer(
+                text=f"Need to get {min_roll} or higher to win",
+                icon_url="attachment://guitar.png",
+            )
+            await channel.send(
+                embed=embed,
+                file=discord.File("pinata/guitar.png", filename="guitar.png"),
+            )
 
             if winner is not None:
                 _message = (
@@ -259,7 +270,7 @@ class Pinata(commands.Cog):
 def generate_embed(
     rewards: list, attendees: dict[discord.User | discord.Member, list[bool]]
 ) -> discord.Embed:
-    description = "Inside this piñata:\n**"
+    description = "Inside this box:\n**"
     color = None
     for reward in rewards:
         description += f"{reward["mention"]}\n"
@@ -279,11 +290,14 @@ def generate_embed(
             description += f" {index}. {attendee.mention}\n"
 
     embed = discord.Embed(
-        title="Piñata Drop",
+        title="Guitar Collecting",
         description=description,
         color=color,
     )
-    embed.set_footer(text="Please refrain from joining if you already have the role(s)")
+    embed.set_footer(
+        text="Please refrain from joining if you already have the role(s)",
+        icon_url="attachment://guitar.png",
+    )
     return embed
 
 
