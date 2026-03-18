@@ -206,8 +206,6 @@ class NotifyBonus(commands.Cog):
                             )
                             notify_start.append(msg)
 
-                print(artist, notify_start, notify_end)
-                print(artist_pings)
                 if not notify_start and not notify_end:
                     continue
 
