@@ -24,7 +24,7 @@ class NotifyBonus(commands.Cog):
     async def cog_unload(self) -> None:
         self.notify_bonus.cancel()
 
-    @tasks.loop(time=[time(hour=h, minute=30) for h in range(24)])
+    @tasks.loop(time=[time(hour=h) for h in range(24)])
     async def notify_bonus(self) -> None:
         channel = self.bot.get_channel(STATUS_CHANNEL) or await self.bot.fetch_channel(
             STATUS_CHANNEL
@@ -246,6 +246,7 @@ class NotifyBonus(commands.Cog):
                     ):
                         continue
 
+                    await channel.send(f"Sending to {user.name} ({user.id})")
                     embed = NotifyBonusEmbed(
                         artist,
                         icon,
