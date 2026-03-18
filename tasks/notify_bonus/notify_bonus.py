@@ -24,7 +24,7 @@ class NotifyBonus(commands.Cog):
     async def cog_unload(self) -> None:
         self.notify_bonus.cancel()
 
-    @tasks.loop(time=[time(hour=h, minute=17) for h in range(24)])
+    @tasks.loop(time=[time(hour=h, minute=30) for h in range(24)])
     async def notify_bonus(self) -> None:
         channel = self.bot.get_channel(STATUS_CHANNEL) or await self.bot.fetch_channel(
             STATUS_CHANNEL
@@ -224,17 +224,21 @@ class NotifyBonus(commands.Cog):
                     to_send.setdefault(
                         user_id,
                         {
-                            "start": 24
-                            - self.bot.notify_bonus[str(user_id)]["start"][0]
+                            "start": (
+                                24 - self.bot.notify_bonus[str(user_id)]["start"][0]
+                            )
                             == current_date.hour,
-                            "end": 24 - self.bot.notify_bonus[str(user_id)]["end"][0]
+                            "end": (24 - self.bot.notify_bonus[str(user_id)]["end"][0])
                             == current_date.hour,
                             "init": True,
                         },
                     )
                     await channel.send(
                         f"{game_name} - {artist}, {user.name} ({user.id}): "
-                        f"{str(to_send[user_id])}"
+                        f"{str(to_send[user_id])} "
+                        f"({24 - self.bot.notify_bonus[str(user_id)]["start"][0]}"
+                        f", {(24 - self.bot.notify_bonus[str(user_id)]["end"][0])}"
+                        f", {current_date.hour})"
                     )
 
                     if not (to_send[user_id]["start"] and notify_start) and not (
