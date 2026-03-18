@@ -24,7 +24,7 @@ class NotifyBonus(commands.Cog):
     async def cog_unload(self) -> None:
         self.notify_bonus.cancel()
 
-    @tasks.loop(time=[time(hour=h) for h in range(24)])
+    @tasks.loop(time=[time(hour=h, minute=17) for h in range(24)])
     async def notify_bonus(self) -> None:
         channel = self.bot.get_channel(STATUS_CHANNEL) or await self.bot.fetch_channel(
             STATUS_CHANNEL
@@ -206,6 +206,8 @@ class NotifyBonus(commands.Cog):
                             )
                             notify_start.append(msg)
 
+                print(artist, notify_start, notify_end)
+                print(artist_pings)
                 if not notify_start and not notify_end:
                     continue
 
