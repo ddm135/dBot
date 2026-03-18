@@ -216,6 +216,9 @@ class NotifyBonus(commands.Cog):
                             user_id
                         )
                     except discord.NotFound:
+                        await channel.send(
+                            f"<@{self.bot.owner_id}> Failed to fetch user {user_id}."
+                        )
                         continue
 
                     to_send.setdefault(
@@ -228,6 +231,10 @@ class NotifyBonus(commands.Cog):
                             == current_date.hour,
                             "init": True,
                         },
+                    )
+                    await channel.send(
+                        f"{game_name} - {artist}, {user.name} ({user.id}): "
+                        f"{str(to_send[user_id])}"
                     )
 
                     if not (to_send[user_id]["start"] and notify_start) and not (
@@ -263,7 +270,7 @@ class NotifyBonus(commands.Cog):
                             f"<@{self.bot.owner_id}> Failed to send bonus ping to"
                             f" {user.name} ({user.id}) for {game_name} - {artist}."
                         )
-                    except discord.HTTPException as e:
+                    except Exception as e:
                         await channel.send(
                             f"<@{self.bot.owner_id}> Failed to send bonus ping for"
                             f" {game_name} - {artist}. Check console for details."

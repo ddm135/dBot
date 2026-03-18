@@ -209,9 +209,9 @@ class Pinata(commands.Cog):
                     f"**{rolls}** more rolls were needed "
                     f"to get a winner for **{reward["mention"]}**\n\n"
                 )
-                final_desc += (
-                    attendees_str if attendees_str != "Attendees:\n" else "None"
-                )
+                final_desc += attendees_str
+                if not pinata_view.joined:
+                    final_desc += "None"
 
             embed = discord.Embed(
                 title="Guitar Collecting",
