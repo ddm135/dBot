@@ -25,6 +25,8 @@ class NotifyBonusEmbed(discord.Embed):
             .replace(r"`", r"\`"),
             icon_url="attachment://icon.png" if isinstance(icon, Path) else icon,
         )
+        starts = starts.copy()
+        ends = ends.copy()
 
         started = False
         while starts:

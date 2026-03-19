@@ -216,41 +216,25 @@ class NotifyBonus(commands.Cog):
                             user_id
                         )
                     except discord.NotFound:
-                        await channel.send(
-                            f"<@{self.bot.owner_id}> Failed to fetch user {user_id}."
-                        )
                         continue
 
                     to_send.setdefault(
                         user_id,
                         {
-                            "start": (
-                                24 - self.bot.notify_bonus[str(user_id)]["start"][0]
-                            )
+                            "start": 24
+                            - self.bot.notify_bonus[str(user_id)]["start"][0]
                             == current_date.hour,
-                            "end": (24 - self.bot.notify_bonus[str(user_id)]["end"][0])
+                            "end": 24 - self.bot.notify_bonus[str(user_id)]["end"][0]
                             == current_date.hour,
                             "init": True,
                         },
-                    )
-                    await channel.send(
-                        f"{game_name} - {artist}, {user.name} ({user.id}): "
-                        f"{str(to_send[user_id])} "
-                        f"({24 - self.bot.notify_bonus[str(user_id)]["start"][0]}"
-                        f", {(24 - self.bot.notify_bonus[str(user_id)]["end"][0])}"
-                        f", {current_date.hour})"
                     )
 
                     if not (to_send[user_id]["start"] and notify_start) and not (
                         to_send[user_id]["end"] and notify_end
                     ):
-                        await channel.send(
-                            f"{to_send[user_id]["start"]}, {str(notify_start)}, "
-                            f"{to_send[user_id]["end"]}, {str(notify_end)}"
-                        )
                         continue
 
-                    await channel.send(f"Sending to {user.name} ({user.id})")
                     embed = NotifyBonusEmbed(
                         artist,
                         icon,
@@ -279,7 +263,7 @@ class NotifyBonus(commands.Cog):
                             f"<@{self.bot.owner_id}> Failed to send bonus ping to"
                             f" {user.name} ({user.id}) for {game_name} - {artist}."
                         )
-                    except Exception as e:
+                    except discord.HTTPException as e:
                         await channel.send(
                             f"<@{self.bot.owner_id}> Failed to send bonus ping for"
                             f" {game_name} - {artist}. Check console for details."
