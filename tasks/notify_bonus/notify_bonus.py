@@ -244,6 +244,10 @@ class NotifyBonus(commands.Cog):
                     if not (to_send[user_id]["start"] and notify_start) and not (
                         to_send[user_id]["end"] and notify_end
                     ):
+                        await channel.send(
+                            f"{to_send[user_id]["start"]}, {str(notify_start)}, "
+                            f"{to_send[user_id]["end"]}, {str(notify_end)}"
+                        )
                         continue
 
                     await channel.send(f"Sending to {user.name} ({user.id})")
