@@ -259,8 +259,8 @@ class DalcomSync(commands.Cog):
                         missing_music.append(
                             [
                                 music_code,
-                                _results[music["code"]]["koKR"],
-                                _results[music["code"]]["enUS"],
+                                _results[results[music["code"]]["localeName"]]["koKR"],
+                                _results[results[music["code"]]["localeName"]]["enUS"],
                                 results[music["code"]]["isHidden"],
                             ]
                         )
