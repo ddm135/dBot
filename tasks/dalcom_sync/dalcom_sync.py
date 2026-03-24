@@ -26,6 +26,7 @@ if TYPE_CHECKING:
 
     from dBot import dBot
     from helpers.google_drive import GoogleDrive
+    from helpers.google_sheets import GoogleSheets
     from helpers.superstar import SuperStar
 
 
@@ -45,6 +46,7 @@ class DalcomSync(commands.Cog):
     @tasks.loop(time=[time(hour=h, minute=15) for h in range(24)])
     async def dalcom_sync(self) -> None:
         drive_cog: "GoogleDrive" = self.bot.get_cog("GoogleDrive")
+        sheets_cog: "GoogleSheets" = self.bot.get_cog("GoogleSheets")
         ss_cog: "SuperStar" = self.bot.get_cog("SuperStar")
         border_channel = self.bot.get_channel(
             BORDER_CHANNEL
@@ -205,10 +207,12 @@ class DalcomSync(commands.Cog):
                         self.bot.info_from_file[game] = {}
 
                 bundle_folders: set[Path] = set()
+                missing_music = []
                 for music in dalcom_data["MusicData"].values():
+                    music_code = str(music["code"])
                     current_key = (
                         self.bot.info_from_file[game]
-                        .setdefault(str(music["code"]), {})
+                        .setdefault(music_code, {})
                         .setdefault("sound", {})
                         .get("key")
                     )
@@ -222,13 +226,14 @@ class DalcomSync(commands.Cog):
                         )
                         found_key = results[found_key]["url"]
 
+                    results = await ss_cog.get_attributes(
+                        game,
+                        (dalcom_data["MusicData"], dalcom_data.get("URLs")),
+                        [music["code"]],
+                        {"sound": True, "localeName": False, "isHidden": False},
+                    )
+
                     if not current_key or current_key != found_key:
-                        results = await ss_cog.get_attributes(
-                            game,
-                            (dalcom_data["MusicData"], dalcom_data.get("URLs")),
-                            [music["code"]],
-                            {"sound": True},
-                        )
                         src_path = results[music["code"]]["sound"]
                         if not src_path:
                             continue
@@ -238,10 +243,26 @@ class DalcomSync(commands.Cog):
                         duration = int(soundfile.info(dst_path).duration)
                         minutes = duration // 60
                         seconds = str(duration % 60).zfill(2)
-                        self.bot.info_from_file[game][str(music["code"])]["sound"] = {
+                        self.bot.info_from_file[game][music_code]["sound"] = {
                             "duration": f"{minutes}:{seconds}",
                             "key": found_key,
                         }
+
+                    if music_code not in self.bot.info_by_id[game]:
+                        _results = await ss_cog.get_attributes(
+                            game,
+                            (dalcom_data["LocaleData"], None),
+                            results[music["code"]]["localeName"],
+                            {"koKR": False, "enUS": False},
+                        )
+                        missing_music.append(
+                            [
+                                music_code,
+                                _results[music["code"]]["koKR"],
+                                _results[music["code"]]["enUS"],
+                                results[music["code"]]["isHidden"],
+                            ]
+                        )
 
                     if "SeqData" in dalcom_data:
                         continue
@@ -253,7 +274,7 @@ class DalcomSync(commands.Cog):
                     }.items():
                         current_key = (
                             self.bot.info_from_file[game]
-                            .setdefault(str(music["code"]), {})
+                            .setdefault(music_code, {})
                             .setdefault("seq", {})
                             .setdefault(difficulty.replace("seq", ""), {})
                             .get("key")
@@ -286,12 +307,20 @@ class DalcomSync(commands.Cog):
                         await self.copy_file(src_path, dst_path, bundle_folders)
 
                         seq_obj = Seq(dst_path)
-                        self.bot.info_from_file[game][str(music["code"])]["seq"][
+                        self.bot.info_from_file[game][music_code]["seq"][
                             difficulty.replace("seq", "")
                         ] = {
                             "count": seq_obj.count,
                             "key": found_key,
                         }
+
+                missing_music.append(["-", "-", "-", "-"])
+                await sheets_cog.update_sheet_data(
+                    game_details["spreadsheet"]["id"],
+                    game_details["spreadsheet"]["ranges"][0].partition("!")[0]
+                    + "!W2:Z",
+                    missing_music,
+                )
 
                 if "SeqData" in dalcom_data:
                     for seq in dalcom_data["SeqData"].values():

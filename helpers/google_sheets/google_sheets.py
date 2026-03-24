@@ -60,6 +60,21 @@ class GoogleSheets(commands.Cog):
         values = result.get("valueRanges", [])
         return [value.get("values", []) for value in values]
 
+    async def update_sheet_data(
+        self, spreadsheet_id: str, range_str: str, data: list[list[str]]
+    ) -> None:
+        await asyncio.to_thread(
+            self.service.values()
+            .update(
+                spreadsheetId=spreadsheet_id,
+                range=range_str,
+                valueInputOption="RAW",
+                body={"values": data},
+            )
+            .execute,
+            num_retries=MAX_RETRIES,
+        )
+
     async def find_replace_sheet_data(
         self,
         spreadsheet_id: str,
