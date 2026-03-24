@@ -232,6 +232,7 @@ class DalcomSync(commands.Cog):
                         [music["code"]],
                         {"sound": True, "localeName": False, "isHidden": False},
                     )
+                    print("what")
 
                     if not current_key or current_key != found_key:
                         src_path = results[music["code"]]["sound"]
@@ -251,8 +252,8 @@ class DalcomSync(commands.Cog):
                     if music_code not in self.bot.info_by_id[game]:
                         _results = await ss_cog.get_attributes(
                             game,
-                            (dalcom_data["LocaleData"], None),
-                            results[music["code"]]["localeName"],
+                            (dalcom_data["LocaleData"], dalcom_data.get("URLs")),
+                            [results[music["code"]]["localeName"]],
                             {"koKR": False, "enUS": False},
                         )
                         missing_music.append(
