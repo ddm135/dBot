@@ -454,6 +454,16 @@ class DalcomSync(commands.Cog):
                     }
                     border_folder = (await drive_cog.create_file(metadata))[0]
 
+                for border_name, border_key in borders.items():
+                    try:
+                        border_file_path = await ss_cog.extract_file_from_bundle(
+                            game, border_key
+                        )
+                        if not border_file_path:
+                            continue
+                    except KeyError:
+                        continue
+
                 next_page = ""
                 while True:
                     border_files = await drive_cog.get_file_list(
