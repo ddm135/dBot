@@ -226,15 +226,20 @@ class DalcomSync(commands.Cog):
                         )
                         found_key = results[found_key]["url"]
 
-                    results = await ss_cog.get_attributes(
+                    _results = await ss_cog.get_attributes(
                         game,
                         (dalcom_data["MusicData"], dalcom_data.get("URLs")),
                         [music["code"]],
-                        {"sound": True, "localeName": False, "isHidden": False},
+                        {"localeName": False, "isHidden": False},
                     )
-                    print(music["code"])
 
                     if not current_key or current_key != found_key:
+                        results = await ss_cog.get_attributes(
+                            game,
+                            (dalcom_data["MusicData"], dalcom_data.get("URLs")),
+                            [music["code"]],
+                            {"sound": True},
+                        )
                         src_path = results[music["code"]]["sound"]
                         if not src_path:
                             continue
@@ -250,18 +255,18 @@ class DalcomSync(commands.Cog):
                         }
 
                     if music_code not in self.bot.info_by_id[game]:
-                        _results = await ss_cog.get_attributes(
+                        results = await ss_cog.get_attributes(
                             game,
                             (dalcom_data["LocaleData"], dalcom_data.get("URLs")),
-                            [results[music["code"]]["localeName"]],
+                            [_results[music["code"]]["localeName"]],
                             {"koKR": False, "enUS": False},
                         )
                         missing_music.append(
                             [
                                 music_code,
-                                _results[results[music["code"]]["localeName"]]["koKR"],
-                                _results[results[music["code"]]["localeName"]]["enUS"],
-                                results[music["code"]]["isHidden"],
+                                results[_results[music["code"]]["localeName"]]["koKR"],
+                                results[_results[music["code"]]["localeName"]]["enUS"],
+                                _results[music["code"]]["isHidden"],
                             ]
                         )
 
