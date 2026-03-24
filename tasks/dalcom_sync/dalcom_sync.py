@@ -232,7 +232,7 @@ class DalcomSync(commands.Cog):
                         [music["code"]],
                         {"sound": True, "localeName": False, "isHidden": False},
                     )
-                    print("what")
+                    print(music["code"])
 
                     if not current_key or current_key != found_key:
                         src_path = results[music["code"]]["sound"]
