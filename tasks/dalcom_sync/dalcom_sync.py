@@ -259,13 +259,14 @@ class DalcomSync(commands.Cog):
                             game,
                             (dalcom_data["LocaleData"], dalcom_data.get("URLs")),
                             [_results[music["code"]]["localeName"]],
-                            {"koKR": False, "enUS": False},
+                            {"koKR": False, "enUS": False, "jaJP": False},
                         )
                         missing_music.append(
                             [
                                 music_code,
                                 results[_results[music["code"]]["localeName"]]["koKR"],
                                 results[_results[music["code"]]["localeName"]]["enUS"],
+                                results[_results[music["code"]]["localeName"]]["jaJP"],
                                 _results[music["code"]]["isHidden"],
                             ]
                         )
@@ -324,7 +325,7 @@ class DalcomSync(commands.Cog):
                 await sheets_cog.update_sheet_data(
                     game_details["spreadsheet"]["id"],
                     game_details["spreadsheet"]["ranges"][0].partition("!")[0]
-                    + "!W2:Z",
+                    + "!V2:Z",
                     missing_music,
                 )
 
@@ -454,15 +455,15 @@ class DalcomSync(commands.Cog):
                     }
                     border_folder = (await drive_cog.create_file(metadata))[0]
 
-                for border_name, border_key in borders.items():
-                    try:
-                        border_file_path = await ss_cog.extract_file_from_bundle(
-                            game, border_key
-                        )
-                        if not border_file_path:
-                            continue
-                    except KeyError:
-                        continue
+                # for border_name, border_key in borders.items():
+                #     try:
+                #         border_file_path = await ss_cog.extract_file_from_bundle(
+                #             game, border_key
+                #         )
+                #         if not border_file_path:
+                #             continue
+                #     except KeyError:
+                #         continue
 
                 next_page = ""
                 while True:
