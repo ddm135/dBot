@@ -321,7 +321,7 @@ class DalcomSync(commands.Cog):
                             "key": found_key,
                         }
 
-                missing_music.append(["-", "-", "-", "-"])
+                missing_music.append(["-", "-", "-", "-", "-"])
                 await sheets_cog.update_sheet_data(
                     game_details["spreadsheet"]["id"],
                     game_details["spreadsheet"]["ranges"][0].partition("!")[0]
