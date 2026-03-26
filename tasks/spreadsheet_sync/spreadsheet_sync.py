@@ -87,7 +87,7 @@ class SpreadsheetSync(commands.Cog):
                 new_row[bonus_end_index] = datetime.strptime(
                     row[bonus_end_index], date_format
                 ).replace(tzinfo=timezone)
-            except ValueError:
+            except (IndexError, ValueError):
                 continue
             new_row[bonus_amount_index] = int(row[bonus_amount_index].replace("%", ""))
             bonus.setdefault(new_row[artist_name_index], []).append(new_row)
