@@ -80,12 +80,15 @@ class SpreadsheetSync(commands.Cog):
             if not row:
                 continue
             new_row: list = row
-            new_row[bonus_start_index] = datetime.strptime(
-                row[bonus_start_index], date_format
-            ).replace(tzinfo=timezone)
-            new_row[bonus_end_index] = datetime.strptime(
-                row[bonus_end_index], date_format
-            ).replace(tzinfo=timezone)
+            try:
+                new_row[bonus_start_index] = datetime.strptime(
+                    row[bonus_start_index], date_format
+                ).replace(tzinfo=timezone)
+                new_row[bonus_end_index] = datetime.strptime(
+                    row[bonus_end_index], date_format
+                ).replace(tzinfo=timezone)
+            except ValueError:
+                continue
             new_row[bonus_amount_index] = int(row[bonus_amount_index].replace("%", ""))
             bonus.setdefault(new_row[artist_name_index], []).append(new_row)
 
