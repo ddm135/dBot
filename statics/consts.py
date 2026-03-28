@@ -450,13 +450,6 @@ GAMES: dict[str, "GameDetails"] = {
             SSRG_GUILD: 481907573948153857,
             TEST_GUILD: 1343840449357418516,
         },
-        "forward": {
-            "source_maint": 1415367073533657128,
-            "target": {
-                SSRG_GUILD: 481907573948153857,
-                TEST_GUILD: 1343840449357418516,
-            },
-        },
         "dateFormat": "%Y-%m-%d",
         "timezone": "JST",
         "packageName": "jp.co.ponos.superstarsmtown",
@@ -492,13 +485,6 @@ GAMES: dict[str, "GameDetails"] = {
             SSRG_GUILD: 951350075190313010,
             TEST_GUILD: 1335936325685084242,
         },
-        "forward": {
-            "source_maint": 1415366656758255666,
-            "target": {
-                SSRG_GUILD: 951350075190313010,
-                TEST_GUILD: 1335936325685084242,
-            },
-        },
         "dateFormat": "%Y-%m-%d",
         "timezone": "JST",
         "packageName": "jp.co.dalcomsoft.superstarjypnation",
@@ -525,13 +511,6 @@ GAMES: dict[str, "GameDetails"] = {
                 },
             ],
         },
-        "forward": {
-            "source_maint": 1415366753814577312,
-            "target": {
-                SSRG_GUILD: 1151895287158276166,
-                TEST_GUILD: 1413706609884008579,
-            },
-        },
         "dateFormat": "%Y-%m-%d",
         "timezone": "JST",
         "packageName": "jp.co.dalcomsoft.superstarebidan",
@@ -541,6 +520,31 @@ GAMES: dict[str, "GameDetails"] = {
             "/version/manifest/{version}.txt"
         ),
         "target_audience": "1006848262784-luosgb8o1hrjvbu6v8mjgh35b5oiimli",
+    },
+    "LDH": {
+        "name": "SUPERSTAR LDH",
+        "color": 0xE60012,
+        "spreadsheet": {
+            "id": "1UoI5Hdk0o02IlX88-wYOJYOkLyW-CL4O46lJXxcvMBQ",
+            "ranges": ["Songs!A2:D", "Bonuses!A2:I"],
+            "columns": [InfoColumns.CLASSIC.value, BONUS_COLUMNS],
+            "replaceGrids": [
+                {
+                    "sheetId": 1685871960,
+                    "startRowIndex": 1,
+                    "startColumnIndex": 2,
+                    "endColumnIndex": 3,
+                },
+            ],
+        },
+        "dateFormat": "%Y-%m-%d",
+        "timezone": "JST",
+        "packageName": "jp.co.dalcomsoft.superstarldh",
+        "lookupQuery": "id=6752320672&country=jp",
+        "manifestUrl": (
+            "https://superstar-ldh-jp-real.s3.amazonaws.com"
+            "/version/manifest/{version}.txt"
+        ),
     },
     "PH": {
         "name": "SuperStar PHILIPPINES",
