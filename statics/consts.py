@@ -24,10 +24,10 @@ TIMEZONES = {
     "KST": ZoneInfo("Asia/Seoul"),
     "JST": ZoneInfo("Asia/Tokyo"),
     "CST": ZoneInfo("Asia/Taipei"),
-    # "EST": ZoneInfo("Etc/GMT+5"),
-    # "EDT": ZoneInfo("Etc/GMT+4"),
+    "EST": ZoneInfo("Etc/GMT+5"),
+    "EDT": ZoneInfo("Etc/GMT+4"),
     "PHT": ZoneInfo("Asia/Manila"),
-    # "ICT": ZoneInfo("Asia/Bangkok"),
+    "ICT": ZoneInfo("Asia/Bangkok"),
 }
 
 STATIC_MODULES = (
