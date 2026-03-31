@@ -1,3 +1,5 @@
+# mypy: disable-error-code="var-annotated"
+
 import asyncio
 from typing import TYPE_CHECKING
 

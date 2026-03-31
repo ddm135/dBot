@@ -501,7 +501,7 @@ GAMES: dict[str, "GameDetails"] = {
         "spreadsheet": {
             "id": "1uwLl0MQM895xI4iBmdP-eVVn7HKOBisFaQCCjzJL4GQ",
             "ranges": ["Songs!A2:D", "Bonuses!A2:I"],
-            "columns": [InfoColumns.CLASSIC.value, BONUS_COLUMNS],
+            "columns": [InfoColumns.SKILLS.value, BONUS_COLUMNS],
             "replaceGrids": [
                 {
                     "sheetId": 1685871960,
@@ -528,6 +528,7 @@ GAMES: dict[str, "GameDetails"] = {
             "id": "1UoI5Hdk0o02IlX88-wYOJYOkLyW-CL4O46lJXxcvMBQ",
             "ranges": ["Songs!A2:D", "Bonuses!A2:I"],
             "columns": [InfoColumns.CLASSIC.value, BONUS_COLUMNS],
+            "columns": [InfoColumns.SKILLS.value, BONUS_COLUMNS],
             "replaceGrids": [
                 {
                     "sheetId": 1685871960,
