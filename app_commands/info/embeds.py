@@ -93,15 +93,13 @@ class InfoDetailsEmbed(discord.Embed):
 
         self.add_field(name="Duration", value=duration)
         if (
-            (
-                difficulty_levels := " / ".join(note_count)
-            )
-        ) != "Easy / Normal / Hard":
+            difficulty_levels := " / ".join(sorted(note_count))
+        ) != "Easy / Hard / Normal":
             self.add_field(name="Difficulty Levels", value=difficulty_levels)
         self.add_field(
             name="Note Count",
             value=" / ".join(
-                str(difficulty["count"]) for difficulty in note_count.values()
+                str(difficulty["count"]) for difficulty in sorted(note_count.values())
             ),
         )
         if skills:
