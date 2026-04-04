@@ -76,8 +76,9 @@ class DalcomSync(commands.Cog):
                     ):
                         song_id = match.group(1)
                         dependency = (
-                            self.bot.info_from_file[game][song_id]
-                            .get("sound", {})
+                            self.bot.info_from_file[game]
+                            .setdefault(song_id, {})
+                            .setdefault("sound", {})
                             .get("dependency")
                         )
                         if (
@@ -106,9 +107,10 @@ class DalcomSync(commands.Cog):
                         song_id = match.group(1)
                         difficulty = match.group(2).capitalize()
                         dependency = (
-                            self.bot.info_from_file[game][song_id]
-                            .get("seq", {})
-                            .get(difficulty, {})
+                            self.bot.info_from_file[game]
+                            .setdefault(song_id, {})
+                            .setdefault("seq", {})
+                            .setdefault(difficulty, {})
                             .get("dependency")
                         )
                         if (
@@ -128,9 +130,7 @@ class DalcomSync(commands.Cog):
                         await self.copy_file(src_path, dst_path, bundle_folders)
 
                         seq_obj = Seq(dst_path)
-                        self.bot.info_from_file[game][song_id]["seq"][
-                            difficulty.capitalize()
-                        ] = {
+                        self.bot.info_from_file[game][song_id]["seq"][difficulty] = {
                             "count": seq_obj.count,
                             "key": k,
                         }
