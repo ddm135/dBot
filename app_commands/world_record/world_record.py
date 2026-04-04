@@ -29,6 +29,7 @@ class WorldRecord(commands.GroupCog, name="world_record"):
         app_commands.Choice(name=game_details["name"], value=game)
         for game, game_details in GAMES.items()
         if not {"firstSeason"} <= set(game_details)
+        and not {"catalogPattern"} <= set(game_details)
     ]
     WEEKLY_CHOICES = [
         app_commands.Choice(name=game_details["name"], value=game)

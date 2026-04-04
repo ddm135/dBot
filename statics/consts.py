@@ -423,6 +423,45 @@ GAMES: dict[str, "GameDetails"] = {
         ),
         "target_audience": "259379396797-tfc19vpi39fosa2sic420po6l67p9ltu",
     },
+    "BL": {
+        "name": "SUPERSTAR THEBLACKLABEL",
+        "color": 0x000000,
+        "spreadsheet": {
+            "id": "1a4lXHp4qDkCmaUwUwCs3PiHgUDXmS00CJaR0dSiQ5Vc",
+            "ranges": ["Info!A2:C"],
+            "columns": [InfoColumns.NO_SSL.value],
+            "replaceGrids": [
+                {
+                    "sheetId": 0,
+                    "startRowIndex": 1,
+                    "startColumnIndex": 1,
+                    "endColumnIndex": 2,
+                },
+            ],
+        },
+        "forward": {
+            "source_maint": 1489895419952758835,
+            "target": {
+                SSRG_GUILD: 1452684579092828292,
+            },
+        },
+        "dateFormat": "%Y-%m-%d",
+        "timezone": "KST",
+        "packageName": "com.dalcomsoft.ssbl",
+        "lookupQuery": "id=6738368827&country=kr",
+        "manifestUrl": (
+            "https://superstar-theblacklabel.s3.amazonaws.com"
+            "/version/prod/manifest/{version}.txt"
+        ),
+        "catalogUrl": (
+            "https://ssbl-cdn.dalcomsoft.net/live/assets"
+            "/LIVE/Android/2.8.0/catalog_{version}.bin"
+        ),
+        "catalogPattern": {
+            "sound": r"Audio_Music_(\d+)",
+            "seq": r"bytes_notes_(\d+)_([a-z]+)",
+        },
+    },
     "SMTOWN": {
         "name": "SUPERSTAR SMTOWN (JP/TW)",
         "color": 0xE10989,

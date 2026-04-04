@@ -4,6 +4,7 @@
 import binascii
 import json
 import logging
+import re
 import shutil
 from collections import defaultdict
 from datetime import datetime, time
@@ -57,6 +58,84 @@ class DalcomSync(commands.Cog):
         )
 
         for game, game_details in GAMES.items():
+            bundle_folders: set[Path] = set()
+            missing_music = []
+
+            music_info_file = Path(f"data/MusicData/{game}.json")
+            if not self.bot.info_from_file.get(game):
+                if music_info_file.exists():
+                    with open(music_info_file, "r", encoding="utf-8") as f:
+                        self.bot.info_from_file[game] = json.load(f)
+                else:
+                    self.bot.info_from_file[game] = {}
+
+            if "catalogPattern" in game_details:
+                for k, v in self.bot.basic[game]["catalog"].items():
+                    if match := re.fullmatch(
+                        game_details["catalogPattern"]["sound"], k
+                    ):
+                        song_id = match.group(1)
+                        dependency = (
+                            self.bot.info_from_file[game][song_id]
+                            .get("sound", {})
+                            .get("dependency")
+                        )
+                        if (
+                            song_id in self.bot.info_from_file[game]
+                            and dependency == v["dependency"]
+                        ):
+                            continue
+
+                        src_path = await ss_cog.extract_file_from_bundle(game, k)
+                        if not src_path:
+                            continue
+                        dst_path = Path(f"data/MusicData/{game}/{song_id}.ogg")
+                        await self.copy_file(src_path, dst_path, bundle_folders)
+
+                        duration = int(soundfile.info(dst_path).duration)
+                        minutes = duration // 60
+                        seconds = str(duration % 60).zfill(2)
+                        self.bot.info_from_file[game][song_id]["sound"] = {
+                            "duration": f"{minutes}:{seconds}",
+                            "key": k,
+                            "dependency": v["dependency"],
+                        }
+                    elif match := re.fullmatch(
+                        game_details["catalogPattern"]["seq"], k
+                    ):
+                        song_id = match.group(1)
+                        difficulty = match.group(2).capitalize()
+                        dependency = (
+                            self.bot.info_from_file[game][song_id]
+                            .get("seq", {})
+                            .get(difficulty, {})
+                            .get("dependency")
+                        )
+                        if (
+                            song_id in self.bot.info_from_file[game]
+                            and difficulty
+                            in self.bot.info_from_file[game][song_id].get("seq", {})
+                            and dependency == v["dependency"]
+                        ):
+                            continue
+
+                        src_path = await ss_cog.extract_file_from_bundle(game, k)
+                        if not src_path:
+                            continue
+                        dst_path = Path(
+                            f"data/MusicData/{game}/{song_id}_{difficulty}.seq"
+                        )
+                        await self.copy_file(src_path, dst_path, bundle_folders)
+
+                        seq_obj = Seq(dst_path)
+                        self.bot.info_from_file[game][song_id]["seq"][
+                            difficulty.capitalize()
+                        ] = {
+                            "count": seq_obj.count,
+                            "key": k,
+                        }
+                continue
+
             try:
                 ajs_path = Path(f"data/dalcom/{game}/a.json")
                 if ajs_path.exists():
@@ -198,16 +277,6 @@ class DalcomSync(commands.Cog):
                 self.bot.artist[game] = artist
                 self.bot.live_theme[game]["max"] = max_live if max_live else 0
 
-                music_info_file = Path(f"data/MusicData/{game}.json")
-                if not self.bot.info_from_file.get(game):
-                    if music_info_file.exists():
-                        with open(music_info_file, "r", encoding="utf-8") as f:
-                            self.bot.info_from_file[game] = json.load(f)
-                    else:
-                        self.bot.info_from_file[game] = {}
-
-                bundle_folders: set[Path] = set()
-                missing_music = []
                 for music in dalcom_data["MusicData"].values():
                     music_code = str(music["code"])
                     current_key = (
@@ -382,7 +451,10 @@ class DalcomSync(commands.Cog):
 
                 # Get World Record seasons and duration
                 current_date = datetime.now(tz=TIMEZONES[game_details["timezone"]])
-                if "firstSeason" not in game_details:
+                if (
+                    "firstSeason" not in game_details
+                    and "catalogPattern" not in game_details
+                ):
                     for reward in dalcom_data["WorldRecordData"].values():
                         season_code = reward["seasonCode"]
                         if season_code in self.bot.world_record.setdefault(game, {}):

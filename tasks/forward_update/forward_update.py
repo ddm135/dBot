@@ -137,6 +137,9 @@ class ForwardUpdate(commands.Cog):
                     if manifest["MaintenanceUrl"]:
                         continue
 
+                    if "catalogPattern" in game_details:
+                        break
+
                     ajs = await cog.get_a_json(game)
                     if ajs["code"] == 1000:
                         break

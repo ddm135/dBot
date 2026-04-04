@@ -92,7 +92,12 @@ class Seq:
                         and not event["duration"]
                         and event["channelId"] in SEQ_LANES[self.SEQData_Info["type"]]
                     ):
-                        self.count += 1
+                        if (
+                            self.SEQData_Info["layout"] != 0x67
+                            or str(event["property"])[0] not in ("1", "2")
+                            or str(event["property"])[1] != "4"
+                        ):
+                            self.count += 1
                     else:
                         self.invalid_count += 1
                 seq.seek(SEQ_PADDING[self.SEQData_Info["layout"]], 1)

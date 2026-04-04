@@ -38,6 +38,7 @@ class GameDetails(TypedDict):
     catalogUrl: NotRequired[str]
     authorization: NotRequired[str]
     target_audience: NotRequired[str]
+    catalogPattern: NotRequired[dict[str, str]]
 
 
 class BasicDetails(TypedDict):

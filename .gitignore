@@ -564,7 +564,12 @@ data/dalcom/*
 !data/dalcom/KD/
 data/dalcom/*/*
 !/data/dalcom/*/a.json
+
 dBot*.json
 **/test*
 **/test*.*
 .dBot
+
+utils/*
+!utils/bundle*
+!utils/catalog-*
