@@ -72,6 +72,25 @@ class DalcomSync(commands.Cog):
                     self.bot.info_from_file[game] = {}
 
             if "catalogPattern" in game_details:
+                artist_name_index = game_details["spreadsheet"]["columns"][0].index(
+                    "artist_name"
+                )
+                artist = {}
+                for song in self.bot.info_by_id[game].values():
+                    artist_name = song[artist_name_index]
+                    if artist_name in artist:
+                        continue
+
+                    artist[artist_name] = {
+                        "code": None,
+                        "emblem": None,
+                        "count": 0,
+                        "score": 0,
+                    }
+
+                self.bot.artist[game] = artist
+                self.bot.live_theme[game]["max"] = 0
+
                 for k, v in self.bot.basic[game]["catalog"].items():
                     if match := re.fullmatch(
                         game_details["catalogPattern"]["sound"], k
