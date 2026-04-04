@@ -133,6 +133,7 @@ class DalcomSync(commands.Cog):
                         self.bot.info_from_file[game][song_id]["seq"][difficulty] = {
                             "count": seq_obj.count,
                             "key": k,
+                            "dependency": v["dependency"],
                         }
 
                 with open(music_info_file, "w", encoding="utf-8") as f:
