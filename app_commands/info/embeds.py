@@ -99,7 +99,8 @@ class InfoDetailsEmbed(discord.Embed):
         self.add_field(
             name="Note Count",
             value=" / ".join(
-                str(difficulty["count"]) for difficulty in sorted(note_count.values())
+                str(difficulty["count"])
+                for difficulty in sorted(note_count.values(), key=lambda x: x["count"])
             ),
         )
         if skills:
