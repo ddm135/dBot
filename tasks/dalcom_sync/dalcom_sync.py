@@ -134,6 +134,10 @@ class DalcomSync(commands.Cog):
                             "count": seq_obj.count,
                             "key": k,
                         }
+
+                for path in bundle_folders:
+                    shutil.rmtree(path)
+
                 continue
 
             try:
