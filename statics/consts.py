@@ -82,17 +82,17 @@ class InfoColumns(Enum):
         "search_term",
         "song_name",
     )
-    NO_SSL = (
-        "song_id",
-        "artist_name",
-        "song_name",
-    )
     SKILLS = (
         "song_id",
         "artist_name",
         "search_term",
         "song_name",
         "skills",
+    )
+    OTHER = (
+        "song_id",
+        "artist_name",
+        "song_name",
     )
 
 
@@ -295,7 +295,7 @@ GAMES: dict[str, "GameDetails"] = {
         "spreadsheet": {
             "id": "1QSCRXKtiwoMTLV8knHC_o4NwV3UZM6ZvL-l9ZCPxoRM",
             "ranges": ["Official Local Version!A2:C"],
-            "columns": [InfoColumns.NO_SSL.value],
+            "columns": [InfoColumns.OTHER.value],
         },
         "dateFormat": "%Y-%m-%d",
         "timezone": "KST",
@@ -391,7 +391,7 @@ GAMES: dict[str, "GameDetails"] = {
         "spreadsheet": {
             "id": "1HHBluEEcWmZMHjq3WlLbS9TeLfPktQ3WrfxpcgReWF0",
             "ranges": ["Songs (Note Count)!A2:C"],
-            "columns": [InfoColumns.NO_SSL.value],
+            "columns": [InfoColumns.OTHER.value],
             "replaceGrids": [
                 {
                     "sheetId": 0,
@@ -428,8 +428,8 @@ GAMES: dict[str, "GameDetails"] = {
         "color": 0x000000,
         "spreadsheet": {
             "id": "1a4lXHp4qDkCmaUwUwCs3PiHgUDXmS00CJaR0dSiQ5Vc",
-            "ranges": ["Info!A2:C"],
-            "columns": [InfoColumns.NO_SSL.value],
+            "ranges": ["Songs!A2:C"],
+            "columns": [InfoColumns.OTHER.value],
             "replaceGrids": [
                 {
                     "sheetId": 0,

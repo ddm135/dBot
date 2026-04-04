@@ -58,6 +58,8 @@ class DalcomSync(commands.Cog):
         )
 
         for game, game_details in GAMES.items():
+            self.LOGGER.info("Downloading Dalcom data: %s...", game_details["name"])
+
             bundle_folders: set[Path] = set()
             missing_music = []
 
@@ -152,7 +154,6 @@ class DalcomSync(commands.Cog):
                 else:
                     stored_ajs = defaultdict(lambda: defaultdict(dict))
 
-                self.LOGGER.info("Downloading Dalcom data: %s...", game_details["name"])
                 if "lastVersion" in game_details:
                     ajs = {"code": 1000, "result": stored_ajs}
                     stored_ajs = ajs
