@@ -77,6 +77,11 @@ class Seq:
                 }
                 self.SEQData_Channel.append(channel)
 
+            slider_none = {
+                "1": False,
+                "2": False,
+            }
+
             for i in range(self.SEQData_Info["eventCount"]):
                 event = {
                     "tick": struct.unpack("<I", seq.read(4))[0],
@@ -92,11 +97,21 @@ class Seq:
                         and not event["duration"]
                         and event["channelId"] in SEQ_LANES[self.SEQData_Info["type"]]
                     ):
-                        if (
-                            self.SEQData_Info["layout"] != 0x67
-                            or str(event["property"])[0] not in ("1", "2")
-                            or str(event["property"])[1] != "4"
+                        property_str = str(event["property"])
+                        if self.SEQData_Info["layout"] == 0x67 and property_str[0] in (
+                            "1",
+                            "2",
                         ):
+                            match property_str[1]:
+                                case "1" if slider_none[property_str[0]]:
+                                    slider_none[property_str[0]] = False
+                                    self.count += 2
+                                case "4":
+                                    slider_none[property_str[0]] = True
+                                case _:
+                                    slider_none[property_str[0]] = False
+                                    self.count += 1
+                        else:
                             self.count += 1
                     else:
                         self.invalid_count += 1
