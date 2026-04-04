@@ -434,7 +434,7 @@ GAMES: dict[str, "GameDetails"] = {
         "color": 0x000000,
         "spreadsheet": {
             "id": "1a4lXHp4qDkCmaUwUwCs3PiHgUDXmS00CJaR0dSiQ5Vc",
-            "ranges": ["Songs!A2:C"],
+            "ranges": ["Songs!A2:I"],
             "columns": [InfoColumns.OTHER.value],
             "replaceGrids": [
                 {
@@ -545,7 +545,7 @@ GAMES: dict[str, "GameDetails"] = {
         "color": 0xC71D1B,
         "spreadsheet": {
             "id": "1uwLl0MQM895xI4iBmdP-eVVn7HKOBisFaQCCjzJL4GQ",
-            "ranges": ["Songs!A2:D", "Bonuses!A2:I"],
+            "ranges": ["Songs!A2:E", "Bonuses!A2:I"],
             "columns": [InfoColumns.SKILLS.value, BONUS_COLUMNS],
             "replaceGrids": [
                 {
@@ -571,7 +571,7 @@ GAMES: dict[str, "GameDetails"] = {
         "color": 0xE60012,
         "spreadsheet": {
             "id": "1UoI5Hdk0o02IlX88-wYOJYOkLyW-CL4O46lJXxcvMBQ",
-            "ranges": ["Songs!A2:D", "Bonuses!A2:I"],
+            "ranges": ["Songs!A2:E", "Bonuses!A2:I"],
             "columns": [InfoColumns.SKILLS.value, BONUS_COLUMNS],
             "replaceGrids": [
                 {
