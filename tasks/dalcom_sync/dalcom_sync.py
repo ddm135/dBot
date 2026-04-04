@@ -135,6 +135,9 @@ class DalcomSync(commands.Cog):
                             "key": k,
                         }
 
+                with open(music_info_file, "w", encoding="utf-8") as f:
+                    json.dump(self.bot.info_from_file[game], f, indent=4)
+
                 for path in bundle_folders:
                     shutil.rmtree(path)
 
