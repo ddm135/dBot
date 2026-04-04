@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import discord
 from discord import app_commands
@@ -71,11 +71,10 @@ class Info(commands.Cog):
                 )
             ):
                 return await itr.followup.send("Artist not found.")
-            icon = (
-                self.bot.artist.get(game_choice.value, {})
-                .get(artist_choice, {})
-                .get("emblem")
-            ) or self.bot.basic[game_choice.value]["iconUrl"]
+            if "catalogPattern" in game_details:
+                icon = self.bot.basic[game_choice.value]["iconUrl"]
+            else:
+                icon = self.bot.artist[game_choice.value][artist_choice]["emblem"]
 
             if song_choice:
                 if not (
@@ -90,23 +89,6 @@ class Info(commands.Cog):
                 )  # type: ignore[assignment]
                 song_id = song[song_id_index]
                 int_song_id = int(song_id)
-                results = await cog.get_attributes(
-                    game_choice.value,
-                    "MusicData",
-                    [int_song_id],
-                    {
-                        "album": True,
-                        "albumName": False,
-                        "albumBgColor": False,
-                        "releaseDate": False,
-                        "myrecordQualifyingScore": False,
-                    },
-                )
-                color = (
-                    int(results[int_song_id]["albumBgColor"][:-2], 16)
-                    if results[int_song_id]["albumBgColor"]
-                    else game_details["color"]
-                )
 
                 file_info = self.bot.info_from_file[game_choice.value].get(
                     song_id,
@@ -116,38 +98,71 @@ class Info(commands.Cog):
                     },
                 )
 
-                album_info: list[str] | dict[str, str]
-                try:
-                    bonus_columns = GAMES[game_choice.value]["spreadsheet"]["columns"][
-                        -1
-                    ]
-                    album_name_index = bonus_columns.index("album_name")
-                    song_id_index = bonus_columns.index("song_id")
-                    bonus_date_index = bonus_columns.index("bonus_date")
-                    bonus = next(
-                        bonus
-                        for bonus in self.bot.bonus[game_choice.value][artist_choice]
-                        if bonus[album_name_index] and song_id == bonus[song_id_index]
+                if "catalogPattern" in game_details:
+                    color = game_details["color"]
+                    results: dict[int, dict[str, Any]] = {
+                        int_song_id: {
+                            "album": None,
+                            "myrecordQualifyingScore": None,
+                        }
+                    }
+                    album_info = {
+                        "album_name": artist_choice.partition(" : ")[2],
+                        "release_date": song[info_columns.index("release_date")],
+                    }
+                else:
+                    results = await cog.get_attributes(
+                        game_choice.value,
+                        "MusicData",
+                        [int_song_id],
+                        {
+                            "album": True,
+                            "albumName": False,
+                            "albumBgColor": False,
+                            "releaseDate": False,
+                            "myrecordQualifyingScore": False,
+                        },
                     )
-                    album_info = {
-                        "album_name": bonus[album_name_index],
-                        "release_date": bonus[bonus_date_index],
-                    }
-                except (ValueError, KeyError, StopIteration):
-                    album_info = {
-                        "album_name": (
-                            await cog.get_attributes(
-                                game_choice.value,
-                                "LocaleData",
-                                [results[int_song_id]["albumName"]],
-                                {"enUS": False},
-                            )
-                        )[results[int_song_id]["albumName"]]["enUS"],
-                        "release_date": datetime.fromtimestamp(
-                            results[int_song_id]["releaseDate"] / 1000,
-                            tz=TIMEZONES[game_details["timezone"]],
-                        ).strftime(game_details["dateFormat"]),
-                    }
+                    color = (
+                        int(results[int_song_id]["albumBgColor"][:-2], 16)
+                        if results[int_song_id]["albumBgColor"]
+                        else game_details["color"]
+                    )
+
+                    try:
+                        bonus_columns = GAMES[game_choice.value]["spreadsheet"][
+                            "columns"
+                        ][-1]
+                        album_name_index = bonus_columns.index("album_name")
+                        song_id_index = bonus_columns.index("song_id")
+                        bonus_date_index = bonus_columns.index("bonus_date")
+                        bonus = next(
+                            bonus
+                            for bonus in self.bot.bonus[game_choice.value][
+                                artist_choice
+                            ]
+                            if bonus[album_name_index]
+                            and song_id == bonus[song_id_index]
+                        )
+                        album_info = {
+                            "album_name": bonus[album_name_index],
+                            "release_date": bonus[bonus_date_index],
+                        }
+                    except (ValueError, KeyError, StopIteration):
+                        album_info = {
+                            "album_name": (
+                                await cog.get_attributes(
+                                    game_choice.value,
+                                    "LocaleData",
+                                    [results[int_song_id]["albumName"]],
+                                    {"enUS": False},
+                                )
+                            )[results[int_song_id]["albumName"]]["enUS"],
+                            "release_date": datetime.fromtimestamp(
+                                results[int_song_id]["releaseDate"] / 1000,
+                                tz=TIMEZONES[game_details["timezone"]],
+                            ).strftime(game_details["dateFormat"]),
+                        }
 
                 return await itr.followup.send(
                     embed=InfoDetailsEmbed(

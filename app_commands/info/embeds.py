@@ -119,7 +119,8 @@ class InfoDetailsEmbed(discord.Embed):
             name="Release Date",
             value=album_info["release_date"],
         )
-        self.add_field(
-            name="My Record Challenge Score",
-            value=f"{my_record:,}",
-        )
+        if my_record:
+            self.add_field(
+                name="My Record Challenge Score",
+                value=f"{my_record:,}",
+            )
