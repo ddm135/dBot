@@ -466,6 +466,7 @@ GAMES: dict[str, "GameDetails"] = {
         "catalogPattern": {
             "sound": r"Audio_Music_(\d+)",
             "seq": r"bytes_notes_(\d+)_([a-z]+)",
+            "border": r"Image_ThemeType_(\d+)_R_Large"
         },
     },
     "SMTOWN": {

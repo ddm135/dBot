@@ -62,6 +62,7 @@ class DalcomSync(commands.Cog):
 
             bundle_folders: set[Path] = set()
             missing_music = []
+            borders = {}
 
             music_info_file = Path(f"data/MusicData/{game}.json")
             if not self.bot.info_from_file.get(game):
@@ -70,6 +71,18 @@ class DalcomSync(commands.Cog):
                         self.bot.info_from_file[game] = json.load(f)
                 else:
                     self.bot.info_from_file[game] = {}
+
+            for folder in drive_folders["files"]:
+                if folder["name"] == game_details["name"]:
+                    border_folder = folder["id"]
+                    break
+            else:
+                metadata: "File" = {
+                    "name": game_details["name"],
+                    "mimeType": FOLDER_MIME,
+                    "parents": [BORDER_FOLDER],
+                }
+                border_folder = (await drive_cog.create_file(metadata))[0]
 
             if "catalogPattern" in game_details:
                 artist_name_index = game_details["spreadsheet"]["columns"][0].index(
@@ -157,11 +170,63 @@ class DalcomSync(commands.Cog):
                             "dependency": v["dependency"],
                         }
 
+                        if song_id not in self.bot.info_by_id[game]:
+                            missing_music.append(
+                                [
+                                    song_id,
+                                    str(seq_obj.SEQData_Object),
+                                ]
+                            )
+                    elif match := re.fullmatch(
+                        game_details["catalogPattern"]["border"], k
+                    ):
+                        border_id = match.group(1)
+                        border_internal = Path(v["internalId"])
+                        border_name = f"{border_id}.{border_internal.suffix}"
+                        borders[border_name] = k
+
                 with open(music_info_file, "w", encoding="utf-8") as f:
                     json.dump(self.bot.info_from_file[game], f, indent=4)
 
                 for path in bundle_folders:
                     shutil.rmtree(path)
+
+                missing_music.append(["-", "-"])
+                await sheets_cog.update_sheet_data(
+                    game_details["spreadsheet"]["id"],
+                    game_details["spreadsheet"]["ranges"][0].partition("!")[0]
+                    + "!Y2:Z",
+                    missing_music,
+                )
+
+                next_page = ""
+                while True:
+                    border_files = await drive_cog.get_file_list(
+                        border_folder, next_page=next_page
+                    )
+                    for file in border_files["files"]:
+                        borders.pop(file["name"], None)
+                    if not (next_page := border_files.get("nextPageToken", "")):
+                        break
+
+                if borders:
+                    self.LOGGER.info("Uploading borders: %s...", game_details["name"])
+                    for border_name, border_key in borders.items():
+                        try:
+                            border_file_path = await ss_cog.extract_file_from_bundle(
+                                game, border_key
+                            )
+                            if not border_file_path:
+                                continue
+                            border_media = MediaFileUpload(border_file_path)
+                        except KeyError:
+                            continue
+                        metadata = {"name": border_name, "parents": [border_folder]}
+                        link = (await drive_cog.create_file(metadata, border_media))[2]
+                        await border_channel.send(
+                            f"{game_details["name"]}: "
+                            f"{border_name.replace(r"<", r"\<")}\n<{link}>"
+                        )
 
                 continue
 
@@ -507,7 +572,6 @@ class DalcomSync(commands.Cog):
                 if "catalogUrl" not in game_details:
                     continue
 
-                borders = {}
                 for border in dalcom_data["ThemeTypeData"].values():
                     if not border["code"]:
                         continue
@@ -542,18 +606,6 @@ class DalcomSync(commands.Cog):
                         borders[border_name] = str(
                             catalog_key.with_stem(catalog_key.stem + k)
                         )
-
-                for folder in drive_folders["files"]:
-                    if folder["name"] == game_details["name"]:
-                        border_folder = folder["id"]
-                        break
-                else:
-                    metadata: "File" = {
-                        "name": game_details["name"],
-                        "mimeType": FOLDER_MIME,
-                        "parents": [BORDER_FOLDER],
-                    }
-                    border_folder = (await drive_cog.create_file(metadata))[0]
 
                 # for border_name, border_key in borders.items():
                 #     try:
