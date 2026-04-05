@@ -182,7 +182,7 @@ class DalcomSync(commands.Cog):
                     ):
                         border_id = match.group(1)
                         border_internal = Path(v["internalId"])
-                        border_name = f"{border_id}.{border_internal.suffix}"
+                        border_name = f"{border_id}{border_internal.suffix}"
                         borders[border_name] = k
 
                 with open(music_info_file, "w", encoding="utf-8") as f:
@@ -218,6 +218,9 @@ class DalcomSync(commands.Cog):
                             )
                             if not border_file_path:
                                 continue
+                            border_file_path = border_file_path.with_stem(
+                                f"{border_file_path.stem}_0"
+                            )
                             border_media = MediaFileUpload(border_file_path)
                         except KeyError:
                             continue
