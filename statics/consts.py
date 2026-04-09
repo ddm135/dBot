@@ -123,7 +123,7 @@ class BaseScore(Enum):
 GAMES: dict[str, "GameDetails"] = {
     "SM": {
         "name": "SUPERSTAR SM",
-        "color": 0xE204DD,
+        "color": 0xF259DC,
         "spreadsheet": {
             "id": "1dX_5lWxenT7CDVXpgyScTHDiwazUZIO3441RaNpN55g",
             "ranges": ["Songs!A2:D", "dBonuses!A2:I"],
@@ -352,8 +352,8 @@ GAMES: dict[str, "GameDetails"] = {
         "target_audience": "832096356756-6nust6ofm2hfoima94nd93uakqq44ev8",
     },
     "SC": {
-        "name": "SUPERSTAR STAYC",
         "color": 0x210630,
+        "name": "SUPERSTAR HIGHUP",
         "spreadsheet": {
             "id": "1zEBkb3oAqP_VkilWfJt6x0nfcrweVn7Ray--wNHqxjg",
             "ranges": ["Info!A2:I"],
@@ -393,7 +393,7 @@ GAMES: dict[str, "GameDetails"] = {
     },
     "W1": {
         "name": "SUPERSTAR WAKEONE",
-        "color": 0x4E25D1,
+        "color": 0x5400FF,
         "spreadsheet": {
             "id": "1HHBluEEcWmZMHjq3WlLbS9TeLfPktQ3WrfxpcgReWF0",
             "ranges": ["Songs (Note Count)!A2:C"],
