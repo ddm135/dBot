@@ -28,6 +28,7 @@ TIMEZONES = {
     # "EDT": ZoneInfo("Etc/GMT+4"),
     "PHT": ZoneInfo("Asia/Manila"),
     # "ICT": ZoneInfo("Asia/Bangkok"),
+    "UTC": ZoneInfo("UTC"),
 }
 
 STATIC_MODULES = (
