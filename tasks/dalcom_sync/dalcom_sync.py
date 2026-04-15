@@ -72,18 +72,6 @@ class DalcomSync(commands.Cog):
                 else:
                     self.bot.info_from_file[game] = {}
 
-            for folder in drive_folders["files"]:
-                if folder["name"] == game_details["name"]:
-                    border_folder = folder["id"]
-                    break
-            else:
-                metadata: "File" = {
-                    "name": game_details["name"],
-                    "mimeType": FOLDER_MIME,
-                    "parents": [BORDER_FOLDER],
-                }
-                border_folder = (await drive_cog.create_file(metadata))[0]
-
             if "catalogPattern" in game_details:
                 artist_name_index = game_details["spreadsheet"]["columns"][0].index(
                     "artist_name"
@@ -198,6 +186,18 @@ class DalcomSync(commands.Cog):
                     + "!Y2:Z",
                     missing_music,
                 )
+
+                for folder in drive_folders["files"]:
+                    if folder["name"] == game_details["name"]:
+                        border_folder = folder["id"]
+                        break
+                else:
+                    metadata: "File" = {
+                        "name": game_details["name"],
+                        "mimeType": FOLDER_MIME,
+                        "parents": [BORDER_FOLDER],
+                    }
+                    border_folder = (await drive_cog.create_file(metadata))[0]
 
                 next_page = ""
                 while True:
@@ -610,15 +610,17 @@ class DalcomSync(commands.Cog):
                             catalog_key.with_stem(catalog_key.stem + k)
                         )
 
-                # for border_name, border_key in borders.items():
-                #     try:
-                #         border_file_path = await ss_cog.extract_file_from_bundle(
-                #             game, border_key
-                #         )
-                #         if not border_file_path:
-                #             continue
-                #     except KeyError:
-                #         continue
+                for folder in drive_folders["files"]:
+                    if folder["name"] == game_details["name"]:
+                        border_folder = folder["id"]
+                        break
+                else:
+                    metadata: "File" = {
+                        "name": game_details["name"],
+                        "mimeType": FOLDER_MIME,
+                        "parents": [BORDER_FOLDER],
+                    }
+                    border_folder = (await drive_cog.create_file(metadata))[0]
 
                 next_page = ""
                 while True:
