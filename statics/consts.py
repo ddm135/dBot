@@ -217,7 +217,7 @@ GAMES: dict[str, "GameDetails"] = {
         "lookupQuery": "id=1086866467&country=kr",
         "manifestUrl": (
             "https://superstar-jyp-resource.s3.amazonaws.com"
-            "/version/live/manifest/j_{version}.txt"
+            "/version/live/manifest/{version}.txt"
         ),
         "catalogUrl": (
             "https://ssj-cdn.dalcomsoft.net/live/assets"
