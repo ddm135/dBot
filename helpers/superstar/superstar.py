@@ -385,17 +385,6 @@ class SuperStar(commands.Cog):
     async def get_xapk(self, game: str) -> Path | None:
         xapk_folder_path = Path(f"data/xapks/{game}")
         xapk_folder_path.mkdir(parents=True, exist_ok=True)
-        xapks = list(
-            xapk_folder_path.rglob(
-                f"*{self.bot.basic[game]["manifest"]["ActiveVersion_Android"]}*.xapk"
-            )
-        )
-        if xapks:
-            xapk_path = xapks[0]
-            if not zipfile.is_zipfile(xapk_path):
-                xapk_path.unlink(missing_ok=True)
-            else:
-                return xapk_path
 
         async with AsyncSession() as session:
             response = await session.get(
