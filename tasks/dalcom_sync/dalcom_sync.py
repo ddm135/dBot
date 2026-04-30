@@ -212,18 +212,25 @@ class DalcomSync(commands.Cog):
                 if borders:
                     self.LOGGER.info("Uploading borders: %s...", game_details["name"])
                     for border_name, border_key in borders.items():
-                        try:
-                            border_file_path = await ss_cog.extract_file_from_bundle(
-                                game, border_key
-                            )
-                            if not border_file_path:
-                                continue
-                            border_file_path = border_file_path.with_stem(
-                                f"{border_file_path.stem}_0"
-                            )
-                            border_media = MediaFileUpload(border_file_path)
-                        except KeyError:
+                        border_file_path = await ss_cog.extract_file_from_bundle(
+                            game, border_key
+                        )
+                        if not border_file_path:
                             continue
+
+                        border_media = None
+                        for path in border_file_path.parent.iterdir():
+                            if not path.is_file():
+                                continue
+
+                            with open(path, "rb") as f:
+                                header = f.read(8)
+                                if header == b"\x89PNG\r\n\x1a\n":
+                                    border_media = MediaFileUpload(path)
+                                    break
+                        if border_media is None:
+                            continue
+
                         metadata = {"name": border_name, "parents": [border_folder]}
                         link = (await drive_cog.create_file(metadata, border_media))[2]
                         await border_channel.send(
@@ -571,7 +578,6 @@ class DalcomSync(commands.Cog):
                             "end": end_date,
                         }
 
-                # TODO: Check if key has been changed
                 if "catalogUrl" not in game_details:
                     continue
 
@@ -615,7 +621,7 @@ class DalcomSync(commands.Cog):
                         border_folder = folder["id"]
                         break
                 else:
-                    metadata: "File" = {
+                    metadata = {
                         "name": game_details["name"],
                         "mimeType": FOLDER_MIME,
                         "parents": [BORDER_FOLDER],

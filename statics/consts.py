@@ -124,7 +124,7 @@ class BaseScore(Enum):
 GAMES: dict[str, "GameDetails"] = {
     "SM": {
         "name": "SUPERSTAR SM",
-        "color": 0xF259DC,
+        "color": 0xE204DD,
         "spreadsheet": {
             "id": "1dX_5lWxenT7CDVXpgyScTHDiwazUZIO3441RaNpN55g",
             "ranges": ["Songs!A2:D", "dBonuses!A2:I"],
