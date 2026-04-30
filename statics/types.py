@@ -33,7 +33,7 @@ class GameDetails(TypedDict):
     firstSeason: NotRequired[datetime]
     packageName: str
     lookupQuery: NotRequired[str]
-    lastVersion: NotRequired[str]
+    lastVersion: str
     manifestUrl: str
     catalogUrl: NotRequired[str]
     authorization: NotRequired[str]

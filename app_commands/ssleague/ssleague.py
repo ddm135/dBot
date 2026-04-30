@@ -140,11 +140,11 @@ class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the d
         pin_role = game_details.get("pinRoles", {}).get(guild_id)
 
         info_columns = game_details["spreadsheet"]["columns"][0]
-        if artist_name is None:
+        if not artist_name:
             artist_name = ssl_song[info_columns.index("artist_name")]
-        if song_name is None:
+        if not song_name:
             song_name = ssl_song[info_columns.index("song_name")]
-        if song_id is None:
+        if not song_id:
             song_id = int(ssl_song[info_columns.index("song_id")])
 
         duration = self.bot.info_from_file[game][str(song_id)]["sound"]["duration"]

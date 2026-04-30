@@ -29,7 +29,6 @@ class Bonus(commands.GroupCog, name="bonus", description="Add/Remove Bonus Pings
         app_commands.Choice(name=game_details["name"], value=game)
         for game, game_details in GAMES.items()
         if "bonus_amount" in game_details["spreadsheet"]["columns"][-1]
-        and not {"lastVersion"} <= set(game_details)
     ]
     FILTERED_GAME_CHOICES = [
         choice for choice in GAME_CHOICES if {"base_score"} <= set(GAMES[choice.value])

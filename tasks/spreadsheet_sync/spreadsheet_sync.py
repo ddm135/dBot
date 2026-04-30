@@ -62,9 +62,7 @@ class SpreadsheetSync(commands.Cog):
         self.bot.info_by_name[game] = info_by_name
         self.bot.info_by_id[game] = info_by_id
 
-        if "bonus_amount" not in game_details["spreadsheet"]["columns"][-1] or {
-            "lastVersion"
-        } <= set(game_details):
+        if "bonus_amount" not in game_details["spreadsheet"]["columns"][-1]:
             return
 
         bonus_columns = game_details["spreadsheet"]["columns"][-1]

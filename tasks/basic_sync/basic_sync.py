@@ -43,7 +43,7 @@ class BasicSync(commands.Cog):
         cog: "SuperStar" = self.bot.get_cog("SuperStar")  # type: ignore[assignment]
 
         async with aiohttp.ClientSession() as session:
-            if {"iconUrl", "lastVersion"} <= set(game_details):
+            if {"iconUrl"} <= set(game_details):
                 # If game has been unlisted
                 version = game_details["lastVersion"]
                 iconUrl = game_details["iconUrl"]

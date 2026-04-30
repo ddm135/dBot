@@ -228,7 +228,7 @@ class DalcomSync(commands.Cog):
                                 if header == b"\x89PNG\r\n\x1a\n":
                                     border_media = MediaFileUpload(path)
                                     break
-                        if border_media is None:
+                        if not border_media:
                             continue
 
                         metadata = {"name": border_name, "parents": [border_folder]}
@@ -248,7 +248,7 @@ class DalcomSync(commands.Cog):
                 else:
                     stored_ajs = defaultdict(lambda: defaultdict(dict))
 
-                if "lastVersion" in game_details:
+                if "iconUrl" in game_details:
                     ajs = {"code": 1000, "result": stored_ajs}
                     stored_ajs = ajs
                 else:

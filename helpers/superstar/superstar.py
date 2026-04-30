@@ -4,6 +4,7 @@
 import asyncio
 import gzip
 import json
+import re
 import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
@@ -35,18 +36,28 @@ class SuperStar(commands.Cog):
     async def get_manifest(self, game: str, version: str | None = None) -> dict:
         async with aiohttp.ClientSession() as session:
             while True:
-                async with session.get(
-                    GAMES[game]["manifestUrl"].format(
-                        version=version
-                        or self.bot.basic[game]["manifest"]["ActiveVersion_Android"]
+                try:
+                    async with session.get(
+                        GAMES[game]["manifestUrl"].format(
+                            version=version
+                            or self.bot.basic[game]["manifest"]["ActiveVersion_Android"]
+                        )
+                    ) as r:
+                        manifest = await r.json(content_type=None)
+                        if manifest["ActiveVersion_Android"] == version:
+                            return manifest
+                        version = manifest["ActiveVersion_Android"]
+                except json.JSONDecodeError:
+                    xapk_path = await self.get_xapk(game)
+                    if not xapk_path:
+                        version = GAMES[game]["lastVersion"]
+                        continue
+
+                    match = re.search(
+                        r"(\d+\.\d+\.\d+)",
+                        xapk_path.stem,
                     )
-                ) as r:
-                    print(r.url)
-                    print(await r.text())
-                    manifest = await r.json(content_type=None)
-                    if manifest["ActiveVersion_Android"] == version:
-                        return manifest
-                    version = manifest["ActiveVersion_Android"]
+                    version = match.group(1) if match else GAMES[game]["lastVersion"]
 
     async def get_a_json(self, game: str) -> dict:
         headers = SuperStarHeaders()
@@ -371,7 +382,7 @@ class SuperStar(commands.Cog):
 
         return file_path
 
-    async def get_xapk(self, game) -> Path | None:
+    async def get_xapk(self, game: str) -> Path | None:
         xapk_folder_path = Path(f"data/xapks/{game}")
         xapk_folder_path.mkdir(parents=True, exist_ok=True)
         xapks = list(
@@ -386,9 +397,6 @@ class SuperStar(commands.Cog):
             else:
                 return xapk_path
 
-        for file in xapk_folder_path.iterdir():
-            if file.is_file():
-                file.unlink()
         async with AsyncSession() as session:
             response = await session.get(
                 APKPURE_URL.format(package_name=GAMES[game]["packageName"]),
@@ -406,16 +414,15 @@ class SuperStar(commands.Cog):
                     return None
 
                 xapk_file_name = disposition.split("filename=")[-1].strip('"')
-                # if (
-                #     self.bot.basic[game]["manifest"]["ActiveVersion_Android"]
-                #     not in xapk_file_name
-                # ):
-                #     return None
-
                 xapk_path = xapk_folder_path / xapk_file_name
-                with open(xapk_path, "wb") as f:
-                    async for chunk in r.content.iter_chunked(CHUNK_SIZE):
-                        f.write(chunk)
+                if not xapk_path.exists():
+                    for file in xapk_folder_path.iterdir():
+                        if file.is_file():
+                            file.unlink()
+
+                    with open(xapk_path, "wb") as f:
+                        async for chunk in r.content.iter_chunked(CHUNK_SIZE):
+                            f.write(chunk)
 
         return xapk_path
 

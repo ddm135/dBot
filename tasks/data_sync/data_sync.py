@@ -177,7 +177,7 @@ class DataSync(commands.Cog):
         self.save_data(Data.LAST_MODIFIED, last_modified)
 
     def save_data(self, data: Data, content: dict | None = None) -> None:
-        if content is None:
+        if not content:
             content = getattr(self.bot, data.name.lower())
         with open(data.value, "w", encoding="utf-8") as f:
             json.dump(content, f, indent=4)

@@ -55,7 +55,7 @@ class SSLeagueEmbed(discord.Embed):
             value=(
                 f"{artist_last.strftime("%A, %B %d, %Y").replace(" 0", " ")} "
                 f"(<t:{int(artist_last.timestamp())}:R>)"
-                if artist_last is not None
+                if artist_last
                 else "N/A"
             ),
             inline=False,
@@ -65,7 +65,7 @@ class SSLeagueEmbed(discord.Embed):
             value=(
                 f"{song_last.strftime("%A, %B %d, %Y").replace(" 0", " ")} "
                 f"(<t:{int(song_last.timestamp())}:R>)"
-                if song_last is not None
+                if song_last
                 else "N/A"
             ),
             inline=False,
