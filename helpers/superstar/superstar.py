@@ -41,6 +41,8 @@ class SuperStar(commands.Cog):
                         or self.bot.basic[game]["manifest"]["ActiveVersion_Android"]
                     )
                 ) as r:
+                    print(r.url)
+                    print(await r.text())
                     manifest = await r.json(content_type=None)
                     if manifest["ActiveVersion_Android"] == version:
                         return manifest
