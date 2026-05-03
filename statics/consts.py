@@ -357,8 +357,8 @@ GAMES: dict[str, "GameDetails"] = {
         "target_audience": "832096356756-6nust6ofm2hfoima94nd93uakqq44ev8",
     },
     "SC": {
-        "color": 0x210630,
         "name": "SUPERSTAR HIGHUP",
+        "color": 0x210630,
         "spreadsheet": {
             "id": "1zEBkb3oAqP_VkilWfJt6x0nfcrweVn7Ray--wNHqxjg",
             "ranges": ["Info!A2:I"],
