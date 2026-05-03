@@ -25,14 +25,15 @@ class NotifyBonusEmbed(discord.Embed):
             .replace(r"`", r"\`"),
             icon_url="attachment://icon.png" if isinstance(icon, Path) else icon,
         )
-        starts = starts.copy()
-        ends = ends.copy()
 
         started = False
-        while starts:
+        start_length = len(starts)
+        i = 0
+        while i < start_length:
             start_str = ""
-            while starts and len(start_str) + len(starts[0]) < 1024:
-                start_str += starts.pop(0)
+            while i < start_length and len(start_str) + len(starts[i]) < 1024:
+                start_str += starts[i]
+                i += 1
             self.add_field(
                 name=(
                     (
@@ -49,10 +50,13 @@ class NotifyBonusEmbed(discord.Embed):
             started = True
 
         ended = False
-        while ends:
+        end_length = len(ends)
+        i = 0
+        while i < end_length:
             end_str = ""
-            while ends and len(end_str) + len(ends[0]) < 1024:
-                end_str += ends.pop(0)
+            while i < end_length and len(end_str) + len(ends[i]) < 1024:
+                end_str += ends[i]
+                i += 1
             self.add_field(
                 name=(
                     (

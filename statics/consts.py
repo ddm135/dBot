@@ -163,6 +163,7 @@ GAMES: dict[str, "GameDetails"] = {
         "dateFormat": "%Y-%m-%d",
         "timezone": "KST",
         "packageName": "kr.co.dalcomsoft.superstar.a",
+        "lastVersion": "3.30.2",
         "lookupQuery": "id=890937532&country=kr",
         "manifestUrl": (
             "https://super-star.s3.amazonaws.com/version/live/manifest/{version}.txt"
@@ -214,6 +215,7 @@ GAMES: dict[str, "GameDetails"] = {
         "dateFormat": "%Y-%m-%d",
         "timezone": "KST",
         "packageName": "com.dalcomsoft.ss.jyp",
+        "lastVersion": "3.30.2",
         "lookupQuery": "id=1086866467&country=kr",
         "manifestUrl": (
             "https://superstar-jyp-resource.s3.amazonaws.com"
@@ -259,6 +261,7 @@ GAMES: dict[str, "GameDetails"] = {
         "dateFormat": "%Y-%m-%d",
         "timezone": "KST",
         "packageName": "com.dalcomsoft.sss",
+        "lastVersion": "3.31.4",
         "lookupQuery": "id=1480181152&country=kr",
         "manifestUrl": (
             "https://superstar-starship.s3.amazonaws.com"
@@ -340,6 +343,7 @@ GAMES: dict[str, "GameDetails"] = {
         "dateFormat": "%Y-%m-%d",
         "timezone": "KST",
         "packageName": "com.dalcomsoft.ssat",
+        "lastVersion": "3.31.4",
         "lookupQuery": "id=1571479814&country=kr",
         "manifestUrl": (
             "https://superstar-ateez.s3.amazonaws.com"
@@ -380,6 +384,7 @@ GAMES: dict[str, "GameDetails"] = {
         "dateFormat": "%Y-%m-%d",
         "timezone": "KST",
         "packageName": "com.dalcomsoft.stayc",
+        "lastVersion": "3.31.4",
         "lookupQuery": "id=6446679596&country=kr",
         "manifestUrl": (
             "https://superstar-stayc.s3.amazonaws.com"
@@ -419,6 +424,7 @@ GAMES: dict[str, "GameDetails"] = {
         "timezone": "KST",
         "firstSeason": datetime(2024, 12, 2, tzinfo=TIMEZONES["KST"]),
         "packageName": "com.dalcomsoft.sswo",
+        "lastVersion": "3.30.5",
         "lookupQuery": "id=6523424185&country=kr",
         "manifestUrl": (
             "https://superstar-wakeone.s3.amazonaws.com"
@@ -455,6 +461,7 @@ GAMES: dict[str, "GameDetails"] = {
         "dateFormat": "%Y-%m-%d",
         "timezone": "KST",
         "packageName": "com.dalcomsoft.ssbl",
+        "lastVersion": "1.0.9",
         "lookupQuery": "id=6738368827&country=kr",
         "manifestUrl": (
             "https://superstar-theblacklabel.s3.amazonaws.com"
@@ -467,7 +474,7 @@ GAMES: dict[str, "GameDetails"] = {
         "catalogPattern": {
             "sound": r"Audio_Music_(\d+)",
             "seq": r"bytes_notes_(\d+)_([a-z]+)",
-            "border": r"Image_ThemeType_(\d+)_R_Large"
+            "border": r"Image_ThemeType_(\d+)_R_Large",
         },
     },
     "SMTOWN": {
@@ -500,6 +507,7 @@ GAMES: dict[str, "GameDetails"] = {
         "dateFormat": "%Y-%m-%d",
         "timezone": "JST",
         "packageName": "jp.co.ponos.superstarsmtown",
+        "lastVersion": "3.6.6",
         "lookupQuery": "id=1216136006&country=jp",
         "manifestUrl": (
             "https://superstar-smtown-real.s3.amazonaws.com/version/{version}.txt"
@@ -535,6 +543,7 @@ GAMES: dict[str, "GameDetails"] = {
         "dateFormat": "%Y-%m-%d",
         "timezone": "JST",
         "packageName": "jp.co.dalcomsoft.superstarjypnation",
+        "lastVersion": "3.7.1",
         "lookupQuery": "id=1569554295&country=jp",
         "manifestUrl": (
             "https://superstar-jyp-jp-real.s3.amazonaws.com"
@@ -561,6 +570,7 @@ GAMES: dict[str, "GameDetails"] = {
         "dateFormat": "%Y-%m-%d",
         "timezone": "JST",
         "packageName": "jp.co.dalcomsoft.superstarebidan",
+        "lastVersion": "1.6.0",
         "lookupQuery": "id=6450412255&country=jp",
         "manifestUrl": (
             "https://superstar-ebidan-jp-real.s3.amazonaws.com"
@@ -587,6 +597,7 @@ GAMES: dict[str, "GameDetails"] = {
         "dateFormat": "%Y-%m-%d",
         "timezone": "JST",
         "packageName": "jp.co.dalcomsoft.superstarldh",
+        "lastVersion": "1.0.1",
         "lookupQuery": "id=6752320672&country=jp",
         "manifestUrl": (
             "https://superstar-ldh-jp-real.s3.amazonaws.com"
@@ -621,6 +632,7 @@ GAMES: dict[str, "GameDetails"] = {
         "dateFormat": "%d-%m-%Y",
         "timezone": "PHT",
         "packageName": "com.dalcomsoft.ssph",
+        "lastVersion": "3.14.0",
         "lookupQuery": "id=6451133069&country=us",
         "manifestUrl": (
             "https://superstar-philippines.s3.amazonaws.com"
