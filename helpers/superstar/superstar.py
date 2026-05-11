@@ -34,7 +34,7 @@ class SuperStar(commands.Cog):
         self.bot = bot
 
     async def get_manifest(self, game: str, version: str | None = None) -> dict:
-        xapk_path = await self.get_xapk(game)
+        xapk_path = await self.get_xapk(game, False)
         match = (
             re.search(
                 r"(\d+\.\d+\.\d+)",
@@ -390,7 +390,7 @@ class SuperStar(commands.Cog):
 
         return file_path
 
-    async def get_xapk(self, game: str) -> Path | None:
+    async def get_xapk(self, game: str, download: bool = True) -> Path | None:
         xapk_folder_path = Path(f"data/xapks/{game}")
         xapk_folder_path.mkdir(parents=True, exist_ok=True)
 
@@ -415,7 +415,7 @@ class SuperStar(commands.Cog):
 
                         xapk_file_name = disposition.split("filename=")[-1].strip('"')
                         xapk_path = xapk_folder_path / xapk_file_name
-                        if not xapk_path.exists():
+                        if download and not xapk_path.exists():
                             for file in xapk_folder_path.iterdir():
                                 if file.is_file():
                                     file.unlink()
