@@ -291,8 +291,6 @@ class SuperStar(commands.Cog):
             url_data = search[1]
 
         found_data = {}
-        print(item_ids)
-        print(attributes)
         for item_id in item_ids:
             found_data[item_id] = {}
             for attribute, is_file in attributes.items():
@@ -303,16 +301,20 @@ class SuperStar(commands.Cog):
                 if not is_file:
                     continue
 
-                if isinstance(found_data[item_id][attribute], int) and url_data:
-                    found_data[item_id][attribute] = url_data.get(
-                        str(found_data[item_id][attribute]), {}
-                    ).get("url")
-                elif "catalogUrl" in GAMES[game]:
-                    found_data[item_id][attribute] = (
-                        await self.extract_file_from_bundle(
-                            game, found_data[item_id][attribute]
+                try:
+                    if isinstance(found_data[item_id][attribute], int) and url_data:
+                        found_data[item_id][attribute] = url_data.get(
+                            str(found_data[item_id][attribute]), {}
+                        ).get("url")
+                    elif "catalogUrl" in GAMES[game]:
+                        found_data[item_id][attribute] = (
+                            await self.extract_file_from_bundle(
+                                game, found_data[item_id][attribute]
+                            )
                         )
-                    )
+                except KeyError as e:
+                    print(e)
+                    print(item_id, attribute)
 
         return found_data
 
