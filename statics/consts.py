@@ -215,7 +215,7 @@ GAMES: dict[str, "GameDetails"] = {
         "dateFormat": "%Y-%m-%d",
         "timezone": "KST",
         "packageName": "com.dalcomsoft.ss.jyp",
-        "lastVersion": "3.30.2",
+        "lastVersion": "3.31.4",
         "lookupQuery": "id=1086866467&country=kr",
         "manifestUrl": (
             "https://superstar-jyp-resource.s3.amazonaws.com"
@@ -424,7 +424,7 @@ GAMES: dict[str, "GameDetails"] = {
         "timezone": "KST",
         "firstSeason": datetime(2024, 12, 2, tzinfo=TIMEZONES["KST"]),
         "packageName": "com.dalcomsoft.sswo",
-        "lastVersion": "3.30.5",
+        "lastVersion": "3.31.4",
         "lookupQuery": "id=6523424185&country=kr",
         "manifestUrl": (
             "https://superstar-wakeone.s3.amazonaws.com"

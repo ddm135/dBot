@@ -16,6 +16,7 @@ from curl_cffi import AsyncSession
 from discord.ext import commands
 from google.auth.transport import requests
 from google.oauth2.service_account import IDTokenCredentials
+from packaging.version import Version
 
 from helpers.superstar.commons import APKPURE_URL
 from statics.consts import CHUNK_SIZE, GAMES, STATUS_CHANNEL, TIMEZONES
@@ -33,6 +34,23 @@ class SuperStar(commands.Cog):
         self.bot = bot
 
     async def get_manifest(self, game: str, version: str | None = None) -> dict:
+        xapk_path = await self.get_xapk(game)
+        match = (
+            re.search(
+                r"(\d+\.\d+\.\d+)",
+                xapk_path.stem,
+            )
+            if xapk_path
+            else None
+        )
+        xapk_version = match.group(1) if match else None
+        true_version = max(
+            Version(v)
+            for v in [version, xapk_version, GAMES[game]["lastVersion"]]
+            if v is not None
+        )
+        version = str(true_version)
+
         async with aiohttp.ClientSession() as session:
             while True:
                 try:
@@ -47,16 +65,7 @@ class SuperStar(commands.Cog):
                             return manifest
                         version = manifest["ActiveVersion_Android"]
                 except json.JSONDecodeError:
-                    xapk_path = await self.get_xapk(game)
-                    if not xapk_path:
-                        version = GAMES[game]["lastVersion"]
-                        continue
-
-                    match = re.search(
-                        r"(\d+\.\d+\.\d+)",
-                        xapk_path.stem,
-                    )
-                    version = match.group(1) if match else GAMES[game]["lastVersion"]
+                    version = GAMES[game]["lastVersion"]
 
     async def get_a_json(self, game: str) -> dict:
         headers = SuperStarHeaders()
@@ -301,20 +310,16 @@ class SuperStar(commands.Cog):
                 if not is_file:
                     continue
 
-                try:
-                    if isinstance(found_data[item_id][attribute], int) and url_data:
-                        found_data[item_id][attribute] = url_data.get(
-                            str(found_data[item_id][attribute]), {}
-                        ).get("url")
-                    elif "catalogUrl" in GAMES[game]:
-                        found_data[item_id][attribute] = (
-                            await self.extract_file_from_bundle(
-                                game, found_data[item_id][attribute]
-                            )
+                if isinstance(found_data[item_id][attribute], int) and url_data:
+                    found_data[item_id][attribute] = url_data.get(
+                        str(found_data[item_id][attribute]), {}
+                    ).get("url")
+                elif "catalogUrl" in GAMES[game]:
+                    found_data[item_id][attribute] = (
+                        await self.extract_file_from_bundle(
+                            game, found_data[item_id][attribute]
                         )
-                except Exception as e:
-                    print(e)
-                    print(item_id, attribute)
+                    )
 
         return found_data
 
