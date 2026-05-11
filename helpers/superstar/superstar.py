@@ -312,7 +312,7 @@ class SuperStar(commands.Cog):
                                 game, found_data[item_id][attribute]
                             )
                         )
-                except KeyError as e:
+                except Exception as e:
                     print(e)
                     print(item_id, attribute)
 
