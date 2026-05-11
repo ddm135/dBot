@@ -404,24 +404,32 @@ class SuperStar(commands.Cog):
             if not xapk_url:
                 return None
 
+        xapk_path = None
         async with aiohttp.ClientSession() as session:
-            async with session.get(xapk_url) as r:
-                disposition = r.headers.get("Content-Disposition")
-                if not disposition:
-                    return None
+            while True:
+                try:
+                    async with session.get(xapk_url) as r:
+                        disposition = r.headers.get("Content-Disposition")
+                        if not disposition:
+                            return None
 
-                xapk_file_name = disposition.split("filename=")[-1].strip('"')
-                xapk_path = xapk_folder_path / xapk_file_name
-                if not xapk_path.exists():
-                    for file in xapk_folder_path.iterdir():
-                        if file.is_file():
-                            file.unlink()
+                        xapk_file_name = disposition.split("filename=")[-1].strip('"')
+                        xapk_path = xapk_folder_path / xapk_file_name
+                        if not xapk_path.exists():
+                            for file in xapk_folder_path.iterdir():
+                                if file.is_file():
+                                    file.unlink()
 
-                    with open(xapk_path, "wb") as f:
-                        async for chunk in r.content.iter_chunked(CHUNK_SIZE):
-                            f.write(chunk)
+                            with open(xapk_path, "wb") as f:
+                                async for chunk in r.content.iter_chunked(CHUNK_SIZE):
+                                    f.write(chunk)
+                        return xapk_path
+                except asyncio.TimeoutError:
+                    if xapk_path:
+                        xapk_path.unlink(missing_ok=True)
+                    continue
 
-        return xapk_path
+        return None
 
     @staticmethod
     async def pin_new_ssl(
