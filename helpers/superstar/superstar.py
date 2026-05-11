@@ -5,7 +5,6 @@ import asyncio
 import gzip
 import json
 import re
-import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
@@ -292,6 +291,8 @@ class SuperStar(commands.Cog):
             url_data = search[1]
 
         found_data = {}
+        print(item_ids)
+        print(attributes)
         for item_id in item_ids:
             found_data[item_id] = {}
             for attribute, is_file in attributes.items():
