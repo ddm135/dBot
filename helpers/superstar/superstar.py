@@ -34,6 +34,9 @@ class SuperStar(commands.Cog):
         self.bot = bot
 
     async def get_manifest(self, game: str, version: str | None = None) -> dict:
+        if not version:
+            version = self.bot.basic[game]["manifest"]["ActiveVersion_Android"]
+
         xapk_path = await self.get_xapk(game, False)
         match = (
             re.search(
