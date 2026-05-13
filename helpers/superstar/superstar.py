@@ -34,19 +34,20 @@ class SuperStar(commands.Cog):
         self.bot = bot
 
     async def get_manifest(self, game: str, version: str | None = None) -> dict:
+        xapk_version = None
         if not version:
             version = self.bot.basic[game]["manifest"]["ActiveVersion_Android"]
-
-        xapk_path = await self.get_xapk(game, False)
-        match = (
-            re.search(
-                r"(\d+\.\d+\.\d+)",
-                xapk_path.stem,
+        else:
+            xapk_path = await self.get_xapk(game, False)
+            match = (
+                re.search(
+                    r"(\d+\.\d+\.\d+)",
+                    xapk_path.stem,
+                )
+                if xapk_path
+                else None
             )
-            if xapk_path
-            else None
-        )
-        xapk_version = match.group(1) if match else None
+            xapk_version = match.group(1) if match else None
         true_version = max(
             Version(v)
             for v in [version, xapk_version, GAMES[game]["lastVersion"]]
@@ -400,7 +401,7 @@ class SuperStar(commands.Cog):
         async with AsyncSession() as session:
             response = await session.get(
                 APKPURE_URL.format(package_name=GAMES[game]["packageName"]),
-                impersonate="chrome",
+                impersonate="chrome146",
                 allow_redirects=False,
             )
             xapk_url = response.headers.get("Location")
