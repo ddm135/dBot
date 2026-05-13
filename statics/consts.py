@@ -163,7 +163,7 @@ GAMES: dict[str, "GameDetails"] = {
         "dateFormat": "%Y-%m-%d",
         "timezone": "KST",
         "packageName": "kr.co.dalcomsoft.superstar.a",
-        "lastVersion": "3.30.2",
+        "lastVersion": "3.31.4",
         "lookupQuery": "id=890937532&country=kr",
         "manifestUrl": (
             "https://super-star.s3.amazonaws.com/version/live/manifest/{version}.txt"
