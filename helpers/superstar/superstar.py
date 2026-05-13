@@ -398,16 +398,17 @@ class SuperStar(commands.Cog):
         xapk_folder_path = Path(f"data/xapks/{game}")
         xapk_folder_path.mkdir(parents=True, exist_ok=True)
 
+        apkpure_url = APKPURE_URL.format(package_name=GAMES[game]["packageName"])
+        xapk_url = None
         async with AsyncSession() as session:
             response = await session.get(
-                APKPURE_URL.format(package_name=GAMES[game]["packageName"]),
-                impersonate="chrome99_android",
-                allow_redirects=False,
+                apkpure_url, impersonate="chrome", allow_redirects=False
             )
             xapk_url = response.headers.get("Location")
-            print(xapk_url)
-            if not xapk_url:
-                return None
+
+        if not xapk_url:
+            print(apkpure_url)
+            return None
 
         xapk_path = None
         async with aiohttp.ClientSession() as session:
