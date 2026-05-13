@@ -47,7 +47,6 @@ class SuperStar(commands.Cog):
             else None
         )
         xapk_version = match.group(1) if match else None
-        print(version, xapk_version, GAMES[game]["lastVersion"])
         true_version = max(
             Version(v)
             for v in [version, xapk_version, GAMES[game]["lastVersion"]]
@@ -405,6 +404,7 @@ class SuperStar(commands.Cog):
                 allow_redirects=False,
             )
             xapk_url = response.headers.get("Location")
+            print(xapk_url)
             if not xapk_url:
                 return None
 
@@ -414,6 +414,7 @@ class SuperStar(commands.Cog):
                 try:
                     async with session.get(xapk_url) as r:
                         disposition = r.headers.get("Content-Disposition")
+                        print(disposition)
                         if not disposition:
                             return None
 
