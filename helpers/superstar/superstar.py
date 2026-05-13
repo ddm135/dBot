@@ -401,7 +401,7 @@ class SuperStar(commands.Cog):
         async with AsyncSession() as session:
             response = await session.get(
                 APKPURE_URL.format(package_name=GAMES[game]["packageName"]),
-                impersonate="chrome146",
+                impersonate="chrome99_android",
                 allow_redirects=False,
             )
             xapk_url = response.headers.get("Location")
