@@ -18,9 +18,9 @@ from google.auth.transport import requests
 from google.oauth2.service_account import IDTokenCredentials
 from packaging.version import Version
 
-from helpers.superstar.commons import APKPURE_URL
 from statics.consts import CHUNK_SIZE, GAMES, STATUS_CHANNEL, TIMEZONES
 
+from .commons import APKPURE_URL
 from .embeds import SSLeagueEmbed as _SSLeagueEmbed
 from .types import SuperStarHeaders
 
@@ -47,6 +47,7 @@ class SuperStar(commands.Cog):
             else None
         )
         xapk_version = match.group(1) if match else None
+        print(version, xapk_version, GAMES[game]["lastVersion"])
         true_version = max(
             Version(v)
             for v in [version, xapk_version, GAMES[game]["lastVersion"]]
