@@ -678,7 +678,7 @@ class DalcomSync(commands.Cog):
                     )
                     minutes = duration // 60
                     seconds = str(duration % 60).zfill(2)
-                    self.bot.info_from_file[game][song_id][
+                    self.bot.info_from_file[game][music_code][
                         "duration"
                     ] = f"{minutes}:{seconds}"
 
