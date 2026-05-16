@@ -116,9 +116,6 @@ class DalcomSync(commands.Cog):
                         #     continue
                         # dst_path = Path(f"data/MusicData/{game}/{song_id}.ogg")
                         # dst_path.unlink(missing_ok=True)
-                        self.bot.info_from_file[game].setdefault(song_id, {}).pop(
-                            "sound", None
-                        )
                         # await self.copy_file(src_path, dst_path, bundle_folders)
 
                         # duration = int(soundfile.info(dst_path).duration)
@@ -568,9 +565,7 @@ class DalcomSync(commands.Cog):
                     else:
                         # dst_path = Path(f"data/MusicData/{game}/{music["code"]}.ogg")
                         # dst_path.unlink(missing_ok=True)
-                        self.bot.info_from_file[game].setdefault(music_code, {}).pop(
-                            "sound", None
-                        )
+                        pass
 
                     self.bot.info_from_file[game][music_code]["duration"] = min(
                         self.bot.info_from_file[game][music_code]["seq"][difficulty][
