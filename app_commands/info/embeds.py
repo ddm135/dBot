@@ -39,8 +39,7 @@ class InfoEmbed(discord.Embed):
                 else "All Songs"
             ),
             description="\n".join(
-                f"({info.get(song[song_id_index], {}).get("sound", {})
-                    .get("duration", "Unknown")}) "
+                f"({info.get(song[song_id_index], {}).get("duration", "Unknown")}) "
                 f"{f"{song[artist_name_index].replace(r"*", r"\*").replace(r"_", r"\_")
                       .replace(r"`", r"\`")} - " if not artist_name else ""}"
                 f"**{song[song_name_index].replace(r"*", r"\*")

@@ -96,33 +96,39 @@ class DalcomSync(commands.Cog):
                     if match := re.fullmatch(
                         game_details["catalogPattern"]["sound"], k
                     ):
+                        # pass
+
                         song_id = match.group(1)
-                        dependency = (
-                            self.bot.info_from_file[game]
-                            .setdefault(song_id, {})
-                            .setdefault("sound", {})
-                            .get("dependency")
+                        # dependency = (
+                        #     self.bot.info_from_file[game]
+                        #     .setdefault(song_id, {})
+                        #     .setdefault("sound", {})
+                        #     .get("dependency")
+                        # )
+                        # if (
+                        #     song_id in self.bot.info_from_file[game]
+                        #     and dependency == v["dependency"]
+                        # ):
+                        #     continue
+
+                        # src_path = await ss_cog.extract_file_from_bundle(game, k)
+                        # if not src_path:
+                        #     continue
+                        # dst_path = Path(f"data/MusicData/{game}/{song_id}.ogg")
+                        # dst_path.unlink(missing_ok=True)
+                        self.bot.info_from_file[game].setdefault(song_id, {}).pop(
+                            "sound", None
                         )
-                        if (
-                            song_id in self.bot.info_from_file[game]
-                            and dependency == v["dependency"]
-                        ):
-                            continue
+                        # await self.copy_file(src_path, dst_path, bundle_folders)
 
-                        src_path = await ss_cog.extract_file_from_bundle(game, k)
-                        if not src_path:
-                            continue
-                        dst_path = Path(f"data/MusicData/{game}/{song_id}.ogg")
-                        await self.copy_file(src_path, dst_path, bundle_folders)
-
-                        duration = int(soundfile.info(dst_path).duration)
-                        minutes = duration // 60
-                        seconds = str(duration % 60).zfill(2)
-                        self.bot.info_from_file[game][song_id]["sound"] = {
-                            "duration": f"{minutes}:{seconds}",
-                            "key": k,
-                            "dependency": v["dependency"],
-                        }
+                        # duration = int(soundfile.info(dst_path).duration)
+                        # minutes = duration // 60
+                        # seconds = str(duration % 60).zfill(2)
+                        # self.bot.info_from_file[game][song_id]["sound"] = {
+                        #     "duration": f"{minutes}:{seconds}",
+                        #     "key": k,
+                        #     "dependency": v["dependency"],
+                        # }
                     elif match := re.fullmatch(
                         game_details["catalogPattern"]["seq"], k
                     ):
@@ -154,6 +160,7 @@ class DalcomSync(commands.Cog):
                         seq_obj = Seq(dst_path)
                         self.bot.info_from_file[game][song_id]["seq"][difficulty] = {
                             "count": seq_obj.count,
+                            "duration": seq_obj.SEQData_Info["secLength"],
                             "key": k,
                             "dependency": v["dependency"],
                         }
@@ -172,6 +179,17 @@ class DalcomSync(commands.Cog):
                         border_internal = Path(v["internalId"])
                         border_name = f"{border_id}{border_internal.suffix}"
                         borders[border_name] = k
+
+                for song_id in self.bot.info_from_file[game]:
+                    if "duration" in self.bot.info_from_file[game][song_id]:
+                        continue
+
+                    self.bot.info_from_file[game][song_id]["duration"] = min(
+                        self.bot.info_from_file[game][song_id]["seq"][difficulty][
+                            "duration"
+                        ]
+                        for difficulty in self.bot.info_from_file[game][song_id]["seq"]
+                    )
 
                 with open(music_info_file, "w", encoding="utf-8") as f:
                     json.dump(self.bot.info_from_file[game], f, indent=4)
@@ -380,15 +398,24 @@ class DalcomSync(commands.Cog):
                 self.bot.artist[game] = artist
                 self.bot.live_theme[game]["max"] = max_live if max_live else 0
 
-                for music in dalcom_data["MusicData"].values():
-                    music_code = str(music["code"])
+                for seq in dalcom_data.get("SeqData", {}).values():
+                    linked_music = str(seq["linkedMusic"])
+                    seq_level = str(seq["seqLevel"])
                     current_key = (
                         self.bot.info_from_file[game]
-                        .setdefault(music_code, {})
-                        .setdefault("sound", {})
+                        .setdefault(linked_music, {})
+                        .setdefault("seq", {})
+                        .setdefault(seq_level, {})
                         .get("key")
                     )
-                    found_key = music["sound"]
+                    dependency = (
+                        self.bot.info_from_file[game]
+                        .setdefault(linked_music, {})
+                        .setdefault("seq", {})
+                        .setdefault(seq_level, {})
+                        .get("dependency")
+                    )
+                    found_key = seq["seqPath"]
                     if isinstance(found_key, int):
                         results = await ss_cog.get_attributes(
                             game,
@@ -397,66 +424,209 @@ class DalcomSync(commands.Cog):
                             {"url": False},
                         )
                         found_key = results[found_key]["url"]
+                    found_dependency = (
+                        self.bot.basic[game]
+                        .get("catalog", {})
+                        .get(found_key, {})
+                        .get("dependency")
+                    )
 
-                    _results = await ss_cog.get_attributes(
+                    if (
+                        linked_music in self.bot.info_from_file[game]
+                        and seq_level
+                        in self.bot.info_from_file[game][linked_music].get("seq", {})
+                        and current_key == found_key
+                        and dependency == found_dependency
+                    ):
+                        continue
+
+                    # results = await ss_cog.get_attributes(
+                    #     game,
+                    #     (dalcom_data["SeqData"], dalcom_data.get("URLs")),
+                    #     [seq["code"]],
+                    #     {"seqPath": True},
+                    # )
+                    # src_path = results[seq["code"]]["seqPath"]
+                    # if not src_path:
+                    #     continue
+                    dst_path = Path(
+                        f"data/MusicData/{game}"
+                        f"/{seq["linkedMusic"]}_{seq["seqLevel"]}.seq"
+                    )
+                    # await self.copy_file(src_path, dst_path, bundle_folders)
+
+                    seq_obj = Seq(dst_path)
+                    self.bot.info_from_file[game][linked_music]["seq"][seq_level] = {
+                        "count": seq_obj.count,
+                        "duration": seq_obj.SEQData_Info["secLength"],
+                        "key": found_key,
+                        "dependency": found_dependency,
+                    }
+
+                for music in dalcom_data["MusicData"].values():
+                    music_code = str(music["code"])
+                    # current_key = (
+                    #     self.bot.info_from_file[game]
+                    #     .setdefault(music_code, {})
+                    #     .setdefault("sound", {})
+                    #     .get("key")
+                    # )
+                    # found_key = music["sound"]
+                    # if isinstance(found_key, int):
+                    #     results = await ss_cog.get_attributes(
+                    #         game,
+                    #         (dalcom_data["URLs"], None),
+                    #         [found_key],
+                    #         {"url": False},
+                    #     )
+                    #     found_key = results[found_key]["url"]
+
+                    # if not current_key or current_key != found_key:
+                    #     results = await ss_cog.get_attributes(
+                    #         game,
+                    #         (dalcom_data["MusicData"], dalcom_data.get("URLs")),
+                    #         [music["code"]],
+                    #         {"sound": True},
+                    #     )
+                    #     src_path = results[music["code"]]["sound"]
+                    #     if not src_path:
+                    #         continue
+                    # dst_path = Path(f"data/MusicData/{game}/{music["code"]}.ogg")
+                    #     await self.copy_file(src_path, dst_path, bundle_folders)
+
+                    #     duration = int(soundfile.info(dst_path).duration)
+                    #     minutes = duration // 60
+                    #     seconds = str(duration % 60).zfill(2)
+                    #     self.bot.info_from_file[game][music_code]["sound"] = {
+                    #         "duration": f"{minutes}:{seconds}",
+                    #         "key": found_key,
+                    #     }
+
+                    music_results = await ss_cog.get_attributes(
                         game,
                         (dalcom_data["MusicData"], dalcom_data.get("URLs")),
                         [music["code"]],
                         {"localeName": False, "isHidden": False},
                     )
 
-                    if not current_key or current_key != found_key:
-                        results = await ss_cog.get_attributes(
-                            game,
-                            (dalcom_data["MusicData"], dalcom_data.get("URLs")),
-                            [music["code"]],
-                            {"sound": True},
+                    if music_results[music["code"]]["isHidden"]:
+                        current_key = (
+                            self.bot.info_from_file[game]
+                            .setdefault(music_code, {})
+                            .setdefault("sound", {})
+                            .get("key")
                         )
-                        src_path = results[music["code"]]["sound"]
-                        if not src_path:
-                            continue
-                        dst_path = Path(f"data/MusicData/{game}/{music["code"]}.ogg")
-                        await self.copy_file(src_path, dst_path, bundle_folders)
+                        dependency = (
+                            self.bot.info_from_file[game]
+                            .setdefault(music_code, {})
+                            .setdefault("sound", {})
+                            .get("dependency")
+                        )
+                        found_key = music["sound"]
+                        if isinstance(found_key, int):
+                            results = await ss_cog.get_attributes(
+                                game,
+                                (dalcom_data["URLs"], None),
+                                [found_key],
+                                {"url": False},
+                            )
+                            found_key = results[found_key]["url"]
+                        found_dependency = (
+                            self.bot.basic[game]
+                            .get("catalog", {})
+                            .get(found_key, {})
+                            .get("dependency")
+                        )
 
-                        duration = int(soundfile.info(dst_path).duration)
-                        minutes = duration // 60
-                        seconds = str(duration % 60).zfill(2)
-                        self.bot.info_from_file[game][music_code]["sound"] = {
-                            "duration": f"{minutes}:{seconds}",
-                            "key": found_key,
-                        }
+                        if not (
+                            music_code in self.bot.info_from_file[game]
+                            and current_key == found_key
+                            and dependency == found_dependency
+                        ):
+                            # results = await ss_cog.get_attributes(
+                            #     game,
+                            #     (dalcom_data["MusicData"], dalcom_data.get("URLs")),
+                            #     [music["code"]],
+                            #     {"sound": True},
+                            # )
+                            # src_path = results[music["code"]]["sound"]
+                            # if not src_path:
+                            #     continue
+                            dst_path = Path(
+                                f"data/MusicData/{game}/{music["code"]}.ogg"
+                            )
+                            # await self.copy_file(src_path, dst_path, bundle_folders)
+
+                            duration = int(soundfile.info(dst_path).duration)
+                            minutes = duration // 60
+                            seconds = str(duration % 60).zfill(2)
+                            self.bot.info_from_file[game][music_code]["sound"] = {
+                                "duration": f"{minutes}:{seconds}",
+                                "key": found_key,
+                                "dependency": found_dependency,
+                            }
+                    else:
+                        # dst_path = Path(f"data/MusicData/{game}/{music["code"]}.ogg")
+                        # dst_path.unlink(missing_ok=True)
+                        self.bot.info_from_file[game].setdefault(music_code, {}).pop(
+                            "sound", None
+                        )
+
+                    self.bot.info_from_file[game][music_code]["duration"] = min(
+                        self.bot.info_from_file[game][music_code]["seq"][difficulty][
+                            "duration"
+                        ]
+                        for difficulty in self.bot.info_from_file[game][music_code][
+                            "seq"
+                        ]
+                    )
 
                     if music_code not in self.bot.info_by_id[game]:
-                        results = await ss_cog.get_attributes(
+                        locale_results = await ss_cog.get_attributes(
                             game,
                             (dalcom_data["LocaleData"], dalcom_data.get("URLs")),
-                            [_results[music["code"]]["localeName"]],
+                            [music_results[music["code"]]["localeName"]],
                             {"koKR": False, "enUS": False, "jaJP": False},
                         )
                         missing_music.append(
                             [
                                 music_code,
-                                results[_results[music["code"]]["localeName"]]["koKR"],
-                                results[_results[music["code"]]["localeName"]]["enUS"],
-                                results[_results[music["code"]]["localeName"]]["jaJP"],
-                                _results[music["code"]]["isHidden"],
+                                locale_results[
+                                    music_results[music["code"]]["localeName"]
+                                ]["koKR"],
+                                locale_results[
+                                    music_results[music["code"]]["localeName"]
+                                ]["enUS"],
+                                locale_results[
+                                    music_results[music["code"]]["localeName"]
+                                ]["jaJP"],
+                                music_results[music["code"]]["isHidden"],
                             ]
                         )
 
                     if "SeqData" in dalcom_data:
-                        continue
+                        seqs = {}
+                    else:
+                        seqs = {
+                            "seqEasy": "_4.seq",
+                            "seqNormal": "_7.seq",
+                            "seqHard": "_13.seq",
+                        }
 
-                    for difficulty, extension in {
-                        "seqEasy": "_4.seq",
-                        "seqNormal": "_7.seq",
-                        "seqHard": "_13.seq",
-                    }.items():
+                    for difficulty, extension in seqs.items():
                         current_key = (
                             self.bot.info_from_file[game]
                             .setdefault(music_code, {})
                             .setdefault("seq", {})
                             .setdefault(difficulty.replace("seq", ""), {})
                             .get("key")
+                        )
+                        dependency = (
+                            self.bot.info_from_file[game]
+                            .setdefault(music_code, {})
+                            .setdefault("seq", {})
+                            .setdefault(difficulty.replace("seq", ""), {})
+                            .get("dependency")
                         )
                         found_key = music[difficulty]
                         if isinstance(found_key, int):
@@ -467,31 +637,54 @@ class DalcomSync(commands.Cog):
                                 {"url": False},
                             )
                             found_key = results[found_key]["url"]
-
-                        if current_key and current_key == found_key:
-                            continue
-
-                        results = await ss_cog.get_attributes(
-                            game,
-                            (dalcom_data["MusicData"], dalcom_data.get("URLs")),
-                            [music["code"]],
-                            {difficulty: True},
+                        found_dependency = (
+                            self.bot.basic[game]
+                            .get("catalog", {})
+                            .get(found_key, {})
+                            .get("dependency")
                         )
-                        src_path = results[music["code"]][difficulty]
-                        if not src_path:
+
+                        if (
+                            music_code in self.bot.info_from_file[game]
+                            and difficulty.replace("seq", "")
+                            in self.bot.info_from_file[game][music_code].get("seq", {})
+                            and current_key == found_key
+                            and dependency == found_dependency
+                        ):
                             continue
+
+                        # results = await ss_cog.get_attributes(
+                        #     game,
+                        #     (dalcom_data["MusicData"], dalcom_data.get("URLs")),
+                        #     [music["code"]],
+                        #     {difficulty: True},
+                        # )
+                        # src_path = results[music["code"]][difficulty]
+                        # if not src_path:
+                        #     continue
                         dst_path = Path(
                             f"data/MusicData/{game}/{music['code']}{extension}"
                         )
-                        await self.copy_file(src_path, dst_path, bundle_folders)
+                        # await self.copy_file(src_path, dst_path, bundle_folders)
 
                         seq_obj = Seq(dst_path)
                         self.bot.info_from_file[game][music_code]["seq"][
                             difficulty.replace("seq", "")
                         ] = {
                             "count": seq_obj.count,
+                            "duration": seq_obj.SEQData_Info["secLength"],
                             "key": found_key,
+                            "dependency": found_dependency,
                         }
+
+                    self.bot.info_from_file[game][music_code]["duration"] = min(
+                        self.bot.info_from_file[game][music_code]["seq"][difficulty][
+                            "duration"
+                        ]
+                        for difficulty in self.bot.info_from_file[game][music_code][
+                            "seq"
+                        ]
+                    )
 
                 missing_music.append(["-", "-", "-", "-", "-"])
                 await sheets_cog.update_sheet_data(
@@ -500,51 +693,6 @@ class DalcomSync(commands.Cog):
                     + "!V2:Z",
                     missing_music,
                 )
-
-                if "SeqData" in dalcom_data:
-                    for seq in dalcom_data["SeqData"].values():
-                        current_key = (
-                            self.bot.info_from_file[game]
-                            .setdefault(str(seq["linkedMusic"]), {})
-                            .setdefault("seq", {})
-                            .setdefault(str(seq["seqLevel"]), {})
-                            .get("key")
-                        )
-                        found_key = seq["seqPath"]
-                        if isinstance(found_key, int):
-                            results = await ss_cog.get_attributes(
-                                game,
-                                (dalcom_data["URLs"], None),
-                                [found_key],
-                                {"url": False},
-                            )
-                            found_key = results[found_key]["url"]
-
-                        if current_key and current_key == found_key:
-                            continue
-
-                        results = await ss_cog.get_attributes(
-                            game,
-                            (dalcom_data["SeqData"], dalcom_data.get("URLs")),
-                            [seq["code"]],
-                            {"seqPath": True},
-                        )
-                        src_path = results[seq["code"]]["seqPath"]
-                        if not src_path:
-                            continue
-                        dst_path = Path(
-                            f"data/MusicData/{game}"
-                            f"/{seq["linkedMusic"]}_{seq["seqLevel"]}.seq"
-                        )
-                        await self.copy_file(src_path, dst_path, bundle_folders)
-
-                        seq_obj = Seq(dst_path)
-                        self.bot.info_from_file[game][str(seq["linkedMusic"])]["seq"][
-                            str(seq["seqLevel"])
-                        ] = {
-                            "count": seq_obj.count,
-                            "key": found_key,
-                        }
 
                 with open(music_info_file, "w", encoding="utf-8") as f:
                     json.dump(self.bot.info_from_file[game], f, indent=4)

@@ -187,7 +187,7 @@ class NotifyBonus(commands.Cog):
                         )
                         song_duration = self.bot.info_from_file[game][
                             bonus[song_id_index]
-                        ]["sound"]["duration"]
+                        ]["duration"]
 
                         if song_end == notify_date and end_check:
                             msg = (

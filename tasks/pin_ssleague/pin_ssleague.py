@@ -108,11 +108,11 @@ class PinSSLeague(commands.Cog):
         file_info = self.bot.info_from_file[game].get(
             str(song_id),
             {
-                "sound": {"duration": "Unknown"},
+                "duration": "Unknown",
                 "seq": {"Unknown": {"count": "Unknown"}},
             },
         )
-        duration = file_info["sound"]["duration"]
+        duration = file_info["duration"]
         note_count = file_info["seq"]
         skills = ssl_song[skills_index] if skills_index is not None else None
 

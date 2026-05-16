@@ -93,7 +93,7 @@ class Info(commands.Cog):
                 file_info = self.bot.info_from_file[game_choice.value].get(
                     song_id,
                     {
-                        "sound": {"duration": "Unknown"},
+                        "duration": "Unknown",
                         "seq": {"Unknown": {"count": "Unknown"}},
                     },
                 )
@@ -169,7 +169,7 @@ class Info(commands.Cog):
                         game_choice.value,
                         artist_choice,
                         song_choice,
-                        file_info["sound"]["duration"],
+                        file_info["duration"],
                         file_info["seq"],
                         results[int_song_id]["album"],
                         icon,
@@ -195,8 +195,8 @@ class Info(commands.Cog):
         sorted_songs = sorted(
             songs,
             key=lambda x: self.bot.info_from_file[game_choice.value].get(
-                x[song_id_index], {"sound": {"duration": "Unknown"}}
-            )["sound"]["duration"],
+                x[song_id_index], {"duration": "Unknown"}
+            )["duration"],
         )
         msg = await itr.followup.send(
             embed=InfoEmbed(

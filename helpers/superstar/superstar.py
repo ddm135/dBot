@@ -4,7 +4,6 @@
 import asyncio
 import gzip
 import json
-import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
@@ -12,15 +11,16 @@ from zipfile import ZipFile
 
 import aiohttp
 import discord
-from curl_cffi import AsyncSession
 from discord.ext import commands
 from google.auth.transport import requests
 from google.oauth2.service_account import IDTokenCredentials
+from gplaydl.api import get_delivery, get_details
+from gplaydl.auth import ensure_auth
 from packaging.version import Version
 
+from helpers.superstar.commons import APKPURE_URL
 from statics.consts import CHUNK_SIZE, GAMES, STATUS_CHANNEL, TIMEZONES
 
-from .commons import APKPURE_URL
 from .embeds import SSLeagueEmbed as _SSLeagueEmbed
 from .types import SuperStarHeaders
 
@@ -34,34 +34,24 @@ class SuperStar(commands.Cog):
         self.bot = bot
 
     async def get_manifest(self, game: str, version: str | None = None) -> dict:
-        xapk_version = None
+        max_active_version = None
         if not version:
-            version = self.bot.basic[game]["manifest"]["ActiveVersion_Android"]
-        else:
-            xapk_path = await self.get_xapk(game, False)
-            match = (
-                re.search(
-                    r"(\d+\.\d+\.\d+)",
-                    xapk_path.stem,
-                )
-                if xapk_path
-                else None
+            max_active_version = max(
+                Version(v)
+                for v in [
+                    self.bot.basic[game]["manifest"]["ActiveVersion_Android"],
+                    self.bot.basic[game]["manifest"]["ActiveVersion_iOS"],
+                    GAMES[game]["lastVersion"],
+                ]
+                if v is not None
             )
-            xapk_version = match.group(1) if match else None
-        true_version = max(
-            Version(v)
-            for v in [version, xapk_version, GAMES[game]["lastVersion"]]
-            if v is not None
-        )
-        version = str(true_version)
 
         async with aiohttp.ClientSession() as session:
             while True:
                 try:
                     async with session.get(
                         GAMES[game]["manifestUrl"].format(
-                            version=version
-                            or self.bot.basic[game]["manifest"]["ActiveVersion_Android"]
+                            version=version or max_active_version
                         )
                     ) as r:
                         manifest = await r.json(content_type=None)
@@ -353,8 +343,8 @@ class SuperStar(commands.Cog):
         if not file_path.exists():
             if not bundle_path.exists():
                 if not bundle_url.startswith("http"):
-                    xapk_path = await self.get_xapk(game)
-                    if not xapk_path:
+                    apk_path = await self.get_base_assets_apk(game)
+                    if not apk_path:
                         channel = self.bot.get_channel(
                             STATUS_CHANNEL
                         ) or await self.bot.fetch_channel(STATUS_CHANNEL)
@@ -367,14 +357,12 @@ class SuperStar(commands.Cog):
                     apk_bundle_path = catalog[catalog_key]["internalId"].split(
                         "/Android/"
                     )[-1]
-                    with ZipFile(xapk_path, "r") as xapk:
-                        with xapk.open("base_assets.apk", "r") as base_assets:
-                            with ZipFile(base_assets, "r") as apk:
-                                with apk.open(
-                                    f"assets/aa/Android/{apk_bundle_path}", "r"
-                                ) as bundle_file:
-                                    with open(bundle_path, "wb") as f:
-                                        f.write(bundle_file.read())
+                    with ZipFile(apk_path, "r") as apk:
+                        with apk.open(
+                            f"assets/aa/Android/{apk_bundle_path}", "r"
+                        ) as bundle_file:
+                            with open(bundle_path, "wb") as f:
+                                f.write(bundle_file.read())
                 else:
                     async with aiohttp.ClientSession() as session:
                         async with session.get(bundle_url) as r:
@@ -394,47 +382,34 @@ class SuperStar(commands.Cog):
 
         return file_path
 
-    async def get_xapk(self, game: str, download: bool = True) -> Path | None:
-        xapk_folder_path = Path(f"data/xapks/{game}")
-        xapk_folder_path.mkdir(parents=True, exist_ok=True)
-
-        apkpure_url = APKPURE_URL.format(package_name=GAMES[game]["packageName"])
-        xapk_url = None
-        async with AsyncSession() as session:
-            response = await session.get(
-                apkpure_url, impersonate="chrome", allow_redirects=False
-            )
-            xapk_url = response.headers.get("Location")
-
-        if not xapk_url:
-            print(apkpure_url)
+    async def get_base_assets_apk(self, game: str) -> Path | None:
+        play_auth = await asyncio.to_thread(ensure_auth)
+        if not play_auth:
             return None
 
-        xapk_path = None
-        async with aiohttp.ClientSession() as session:
-            while True:
-                try:
-                    async with session.get(xapk_url) as r:
-                        disposition = r.headers.get("Content-Disposition")
-                        print(disposition)
-                        if not disposition:
-                            return None
+        play_details = await asyncio.to_thread(
+            get_details, GAMES[game]["packageName"], play_auth
+        )
+        version = play_details.version_string
+        version_code = play_details.version_code
 
-                        xapk_file_name = disposition.split("filename=")[-1].strip('"')
-                        xapk_path = xapk_folder_path / xapk_file_name
-                        if download and not xapk_path.exists():
-                            for file in xapk_folder_path.iterdir():
-                                if file.is_file():
-                                    file.unlink()
+        apk_folder_path = Path(f"data/apks/{game}")
+        apk_folder_path.mkdir(parents=True, exist_ok=True)
+        apk_path = apk_folder_path / f"{version}.apk"
+        if apk_path.exists():
+            return apk_path
 
-                            with open(xapk_path, "wb") as f:
-                                async for chunk in r.content.iter_chunked(CHUNK_SIZE):
-                                    f.write(chunk)
-                        return xapk_path
-                except asyncio.TimeoutError:
-                    if xapk_path:
-                        xapk_path.unlink(missing_ok=True)
-                    continue
+        play_delivery = get_delivery(
+            GAMES[game]["packageName"], version_code, play_auth
+        )
+        for apk in play_delivery.splits:
+            if apk.name == "base_assets":
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(apk.url) as r:
+                        with open(apk_path, "wb") as f:
+                            async for chunk in r.content.iter_chunked(CHUNK_SIZE):
+                                f.write(chunk)
+                return apk_path
 
         return None
 

@@ -9,6 +9,9 @@ from typing import TYPE_CHECKING
 
 import aiohttp
 from discord.ext import commands, tasks
+from gplaydl.api import get_details
+from gplaydl.auth import ensure_auth
+from packaging.version import Version
 
 from statics.consts import GAMES
 from statics.types import BasicDetails
@@ -24,6 +27,7 @@ class BasicSync(commands.Cog):
 
     def __init__(self, bot: "dBot") -> None:
         self.bot = bot
+        self.play_auth = None
 
     async def cog_load(self) -> None:
         await self.basic_sync()
@@ -35,6 +39,7 @@ class BasicSync(commands.Cog):
 
     @tasks.loop(time=[time(hour=h, minute=5) for h in range(24)])
     async def basic_sync(self) -> None:
+        self.play_auth = await asyncio.to_thread(ensure_auth)
         for game, game_details in GAMES.items():
             await self.get_basic_data(game, game_details)
 
@@ -48,6 +53,14 @@ class BasicSync(commands.Cog):
                 version = game_details["lastVersion"]
                 iconUrl = game_details["iconUrl"]
             else:
+                # Get latest version from Google Play
+                android_version = None
+                if self.play_auth:
+                    play_details = await asyncio.to_thread(
+                        get_details, game_details["packageName"], self.play_auth
+                    )
+                    android_version = play_details.version_string
+
                 # Get latest version and icon from iTunes
                 query = game_details.get("lookupQuery")
                 while True:
@@ -58,12 +71,24 @@ class BasicSync(commands.Cog):
                             weird_result = await r.text()
                             text_result = weird_result.replace("\n", "")
                             json_result = json.loads(text_result)
-                            version = json_result["results"][0]["version"]
+                            ios_version = json_result["results"][0]["version"]
                             iconUrl = json_result["results"][0]["artworkUrl100"]
                             break
                     except aiohttp.ClientConnectorError:
                         self.LOGGER.exception("?")
                         continue
+
+                version = str(
+                    max(
+                        Version(v)
+                        for v in [
+                            android_version,
+                            ios_version,
+                            game_details["lastVersion"],
+                        ]
+                        if v is not None
+                    )
+                )
 
             # Get manifest
             manifest = await cog.get_manifest(game, version)
