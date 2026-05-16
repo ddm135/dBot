@@ -114,8 +114,8 @@ class DalcomSync(commands.Cog):
                         # src_path = await ss_cog.extract_file_from_bundle(game, k)
                         # if not src_path:
                         #     continue
-                        # dst_path = Path(f"data/MusicData/{game}/{song_id}.ogg")
-                        # dst_path.unlink(missing_ok=True)
+                        dst_path = Path(f"data/MusicData/{game}/{song_id}.ogg")
+                        dst_path.unlink(missing_ok=True)
                         # await self.copy_file(src_path, dst_path, bundle_folders)
 
                         # duration = int(soundfile.info(dst_path).duration)
@@ -146,13 +146,13 @@ class DalcomSync(commands.Cog):
                         ):
                             continue
 
-                        src_path = await ss_cog.extract_file_from_bundle(game, k)
-                        if not src_path:
-                            continue
+                        # src_path = await ss_cog.extract_file_from_bundle(game, k)
+                        # if not src_path:
+                        #     continue
                         dst_path = Path(
                             f"data/MusicData/{game}/{song_id}_{difficulty}.seq"
                         )
-                        await self.copy_file(src_path, dst_path, bundle_folders)
+                        # await self.copy_file(src_path, dst_path, bundle_folders)
 
                         seq_obj = Seq(dst_path)
                         self.bot.info_from_file[game][song_id]["seq"][difficulty] = {
@@ -181,12 +181,17 @@ class DalcomSync(commands.Cog):
                     if "duration" in self.bot.info_from_file[game][song_id]:
                         continue
 
-                    self.bot.info_from_file[game][song_id]["duration"] = min(
+                    duration = min(
                         self.bot.info_from_file[game][song_id]["seq"][difficulty][
                             "duration"
                         ]
                         for difficulty in self.bot.info_from_file[game][song_id]["seq"]
                     )
+                    minutes = duration // 60
+                    seconds = str(duration % 60).zfill(2)
+                    self.bot.info_from_file[game][song_id][
+                        "duration"
+                    ] = f"{minutes}:{seconds}"
 
                 with open(music_info_file, "w", encoding="utf-8") as f:
                     json.dump(self.bot.info_from_file[game], f, indent=4)
@@ -563,9 +568,9 @@ class DalcomSync(commands.Cog):
                                 "dependency": found_dependency,
                             }
                     else:
-                        # dst_path = Path(f"data/MusicData/{game}/{music["code"]}.ogg")
-                        # dst_path.unlink(missing_ok=True)
-                        pass
+                        dst_path = Path(f"data/MusicData/{game}/{music["code"]}.ogg")
+                        dst_path.unlink(missing_ok=True)
+                        # pass
 
                     if music_code not in self.bot.info_by_id[game]:
                         locale_results = await ss_cog.get_attributes(
@@ -663,7 +668,7 @@ class DalcomSync(commands.Cog):
                             "dependency": found_dependency,
                         }
 
-                    self.bot.info_from_file[game][music_code]["duration"] = min(
+                    duration = min(
                         self.bot.info_from_file[game][music_code]["seq"][difficulty][
                             "duration"
                         ]
@@ -671,6 +676,11 @@ class DalcomSync(commands.Cog):
                             "seq"
                         ]
                     )
+                    minutes = duration // 60
+                    seconds = str(duration % 60).zfill(2)
+                    self.bot.info_from_file[game][song_id][
+                        "duration"
+                    ] = f"{minutes}:{seconds}"
 
                 missing_music.append(["-", "-", "-", "-", "-"])
                 await sheets_cog.update_sheet_data(
