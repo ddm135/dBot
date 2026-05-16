@@ -94,42 +94,7 @@ class DalcomSync(commands.Cog):
                 self.bot.live_theme[game]["max"] = 0
 
                 for k, v in self.bot.basic[game]["catalog"].items():
-                    if match := re.fullmatch(
-                        game_details["catalogPattern"]["sound"], k
-                    ):
-                        # pass
-
-                        song_id = match.group(1)
-                        # dependency = (
-                        #     self.bot.info_from_file[game]
-                        #     .setdefault(song_id, {})
-                        #     .setdefault("sound", {})
-                        #     .get("dependency")
-                        # )
-                        # if (
-                        #     song_id in self.bot.info_from_file[game]
-                        #     and dependency == v["dependency"]
-                        # ):
-                        #     continue
-
-                        # src_path = await ss_cog.extract_file_from_bundle(game, k)
-                        # if not src_path:
-                        #     continue
-                        dst_path = Path(f"data/MusicData/{game}/{song_id}.ogg")
-                        dst_path.unlink(missing_ok=True)
-                        # await self.copy_file(src_path, dst_path, bundle_folders)
-
-                        # duration = int(soundfile.info(dst_path).duration)
-                        # minutes = duration // 60
-                        # seconds = str(duration % 60).zfill(2)
-                        # self.bot.info_from_file[game][song_id]["sound"] = {
-                        #     "duration": f"{minutes}:{seconds}",
-                        #     "key": k,
-                        #     "dependency": v["dependency"],
-                        # }
-                    elif match := re.fullmatch(
-                        game_details["catalogPattern"]["seq"], k
-                    ):
+                    if match := re.fullmatch(game_details["catalogPattern"]["seq"], k):
                         song_id = match.group(1)
                         difficulty = match.group(2).capitalize()
                         dependency = (
@@ -147,13 +112,13 @@ class DalcomSync(commands.Cog):
                         ):
                             continue
 
-                        # src_path = await ss_cog.extract_file_from_bundle(game, k)
-                        # if not src_path:
-                        #     continue
+                        src_path = await ss_cog.extract_file_from_bundle(game, k)
+                        if not src_path:
+                            continue
                         dst_path = Path(
                             f"data/MusicData/{game}/{song_id}_{difficulty}.seq"
                         )
-                        # await self.copy_file(src_path, dst_path, bundle_folders)
+                        await self.copy_file(src_path, dst_path, bundle_folders)
 
                         seq_obj = Seq(dst_path)
                         self.bot.info_from_file[game][song_id]["seq"][difficulty] = {
@@ -444,20 +409,20 @@ class DalcomSync(commands.Cog):
                     ):
                         continue
 
-                    # results = await ss_cog.get_attributes(
-                    #     game,
-                    #     (dalcom_data["SeqData"], dalcom_data.get("URLs")),
-                    #     [seq["code"]],
-                    #     {"seqPath": True},
-                    # )
-                    # src_path = results[seq["code"]]["seqPath"]
-                    # if not src_path:
-                    #     continue
+                    results = await ss_cog.get_attributes(
+                        game,
+                        (dalcom_data["SeqData"], dalcom_data.get("URLs")),
+                        [seq["code"]],
+                        {"seqPath": True},
+                    )
+                    src_path = results[seq["code"]]["seqPath"]
+                    if not src_path:
+                        continue
                     dst_path = Path(
                         f"data/MusicData/{game}"
                         f"/{seq["linkedMusic"]}_{seq["seqLevel"]}.seq"
                     )
-                    # await self.copy_file(src_path, dst_path, bundle_folders)
+                    await self.copy_file(src_path, dst_path, bundle_folders)
 
                     seq_obj = Seq(dst_path)
                     self.bot.info_from_file[game][linked_music]["seq"][seq_level] = {
@@ -469,43 +434,6 @@ class DalcomSync(commands.Cog):
 
                 for music in dalcom_data["MusicData"].values():
                     music_code = str(music["code"])
-                    # current_key = (
-                    #     self.bot.info_from_file[game]
-                    #     .setdefault(music_code, {})
-                    #     .setdefault("sound", {})
-                    #     .get("key")
-                    # )
-                    # found_key = music["sound"]
-                    # if isinstance(found_key, int):
-                    #     results = await ss_cog.get_attributes(
-                    #         game,
-                    #         (dalcom_data["URLs"], None),
-                    #         [found_key],
-                    #         {"url": False},
-                    #     )
-                    #     found_key = results[found_key]["url"]
-
-                    # if not current_key or current_key != found_key:
-                    #     results = await ss_cog.get_attributes(
-                    #         game,
-                    #         (dalcom_data["MusicData"], dalcom_data.get("URLs")),
-                    #         [music["code"]],
-                    #         {"sound": True},
-                    #     )
-                    #     src_path = results[music["code"]]["sound"]
-                    #     if not src_path:
-                    #         continue
-                    # dst_path = Path(f"data/MusicData/{game}/{music["code"]}.ogg")
-                    #     await self.copy_file(src_path, dst_path, bundle_folders)
-
-                    #     duration = int(soundfile.info(dst_path).duration)
-                    #     minutes = duration // 60
-                    #     seconds = str(duration % 60).zfill(2)
-                    #     self.bot.info_from_file[game][music_code]["sound"] = {
-                    #         "duration": f"{minutes}:{seconds}",
-                    #         "key": found_key,
-                    #     }
-
                     music_results = await ss_cog.get_attributes(
                         game,
                         (dalcom_data["MusicData"], dalcom_data.get("URLs")),
@@ -547,19 +475,19 @@ class DalcomSync(commands.Cog):
                             and current_key == found_key
                             and dependency == found_dependency
                         ):
-                            # results = await ss_cog.get_attributes(
-                            #     game,
-                            #     (dalcom_data["MusicData"], dalcom_data.get("URLs")),
-                            #     [music["code"]],
-                            #     {"sound": True},
-                            # )
-                            # src_path = results[music["code"]]["sound"]
-                            # if not src_path:
-                            #     continue
+                            results = await ss_cog.get_attributes(
+                                game,
+                                (dalcom_data["MusicData"], dalcom_data.get("URLs")),
+                                [music["code"]],
+                                {"sound": True},
+                            )
+                            src_path = results[music["code"]]["sound"]
+                            if not src_path:
+                                continue
                             dst_path = Path(
                                 f"data/MusicData/{game}/{music["code"]}.ogg"
                             )
-                            # await self.copy_file(src_path, dst_path, bundle_folders)
+                            await self.copy_file(src_path, dst_path, bundle_folders)
 
                             duration = int(soundfile.info(dst_path).duration)
                             minutes = duration // 60
@@ -569,10 +497,6 @@ class DalcomSync(commands.Cog):
                                 "key": found_key,
                                 "dependency": found_dependency,
                             }
-                    else:
-                        dst_path = Path(f"data/MusicData/{game}/{music["code"]}.ogg")
-                        dst_path.unlink(missing_ok=True)
-                        # pass
 
                     if music_code not in self.bot.info_by_id[game]:
                         locale_results = await ss_cog.get_attributes(
@@ -646,19 +570,19 @@ class DalcomSync(commands.Cog):
                         ):
                             continue
 
-                        # results = await ss_cog.get_attributes(
-                        #     game,
-                        #     (dalcom_data["MusicData"], dalcom_data.get("URLs")),
-                        #     [music["code"]],
-                        #     {difficulty: True},
-                        # )
-                        # src_path = results[music["code"]][difficulty]
-                        # if not src_path:
-                        #     continue
+                        results = await ss_cog.get_attributes(
+                            game,
+                            (dalcom_data["MusicData"], dalcom_data.get("URLs")),
+                            [music["code"]],
+                            {difficulty: True},
+                        )
+                        src_path = results[music["code"]][difficulty]
+                        if not src_path:
+                            continue
                         dst_path = Path(
                             f"data/MusicData/{game}/{music['code']}{extension}"
                         )
-                        # await self.copy_file(src_path, dst_path, bundle_folders)
+                        await self.copy_file(src_path, dst_path, bundle_folders)
 
                         seq_obj = Seq(dst_path)
                         self.bot.info_from_file[game][music_code]["seq"][
