@@ -4,6 +4,7 @@
 import binascii
 import json
 import logging
+import math
 import re
 import shutil
 from collections import defaultdict
@@ -187,6 +188,7 @@ class DalcomSync(commands.Cog):
                         ]
                         for difficulty in self.bot.info_from_file[game][song_id]["seq"]
                     )
+                    duration = math.floor(duration + 0.5)
                     minutes = duration // 60
                     seconds = str(duration % 60).zfill(2)
                     self.bot.info_from_file[game][song_id][
@@ -676,6 +678,7 @@ class DalcomSync(commands.Cog):
                             "seq"
                         ]
                     )
+                    duration = math.floor(duration + 0.5)
                     minutes = duration // 60
                     seconds = str(duration % 60).zfill(2)
                     self.bot.info_from_file[game][music_code][
