@@ -567,15 +567,6 @@ class DalcomSync(commands.Cog):
                         # dst_path.unlink(missing_ok=True)
                         pass
 
-                    self.bot.info_from_file[game][music_code]["duration"] = min(
-                        self.bot.info_from_file[game][music_code]["seq"][difficulty][
-                            "duration"
-                        ]
-                        for difficulty in self.bot.info_from_file[game][music_code][
-                            "seq"
-                        ]
-                    )
-
                     if music_code not in self.bot.info_by_id[game]:
                         locale_results = await ss_cog.get_attributes(
                             game,
