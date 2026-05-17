@@ -531,18 +531,19 @@ class DalcomSync(commands.Cog):
                         }
 
                     for difficulty, extension in seqs.items():
+                        difficulty_key = difficulty.replace("seq", "")
                         current_key = (
                             self.bot.info_from_file[game]
                             .setdefault(music_code, {})
                             .setdefault("seq", {})
-                            .setdefault(difficulty.replace("seq", ""), {})
+                            .setdefault(difficulty_key, {})
                             .get("key")
                         )
                         dependency = (
                             self.bot.info_from_file[game]
                             .setdefault(music_code, {})
                             .setdefault("seq", {})
-                            .setdefault(difficulty.replace("seq", ""), {})
+                            .setdefault(difficulty_key, {})
                             .get("dependency")
                         )
                         found_key = music[difficulty]
@@ -563,7 +564,7 @@ class DalcomSync(commands.Cog):
 
                         if (
                             music_code in self.bot.info_from_file[game]
-                            and difficulty.replace("seq", "")
+                            and difficulty_key
                             in self.bot.info_from_file[game][music_code].get("seq", {})
                             and current_key == found_key
                             and dependency == found_dependency
@@ -586,7 +587,7 @@ class DalcomSync(commands.Cog):
 
                         seq_obj = Seq(dst_path)
                         self.bot.info_from_file[game][music_code]["seq"][
-                            difficulty.replace("seq", "")
+                            difficulty_key
                         ] = {
                             "count": seq_obj.count,
                             "duration": seq_obj.SEQData_Info["secLength"],

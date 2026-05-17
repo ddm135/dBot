@@ -14,11 +14,10 @@ import discord
 from discord.ext import commands
 from google.auth.transport import requests
 from google.oauth2.service_account import IDTokenCredentials
-from gplaydl.api import get_delivery, get_details
+from gplaydl.api import get_delivery, get_details, purchase
 from gplaydl.auth import ensure_auth
 from packaging.version import Version
 
-from helpers.superstar.commons import APKPURE_URL
 from statics.consts import CHUNK_SIZE, GAMES, STATUS_CHANNEL, TIMEZONES
 
 from .embeds import SSLeagueEmbed as _SSLeagueEmbed
@@ -399,8 +398,11 @@ class SuperStar(commands.Cog):
         if apk_path.exists():
             return apk_path
 
-        play_delivery = get_delivery(
-            GAMES[game]["packageName"], version_code, play_auth
+        await asyncio.to_thread(
+            purchase, GAMES[game]["packageName"], version_code, play_auth
+        )
+        play_delivery = await asyncio.to_thread(
+            get_delivery, GAMES[game]["packageName"], version_code, play_auth
         )
         for apk in play_delivery.splits:
             if apk.name == "base_assets":
