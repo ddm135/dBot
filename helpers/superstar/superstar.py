@@ -419,9 +419,16 @@ class SuperStar(commands.Cog):
     async def pin_new_ssl(
         embed: discord.Embed,
         pin_channel: discord.TextChannel,
-        files: list[discord.File],
+        files: dict,
     ) -> int:
-        msg = await pin_channel.send(embed=embed, files=files)
+        msg = await pin_channel.send(
+            embed=embed,
+            files=[
+                discord.File(file, filename=filename)
+                for filename, file in files.items()
+                if isinstance(file, Path)
+            ],
+        )
         await asyncio.sleep(1)
         await msg.pin()
         return msg.id

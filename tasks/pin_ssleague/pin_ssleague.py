@@ -5,7 +5,6 @@ import asyncio
 import json
 import logging
 from datetime import datetime, time
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 import aiohttp
@@ -45,8 +44,7 @@ class PinSSLeague(commands.Cog):
             for game in GAMES
             if game in credentials
         ]
-        results = await asyncio.gather(*pin_tasks, return_exceptions=True)
-        self.LOGGER.info(results)
+        await asyncio.gather(*pin_tasks, return_exceptions=True)
 
         cog.save_data(Data.SSLEAGUES)
 
@@ -167,14 +165,7 @@ class PinSSLeague(commands.Cog):
             artist_last,
             song_last,
         )
-        files = [
-            discord.File(file, filename=filename)
-            for filename, file in {
-                "album.png": album,
-                "icon.png": icon,
-            }.items()
-            if isinstance(file, Path)
-        ]
+        files = {"album.png": album, "icon.png": icon}
         pin_channels = game_details.get("pinChannelIds", {})
         pin_roles = game_details.get("pinRoles", {})
         topic = f"[{current_time.strftime("%m.%d.%y")}] {artist_name} - {song_name}"
