@@ -39,7 +39,7 @@ class SuperStar(commands.Cog):
                 Version(v)
                 for v in [
                     self.bot.basic[game]["manifest"]["ActiveVersion_Android"],
-                    self.bot.basic[game]["manifest"]["ActiveVersion_iOS"],
+                    self.bot.basic[game]["manifest"]["ActiveVersion_IOS"],
                     GAMES[game]["lastVersion"],
                 ]
                 if v is not None
