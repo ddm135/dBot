@@ -45,7 +45,8 @@ class PinSSLeague(commands.Cog):
             for game in GAMES
             if game in credentials
         ]
-        await asyncio.gather(*pin_tasks, return_exceptions=True)
+        results = await asyncio.gather(*pin_tasks, return_exceptions=True)
+        self.LOGGER.info(results)
 
         cog.save_data(Data.SSLEAGUES)
 
@@ -144,6 +145,13 @@ class PinSSLeague(commands.Cog):
         else:
             song_last = None
 
+        self.bot.ssleagues[game][artist_name]["date"] = current_time.strftime(
+            game_details["dateFormat"]
+        )
+        self.bot.ssleagues[game][artist_name]["songs"][str(song_id)] = (
+            current_time.strftime(game_details["dateFormat"])
+        )
+
         embed = cog.SSLeagueEmbed(
             game,
             artist_name,
@@ -159,7 +167,6 @@ class PinSSLeague(commands.Cog):
             artist_last,
             song_last,
         )
-
         files = [
             discord.File(file, filename=filename)
             for filename, file in {
@@ -186,13 +193,6 @@ class PinSSLeague(commands.Cog):
                 await pin_channel.send(topic)
             await pin_channel.edit(topic=topic)
             await cog.unpin_old_ssl(embed, pin_channel, new_pin)
-
-        self.bot.ssleagues[game][artist_name]["date"] = current_time.strftime(
-            game_details["dateFormat"]
-        )
-        self.bot.ssleagues[game][artist_name]["songs"][str(song_id)] = (
-            current_time.strftime(game_details["dateFormat"])
-        )
 
     @pin_ssls.before_loop
     async def before_loop(self) -> None:
