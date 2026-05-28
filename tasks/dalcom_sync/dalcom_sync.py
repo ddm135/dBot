@@ -135,6 +135,7 @@ class DalcomSync(commands.Cog):
                                     str(seq_obj.SEQData_Object),
                                 ]
                             )
+                        self.bot.info_from_file[game][song_id].pop("duration", None)
                     elif match := re.fullmatch(
                         game_details["catalogPattern"]["border"], k
                     ):
