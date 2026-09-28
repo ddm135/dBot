@@ -54,7 +54,7 @@ class SuperStar(commands.Cog):
                         )
                     ) as r:
                         manifest = await r.json(content_type=None)
-                        if manifest["ActiveVersion_Android"] == version:
+                        if Version(manifest["ActiveVersion_Android"]) <= Version(version):
                             return manifest
                         version = manifest["ActiveVersion_Android"]
                 except json.JSONDecodeError:
