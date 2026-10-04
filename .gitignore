@@ -558,6 +558,8 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
+.venv*
+
 data/*
 !/data/dalcom/
 data/dalcom/*
@@ -565,11 +567,8 @@ data/dalcom/*
 data/dalcom/*/*
 !/data/dalcom/*/a.json
 
-dBot*.json
-**/test*
-**/test*.*
 .dBot
-
-utils/*
-!utils/bundle*
-!utils/catalog-*
+dBot*.json
+*.zip
+*.7z
+*.pem

@@ -1,0 +1,229 @@
+# pyright: reportTypedDictNotRequiredAccess=false
+
+from datetime import datetime
+from pathlib import Path
+from typing import TYPE_CHECKING, Any
+
+import discord
+from discord import app_commands
+from discord.ext import commands
+from statics.consts import GAMES, TIMEZONES, InfoColumns
+
+from .autocompletes import artist_autocomplete, song_autocomplete
+from .embeds import InfoDetailsEmbed, InfoEmbed
+from .views import InfoView
+
+if TYPE_CHECKING:
+    from helpers.superstar import SuperStar
+
+    from dBot import dBot
+
+
+class Info(commands.Cog):
+    GAME_CHOICES = [
+        app_commands.Choice(name=game_details["name"], value=game)
+        for game, game_details in GAMES.items()
+    ]
+
+    def __init__(self, bot: "dBot") -> None:
+        self.bot = bot
+
+    @app_commands.command()
+    @app_commands.choices(game_choice=GAME_CHOICES)
+    @app_commands.autocomplete(artist_choice=artist_autocomplete)
+    @app_commands.autocomplete(song_choice=song_autocomplete)
+    @app_commands.rename(game_choice="game", artist_choice="artist", song_choice="song")
+    async def info(
+        self,
+        itr: discord.Interaction["dBot"],
+        game_choice: app_commands.Choice[str],
+        artist_choice: str | None = None,
+        song_choice: str | None = None,
+    ) -> None:
+        """View song durations from shortest to longest.
+        If song name is provided, view detailed information about the song.
+
+        Parameters
+        -----------
+        game_choice: Choice[:class:`str`]
+            Game
+        artist_choice: Optional[:class:`str`]
+            Artist/Album
+        song_choice: Optional[:class:`str`]
+            Song (requires artist/album to be set)
+        """
+
+        await itr.response.defer()
+        game_details = GAMES[game_choice.value]
+        info_columns = game_details["spreadsheet"]["columns"][0]
+        song_id_index = info_columns.index("song_id")
+
+        icon: str | Path | None
+        if not artist_choice:
+            songs = self.bot.info_by_id[game_choice.value].values()
+            icon = self.bot.basic[game_choice.value]["iconUrl"]
+        else:
+            if not (
+                songs := (
+                    self.bot.info_by_name[game_choice.value]
+                    .get(artist_choice, {})
+                    .values()
+                )
+            ):
+                return await itr.followup.send("Artist not found.")
+            if "catalogPattern" in game_details:
+                icon = self.bot.basic[game_choice.value]["iconUrl"]
+            else:
+                icon = self.bot.artist[game_choice.value][artist_choice]["emblem"]
+
+            if song_choice:
+                if not (
+                    song := self.bot.info_by_name[game_choice.value]
+                    .get(artist_choice, {})
+                    .get(song_choice)
+                ):
+                    return await itr.followup.send("Song not found.")
+
+                cog: "SuperStar" = self.bot.get_cog(
+                    "SuperStar",
+                )  # type: ignore[assignment]
+                song_id = song[song_id_index]
+                int_song_id = int(song_id)
+
+                file_info = self.bot.info_from_file[game_choice.value].get(
+                    song_id,
+                    {
+                        "duration": "Unknown",
+                        "seq": {"Unknown": {"count": "Unknown"}},
+                    },
+                )
+
+                if "catalogPattern" in game_details:
+                    color = game_details["color"]
+                    results: dict[int, dict[str, Any]] = {
+                        int_song_id: {
+                            "album": None,
+                            "myrecordQualifyingScore": None,
+                        }
+                    }
+                    album_info = {
+                        "album_name": artist_choice.partition(" : ")[2],
+                        "release_date": song[info_columns.index("release_date")],
+                    }
+                else:
+                    results = await cog.get_attributes(
+                        game_choice.value,
+                        "MusicData",
+                        [int_song_id],
+                        {
+                            "album": True,
+                            "albumName": False,
+                            "albumBgColor": False,
+                            "releaseDate": False,
+                            "myrecordQualifyingScore": False,
+                        },
+                    )
+                    color = (
+                        int(results[int_song_id]["albumBgColor"][:-2], 16)
+                        if results[int_song_id]["albumBgColor"]
+                        else game_details["color"]
+                    )
+
+                    try:
+                        bonus_columns = GAMES[game_choice.value]["spreadsheet"][
+                            "columns"
+                        ][-1]
+                        album_name_index = bonus_columns.index("album_name")
+                        song_id_index = bonus_columns.index("song_id")
+                        bonus_date_index = bonus_columns.index("bonus_date")
+                        bonus = next(
+                            bonus
+                            for bonus in self.bot.bonus[game_choice.value][
+                                artist_choice
+                            ]
+                            if bonus[album_name_index]
+                            and song_id == bonus[song_id_index]
+                        )
+                        album_info = {
+                            "album_name": bonus[album_name_index],
+                            "release_date": bonus[bonus_date_index],
+                        }
+                    except ValueError, KeyError, StopIteration:
+                        album_info = {
+                            "album_name": (
+                                await cog.get_attributes(
+                                    game_choice.value,
+                                    "LocaleData",
+                                    [results[int_song_id]["albumName"]],
+                                    {"enUS": False},
+                                )
+                            )[results[int_song_id]["albumName"]]["enUS"],
+                            "release_date": datetime.fromtimestamp(
+                                results[int_song_id]["releaseDate"] / 1000,
+                                tz=TIMEZONES[game_details["timezone"]],
+                            ).strftime(game_details["dateFormat"]),
+                        }
+
+                return await itr.followup.send(
+                    embed=InfoDetailsEmbed(
+                        game_choice.value,
+                        artist_choice,
+                        song_choice,
+                        file_info["duration"],
+                        file_info["seq"],
+                        results[int_song_id]["album"],
+                        icon,
+                        color,
+                        album_info,
+                        (
+                            song[info_columns.index("skills")]
+                            if info_columns == InfoColumns.SKILLS.value
+                            else None
+                        ),
+                        results[int_song_id]["myrecordQualifyingScore"],
+                    ),
+                    files=[
+                        discord.File(file, filename=filename)
+                        for filename, file in {
+                            "album.png": results[int_song_id]["album"],
+                            "icon.png": icon,
+                        }.items()
+                        if isinstance(file, Path)
+                    ],
+                )
+
+        sorted_songs = sorted(
+            songs,
+            key=lambda x: self.bot.info_from_file[game_choice.value].get(
+                x[song_id_index], {"duration": "Unknown"}
+            )["duration"],
+        )
+        msg = await itr.followup.send(
+            embed=InfoEmbed(
+                game_choice.value,
+                artist_choice,
+                sorted_songs,
+                self.bot.info_from_file[game_choice.value],
+                icon,
+            ),
+            files=(
+                [discord.File(icon, filename="icon.png")]
+                if isinstance(icon, Path)
+                else []
+            ),
+            wait=True,
+        )
+        view = InfoView(
+            msg,
+            game_choice.value,
+            artist_choice,
+            sorted_songs,
+            self.bot.info_from_file[game_choice.value],
+            itr.user,
+            icon,
+        )
+        await msg.edit(view=view)
+
+
+async def setup(bot: "dBot") -> None:
+    await bot.add_cog(Info(bot))

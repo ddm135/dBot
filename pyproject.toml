@@ -1,0 +1,55 @@
+[project]
+name = "dbot"
+version = "1.0.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [{ name = "ddm135 | Aut", email = "ddm135@outlook.com" }]
+requires-python = ">=3.14"
+dependencies = [
+    "asyncpg>=0.32.0",
+    "asyncpg-typed>=0.1.7",
+    "discord-py>=2.7.1",
+    "google-api-python-client>=2.202.0",
+    "google-auth>=2.63.1",
+    "gplaydl>=4.4.0",
+    "grpcio>=1.85.3",
+    "httpx>=0.28.1",
+    "msgpack>=1.2.4",
+    "packaging>=26.4",
+    "pycryptodomex>=3.24.2",
+    "python-dotenv>=1.2.4",
+    "soundfile>=0.14.0",
+    "tenacity>=9.2.1",
+    "tzdata>=2026.6",
+    "unitypy>=1.25.4",
+    "valkey[libvalkey]>=6.2.0 ; sys_platform == 'win32'",
+    "valkey-glide>=2.6.0 ; sys_platform != 'win32'",
+]
+
+[dependency-groups]
+dev = [
+    "asyncpg-stubs>=0.32.0",
+    "google-api-python-client-stubs>=1.40.0",
+    "msgpack-types>=0.8.0",
+    "mypy>=2.4.1",
+    "pytest>=9.2.0",
+    "pytest-asyncio>=1.5.0",
+    "ruff>=0.17.6",
+    "types-grpcio>=1.85.0.20261122",
+]
+
+[tool.ruff]
+extend-exclude = [
+    "v0",
+    "tests/reference",
+] # the old bot and its vendored reference
+
+[tool.ruff.lint]
+extend-select = ["I"]
+
+[tool.mypy]
+exclude = ["^tests/", "^v0/", "(^|/)test[^/]*\\.py$"]
+
+[[tool.mypy.overrides]]
+module = ["gplaydl.*"]
+ignore_missing_imports = true

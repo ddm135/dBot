@@ -1,0 +1,51 @@
+name: dbot
+
+services:
+  dbot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      pull: true
+    deploy:
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 1G
+        reservations:
+          memory: 512M
+    develop:
+      watch:
+        - path: .
+          action: rebuild
+          ignore:
+            - data/
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
+    environment:
+    - DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
+    env_file:
+      - ./.env
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: 2
+    pull_policy: build
+    restart: unless-stopped
+    secrets:
+      - source: google_service_account
+        target: /opt/app/dBot.json
+      - source: postgres_ca_file
+        target: /opt/app/ca.pem
+    stdin_open: true
+    stop_grace_period: 30s
+    tty: true
+    volumes:
+      - ./data:/opt/app/data
+
+secrets:
+  google_service_account:
+    file: ./dBot.json
+  postgres_ca_file:
+    file: ./ca.pem

@@ -1,0 +1,108 @@
+import asyncio
+import logging
+import secrets
+import signal
+import sys
+
+from bot import dBot
+from config import Settings
+from lease import BaseLease, Leader, create_lease_backend, supervise
+
+logger = logging.getLogger(__name__)
+
+CONNECT_BACKOFF_MAX = 30.0
+
+
+def _install_signal_handlers(stop: asyncio.Event) -> None:
+    def request_stop(name: str) -> None:
+        if not stop.is_set():
+            logger.info("Received %s, shutting down...", name)
+            stop.set()
+
+    loop = asyncio.get_running_loop()
+    for sig in (signal.SIGINT, signal.SIGTERM):
+        if sys.platform != "win32":
+            loop.add_signal_handler(sig, request_stop, sig.name)
+        else:
+            signal.signal(
+                sig,
+                lambda signum, _: loop.call_soon_threadsafe(
+                    request_stop, signal.Signals(signum).name
+                ),
+            )
+
+
+async def _connect_lease_backend(
+    backend: BaseLease, request_timeout: float, stop: asyncio.Event
+) -> bool:
+    delay = 1.0
+    while not stop.is_set():
+        try:
+            await backend.connect(request_timeout)
+        except Exception:
+            logger.warning(
+                "Could not connect to the lease backend, retrying in %.0fs...",
+                delay,
+                exc_info=True,
+            )
+
+            try:
+                await backend.close()
+            except Exception:
+                logger.debug("Error while closing the lease backend.", exc_info=True)
+
+            try:
+                await asyncio.wait_for(stop.wait(), delay)
+            except TimeoutError:
+                delay = min(delay * 2, CONNECT_BACKOFF_MAX)
+            else:
+                return False
+        else:
+            return True
+    return False
+
+
+async def run(settings: Settings) -> None:
+    stop = asyncio.Event()
+    _install_signal_handlers(stop)
+
+    holder = f"{settings.instance_id}-{secrets.token_hex(4)}"
+    backend = create_lease_backend(
+        settings.valkey,
+        key=settings.lease_key,
+        holder=holder,
+        ttl=settings.lease_ttl,
+        preferred_ttl=settings.preferred_ttl,
+    )
+    if not await _connect_lease_backend(backend, settings.lease_request_timeout, stop):
+        return
+    logger.info("Lease backend: %s", backend.name)
+
+    leader = Leader(
+        backend,
+        ttl=settings.lease_ttl,
+        renew_interval=settings.lease_renew_interval,
+        poll_interval=settings.lease_poll_interval,
+        margin=settings.lease_margin,
+        request_timeout=settings.lease_request_timeout,
+        preferred=settings.preferred,
+        healthy_for=settings.preferred_healthy_for,
+    )
+    logger.info(
+        "Instance ID: %s%s",
+        holder,
+        " (Preferred)" if settings.preferred else "",
+    )
+
+    try:
+        await supervise(
+            leader,
+            lambda: dBot(settings),
+            settings.discord_token,
+            cooldown=settings.restart_cooldown,
+            stop=stop,
+            close_timeout=settings.close_timeout,
+        )
+    finally:
+        await leader.release()
+        await backend.close()
