@@ -1,0 +1,711 @@
+from datetime import datetime, timedelta
+from enum import Enum
+from pathlib import Path
+from typing import TYPE_CHECKING
+from zoneinfo import ZoneInfo
+
+if TYPE_CHECKING:
+    from statics.types import GameDetails
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+LOCK = REPO_ROOT / ".dBot"
+DATA_DIR = REPO_ROOT / "data"
+UTILS_DIR = REPO_ROOT / "utils"
+
+TEST_GUILD = 540849436868214784
+SSRG_GUILD = 360109303199432704
+STATUS_CHANNEL = 1335315390732963952
+
+CHUNK_SIZE = 104857600  # 100 MB
+MAX_RETRIES = 10
+MAX_AUTOCOMPLETE = 25
+
+BONUS_OFFSET = timedelta(days=1)
+RESET_OFFSET = timedelta(hours=2)
+
+TIMEZONES = {
+    "KST": ZoneInfo("Asia/Seoul"),
+    "JST": ZoneInfo("Asia/Tokyo"),
+    "CST": ZoneInfo("Asia/Taipei"),
+    # "EST": ZoneInfo("Etc/GMT+5"),
+    # "EDT": ZoneInfo("Etc/GMT+4"),
+    "PHT": ZoneInfo("Asia/Manila"),
+    # "ICT": ZoneInfo("Asia/Bangkok"),
+    "UTC": ZoneInfo("UTC"),
+}
+
+STATIC_MODULES = (
+    "statics.consts",
+    "statics.types",
+)
+
+EXTENSIONS = (
+    "helpers.cryptographic",
+    "helpers.google_sheets",
+    "helpers.google_drive",
+    "helpers.superstar",
+    "commands.administrative",
+    "tasks.data_sync",
+    "tasks.basic_sync",
+    "tasks.spreadsheet_sync",
+    "tasks.dalcom_sync",
+    "tasks.notify_bonus",
+    "tasks.pin_ssleague",
+    "tasks.forward_update",
+    "app_commands.info",
+    "app_commands.bonus",
+    "app_commands.ping",
+    "app_commands.role",
+    "app_commands.ssleague",
+    "tasks.clock",
+    "commands.miscellaneous",
+    "app_commands.world_record",
+    # "app_commands.coupon",
+    "entertainment.pinata",
+    "entertainment.alice",
+    "events.on_command_error",
+    "events.on_message",
+    "events.on_ready",
+)
+
+
+class Data(Enum):
+    CREDENTIALS = DATA_DIR / "credentials.json"
+    WORD_PINGS = DATA_DIR / "word_pings.json"
+    ROLES = DATA_DIR / "roles.json"
+    SSLEAGUES = DATA_DIR / "ssleagues.json"
+    LAST_MODIFIED = DATA_DIR / "last_modified.json"
+    LIVE_THEME = DATA_DIR / "live_theme.json"
+    NOTIFY_BONUS = DATA_DIR / "notify_bonus.json"
+
+
+class InfoColumns(Enum):
+    CLASSIC = (
+        "song_id",
+        "artist_name",
+        "search_term",
+        "song_name",
+    )
+    SKILLS = (
+        "song_id",
+        "artist_name",
+        "search_term",
+        "song_name",
+        "skills",
+    )
+    OTHER = (
+        "song_id",
+        "artist_name",
+        "song_name",
+        "_",
+        "_",
+        "_",
+        "_",
+        "_",
+        "release_date",
+    )
+
+
+BONUS_COLUMNS = (
+    "song_id",
+    "bonus_amount",
+    "artist_name",
+    "member_name",
+    "album_name",
+    "song_name",
+    "bonus_date",
+    "bonus_start",
+    "bonus_end",
+)
+
+
+class BaseScore(Enum):
+    NORMAL = 6_358_000
+    PRISM = 6_909_000
+
+
+GAMES: dict[str, "GameDetails"] = {
+    "SM": {
+        "name": "SUPERSTAR SM",
+        "color": 0xE204DD,
+        "spreadsheet": {
+            "id": "1dX_5lWxenT7CDVXpgyScTHDiwazUZIO3441RaNpN55g",
+            "ranges": ["Songs!A2:D", "dBonuses!A2:I"],
+            "columns": [InfoColumns.CLASSIC.value, BONUS_COLUMNS],
+            "replaceGrids": [
+                {
+                    "sheetId": 0,
+                    "startRowIndex": 1,
+                    "startColumnIndex": 1,
+                    "endColumnIndex": 2,
+                },
+                {
+                    "sheetId": 48988104,
+                    "startRowIndex": 1,
+                    "startColumnIndex": 2,
+                    "endColumnIndex": 3,
+                },
+            ],
+        },
+        "base_score": BaseScore.NORMAL.value,
+        "pinChannelIds": {
+            SSRG_GUILD: 401291379810107394,
+            TEST_GUILD: 1336210286289616917,
+        },
+        "pinRoles": {
+            SSRG_GUILD: 420428449325252608,
+            TEST_GUILD: 1350860245487845570,
+        },
+        "forward": {
+            "source_maint": 1413706777375014943,
+            "target": {
+                SSRG_GUILD: 401291379810107394,
+                TEST_GUILD: 1336210286289616917,
+            },
+        },
+        "dateFormat": "%Y-%m-%d",
+        "timezone": "KST",
+        "packageName": "kr.co.dalcomsoft.superstar.a",
+        "lastVersion": "3.31.4",
+        "lookupQuery": "id=890937532&country=kr",
+        "manifestUrl": (
+            "https://super-star.s3.amazonaws.com/version/live/manifest/{version}.txt"
+        ),
+        "catalogUrl": (
+            "https://ssm-cdn.dalcomsoft.net/assets"
+            "/LIVE/Android/2.7.4/catalog_{version}.bin"
+        ),
+        "authorization": "SFFINkh6ckdwRkZiRmlYeis1Mi86U1cwU0JxdWg1dw==",
+        "target_audience": "864447301209-h0hsb0denh03td7sgoelh5lmdvv79f9h",
+    },
+    "JYP": {
+        "name": "SUPERSTAR JYP",
+        "color": 0x4977FB,
+        "spreadsheet": {
+            "id": "1XgaSMje3TKa1bnekWzmpLRjr81QWoag_6w9SlzSwN0g",
+            "ranges": ["Songs!A2:D", "dBonuses!A2:I"],
+            "columns": [InfoColumns.CLASSIC.value, BONUS_COLUMNS],
+            "replaceGrids": [
+                {
+                    "sheetId": 0,
+                    "startRowIndex": 1,
+                    "startColumnIndex": 1,
+                    "endColumnIndex": 2,
+                },
+                {
+                    "sheetId": 1160780925,
+                    "startRowIndex": 1,
+                    "startColumnIndex": 2,
+                    "endColumnIndex": 3,
+                },
+            ],
+        },
+        "base_score": BaseScore.NORMAL.value,
+        "pinChannelIds": {
+            SSRG_GUILD: 360109303199432705,
+            TEST_GUILD: 1354222667384885329,
+        },
+        "pinRoles": {
+            SSRG_GUILD: 420428238171668480,
+        },
+        "forward": {
+            "source_maint": 1413706832953872414,
+            "target": {
+                SSRG_GUILD: 360109303199432705,
+                TEST_GUILD: 1354222667384885329,
+            },
+        },
+        "dateFormat": "%Y-%m-%d",
+        "timezone": "KST",
+        "packageName": "com.dalcomsoft.ss.jyp",
+        "lastVersion": "3.31.4",
+        "lookupQuery": "id=1086866467&country=kr",
+        "manifestUrl": (
+            "https://superstar-jyp-resource.s3.amazonaws.com"
+            "/version/live/manifest/{version}.txt"
+        ),
+        "catalogUrl": (
+            "https://ssj-cdn.dalcomsoft.net/live/assets"
+            "/LIVE/Android/2.7.4/catalog_{version}.bin"
+        ),
+        "authorization": "MHhYTEhMQnv0aGpqY3ZRd1JHbUY6SlE0VFZZaVhXYw==",
+        "target_audience": "506321732908-4u8t2uk3888gm8087i7lcpi97ff6ld4a",
+    },
+    "SS": {
+        "name": "SUPERSTAR STARSHIP",
+        "color": 0x484E8A,
+        "spreadsheet": {
+            "id": "13MYqeey_Pd8_5vXsEQe94usC517WaMEduPte19xtQiU",
+            "ranges": ["Songs!A2:D", "Bonuses!A2:I"],
+            "columns": [InfoColumns.CLASSIC.value, BONUS_COLUMNS],
+            "replaceGrids": [
+                {
+                    "sheetId": 0,
+                    "startRowIndex": 1,
+                    "startColumnIndex": 1,
+                    "endColumnIndex": 2,
+                },
+                {
+                    "sheetId": 1039181707,
+                    "startRowIndex": 1,
+                    "startColumnIndex": 2,
+                    "endColumnIndex": 3,
+                },
+            ],
+        },
+        "base_score": BaseScore.NORMAL.value,
+        "forward": {
+            "source_maint": 1413706721494438039,
+            "target": {
+                SSRG_GUILD: 629497534804525066,
+                TEST_GUILD: 1413706247185633412,
+            },
+        },
+        "dateFormat": "%Y-%m-%d",
+        "timezone": "KST",
+        "packageName": "com.dalcomsoft.sss",
+        "lastVersion": "3.31.4",
+        "lookupQuery": "id=1480181152&country=kr",
+        "manifestUrl": (
+            "https://superstar-starship.s3.amazonaws.com"
+            "/version/live/manifest/{version}.txt"
+        ),
+        "catalogUrl": (
+            "https://sss-cdn.dalcomsoft.net/assets"
+            "/LIVE/Android/2.7.4/catalog_{version}.bin"
+        ),
+        "authorization": "bnZQb1RweVg4WVlyUlZERE85Zkc6WVBrQklrNFdhcQ==",
+        "target_audience": "42043845970-4hm4teclds9q4pji2on6f8o35n4ji6ac",
+    },
+    "KD": {
+        "name": "SuperStar KANGDANIEL",
+        "iconUrl": "https://lh3.googleusercontent.com/fife/ALs6j_F5p1r_gQeZEflvr7IT"
+        "q6WPNV3baQB9c3WRnoXMU1tVyBWdls2WF17Fi-gRYlKERFF-RYmbP_tHqoWUdw-Qe8UQcl120g"
+        "ropBajFxrOWfJDrP-6MzB_-CQpMIQMYEro_xafihKHHUS4P3nOhPaQBM1flRiQD0Rg5dw4E0fU"
+        "iXNUy7chCIzPiTh7VZLF6zGlrB-uz9fMYKg_35JS_yCQv_ysZwBjmWtDmVI6Gh3sjc0EPppijC"
+        "sFAXlKdLAZLm0blHtfqmxhafKVrhmq0XyHCjQ04pxw8CGOMNNTpSvd9MYQELPiPTZt2QykEj21"
+        "hJ9rYzWCpyHVA3meJpeKQS7OZllbDgfh3nHlylTeq6LrWiZbaatznSbXPhEKYx2gSztUdPccsP"
+        "TYr9X3c3J5HjHIhtsovYH-4LhIhO1P767BQGtflPzzZMIRvG54ARL_2THgxphjJYxILk-etoFA"
+        "e35SW18w49gAporBqvcBodObPURcrB8C6jyFWZLhMCERu2jjdgDEXnYZ2n5iSy6Q04cPYYVOjI"
+        "X9EDrkg18kg0vvMnkQ2VcK3kUbdqcEbi5x_-T13Uw8GDWcCyDuEe09Vmw9tMxL5N7wVyOyx9qX"
+        "EYvpAp9LRS1mxRveGt-LG-pNH0EEMdGOgcMoVdEBMzWi0gJ2Zc9H82J9PXD7Zd68xZPUhiOuVE"
+        "BwMbVOwKPNsR3nLAgVtUMhMNqOBWRpdWRHLd7kRo08MltORdIa4QWWJeWDHsqGmK3vb_UewDE8"
+        "t2iHCCK3cPKQ5L2m9vZ1pQCln5upBHilk7-L6Oj-bpTJRDIMV78BKsSAaFyXlE_HOE28KFf4Qv"
+        "7frYvm1dI6ptXc9J6dv_P-s_M6dGawGT7KY6u4rDcrhg4taiWNWTH-5qbNh6-xWpepeQ0wbMtu"
+        "YPyVZV_i_BVNrMJAPl8P9UjVoEWweAlPX5uUV5nyCymDSOGU5-m1mpQi-bjSlkuFCg_0E6uy_S"
+        "AD_P0SVbwFFMzNLPKps-iV0RTq-PmPHgT1OJGZ3ENQgiMa7hWW5Ef4Lv9GAfBeX7-syMJtoTO3"
+        "-aboiGkauVWidEtuJItsdzqW5_4ve4kNt4SuH97EheoX2fmNcX6Z_fDILAbNkPvY3ktc8-MoqM"
+        "k8zup4oFlcDK1CQwsgkiMStwPiuCkRJccPPGfyAS1za2RKsWzsU5s67L_eDE_bpSzCkMs23BXe"
+        "dgjC2U_HXqOd-QPRho6c5E_-Iym46uGcAYG0ZvozetFlmnmY3VT5HjyJ34WTDKL4B4sOF2Eni2"
+        "WkTKgaBAqfoXhVIO82D1fGdn_XPKPK2EOQKtAUnEzFQyTtYTFs06BeNzcn6-IQsA5Fx8kbxsZn"
+        "upeo9T8IQjJ2QOxVUPgZEdpKQIi9ivV-aURpHC07F9F62kjr-ukyKwMmsOBnbNZ2ofvLyFmV33"
+        "ZwrqnxzL16QskEWfWBLKx6IzxweJormHpnp1mZFQjIRDFfNhYeFBOFgfaoQ7R05i_I8haNNhcX"
+        "qtqqFO_eX8fMfSGV4IWE8IBcy1v6JaLe-aDj1ceuSQ0uNqj8FNThw3PPQmC-N7RLg2PPvnkEW8"
+        "T1Rt_bDVv3FBWAuHAWTsFCQB4nrBKcUkeKHD2Bsoa5BnH4KAqIPBpR0BG344aWzaL6HJdVbSsG"
+        "Cb-7GDlZLRqLX-TbDgqdLdRHk1UKEy0PXpVGOI2CrTkYWztMWlFA8UktLarSPA=w1920-h943?"
+        "auditContext=prefetch",
+        "color": 0xB72476,
+        "spreadsheet": {
+            "id": "1QSCRXKtiwoMTLV8knHC_o4NwV3UZM6ZvL-l9ZCPxoRM",
+            "ranges": ["Official Local Version!A2:C"],
+            "columns": [InfoColumns.OTHER.value],
+        },
+        "dateFormat": "%Y-%m-%d",
+        "timezone": "KST",
+        "packageName": "com.dalcomsoft.kangdaniel",
+        "lastVersion": "4.0.0",
+        "manifestUrl": (
+            "https://superstar-kangdaniel.s3.amazonaws.com"
+            "/version/real/manifest/{version}.txt"
+        ),
+    },
+    "ATZ": {
+        "name": "SUPERSTAR ATEEZ",
+        "color": 0xDB811C,
+        "spreadsheet": {
+            "id": "1ZRfm1D2sxV183umOvK4hdWUXIVWvd-Gc8nmRbnsmajY",
+            "ranges": ["Info!A2:I"],
+            "columns": [BONUS_COLUMNS],
+            "replaceGrids": [
+                {
+                    "sheetId": 0,
+                    "startRowIndex": 1,
+                    "startColumnIndex": 2,
+                    "endColumnIndex": 3,
+                },
+            ],
+        },
+        "base_score": BaseScore.PRISM.value,
+        "forward": {
+            "source_maint": 1413706800049688647,
+            "target": {
+                SSRG_GUILD: 872044312731484200,
+                TEST_GUILD: 1413706348469682187,
+            },
+        },
+        "dateFormat": "%Y-%m-%d",
+        "timezone": "KST",
+        "packageName": "com.dalcomsoft.ssat",
+        "lastVersion": "3.31.4",
+        "lookupQuery": "id=1571479814&country=kr",
+        "manifestUrl": (
+            "https://superstar-ateez.s3.amazonaws.com"
+            "/version/live/manifest/{version}.txt"
+        ),
+        "catalogUrl": (
+            "https://ssat-cdn.dalcomsoft.net/assets"
+            "/LIVE/Android/2.7.4/catalog_{version}.bin"
+        ),
+        "authorization": "QWVob3JZcmxGanJ2dmRtTXY4S0w6SVJLR0lqTlRyRw==",
+        "target_audience": "832096356756-6nust6ofm2hfoima94nd93uakqq44ev8",
+    },
+    "SC": {
+        "name": "SUPERSTAR HIGHUP",
+        "color": 0x210630,
+        "spreadsheet": {
+            "id": "1zEBkb3oAqP_VkilWfJt6x0nfcrweVn7Ray--wNHqxjg",
+            "ranges": ["Info!A2:I"],
+            "columns": [BONUS_COLUMNS],
+            "replaceGrids": [
+                {
+                    "sheetId": 0,
+                    "startRowIndex": 1,
+                    "startColumnIndex": 2,
+                    "endColumnIndex": 3,
+                },
+            ],
+        },
+        "base_score": BaseScore.PRISM.value,
+        "forward": {
+            "source_maint": 1413706850389725244,
+            "source_msd": 1418938625348997200,
+            "target": {
+                SSRG_GUILD: 1104332747008389231,
+                TEST_GUILD: 1413706402790379520,
+            },
+        },
+        "dateFormat": "%Y-%m-%d",
+        "timezone": "KST",
+        "packageName": "com.dalcomsoft.stayc",
+        "lastVersion": "3.31.4",
+        "lookupQuery": "id=6446679596&country=kr",
+        "manifestUrl": (
+            "https://superstar-stayc.s3.amazonaws.com"
+            "/version/live/manifest/{version}.txt"
+        ),
+        "catalogUrl": (
+            "https://sssc-cdn.dalcomsoft.net/assets"
+            "/LIVE/Android/2.7.4/catalog_{version}.bin"
+        ),
+        "authorization": "WW5yI0VCPmlKM182fG5qXllrMzQ6THpULVQ3UF9dfg==",
+        "target_audience": "154091709836-q1sk7hq02vi16f3v0q88uvuf6op5lenv",
+    },
+    "W1": {
+        "name": "SUPERSTAR WAKEONE",
+        "color": 0x5400FF,
+        "spreadsheet": {
+            "id": "1HHBluEEcWmZMHjq3WlLbS9TeLfPktQ3WrfxpcgReWF0",
+            "ranges": ["Songs (Note Count)!A2:C"],
+            "columns": [InfoColumns.OTHER.value],
+            "replaceGrids": [
+                {
+                    "sheetId": 0,
+                    "startRowIndex": 1,
+                    "startColumnIndex": 1,
+                    "endColumnIndex": 2,
+                },
+            ],
+        },
+        "forward": {
+            "source_maint": 1413706817548189807,
+            "target": {
+                SSRG_GUILD: 1291640600080289803,
+                TEST_GUILD: 1413706513561681930,
+            },
+        },
+        "dateFormat": "%Y-%m-%d",
+        "timezone": "KST",
+        "firstSeason": datetime(2024, 12, 2, tzinfo=TIMEZONES["KST"]),
+        "packageName": "com.dalcomsoft.sswo",
+        "lastVersion": "3.31.4",
+        "lookupQuery": "id=6523424185&country=kr",
+        "manifestUrl": (
+            "https://superstar-wakeone.s3.amazonaws.com"
+            "/version/live/manifest/{version}.txt"
+        ),
+        "catalogUrl": (
+            "https://sswo-cdn.dalcomsoft.net/assets"
+            "/LIVE/Android/2.7.4/catalog_{version}.bin"
+        ),
+        "target_audience": "259379396797-tfc19vpi39fosa2sic420po6l67p9ltu",
+    },
+    "BL": {
+        "name": "SUPERSTAR THEBLACKLABEL",
+        "color": 0x000000,
+        "spreadsheet": {
+            "id": "1a4lXHp4qDkCmaUwUwCs3PiHgUDXmS00CJaR0dSiQ5Vc",
+            "ranges": ["Songs!A2:I"],
+            "columns": [InfoColumns.OTHER.value],
+            "replaceGrids": [
+                {
+                    "sheetId": 0,
+                    "startRowIndex": 1,
+                    "startColumnIndex": 1,
+                    "endColumnIndex": 2,
+                },
+            ],
+        },
+        "forward": {
+            "source_maint": 1489895419952758835,
+            "target": {
+                SSRG_GUILD: 1452684579092828292,
+            },
+        },
+        "dateFormat": "%Y-%m-%d",
+        "timezone": "KST",
+        "packageName": "com.dalcomsoft.ssbl",
+        "lastVersion": "1.0.9",
+        "lookupQuery": "id=6738368827&country=kr",
+        "manifestUrl": (
+            "https://superstar-theblacklabel.s3.amazonaws.com"
+            "/version/prod/manifest/{version}.txt"
+        ),
+        "catalogUrl": (
+            "https://ssbl-cdn.dalcomsoft.net/live/assets"
+            "/LIVE/Android/2.8.0/catalog_{version}.bin"
+        ),
+        "catalogPattern": {
+            "sound": r"Audio_Music_(\d+)",
+            "seq": r"bytes_notes_(\d+)_([a-z]+)",
+            "border": r"Image_ThemeType_(\d+)_R_Large",
+        },
+    },
+    "SMTOWN": {
+        "name": "SUPERSTAR SMTOWN (JP/TW)",
+        "color": 0xE10989,
+        "spreadsheet": {
+            "id": "1kC38CLFd6xkDXD9qLHgnnv3s3jmM_4vf4RLsWuXs9NU",
+            "ranges": ["Songs!A2:D", "Bonuses!A2:I"],
+            "columns": [InfoColumns.CLASSIC.value, BONUS_COLUMNS],
+            "replaceGrids": [
+                {
+                    "sheetId": 0,
+                    "startRowIndex": 1,
+                    "startColumnIndex": 1,
+                    "endColumnIndex": 2,
+                },
+                {
+                    "sheetId": 1118940800,
+                    "startRowIndex": 1,
+                    "startColumnIndex": 2,
+                    "endColumnIndex": 3,
+                },
+            ],
+        },
+        "base_score": BaseScore.NORMAL.value,
+        "pinChannelIds": {
+            SSRG_GUILD: 481907573948153857,
+            TEST_GUILD: 1343840449357418516,
+        },
+        "dateFormat": "%Y-%m-%d",
+        "timezone": "JST",
+        "packageName": "jp.co.ponos.superstarsmtown",
+        "lastVersion": "3.6.6",
+        "lookupQuery": "id=1216136006&country=jp",
+        "manifestUrl": (
+            "https://superstar-smtown-real.s3.amazonaws.com/version/{version}.txt"
+        ),
+        "target_audience": "28835016655-choauh766oss3ht8ddqiamavvtfm05ur",
+    },
+    "JYPNATION": {
+        "name": "SUPERSTAR JYPNATION (JP)",
+        "color": 0x2377E4,
+        "spreadsheet": {
+            "id": "1eVjwi0GudyMixnZtam8TeupRd3DQ6mheyRKp2lDA6qw",
+            "ranges": ["Songs!A2:E", "Bonuses!A2:I"],
+            "columns": [InfoColumns.SKILLS.value, BONUS_COLUMNS],
+            "replaceGrids": [
+                {
+                    "sheetId": 1514100857,
+                    "startRowIndex": 1,
+                    "startColumnIndex": 1,
+                    "endColumnIndex": 2,
+                },
+                {
+                    "sheetId": 1285084831,
+                    "startRowIndex": 1,
+                    "startColumnIndex": 2,
+                    "endColumnIndex": 3,
+                },
+            ],
+        },
+        "pinChannelIds": {
+            SSRG_GUILD: 951350075190313010,
+            TEST_GUILD: 1335936325685084242,
+        },
+        "dateFormat": "%Y-%m-%d",
+        "timezone": "JST",
+        "packageName": "jp.co.dalcomsoft.superstarjypnation",
+        "lastVersion": "3.7.1",
+        "lookupQuery": "id=1569554295&country=jp",
+        "manifestUrl": (
+            "https://superstar-jyp-jp-real.s3.amazonaws.com"
+            "/version/manifest/{version}.txt"
+        ),
+        "target_audience": "776124120237-r7q2lcrob52mp0asch12hbmkd52elej5",
+    },
+    "EB": {
+        "name": "SUPERSTAR EBiDAN",
+        "color": 0xC71D1B,
+        "spreadsheet": {
+            "id": "1uwLl0MQM895xI4iBmdP-eVVn7HKOBisFaQCCjzJL4GQ",
+            "ranges": ["Songs!A2:E", "Bonuses!A2:I"],
+            "columns": [InfoColumns.SKILLS.value, BONUS_COLUMNS],
+            "replaceGrids": [
+                {
+                    "sheetId": 1685871960,
+                    "startRowIndex": 1,
+                    "startColumnIndex": 2,
+                    "endColumnIndex": 3,
+                },
+            ],
+        },
+        "dateFormat": "%Y-%m-%d",
+        "timezone": "JST",
+        "packageName": "jp.co.dalcomsoft.superstarebidan",
+        "lastVersion": "1.6.0",
+        "lookupQuery": "id=6450412255&country=jp",
+        "manifestUrl": (
+            "https://superstar-ebidan-jp-real.s3.amazonaws.com"
+            "/version/manifest/{version}.txt"
+        ),
+        "target_audience": "1006848262784-luosgb8o1hrjvbu6v8mjgh35b5oiimli",
+    },
+    "LDH": {
+        "name": "SUPERSTAR LDH",
+        "color": 0xE60012,
+        "spreadsheet": {
+            "id": "1UoI5Hdk0o02IlX88-wYOJYOkLyW-CL4O46lJXxcvMBQ",
+            "ranges": ["Songs!A2:E", "Bonuses!A2:I"],
+            "columns": [InfoColumns.SKILLS.value, BONUS_COLUMNS],
+            "replaceGrids": [
+                {
+                    "sheetId": 1685871960,
+                    "startRowIndex": 1,
+                    "startColumnIndex": 2,
+                    "endColumnIndex": 3,
+                },
+            ],
+        },
+        "dateFormat": "%Y-%m-%d",
+        "timezone": "JST",
+        "packageName": "jp.co.dalcomsoft.superstarldh",
+        "lastVersion": "1.0.1",
+        "lookupQuery": "id=6752320672&country=jp",
+        "manifestUrl": (
+            "https://superstar-ldh-jp-real.s3.amazonaws.com"
+            "/version/manifest/{version}.txt"
+        ),
+    },
+    "PH": {
+        "name": "SuperStar PHILIPPINES",
+        "color": 0x04102D,
+        "spreadsheet": {
+            "id": "1Fz71pl3YCUIbCRcZRuKBjsDT4JEW0m9Uoj8wyJhUMOc",
+            "ranges": ["Songs!A2:D", "Bonuses!A2:I"],
+            "columns": [InfoColumns.CLASSIC.value, BONUS_COLUMNS],
+            "replaceGrids": [
+                {
+                    "sheetId": 0,
+                    "startRowIndex": 1,
+                    "startColumnIndex": 2,
+                    "endColumnIndex": 3,
+                },
+            ],
+        },
+        "base_score": BaseScore.PRISM.value,
+        "forward": {
+            "source_maint": 1413706748833038498,
+            "source_msd": 1418938997165527171,
+            "target": {
+                SSRG_GUILD: 1156462287943630930,
+                TEST_GUILD: 1413706686346301480,
+            },
+        },
+        "dateFormat": "%d-%m-%Y",
+        "timezone": "PHT",
+        "packageName": "com.dalcomsoft.ssph",
+        "lastVersion": "3.14.0",
+        "lookupQuery": "id=6451133069&country=us",
+        "manifestUrl": (
+            "https://superstar-philippines.s3.amazonaws.com"
+            "/version/real/manifest/{version}.txt"
+        ),
+        "authorization": "WWFeNnhxVldSJWFkVWp4Z3ViOFY6WmJRcy1uZ1YyQQ==",
+        "target_audience": "234980834479-creie63p99odjttcv9pvifjelsuf983i",
+    },
+}
+
+ROLES: dict[int, tuple[int, ...]] = {
+    TEST_GUILD: (1341036401483055147, 1341036445900472403, 1341036487084609556),
+    SSRG_GUILD: (
+        437796301401489420,  # Swain
+        459083923327025154,  # fromis_9
+        506486523345108993,  # BAEK A YEON
+        485894758867271709,  # woo!ah!
+        452938514221367298,  # SHINee
+        467093328819912724,  # f(x)
+        499537948274982922,  # ATEEZ
+        478013408781008896,  # NCT DREAM
+        443941784066719744,  # NCT
+        481401571108716544,  # 3RACHA
+        492037142718185473,  # STRAY KIDS
+        467358853936185364,  # BIGBANG
+        434407852719996938,  # LOOΠΔ
+        425779125773664267,  # TWICE
+        463295473206165505,  # GOT7
+        473350382421016586,  # DAY6
+        433044172623052800,  # TVXQ!
+        432952370314477578,  # SUPER JUNIOR
+        431187380188479508,  # ITZY
+        434935025767809024,  # EXO
+        486984842886512647,  # WONDER GIRLS
+        434568293848711168,  # Red Velvet
+        497585329113399336,  # CHUNGHA
+        491962322974408736,  # BLACKPINK
+        464521299885031435,  # IU
+        436712096604880907,  # BTS
+        498995602391171085,  # Agust D
+        481700836829822997,  # TXT
+        474593959226638347,  # EXO-CBX
+        438837118697996299,  # MAMAMOO
+        479773267247235082,  # JAMIE
+        443544890622738433,  # PRISTIN V
+        436930802715066368,  # SuperM
+        446958971471790080,  # DREAMCATCHER
+        454021810720210956,  # SEVENTEEN
+        457396413639426048,  # NU'EST
+        461181565821517825,  # MONSTA X
+        462785070877638657,  # GIRLS' GENERATION
+        471052244264157204,  # JJ Project
+        470103655656194068,  # IZ*ONE
+        475640605087891467,  # WJSN
+        480072838842417152,  # HYOLYN
+        481013464039555082,  # 2PM
+        488063679552552971,  # GFriend
+        467556568960073729,  # HYUNA
+        490995416188321824,  # GOLDEN CHILD
+        493777070120370178,  # iKON
+        494436432274784256,  # OH MY GIRL
+        497655139478274058,  # SUZY
+        523502228078592001,  # TAEYEON
+        528972207922348032,  # Oh!GG
+        455139836953755648,  # SUNMI
+        460246887899856896,  # DAY6 (Even of Day)
+        939391654220148748,  # KANG DANIEL
+        939397127099019284,  # PSY
+        939398862886567976,  # THE BOYZ
+        965022365601910784,  # CLASS:y
+        1105405311436726313,  # STAYC
+    ),
+}

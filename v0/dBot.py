@@ -1,0 +1,116 @@
+import logging
+import os
+from collections import defaultdict
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
+import discord
+from discord.ext import commands
+from dotenv import load_dotenv
+from statics.consts import EXTENSIONS, LOCK, STATUS_CHANNEL
+from statics.types import (
+    ArtistDetails,
+    BasicDetails,
+    LastAppearance,
+    LastAppearanceManual,
+)
+
+
+class dBot(commands.Bot):
+    LOGGER = logging.getLogger("dBot")
+
+    basic: dict[str, BasicDetails] = {}
+
+    info_by_name: dict[str, dict[str, dict[str, list[str]]]] = {}
+    info_by_id: dict[str, dict[str, list[str]]] = {}
+    info_from_file: dict[str, dict[str, dict]] = {}
+
+    bonus: dict[str, dict[str, list[list]]] = {}
+
+    artist: dict[str, dict[str, ArtistDetails]] = {}
+
+    word_pings: defaultdict[str, defaultdict[str, defaultdict[str, dict]]] = (
+        defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
+    )
+    roles: defaultdict[str, list[int]] = defaultdict(list[int])
+    ssleagues: defaultdict[str, defaultdict[str, LastAppearance]] = defaultdict(
+        lambda: defaultdict(
+            lambda: LastAppearance(songs=defaultdict(lambda: None), date=None)
+        )
+    )
+    ssleague_manual: dict[str, LastAppearanceManual] = {}
+
+    live_theme: defaultdict[str, defaultdict[str, int]] = defaultdict(
+        lambda: defaultdict(int)
+    )
+
+    notify_bonus: defaultdict[str, defaultdict[str, list[int]]] = defaultdict(
+        lambda: defaultdict(list[int])
+    )
+
+    world_record: dict[str, dict[int, dict[str, datetime]]] = {}
+
+    async def setup_hook(self) -> None:
+        for ext in EXTENSIONS:
+            await self.load_extension(ext)
+        LOCK.touch(exist_ok=True)
+        self.LOGGER.info("Ready!")
+
+    async def close(self) -> None:
+        try:
+            channel = self.get_channel(STATUS_CHANNEL) or await self.fetch_channel(
+                STATUS_CHANNEL
+            )
+            assert isinstance(channel, discord.TextChannel)
+            current_date = datetime.now(tz=ZoneInfo("Etc/GMT-8"))
+            if current_date.hour in (3, 4) and not current_date.weekday():
+                await self.change_presence(
+                    status=discord.Status.dnd,
+                    activity=discord.CustomActivity("Weekly restart in progress..."),
+                )
+                await channel.send(
+                    f"Weekly restart at {datetime.now(tz=ZoneInfo('Etc/GMT-8'))}."
+                )
+            else:
+                await self.change_presence(
+                    status=discord.Status.dnd,
+                    activity=discord.CustomActivity("Shutting down..."),
+                )
+                await channel.send(
+                    f"Shutting down at {datetime.now(tz=ZoneInfo('Etc/GMT-8'))}."
+                )
+        except Exception:
+            pass
+        finally:
+            for ext in reversed(EXTENSIONS):
+                try:
+                    await self.unload_extension(ext)
+                except commands.ExtensionNotLoaded:
+                    pass
+            await super().close()
+            LOCK.unlink(missing_ok=True)
+
+
+bot = dBot(
+    command_prefix=["db!", "DB!", "dB!", "Db!"],
+    help_command=None,
+    intents=discord.Intents.all(),
+    status=discord.Status.idle,
+    activity=discord.CustomActivity("Waiting for clock..."),
+    member_cache_flags=discord.MemberCacheFlags.all(),
+)
+bot.owner_id = 180925261531840512
+
+load_dotenv()
+
+
+def main() -> None:
+    load_dotenv()
+    bot.run(
+        os.getenv("DISCORD_TOKEN"),  # type: ignore[arg-type]
+        root_logger=True,
+    )
+
+
+if __name__ == "__main__":
+    main()

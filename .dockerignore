@@ -1,0 +1,14 @@
+.vscode/
+.venv/
+.git/
+.gitignore
+.gitattributes
+.dockerignore
+.env
+**/__pycache__/
+**/.mypy_cache/
+test*.*
+*.json
+Dockerfile
+requirements.txt
+data/

@@ -1,0 +1,49 @@
+name: dbot
+
+services:
+  dbot:
+    build:
+      context: ./v0
+      dockerfile: ../Dockerfile
+      pull: true
+      additional_contexts:
+        project-root: .
+    deploy:
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 1G
+        reservations:
+          memory: 512M
+    develop:
+      watch:
+        - path: .
+          action: rebuild
+          ignore:
+            - data/
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
+    environment:
+    - DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
+    env_file:
+      - ./.env
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: 2
+    pull_policy: build
+    restart: unless-stopped
+    secrets:
+      - source: google_service_account
+        target: /run/secrets/dBot.json
+        uid: '8508'
+        gid: '8508'
+        mode: 0400
+    volumes:
+      - ./data:/opt/app/data
+
+secrets:
+  google_service_account:
+    file: ./dBot.json

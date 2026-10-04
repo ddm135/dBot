@@ -1,0 +1,33 @@
+[project]
+name = "dbot"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [{ name = "ddm135 | Aut", email = "ddm135@outlook.com" }]
+requires-python = ">=3.14"
+dependencies = [
+    "asteval>=1.0.10",
+    "asyncpg>=0.31.0",
+    "asyncpg-typed>=0.1.6",
+    "discord-py>=2.7.1",
+    "google-api-python-client>=2.201.0",
+    "gplaydl>=4.2.1",
+    "packaging>=26.3",
+    "pycryptodomex>=3.23.0",
+    "python-dotenv>=1.2.4",
+    "soundfile>=0.14.0",
+    "tzdata>=2026.5",
+    "valkey[libvalkey]>=6.1.1 ; sys_platform == 'win32'",
+    "valkey-glide>=2.5.3 ; sys_platform != 'win32'",
+]
+
+[dependency-groups]
+dev = [
+    "asyncpg-stubs>=0.31.3",
+    "google-api-python-client-stubs>=1.40.0",
+    "mypy>=2.4.0",
+    "ruff>=0.16.10",
+]
+
+[tool.ruff.lint]
+extend-select = ["I"]
