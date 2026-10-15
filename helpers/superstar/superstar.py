@@ -33,9 +33,8 @@ class SuperStar(commands.Cog):
         self.bot = bot
 
     async def get_manifest(self, game: str, version: str | None = None) -> dict:
-        max_active_version = None
         if not version:
-            max_active_version = max(
+            version = max(
                 Version(v)
                 for v in [
                     self.bot.basic[game]["manifest"]["ActiveVersion_Android"],
@@ -50,7 +49,7 @@ class SuperStar(commands.Cog):
                 try:
                     async with session.get(
                         GAMES[game]["manifestUrl"].format(
-                            version=version or max_active_version
+                            version=version
                         )
                     ) as r:
                         manifest = await r.json(content_type=None)
