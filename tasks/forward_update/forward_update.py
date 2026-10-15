@@ -135,7 +135,6 @@ class ForwardUpdate(commands.Cog):
                 try:
                     manifest = await cog.get_manifest(game)
                     if manifest["MaintenanceUrl"]:
-                        print(manifest["MaintenanceUrl"])
                         continue
 
                     if "catalogPattern" in game_details:
@@ -144,14 +143,12 @@ class ForwardUpdate(commands.Cog):
                     ajs = await cog.get_a_json(game)
                     if ajs["code"] == 1000:
                         break
-                    print(ajs["code"])
                 except (
                     aiohttp.ConnectionTimeoutError,
                     json.JSONDecodeError,
                     binascii.Error,
                     ValueError,
-                ) as e:
-                    print(e)
+                ):
                     continue
 
         target_channels = []
