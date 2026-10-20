@@ -33,6 +33,7 @@ class SuperStar(commands.Cog):
         self.bot = bot
 
     async def get_manifest(self, game: str, version: str | None = None) -> dict:
+        print(version)
         if not version:
             version = max(
                 Version(v)
@@ -43,6 +44,7 @@ class SuperStar(commands.Cog):
                 ]
                 if v is not None
             )
+        print(version)
 
         async with aiohttp.ClientSession() as session:
             while True:
