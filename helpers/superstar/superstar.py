@@ -34,7 +34,7 @@ class SuperStar(commands.Cog):
 
     async def get_manifest(self, game: str, version: str | None = None) -> dict:
         if not version:
-            version = max(
+            version = str(max(
                 Version(v)
                 for v in [
                     self.bot.basic[game]["manifest"]["ActiveVersion_Android"],
@@ -42,9 +42,7 @@ class SuperStar(commands.Cog):
                     GAMES[game]["lastVersion"],
                 ]
                 if v is not None
-            )
-        elif isinstance(version, Version):
-            version = str(version)
+            ))
 
         async with aiohttp.ClientSession() as session:
             while True:
