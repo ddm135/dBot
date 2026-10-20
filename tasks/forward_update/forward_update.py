@@ -148,7 +148,8 @@ class ForwardUpdate(commands.Cog):
                     json.JSONDecodeError,
                     binascii.Error,
                     ValueError,
-                ):
+                ) as e:
+                    print(e)
                     continue
 
         target_channels = []
