@@ -39,10 +39,7 @@ dev = [
 ]
 
 [tool.ruff]
-extend-exclude = [
-    "v0",
-    "tests/reference",
-] # the old bot and its vendored reference
+extend-exclude = ["tests/reference"]
 
 [tool.ruff.lint]
 extend-select = ["I"]

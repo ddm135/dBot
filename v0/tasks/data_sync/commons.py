@@ -1,1 +1,0 @@
-DATA_FOLDER = "1Nk7Ik6Tqfz3m5ohldzQ4aRpKZBOWMe__"

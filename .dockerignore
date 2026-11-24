@@ -13,5 +13,3 @@ test*
 Dockerfile
 requirements.txt
 data/
-utils/
-v0/
