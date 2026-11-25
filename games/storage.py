@@ -135,8 +135,7 @@ class DataStore:
             return None
 
     async def write_assets(self, game_key: str, index: AssetContext) -> None:
-        # Only the result is kept; reading accepts both that and the full answer.
-        await self.write_json(self.assets_path(game_key), index.raw["result"])
+        await self.write_json(self.assets_path(game_key), index.raw)
 
     async def present_tables(self, game_key: str) -> set[str]:
         return await asyncio.to_thread(_present_tables, self._game_dir(game_key))

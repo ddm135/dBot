@@ -4,6 +4,11 @@ A loop that is held by heavy work cannot renew the lease, answer an interaction
 within Discord's three seconds, or send a heartbeat. A thread outside the loop
 asks it for a beat every half second; when one is late it logs where the loop's
 thread currently is, which is the code holding it.
+
+If that thread is idle (waiting in ``select``) the loop is not the one at fault:
+either another thread holds the interpreter lock, or the host is not giving the
+process CPU time. So the report also shows what the other threads are doing, how
+much CPU the process used while stalled, and how much the host throttled it.
 """
 
 import asyncio
@@ -12,8 +17,24 @@ import sys
 import threading
 import time
 import traceback
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
+
+CGROUP_CPU_STAT = Path("/sys/fs/cgroup/cpu.stat")
+IDLE_FUNCTIONS = {"select", "poll", "_run_once"}  # where a waiting loop sits
+
+
+def cgroup_throttling() -> tuple[int, int] | None:
+    """How often and for how long (ms) the host has held this container's CPU back.
+
+    Cumulative; None where the container's cgroup cannot be read.
+    """
+    try:
+        values = dict(line.split() for line in CGROUP_CPU_STAT.read_text().splitlines())
+        return int(values["nr_throttled"]), int(values["throttled_usec"]) // 1000
+    except OSError, KeyError, ValueError:
+        return None
 
 
 class LoopWatchdog:
@@ -28,6 +49,8 @@ class LoopWatchdog:
         self._threshold = threshold
         self._interval = interval
         self._beat = time.monotonic()
+        self._cpu_at_beat = time.process_time()
+        self._throttle_seen = cgroup_throttling()
         self._thread_id = threading.get_ident()  # started from the loop's thread
         self._stopped = threading.Event()
         self._watcher = threading.Thread(
@@ -43,12 +66,39 @@ class LoopWatchdog:
 
     def _tick(self) -> None:
         self._beat = time.monotonic()
+        self._cpu_at_beat = time.process_time()
 
-    def _where(self) -> str:
+    def _where(self) -> tuple[str, bool]:
+        """The loop thread's stack, and whether it is only waiting."""
         frame = sys._current_frames().get(self._thread_id)
         if frame is None:
-            return "(unknown)"
-        return "".join(traceback.format_stack(frame, limit=12)).rstrip()
+            return "(unknown)", False
+        return (
+            "".join(traceback.format_stack(frame, limit=12)).rstrip(),
+            frame.f_code.co_name in IDLE_FUNCTIONS,
+        )
+
+    def _others(self) -> str:
+        names = {t.ident: t.name for t in threading.enumerate()}
+        parts = []
+        for ident, frame in sys._current_frames().items():
+            if ident in (self._thread_id, threading.get_ident()):
+                continue
+            stack = "".join(traceback.format_stack(frame, limit=6)).rstrip()
+            parts.append(f"[{names.get(ident, ident)}]\n{stack}")
+        return "\n".join(parts) or "(none)"
+
+    def _host(self, late: float) -> str:
+        used = time.process_time() - self._cpu_at_beat
+        text = f"The process used {used:.1f}s of CPU in those {late:.1f}s"
+        now = cgroup_throttling()
+        if now is not None and self._throttle_seen is not None:
+            times, ms = now[0] - self._throttle_seen[0], now[1] - self._throttle_seen[1]
+            text += (
+                f"; the host throttled it {times} times ({ms} ms) since the last report"
+            )
+        self._throttle_seen = now or self._throttle_seen
+        return text + "."
 
     def _watch(self) -> None:
         reported = False
@@ -56,10 +106,16 @@ class LoopWatchdog:
             late = time.monotonic() - self._beat
             if late >= self._threshold and not reported:
                 reported = True
+                where, idle = self._where()
+                message = "The event loop has been blocked for %.1fs. It is in:\n%s\n%s"
+                if idle:  # not its own code: look at the others and at the host
+                    message += "\nThe loop was only waiting. Other threads:\n%s"
                 logger.warning(
-                    "The event loop has been blocked for %.1fs. It is in:\n%s",
+                    message,
                     late,
-                    self._where(),
+                    where,
+                    self._host(late),
+                    *((self._others(),) if idle else ()),
                 )
             elif late < self._threshold and reported:
                 reported = False

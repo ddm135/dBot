@@ -12,7 +12,7 @@ ANSWER = {
 
 async def test_only_the_result_is_stored_with_the_same_formatting(tmp_path):
     store = DataStore(tmp_path)
-    await store.write_assets("SM", AssetContext.from_json(ANSWER))
+    await store.write_assets("SM", AssetContext.from_json(ANSWER["result"]))
     text = store.assets_path("SM").read_text(encoding="utf-8")
     assert json.loads(text) == ANSWER["result"]
     assert "code" not in json.loads(text) and "invoke" not in json.loads(text)
@@ -24,16 +24,14 @@ async def test_only_the_result_is_stored_with_the_same_formatting(tmp_path):
     assert again.table_files()["MusicData"].url == "u"
 
 
-async def test_an_old_file_with_the_full_answer_still_reads(tmp_path):
+async def test_an_old_file_with_the_full_answer_is_not_read_so_it_is_fetched_again(
+    tmp_path,
+):
     store = DataStore(tmp_path)
     path = store.assets_path("SM")
     path.parent.mkdir(parents=True)
     path.write_text(json.dumps(ANSWER, indent=4), encoding="utf-8")
-    old = await store.read_assets("SM")
-    assert old is not None and old.version == "7"
-    # Writing it back converts it to the new layout.
-    await store.write_assets("SM", old)
-    assert json.loads(path.read_text(encoding="utf-8")) == ANSWER["result"]
+    assert await store.read_assets("SM") is None
 
 
 async def test_big_tables_are_trimmed_in_memory_but_not_on_disk(tmp_path):

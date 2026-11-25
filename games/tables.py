@@ -100,7 +100,7 @@ async def _current_index(
             logger.info("%s: no asset context from the server (%s).", game.key, exc)
         if answer is not None and answer.get("code") == 1000:
             try:
-                return AssetContext.from_json(answer), True
+                return AssetContext.from_json(answer.get("result")), True
             except AssetContextError:
                 logger.warning("%s: the server's asset context is malformed.", game.key)
 

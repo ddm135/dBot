@@ -35,25 +35,22 @@ class AssetContext:
 
     @classmethod
     def from_json(cls, data: object) -> Self:
-        if not isinstance(data, Mapping):
-            raise AssetContextError("The asset context is not a JSON object.")
-        raw: Mapping[str, Any] = (
-            data
-            if isinstance(data.get("result"), Mapping)
-            else {"code": 1000, "result": data}
-        )
-        result: Mapping[str, Any] = raw["result"]
-        if "version" not in result or not isinstance(result.get("context"), Mapping):
+        """From what ``a.json`` holds: an object with a ``version`` and a ``context``."""
+        if (
+            not isinstance(data, Mapping)
+            or "version" not in data
+            or not isinstance(data.get("context"), Mapping)
+        ):
             raise AssetContextError("The asset context has no version and/or context.")
-        return cls(raw)
+        return cls(data)
 
     @property
     def version(self) -> str:
-        return str(self.raw["result"]["version"])
+        return str(self.raw["version"])
 
     @property
     def context(self) -> Mapping[str, Any]:
-        context: Mapping[str, Any] = self.raw["result"]["context"]
+        context: Mapping[str, Any] = self.raw["context"]
         return context
 
     def table_files(self) -> dict[str, AssetFile]:
@@ -70,7 +67,7 @@ class AssetContext:
 
     def with_tables(self, replacements: Mapping[str, Mapping[str, Any] | None]) -> Self:
         raw = copy.deepcopy(dict(self.raw))
-        context = raw["result"]["context"]
+        context = raw["context"]
         for name, entry in replacements.items():
             if entry is None:
                 context.pop(name, None)

@@ -1,5 +1,3 @@
-import json
-
 import httpx
 
 from games.bundles import BundleStore, asset_name
@@ -476,7 +474,7 @@ async def test_charts_of_a_catalog_only_game_are_found_by_key(tmp_path):
     assert len(rec.calls) == 1  # one bundle for both charts
 
 
-async def test_only_the_preferred_instance_measures_and_old_files_move_over(tmp_path):
+async def test_only_the_preferred_instance_measures(tmp_path):
     from types import SimpleNamespace
 
     from games.registry import GAMES
@@ -488,9 +486,6 @@ async def test_only_the_preferred_instance_measures_and_old_files_move_over(tmp_
     data = State(GAMES["SM"])
     data.loaded_tables = LoadedTables(None, tables())
     data.catalog = SimpleNamespace(catalog=catalog())
-    legacy = tmp_path / "MusicData"
-    legacy.mkdir()
-    (legacy / "SM.json").write_text(json.dumps({"999": {"duration": "3:00"}}))
     rec = Recorder()
     async with rec.client() as client:
         database = MemoryStats()
@@ -509,6 +504,24 @@ async def test_only_the_preferred_instance_measures_and_old_files_move_over(tmp_
 
         bot.settings.preferred = True
         await cog.sync_game(data)
-        # The file's songs were carried over, and the charts measured on top.
-        assert set(database.songs["SM"]) == {"999", "770"}
-        assert database.songs["SM"]["999"] == {"duration": "3:00"}
+        assert set(database.songs["SM"]) == {"770"}
+
+
+async def test_sorting_the_charts_does_not_hold_the_event_loop(tmp_path, monkeypatch):
+    import threading
+
+    from games import song_sync
+
+    seen = set()
+    original = song_sync.resolve
+
+    def resolve_here(ref, tables, catalog):
+        seen.add(threading.current_thread())
+        return original(ref, tables, catalog)
+
+    monkeypatch.setattr(song_sync, "resolve", resolve_here)
+    rec = Recorder()
+    async with rec.client() as client:
+        store = BundleStore(tmp_path, client, retry=NO_RETRY)
+        await sync_seq_stats("SM", tables(), catalog(), store, {}, rec.save)
+    assert seen and threading.main_thread() not in seen

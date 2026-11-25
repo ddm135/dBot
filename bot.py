@@ -29,6 +29,11 @@ from ssl_pins import SslPinner
 
 logger = logging.getLogger(__name__)
 
+# The bot has no voice features; discord.py warns about the missing voice
+# libraries once, when the first client is made.
+discord.VoiceClient.warn_nacl = False
+discord.VoiceClient.warn_dave = False
+
 SHUTDOWN_NOTICE_TIMEOUT = 5.0  # seconds to tell Discord we are shutting down
 
 IGNORED_COMMAND_ERRORS = (

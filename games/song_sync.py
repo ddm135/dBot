@@ -210,6 +210,53 @@ def _parse(data: bytes) -> tuple[int, float] | SeqError:
     return stats.count, stats.seconds
 
 
+def _classify(
+    game_key: str,
+    tables: Tables,
+    catalog: Catalog | None,
+    stored: Stored,
+    known_bad: set[str],
+    seq_pattern: re.Pattern[str] | None,
+    result: SyncResult,
+) -> tuple[dict[str, list[Source]], set[tuple[str, bool]]]:
+    """Sort every chart into: to measure (by bundle), kept as it is, or missing."""
+    by_url: dict[str, list[Source]] = defaultdict(list)
+    keep: set[tuple[str, bool]] = set()  # (url, plain) of charts not measured
+    refs = (
+        catalog_refs(tables, catalog, seq_pattern)
+        if seq_pattern is not None and catalog is not None
+        else collect_refs(tables)
+    )
+    for ref in refs:
+        source = resolve(ref, tables, catalog)
+        if source is None:
+            result.missing += 1
+        elif is_current(stored, source):
+            result.unchanged += 1
+            keep.add((source.url, source.asset is None))
+        elif f"{game_key}:{source.key}" in known_bad:
+            result.failed += 1
+            keep.add((source.url, source.asset is None))
+        else:
+            by_url[source.url].append(source)
+    return by_url, keep
+
+
+def _absent(
+    game_key: str, bundles: BundleStore, keep: set[tuple[str, bool]]
+) -> list[tuple[str, bool]]:
+    """The kept charts whose bundle is not on disk (sorted, so runs are alike)."""
+    return [
+        (url, plain)
+        for url, plain in sorted(keep)
+        if not (
+            bundles.plain_path(game_key, url)
+            if plain
+            else bundles.path(game_key, bundle_name(url))
+        ).exists()
+    ]
+
+
 async def sync_seq_stats(
     game_key: str,
     tables: Tables,
@@ -230,26 +277,13 @@ async def sync_seq_stats(
     """
     result = SyncResult()
     known_bad = known_bad if known_bad is not None else set()
-    by_url: dict[str, list[Source]] = defaultdict(list)
-    keep: set[tuple[str, bool]] = set()  # (url, plain) of charts not measured
-
-    refs = (
-        catalog_refs(tables, catalog, seq_pattern)
-        if seq_pattern is not None and catalog is not None
-        else collect_refs(tables)
+    # Thousands of charts, each looked up in the catalog: seconds of work that
+    # would hold the event loop (and the lease with it), so it runs in a thread.
+    by_url, keep = await asyncio.to_thread(
+        _classify, game_key, tables, catalog, stored, known_bad, seq_pattern, result
     )
-    for ref in refs:
-        source = resolve(ref, tables, catalog)
-        if source is None:
-            result.missing += 1
-        elif is_current(stored, source):
-            result.unchanged += 1
-            keep.add((source.url, source.asset is None))
-        elif f"{game_key}:{source.key}" in known_bad:
-            result.failed += 1
-            keep.add((source.url, source.asset is None))
-        else:
-            by_url[source.url].append(source)
+    # Also in a thread: a path is worked out and checked for every kept chart.
+    absent = await asyncio.to_thread(_absent, game_key, bundles, keep)
 
     semaphore = asyncio.Semaphore(concurrency)
     done = 0
@@ -278,13 +312,6 @@ async def sync_seq_stats(
                 await save()
 
     async def keep_bundle(url: str, plain: bool) -> None:
-        path = (
-            bundles.plain_path(game_key, url)
-            if plain
-            else bundles.path(game_key, bundle_name(url))
-        )
-        if await asyncio.to_thread(path.exists):
-            return
         async with semaphore:
             try:
                 await bundles.fetch(game_key, url, plain=plain)
@@ -297,7 +324,7 @@ async def sync_seq_stats(
 
     await asyncio.gather(
         *(work(url, sources) for url, sources in by_url.items()),
-        *(keep_bundle(url, plain) for url, plain in sorted(keep)),
+        *(keep_bundle(url, plain) for url, plain in absent),
     )
     for song in result.songs:
         refresh_duration(stored[song])

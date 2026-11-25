@@ -45,15 +45,6 @@ class SongStatsSync(HourlyTask):
             return None
         database = self.bot.db.song_stats
         stored = await database.load(game.key)
-        if not stored:  # first time here: carry over what the files had
-            legacy = await self.bot.games.store.read_json(
-                self.bot.settings.data_dir / "MusicData" / f"{game.key}.json"
-            )
-            if isinstance(legacy, dict):
-                stored = legacy
-                logger.info(
-                    "%s: Moving %d songs' stats to the database.", game.key, len(stored)
-                )
 
         async def save() -> None:
             await database.save(game.key, stored)
