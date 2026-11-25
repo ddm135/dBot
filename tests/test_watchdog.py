@@ -69,3 +69,24 @@ def test_the_cpu_quota_is_read_from_the_cgroup(tmp_path, monkeypatch):
     assert module.cgroup_cpu_limit() is None
     monkeypatch.setattr(module, "CGROUP_CPU_MAX", tmp_path / "missing")
     assert module.cgroup_cpu_limit() is None
+
+
+async def test_the_report_names_the_thread_that_used_the_cpu(caplog):
+    import threading
+
+    def spin() -> None:
+        end = time.thread_time() + 0.3
+        while time.thread_time() < end:
+            pass
+
+    watchdog = LoopWatchdog(asyncio.get_running_loop(), threshold=0.2, interval=0.05)
+    with caplog.at_level(logging.WARNING):
+        watchdog.start()
+        await asyncio.sleep(0.15)
+        worker = threading.Thread(target=spin, name="burner")
+        worker.start()
+        _hold_the_loop()
+        worker.join()
+        await asyncio.sleep(0.1)
+        watchdog.stop()
+    assert "CPU by thread:" in caplog.text and "burner" in caplog.text

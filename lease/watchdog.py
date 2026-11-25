@@ -19,6 +19,8 @@ import time
 import traceback
 from pathlib import Path
 
+import psutil
+
 logger = logging.getLogger(__name__)
 
 CGROUP_CPU_STAT = Path("/sys/fs/cgroup/cpu.stat")
@@ -61,6 +63,14 @@ def cgroup_throttling() -> tuple[int, int] | None:
         return None
 
 
+def thread_cpu() -> dict[int, float]:
+    """CPU seconds used so far by each thread of the process, by native id."""
+    try:
+        return {t.id: t.user_time + t.system_time for t in psutil.Process().threads()}
+    except psutil.Error, OSError:
+        return {}
+
+
 class LoopWatchdog:
     def __init__(
         self,
@@ -75,6 +85,7 @@ class LoopWatchdog:
         self._beat = time.monotonic()
         self._cpu_at_beat = time.process_time()
         self._throttle_seen = cgroup_throttling()
+        self._threads_before = thread_cpu()  # taken while the loop was answering
         self._thread_id = threading.get_ident()  # started from the loop's thread
         self._stopped = threading.Event()
         self._watcher = threading.Thread(
@@ -114,6 +125,21 @@ class LoopWatchdog:
             parts.append(f"[{names.get(ident, ident)}]\n{stack}")
         return "\n".join(parts) or "(none)"
 
+    def _busiest(self) -> str:
+        """Which threads used the CPU since the loop last answered."""
+        names = {t.native_id: t.name for t in threading.enumerate()}
+        used = {
+            ident: seconds - self._threads_before.get(ident, 0.0)
+            for ident, seconds in thread_cpu().items()
+        }
+        top = sorted(used.items(), key=lambda item: item[1], reverse=True)[:4]
+        shown = [
+            f"{names.get(ident, ident)} {seconds:.1f}s"
+            for ident, seconds in top
+            if seconds >= 0.05
+        ]
+        return "CPU by thread: " + (", ".join(shown) or "none above 0.05s") + "."
+
     def _host(self, late: float) -> str:
         used = time.process_time() - self._cpu_at_beat
         text = f"The process used {used:.1f}s of CPU in those {late:.1f}s"
@@ -143,11 +169,20 @@ class LoopWatchdog:
                 # from a thread running C code. So the others are always shown.
                 if idle:
                     message += "\nThe loop itself was only waiting."
-                message += "\nOther threads that are working:\n%s"
-                logger.warning(message, late, where, self._host(late), self._others())
+                message += "\n%s\nOther threads that are working:\n%s"
+                logger.warning(
+                    message,
+                    late,
+                    where,
+                    self._host(late),
+                    self._busiest(),
+                    self._others(),
+                )
             elif late < self._threshold and reported:
                 reported = False
                 logger.info("The event loop is responding again.")
+            if late < self._interval * 1.5:  # still answering: the baseline
+                self._threads_before = thread_cpu()
             try:
                 self._loop.call_soon_threadsafe(self._tick)
             except RuntimeError:  # the loop is closed
