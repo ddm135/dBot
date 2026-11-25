@@ -23,7 +23,7 @@ events on January 1.
 
 import calendar
 from collections import defaultdict
-from collections.abc import Iterable, Iterator, Mapping, Sequence
+from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import date, timedelta
 from enum import StrEnum
@@ -205,13 +205,23 @@ def periods_for(
     if not intervals:
         return ()
 
-    cuts = sorted({s for s, _, _ in intervals} | {e + ONE_DAY for _, e, _ in intervals})
+    # Sweep the cuts in date order, keeping the intervals that cover each stretch
+    # (comparing every cut with every interval is quadratic, and this runs for
+    # every song of every game).
+    starting: dict[date, list[int]] = defaultdict(list)
+    ending: dict[date, list[int]] = defaultdict(list)
+    for index, (start, end, _) in enumerate(intervals):
+        starting[start].append(index)
+        ending[end + ONE_DAY].append(index)
+    cuts = sorted(starting.keys() | ending.keys())
+    covering: set[int] = set()
     periods: list[Period] = []
     for left, right in pairwise(cuts):
-        last = right - ONE_DAY
-        active = tuple(b for s, e, b in intervals if s <= left and last <= e)
-        if active:
-            periods.append(Period(left, last, active))
+        covering.difference_update(ending.get(left, ()))
+        covering.update(starting.get(left, ()))
+        if covering:  # in the order the intervals were made
+            active = tuple(intervals[i][2] for i in sorted(covering))
+            periods.append(Period(left, right - ONE_DAY, active))
     return tuple(periods)
 
 
@@ -239,11 +249,17 @@ def build_song_periods(
     years: Iterable[int],
     rules: BonusRules = DEFAULT_RULES,
     languages: Sequence[str] = DEFAULT_LANGUAGES,
+    pace: Callable[[], None] | None = None,
 ) -> dict[int, SongPeriods]:
-    """Periods for every visible song that has any (keyed by song code)."""
+    """Periods for every visible song that has any (keyed by song code).
+
+    ``pace`` is called between songs (see ``games.pacing``).
+    """
     years = tuple(years)
     result: dict[int, SongPeriods] = {}
     for song in index.songs.values():
+        if pace is not None:
+            pace()
         if song.is_hidden:
             continue
         members = song_people(song, artists, locale, index.timezone, rules, languages)
@@ -394,10 +410,15 @@ class BonusCalendar:
 
     @classmethod
     def build(
-        cls, songs: Mapping[int, SongPeriods], years: Iterable[int]
+        cls,
+        songs: Mapping[int, SongPeriods],
+        years: Iterable[int],
+        pace: Callable[[], None] | None = None,
     ) -> BonusCalendar:
         by_day: dict[date, list[BonusEvent]] = defaultdict(list)
         for sp in songs.values():
+            if pace is not None:
+                pace()
             for periods in timelines(sp):
                 for event in song_events(sp.song, periods):
                     by_day[event.day].append(event)

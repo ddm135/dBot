@@ -475,3 +475,82 @@ def test_member_entries_do_not_depend_on_release_anniversaries():
         d(2023, 6, 15),
         2,
     )
+
+
+def _quadratic_periods(song, members, years, rules, include_release=True):
+    """The first version of periods_for, kept to check the faster one against."""
+    from datetime import timedelta
+    from itertools import pairwise
+
+    from games.bonuses import ONE_DAY, Period
+
+    wanted = sorted(set(years))
+    delta = timedelta(days=rules.window_days)
+    intervals = []
+    for year in range(wanted[0] - 1, wanted[-1] + 2):
+        for member in members:
+            centre = anniversary_in_year(member.birthday, year)
+            if centre:
+                intervals.append((centre - delta, centre + delta, member))
+        if include_release and song.release and year > song.release.year:
+            centre = anniversary_in_year(song.release, year)
+            if centre:
+                bonus = ReleaseBonus(
+                    rules.anniversary_percent, year - song.release.year, song.release
+                )
+                intervals.append((centre - delta, centre + delta, bonus))
+    cuts = sorted({s for s, _, _ in intervals} | {e + ONE_DAY for _, e, _ in intervals})
+    out = []
+    for left, right in pairwise(cuts):
+        last = right - ONE_DAY
+        active = tuple(b for s, e, b in intervals if s <= left and last <= e)
+        if active:
+            out.append(Period(left, last, active))
+    return tuple(out)
+
+
+def test_the_sweep_gives_exactly_the_periods_the_quadratic_scan_gave():
+    from types import SimpleNamespace
+
+    rng = random.Random(7)
+    rules = BonusRules()
+    for _ in range(300):
+        members = [
+            MemberBonus(
+                f"M{i}",
+                date(rng.randint(1985, 2005), rng.randint(1, 12), rng.randint(1, 28)),
+                rng.choice([5, 10]),
+                (i,),
+            )
+            for i in range(rng.randint(0, 12))
+        ]
+        release = (
+            date(rng.randint(2012, 2024), rng.randint(1, 12), rng.randint(1, 28))
+            if rng.random() < 0.7
+            else None
+        )
+        song = SimpleNamespace(release=release)
+        years = range(2025, 2025 + rng.randint(1, 3))
+        for include_release in (True, False):
+            expected = _quadratic_periods(song, members, years, rules, include_release)
+            got = periods_for(
+                song, members, years, rules, include_release=include_release
+            )
+            assert got == expected
+
+
+def test_a_paced_build_gives_the_same_calendar_and_rests_between_songs():
+    _, tables, index = make()
+    calls: list[int] = []
+
+    def pace() -> None:
+        calls.append(1)
+
+    args = (index, tables["ArtistData"], tables["LocaleData"], [2025])
+    plain = build_song_periods(*args)
+    paced = build_song_periods(*args, pace=pace)
+    assert paced == plain
+    assert len(calls) == len(index.songs)
+    built = BonusCalendar.build(paced, [2025], pace)
+    assert len(calls) == len(index.songs) + len(paced)
+    assert built.songs == plain

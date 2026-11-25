@@ -408,9 +408,9 @@ async def test_warming_builds_off_the_loop_once_and_leaves_the_caches_full():
     built_in = []
     original = indexes._build_calendar
 
-    def build_calendar(index, years):
+    def build_calendar(index, years, **kw):
         built_in.append(threading.current_thread())
-        return original(index, years)
+        return original(index, years, **kw)
 
     indexes._build_calendar = build_calendar
     await asyncio.gather(indexes.warm("SM"), indexes.warm("SM"))  # one build, not two

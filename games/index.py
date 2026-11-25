@@ -30,6 +30,7 @@ from .decks import (
 )
 from .fields import LOCALE_COLUMNS
 from .models import Game, StringsConfig
+from .pacing import Pacer
 from .scoring import DeckScore, deck_scores, live_theme_maximum, member_counts
 from .strings import pick
 
@@ -48,6 +49,7 @@ SOURCE_TABLES = (
     "URLs",
 )
 
+CALENDAR_SHARE = 0.5  # of the time a thread building a calendar may work
 CALENDAR_YEARS_BEFORE = 0
 CALENDAR_YEARS_AFTER = 1  # so a window across New Year is always complete
 
@@ -372,7 +374,12 @@ class Indexes:
             return cached[2]
         return None
 
-    def _build_calendar(self, index: Index, years: tuple[int, ...]) -> BonusCalendar:
+    def _build_calendar(
+        self, index: Index, years: tuple[int, ...], *, paced: bool = False
+    ) -> BonusCalendar:
+        # In a worker thread it rests between songs, so that the host's CPU quota
+        # is not spent in one go (see games.pacing); on the loop it must not.
+        pace = Pacer(CALENDAR_SHARE) if paced else None
         songs = build_song_periods(
             index.decks,
             index.artists,
@@ -380,8 +387,9 @@ class Indexes:
             years,
             self._rules,
             index.languages,
+            pace,
         )
-        return BonusCalendar.build(songs, years)
+        return BonusCalendar.build(songs, years, pace)
 
     def calendar(self, key: str, year: int) -> BonusCalendar | None:
         """The bonus calendar covering ``year`` and the one after it.
@@ -424,7 +432,9 @@ class Indexes:
             )
             if self._cached_calendar(key, source, years) is not None:
                 return
-            calendar = await asyncio.to_thread(self._build_calendar, index, years)
+            calendar = await asyncio.to_thread(
+                self._build_calendar, index, years, paced=True
+            )
             self._calendars[key] = (source, years, calendar)
 
     def current_calendar(self, key: str) -> BonusCalendar | None:
