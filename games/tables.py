@@ -38,7 +38,7 @@ async def _prune_tables(
             if full is None:
                 continue
             tables[name] = full
-        pruned = prune_referenced(name, tables)
+        pruned = await asyncio.to_thread(prune_referenced, name, tables)
         if pruned is not None:
             tables[name] = pruned
 
@@ -162,7 +162,7 @@ async def sync_tables(
                 tables[name] = previous
             continue
         await store.write_table(game.key, name, table)
-        tables[name] = slim(name, table)
+        tables[name] = await asyncio.to_thread(slim, name, table)
         downloaded.append(name)
 
     await _prune_tables(store, game, tables, downloaded, loaded)

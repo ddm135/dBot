@@ -59,6 +59,19 @@ def prune_referenced(name: str, tables: Mapping[str, Table]) -> Table | None:
     return {code: entry for code, entry in table.items() if code in wanted}
 
 
+def _trimmed(name: str, data: Any) -> Table | None:
+    """A table as the bot keeps it, from what its file holds (None if unusable)."""
+    table: Table | None = None
+    if isinstance(data, dict):
+        table = {str(key): value for key, value in data.items()}
+    elif isinstance(data, list):
+        try:
+            table = {str(item["code"]): item for item in data}
+        except KeyError, TypeError:
+            pass
+    return slim(name, table) if table is not None else None
+
+
 def slim(name: str, table: Table) -> Table:
     """``table`` as the bot keeps it in memory."""
     keep = KEPT_FIELDS.get(name)
@@ -142,16 +155,8 @@ class DataStore:
 
     async def read_table(self, game_key: str, name: str) -> Table | None:
         data = await self.read_json(self.table_path(game_key, name))
-        table: Table | None = None
-        if isinstance(data, dict):
-            table = {str(key): value for key, value in data.items()}
-        elif isinstance(data, list):
-            try:
-                table = {str(item["code"]): item for item in data}
-            except KeyError, TypeError:
-                pass
-        del data  # the full file is not kept; only the trimmed table is
-        return slim(name, table) if table is not None else None
+        # Keyed and trimmed in a thread: a big table is seconds of work.
+        return await asyncio.to_thread(_trimmed, name, data)
 
     async def write_table(self, game_key: str, name: str, table: Table) -> None:
         await self.write_json(self.table_path(game_key, name), table)

@@ -145,3 +145,13 @@ class Drive:
         await self._execute(
             self._files.update(fileId=file_id, body={"name": name}, fields="id")
         )
+
+    async def set_source(self, file_id: str, source: str) -> None:
+        """Record where an existing file came from."""
+        await self._execute(
+            self._files.update(
+                fileId=file_id,
+                body={"appProperties": {SOURCE: source}},
+                fields="id",
+            )
+        )

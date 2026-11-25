@@ -2,6 +2,7 @@
 
 Only the preferred instance does this (and downloads the border bundles)."""
 
+import asyncio
 import logging
 from pathlib import PurePosixPath
 from typing import TYPE_CHECKING, Any
@@ -33,7 +34,7 @@ class Borders(HourlyTask):
         super().__init__(bot)
         self._drive = drive
 
-    def _folder(self) -> BorderFolder | None:
+    async def _folder(self) -> BorderFolder | None:
         if self._drive is None:
             google = self.bot.settings.google
             if not google.credentials_file.is_file():
@@ -42,8 +43,11 @@ class Borders(HourlyTask):
                     google.credentials_file,
                 )
                 return None
-            self._drive = Drive.from_service_account(
-                google.border_folder_id, google.credentials_file
+            # Building the client reads Google's whole API description.
+            self._drive = await asyncio.to_thread(
+                Drive.from_service_account,
+                google.border_folder_id,
+                google.credentials_file,
             )
         return self._drive
 
@@ -70,7 +74,7 @@ class Borders(HourlyTask):
         sources = {name: _source(catalog, key) for name, key in wanted.items()}
         # The bundles are kept like the others, whatever Drive has.
         await self._keep_bundles(game.key, catalog, wanted.values())
-        folder = self._folder()
+        folder = await self._folder()
         if folder is None:
             return 0
         folder_id = await folder.game_folder(game.name)

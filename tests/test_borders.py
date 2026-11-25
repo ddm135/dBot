@@ -403,3 +403,33 @@ async def test_only_the_preferred_instance_downloads_and_uploads_borders(monkeyp
     cog.bot.settings.preferred = True
     assert await cog.run_all() is True
     assert [u[1] for u in folder.uploads] == ["1.png"] and bundles.fetched
+
+
+def test_the_migration_plan_sorts_every_file_in_the_folder():
+    from games.drive import StoredFile, fingerprint
+    from scripts.migrate_borders import plan
+
+    wanted = {
+        "1 - A.png": "k1",
+        "2 - B.png": "k2",
+        "3 - C.png": "k3",
+        "4 - D.png": "k4",
+        "5 - E.png": "k5",
+        "6 - F.png": "k6",
+    }
+    sources = {name: f"src-{key}" for name, key in wanted.items()}
+    have = {
+        "1.png": StoredFile("a", None),  # kept under its number alone
+        "2 - B.png": StoredFile("b", sources["2 - B.png"]),  # the old long source
+        "3 - C.png": StoredFile("c", fingerprint(sources["3 - C.png"])),  # current
+        "4 - D.png": StoredFile("d", "something else"),  # republished
+        "5 - E.png": StoredFile("e", None),  # no source
+        "4 (old) - D.png": StoredFile("x", None),  # not a border the game has
+    }
+    result = plan(wanted, sources, have)
+    assert result.renames == [("a", "1.png", "1 - A.png")]
+    assert [n for _, n, _ in result.to_fingerprint] == ["2 - B.png"]
+    assert result.current == 1 and result.republished == ["4 - D.png"]
+    assert [n for _, n, _ in result.unknown] == ["1 - A.png", "5 - E.png"]
+    assert result.missing == ["6 - F.png"] and result.extra == 1
+    assert result.pending == 4
