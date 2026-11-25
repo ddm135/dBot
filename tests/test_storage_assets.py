@@ -106,3 +106,38 @@ def test_urls_are_kept_only_for_games_that_name_files_by_code():
         "MusicData": {"2": {"seqEasy": "bytes_notes_2_easy", "album": "Image_Album_1"}},
     }
     assert prune_referenced("URLs", by_key) == {}
+
+
+async def test_a_kept_table_is_good_until_a_table_file_changes(tmp_path):
+    store = DataStore(tmp_path)
+    await store.write_table("SM", "LocaleData", {"1": {"enUS": "a"}})
+    await store.write_table("SM", "MusicData", {"9": {"localeName": 1}})
+    assert await store.read_kept("SM", "LocaleData") is None  # nothing kept yet
+
+    await store.write_kept("SM", "LocaleData", {"1": {"enUS": "a"}})
+    assert await store.read_kept("SM", "LocaleData") == {"1": {"enUS": "a"}}
+
+    # Any table file changing (what is kept depends on all of them) drops it.
+    await store.write_table("SM", "MusicData", {"9": {"localeName": 2}, "10": {}})
+    assert await store.read_kept("SM", "LocaleData") is None
+
+
+async def test_pruning_saves_what_it_kept_for_the_next_start(tmp_path):
+    from games.registry import GAMES
+    from games.tables import _prune_tables
+
+    store = DataStore(tmp_path)
+    game = GAMES["SM"]
+    full = {"1": {"enUS": "a"}, "2": {"enUS": "b"}}
+    music = {"9": {"localeName": 1}}
+    await store.write_table(game.key, "LocaleData", full)
+    await store.write_table(game.key, "MusicData", music)
+
+    tables = {"LocaleData": full, "MusicData": music}
+    await _prune_tables(store, game, tables, ["LocaleData"], None)
+    assert await store.read_kept(game.key, "LocaleData") == {"1": {"enUS": "a"}}
+
+    # A start from the kept copy leaves it as it is, and does not read the file.
+    tables = {"LocaleData": {"1": {"enUS": "a"}}, "MusicData": music}
+    await _prune_tables(store, game, tables, [], None, saved={"LocaleData"})
+    assert tables["LocaleData"] == {"1": {"enUS": "a"}}

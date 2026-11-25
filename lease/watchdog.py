@@ -24,6 +24,8 @@ logger = logging.getLogger(__name__)
 CGROUP_CPU_STAT = Path("/sys/fs/cgroup/cpu.stat")
 CGROUP_CPU_MAX = Path("/sys/fs/cgroup/cpu.max")
 IDLE_FUNCTIONS = {"select", "poll", "_run_once"}  # where a waiting loop sits
+# Where a parked thread sits (an idle worker, the console reader): not worth showing.
+PARKED_FUNCTIONS = {"get", "wait", "_read", "acquire"}
 
 
 def cgroup_cpu_limit() -> float | None:
@@ -106,6 +108,8 @@ class LoopWatchdog:
         for ident, frame in sys._current_frames().items():
             if ident in (self._thread_id, threading.get_ident()):
                 continue
+            if frame.f_code.co_name in PARKED_FUNCTIONS:
+                continue
             stack = "".join(traceback.format_stack(frame, limit=6)).rstrip()
             parts.append(f"[{names.get(ident, ident)}]\n{stack}")
         return "\n".join(parts) or "(none)"
@@ -134,15 +138,13 @@ class LoopWatchdog:
                 reported = True
                 where, idle = self._where()
                 message = "The event loop has been blocked for %.1fs. It is in:\n%s\n%s"
-                if idle:  # not its own code: look at the others and at the host
-                    message += "\nThe loop was only waiting. Other threads:\n%s"
-                logger.warning(
-                    message,
-                    late,
-                    where,
-                    self._host(late),
-                    *((self._others(),) if idle else ()),
-                )
+                # The loop's own code may not be what held it: it can sit at a call
+                # that lets go of the interpreter lock and wait to get it back
+                # from a thread running C code. So the others are always shown.
+                if idle:
+                    message += "\nThe loop itself was only waiting."
+                message += "\nOther threads that are working:\n%s"
+                logger.warning(message, late, where, self._host(late), self._others())
             elif late < self._threshold and reported:
                 reported = False
                 logger.info("The event loop is responding again.")

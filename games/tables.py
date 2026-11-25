@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from collections.abc import Mapping
+from collections.abc import Collection, Mapping
 from dataclasses import dataclass, field
 
 import httpx
@@ -24,6 +24,7 @@ async def _prune_tables(
     tables: dict[str, Table],
     downloaded: list[str],
     loaded: LoadedTables | None,
+    saved: Collection[str] = (),
 ) -> None:
     """Keep of the big lookup tables what the others refer to (``prune_referenced``)."""
     # What was kept from an earlier round is already pruned. If anything it is
@@ -33,6 +34,8 @@ async def _prune_tables(
     for name in REFERENCE_FIELDS:
         if name not in tables:
             continue
+        if name in saved and not downloaded:
+            continue  # read already pruned, from the copy kept on disk
         if name not in downloaded:
             full = await store.read_table(game.key, name)
             if full is None:
@@ -41,6 +44,7 @@ async def _prune_tables(
         pruned = await asyncio.to_thread(prune_referenced, name, tables)
         if pruned is not None:
             tables[name] = pruned
+            await store.write_kept(game.key, name, pruned)
 
 
 @dataclass(frozen=True, slots=True)
@@ -140,11 +144,17 @@ async def sync_tables(
 
     tables: dict[str, Table] = {}
     downloaded: list[str] = []
+    saved: set[str] = set()
     failed: dict[str, str] = {}
 
     for name, file in current.table_files().items():
         if name not in wanted:
             kept = loaded.tables.get(name) if loaded is not None else None
+            if kept is None and name in REFERENCE_FIELDS:
+                # Cut down and pruned by an earlier run: no need to read it all.
+                kept = await store.read_kept(game.key, name)
+                if kept is not None:
+                    saved.add(name)
             if kept is None:
                 kept = await store.read_table(game.key, name)
             if kept is not None:
@@ -165,7 +175,7 @@ async def sync_tables(
         tables[name] = await asyncio.to_thread(slim, name, table)
         downloaded.append(name)
 
-    await _prune_tables(store, game, tables, downloaded, loaded)
+    await _prune_tables(store, game, tables, downloaded, loaded, saved)
 
     effective = current
     if failed:

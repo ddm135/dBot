@@ -1,4 +1,5 @@
 import asyncio
+import hashlib
 import json
 import logging
 import os
@@ -98,17 +99,41 @@ def _read_json(path: Path) -> Any | None:
         return None
 
 
-def _write_json(path: Path, data: Any) -> None:
+def _write_json(path: Path, data: Any, indent: int | None = 4) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(path.name + ".tmp")
     try:
         temporary.write_text(
-            json.dumps(data, indent=4, ensure_ascii=False), encoding="utf-8"
+            json.dumps(data, indent=indent, ensure_ascii=False), encoding="utf-8"
         )
         os.replace(temporary, path)  # readers never see a half-written file
     except BaseException:
         temporary.unlink(missing_ok=True)
         raise
+
+
+def _signature(directory: Path) -> str:
+    """Stands for the table files as they are now, and for how they are cut down.
+
+    A kept table (see ``DataStore.read_kept``) is only good while none of the
+    files it was made from has changed, nor the fields it keeps.
+    """
+    parts: list[object] = [sorted(KEPT_FIELDS.items(), key=str), REFERENCE_FIELDS]
+    for name in sorted(TABLE_NAMES):
+        try:
+            status = (directory / f"{name}.json").stat()
+        except FileNotFoundError:
+            continue
+        parts.append((name, status.st_size, status.st_mtime_ns))
+    return hashlib.sha256(repr(parts).encode()).hexdigest()
+
+
+def _read_kept(path: Path, signature: str) -> Table | None:
+    data = _read_json(path)
+    if not isinstance(data, dict) or data.get("signature") != signature:
+        return None
+    table = data.get("table")
+    return table if isinstance(table, dict) else None
 
 
 def _present_tables(directory: Path) -> set[str]:
@@ -152,6 +177,26 @@ class DataStore:
 
     async def present_tables(self, game_key: str) -> set[str]:
         return await asyncio.to_thread(_present_tables, self._game_dir(game_key))
+
+    def kept_path(self, game_key: str, name: str) -> Path:
+        return self._game_dir(game_key) / "slim" / f"{name}.json"
+
+    async def signature(self, game_key: str) -> str:
+        return await asyncio.to_thread(_signature, self._game_dir(game_key))
+
+    async def read_kept(self, game_key: str, name: str) -> Table | None:
+        """The big table ``name`` as the bot keeps it, if it was saved from the
+        files that are there now. Parsing it costs next to nothing, where the
+        full file is seconds of CPU on a slow host."""
+        signature = await self.signature(game_key)
+        return await asyncio.to_thread(
+            _read_kept, self.kept_path(game_key, name), signature
+        )
+
+    async def write_kept(self, game_key: str, name: str, table: Table) -> None:
+        signature = await self.signature(game_key)
+        data = {"signature": signature, "table": table}
+        await asyncio.to_thread(_write_json, self.kept_path(game_key, name), data, None)
 
     async def read_table(self, game_key: str, name: str) -> Table | None:
         data = await self.read_json(self.table_path(game_key, name))
