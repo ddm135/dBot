@@ -6,19 +6,19 @@ import asyncpg
 from asyncpg_typed import sql
 
 _GET = sql(
-    "SELECT role_id FROM stored_roles WHERE user_id = $1",
+    t"SELECT role_id FROM stored_roles WHERE user_id = {1}",
     arg=int,
     result=int,
 )
 
 _REMOVE = sql(
-    "DELETE FROM stored_roles WHERE user_id = $1 AND role_id = ANY($2::bigint[])",
+    t"DELETE FROM stored_roles WHERE user_id = {1} AND role_id = ANY({2}::bigint[])",
     args=tuple[int, list[int]],
 )
 
 # Also used by the v0 import.
 INSERT_IGNORING = sql(
-    "INSERT INTO stored_roles (user_id, role_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+    t"INSERT INTO stored_roles (user_id, role_id) VALUES ({1}, {2}) ON CONFLICT DO NOTHING",
     args=tuple[int, int],
 )
 

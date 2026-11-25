@@ -7,9 +7,10 @@ import discord
 
 from games.api.world_records import Record
 from games.models import Game
+from templates import Raw
 
 from .pages import slice_page
-from .text import escape
+from .text import escape, md
 
 PER_PAGE = 10
 
@@ -60,11 +61,9 @@ def leaderboard_embed(
 ) -> discord.Embed:
     """A song's (or, for weekly seasons, an artist's) top records."""
     shown = slice_page(records, page, PER_PAGE)
-    title = escape(artist) + (f" - {escape(song)}" if song else "")
+    title = md(t"{artist}") + (md(t" - {song}") if song else "")
     description = (
-        "\n".join(
-            f"{r.rank}. **{escape(r.nickname)}** - {r.highscore:,}" for r in shown
-        )
+        "\n".join(md(t"{r.rank}. **{r.nickname}** - {r.highscore:,}") for r in shown)
         or "None"
     )
     embed = _frame(
@@ -90,8 +89,8 @@ def artist_embed(
         if isinstance(record, str):
             result = f"**{record}**"
         else:
-            result = f"**{escape(record.nickname)}** - {record.highscore:,}"
-        lines.append(f"- {escape(song)}: {result}")
+            result = md(t"**{record.nickname}** - {record.highscore:,}")
+        lines.append(md(t"- {song}: {Raw(result)}"))
     return _frame(
         game,
         escape(artist),

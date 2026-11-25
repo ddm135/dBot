@@ -14,32 +14,32 @@ class LastAppearance(NamedTuple):
 
 
 _RECORD = sql(
-    "INSERT INTO ssl_history (game, day, song_code, deck_code) "
-    "VALUES ($1, $2, $3, $4) "
-    "ON CONFLICT (game, day) "
-    "DO UPDATE SET song_code = EXCLUDED.song_code, deck_code = EXCLUDED.deck_code",
+    t"INSERT INTO ssl_history (game, day, song_code, deck_code) "
+    t"VALUES ({1}, {2}, {3}, {4}) "
+    t"ON CONFLICT (game, day) "
+    t"DO UPDATE SET song_code = EXCLUDED.song_code, deck_code = EXCLUDED.deck_code",
     args=tuple[str, date, int, int],
 )
 
 _LAST = sql(
-    "SELECT max(day) FILTER (WHERE song_code = $2) AS song, "
-    "       max(day) FILTER (WHERE deck_code = $3) AS deck "
-    "FROM ssl_history "
-    "WHERE game = $1 AND ($4::date IS NULL OR day < $4)",
+    t"SELECT max(day) FILTER (WHERE song_code = {2}) AS song, "
+    t"       max(day) FILTER (WHERE deck_code = {3}) AS deck "
+    t"FROM ssl_history "
+    t"WHERE game = {1} AND ({4}::date IS NULL OR day < {4})",
     args=tuple[str, int, int, date | None],
     resultset=LastAppearance,
 )
 
 _PINNED_ON = sql(
-    "SELECT true FROM ssl_history WHERE game = $1 AND day = $2",
+    t"SELECT true FROM ssl_history WHERE game = {1} AND day = {2}",
     args=tuple[str, date],
     result=bool,
 )
 
 # Also used by the v0 import: an existing day is kept.
 INSERT_MISSING = sql(
-    "INSERT INTO ssl_history (game, day, song_code, deck_code) "
-    "VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING",
+    t"INSERT INTO ssl_history (game, day, song_code, deck_code) "
+    t"VALUES ({1}, {2}, {3}, {4}) ON CONFLICT DO NOTHING",
     args=tuple[str, date, int, int],
 )
 

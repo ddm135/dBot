@@ -15,19 +15,19 @@ logger = logging.getLogger(__name__)
 MIGRATION_LOCK = 0x64426F74  # "dBot": serialises migrations across instances
 IDLE_SECONDS = 30.0  # close idle connections quickly: small servers have little memory
 
-_LOCK = sql("SELECT pg_advisory_lock($1)", arg=int)
-_UNLOCK = sql("SELECT pg_advisory_unlock($1)", arg=int)
+_LOCK = sql(t"SELECT pg_advisory_lock({1})", arg=int)
+_UNLOCK = sql(t"SELECT pg_advisory_unlock({1})", arg=int)
 
 _CREATE_MIGRATIONS = sql(
-    "CREATE TABLE IF NOT EXISTS schema_migrations ("
-    "version integer PRIMARY KEY, "
-    "applied_at timestamptz NOT NULL DEFAULT now())"
+    t"CREATE TABLE IF NOT EXISTS schema_migrations ("
+    t"version integer PRIMARY KEY, "
+    t"applied_at timestamptz NOT NULL DEFAULT now())"
 )
 
-_APPLIED = sql("SELECT version FROM schema_migrations", result=int)
+_APPLIED = sql(t"SELECT version FROM schema_migrations", result=int)
 
 _RECORD_MIGRATION = sql(
-    "INSERT INTO schema_migrations (version) VALUES ($1)",
+    t"INSERT INTO schema_migrations (version) VALUES ({1})",
     arg=int,
 )
 

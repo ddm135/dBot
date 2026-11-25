@@ -5,6 +5,7 @@ They are kept in the database (``db.songstats``), in v0's layout per song:
 measures and saves them; every instance reads them.
 """
 
+import asyncio
 import logging
 import math
 import time
@@ -118,7 +119,8 @@ class SongStatsStore:
             if cached and cached[0] == version:
                 self._cache[game_key] = (version, now, cached[2])
                 return cached[2]
-            stats = parse_stats(await self._source.load(game_key))
+            raw = await self._source.load(game_key)
+            stats = await asyncio.to_thread(parse_stats, raw)
         except Exception:
             logger.warning("Could not read the stats of %s.", game_key, exc_info=True)
             return cached[2] if cached else {}

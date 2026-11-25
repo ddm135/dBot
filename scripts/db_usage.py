@@ -33,24 +33,24 @@ class _Connection(NamedTuple):
     total: int
 
 
-_DATABASE_SIZE = sql("SELECT pg_database_size(current_database())", result=int)
+_DATABASE_SIZE = sql(t"SELECT pg_database_size(current_database())", result=int)
 
 _TABLES = sql(
-    "SELECT relname::text AS relname, n_live_tup AS live, n_dead_tup AS dead, "
-    "pg_total_relation_size(relid) AS size, "
-    "GREATEST(last_autovacuum, last_vacuum) AS vacuumed "
-    "FROM pg_stat_user_tables ORDER BY 4 DESC",
+    t"SELECT relname::text AS relname, n_live_tup AS live, n_dead_tup AS dead, "
+    t"pg_total_relation_size(relid) AS size, "
+    t"GREATEST(last_autovacuum, last_vacuum) AS vacuumed "
+    t"FROM pg_stat_user_tables ORDER BY 4 DESC",
     resultset=_Table,
 )
 
 _CONNECTIONS = sql(
-    "SELECT coalesce(state, 'background')::text AS state, count(*) AS total "
-    "FROM pg_stat_activity WHERE datname = current_database() "
-    "GROUP BY 1 ORDER BY 2 DESC",
+    t"SELECT coalesce(state, 'background')::text AS state, count(*) AS total "
+    t"FROM pg_stat_activity WHERE datname = current_database() "
+    t"GROUP BY 1 ORDER BY 2 DESC",
     resultset=_Connection,
 )
 
-_SETTING = sql("SELECT current_setting($1)", arg=str, result=str)
+_SETTING = sql(t"SELECT current_setting({1})", arg=str, result=str)
 
 
 def _size(count: int) -> str:

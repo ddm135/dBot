@@ -38,46 +38,46 @@ class _UserPreferences(NamedTuple):
 # "RETURNING true" gives a row only if something was written, which is how
 # a caller learns whether the subscription was new.
 _SUBSCRIBE = sql(
-    "INSERT INTO bonus_subscriptions (user_id, game, deck_code) "
-    "VALUES ($1, $2, $3) ON CONFLICT DO NOTHING RETURNING true",
+    t"INSERT INTO bonus_subscriptions (user_id, game, deck_code) "
+    t"VALUES ({1}, {2}, {3}) ON CONFLICT DO NOTHING RETURNING true",
     args=tuple[int, str, int],
     result=bool,
 )
 
 _ENSURE_PREFERENCES = sql(
-    "INSERT INTO bonus_preferences (user_id) VALUES ($1) ON CONFLICT DO NOTHING",
+    t"INSERT INTO bonus_preferences (user_id) VALUES ({1}) ON CONFLICT DO NOTHING",
     arg=int,
 )
 
 # Used by the v0 import.
 IMPORT_SUBSCRIPTION = sql(
-    "INSERT INTO bonus_subscriptions (user_id, game, deck_code) VALUES ($1, $2, $3) "
-    "ON CONFLICT DO NOTHING",
+    t"INSERT INTO bonus_subscriptions (user_id, game, deck_code) VALUES ({1}, {2}, {3}) "
+    t"ON CONFLICT DO NOTHING",
     args=tuple[int, str, int],
 )
 
 IMPORT_PREFERENCES = sql(
-    "INSERT INTO bonus_preferences (user_id, start_hours, end_hours) VALUES ($1, $2, $3) "
-    "ON CONFLICT (user_id) DO NOTHING",
+    t"INSERT INTO bonus_preferences (user_id, start_hours, end_hours) VALUES ({1}, {2}, {3}) "
+    t"ON CONFLICT (user_id) DO NOTHING",
     args=tuple[int, int, int],
 )
 
 _UNSUBSCRIBE = sql(
-    "DELETE FROM bonus_subscriptions "
-    "WHERE user_id = $1 AND game = $2 AND deck_code = $3 RETURNING true",
+    t"DELETE FROM bonus_subscriptions "
+    t"WHERE user_id = {1} AND game = {2} AND deck_code = {3} RETURNING true",
     args=tuple[int, str, int],
     result=bool,
 )
 
 _DECKS_OF = sql(
-    "SELECT deck_code FROM bonus_subscriptions "
-    "WHERE user_id = $1 AND game = $2 ORDER BY deck_code",
+    t"SELECT deck_code FROM bonus_subscriptions "
+    t"WHERE user_id = {1} AND game = {2} ORDER BY deck_code",
     args=tuple[int, str],
     result=int,
 )
 
 _SUBSCRIBERS = sql(
-    "SELECT user_id, deck_code FROM bonus_subscriptions WHERE game = $1",
+    t"SELECT user_id, deck_code FROM bonus_subscriptions WHERE game = {1}",
     arg=str,
     resultset=_Subscriber,
 )
@@ -85,8 +85,8 @@ _SUBSCRIBERS = sql(
 # -- preferences ---------------------------------------------------------------
 
 _PREFERENCES = sql(
-    "SELECT user_id, start_hours, end_hours FROM bonus_preferences "
-    "WHERE user_id = ANY($1::bigint[])",
+    t"SELECT user_id, start_hours, end_hours FROM bonus_preferences "
+    t"WHERE user_id = ANY({1}::bigint[])",
     arg=list[int],
     resultset=_UserPreferences,
 )
@@ -94,12 +94,12 @@ _PREFERENCES = sql(
 # $2 and $3 are the hours to set, or NULL to leave one as it is; $4 is the
 # default for a user who has no row yet.
 _SET_PREFERENCES = sql(
-    "INSERT INTO bonus_preferences (user_id, start_hours, end_hours) "
-    "VALUES ($1, COALESCE($2::smallint, $4::smallint), COALESCE($3::smallint, $4::smallint)) "
-    "ON CONFLICT (user_id) DO UPDATE SET "
-    "start_hours = COALESCE($2::smallint, bonus_preferences.start_hours), "
-    "end_hours = COALESCE($3::smallint, bonus_preferences.end_hours) "
-    "RETURNING start_hours, end_hours",
+    t"INSERT INTO bonus_preferences (user_id, start_hours, end_hours) "
+    t"VALUES ({1}, COALESCE({2}::smallint, {4}::smallint), COALESCE({3}::smallint, {4}::smallint)) "
+    t"ON CONFLICT (user_id) DO UPDATE SET "
+    t"start_hours = COALESCE({2}::smallint, bonus_preferences.start_hours), "
+    t"end_hours = COALESCE({3}::smallint, bonus_preferences.end_hours) "
+    t"RETURNING start_hours, end_hours",
     args=tuple[int, int | None, int | None, int],
     resultset=PingPreferences,
 )
@@ -107,21 +107,21 @@ _SET_PREFERENCES = sql(
 # -- delivery log ----------------------------------------------------------------
 
 _CLAIM = sql(
-    "INSERT INTO bonus_ping_log (user_id, game, day, kind) "
-    "VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING RETURNING true",
+    t"INSERT INTO bonus_ping_log (user_id, game, day, kind) "
+    t"VALUES ({1}, {2}, {3}, {4}) ON CONFLICT DO NOTHING RETURNING true",
     args=tuple[int, str, date, str],
     result=bool,
 )
 
 _RELEASE = sql(
-    "DELETE FROM bonus_ping_log "
-    "WHERE user_id = $1 AND game = $2 AND day = $3 AND kind = $4",
+    t"DELETE FROM bonus_ping_log "
+    t"WHERE user_id = {1} AND game = {2} AND day = {3} AND kind = {4}",
     args=tuple[int, str, date, str],
 )
 
 _PRUNE = sql(
-    "WITH deleted AS (DELETE FROM bonus_ping_log WHERE day < $1 RETURNING 1) "
-    "SELECT count(*) FROM deleted",
+    t"WITH deleted AS (DELETE FROM bonus_ping_log WHERE day < {1} RETURNING 1) "
+    t"SELECT count(*) FROM deleted",
     arg=date,
     result=int,
 )

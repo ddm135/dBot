@@ -16,7 +16,7 @@ from games.media.borders import old_name as _old_name
 from games.media.bundles import BuiltInBundle, BundleError
 from games.media.drive import BorderFolder, Drive, StoredFile, fingerprint
 from games.service import State
-from ui.text import escape
+from ui.text import md
 
 from .hourly import HourlyTask
 
@@ -105,7 +105,7 @@ class Borders(HourlyTask):
             link = await folder.upload(
                 folder_id, name, image, fingerprint(sources[name])
             )
-            await channel.send(f"{game.name}: {escape(name)}{note}\n<{link}>")
+            await channel.send(md(t"{game.name}: {name}{note}\n<{link}>"))
             announced += 1
         return announced
 

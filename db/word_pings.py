@@ -8,6 +8,8 @@ from typing import Literal, NamedTuple
 import asyncpg
 from asyncpg_typed import sql
 
+from templates import Raw, render
+
 type IgnoreKind = Literal["user", "channel"]
 
 # What may surround a pinged word: whitespace or punctuation (or the ends).
@@ -33,50 +35,50 @@ class _IgnoreRow(NamedTuple):
 
 
 _LOAD_PINGS = sql(
-    "SELECT guild_id, user_id, word, count AS pings FROM word_pings",
+    t"SELECT guild_id, user_id, word, count AS pings FROM word_pings",
     resultset=_PingRow,
 )
 
 _LOAD_IGNORES = sql(
-    "SELECT guild_id, user_id, word, kind, target_id FROM word_ping_ignores",
+    t"SELECT guild_id, user_id, word, kind, target_id FROM word_ping_ignores",
     resultset=_IgnoreRow,
 )
 
 _ADD = sql(
-    "INSERT INTO word_pings (guild_id, user_id, word) VALUES ($1, $2, $3) "
-    "ON CONFLICT DO NOTHING",
+    t"INSERT INTO word_pings (guild_id, user_id, word) VALUES ({1}, {2}, {3}) "
+    t"ON CONFLICT DO NOTHING",
     args=tuple[int, int, str],
 )
 
 _REMOVE = sql(
-    "DELETE FROM word_pings WHERE guild_id = $1 AND user_id = $2 AND word = $3",
+    t"DELETE FROM word_pings WHERE guild_id = {1} AND user_id = {2} AND word = {3}",
     args=tuple[int, int, str],
 )
 
 _RECORD_PING = sql(
-    "UPDATE word_pings SET count = count + 1 "
-    "WHERE guild_id = $1 AND user_id = $2 AND word = $3",
+    t"UPDATE word_pings SET count = count + 1 "
+    t"WHERE guild_id = {1} AND user_id = {2} AND word = {3}",
     args=tuple[int, int, str],
 )
 
 _IGNORE = sql(
-    "INSERT INTO word_ping_ignores (guild_id, user_id, word, kind, target_id) "
-    "VALUES ($1, $2, $3, $4, $5) ON CONFLICT DO NOTHING",
+    t"INSERT INTO word_ping_ignores (guild_id, user_id, word, kind, target_id) "
+    t"VALUES ({1}, {2}, {3}, {4}, {5}) ON CONFLICT DO NOTHING",
     args=tuple[int, int, str, str, int],
 )
 
 _UNIGNORE = sql(
-    "DELETE FROM word_ping_ignores "
-    "WHERE guild_id = $1 AND user_id = $2 AND kind = $3 AND target_id = $4 "
-    "AND word = ANY($5::text[])",
+    t"DELETE FROM word_ping_ignores "
+    t"WHERE guild_id = {1} AND user_id = {2} AND kind = {3} AND target_id = {4} "
+    t"AND word = ANY({5}::text[])",
     args=tuple[int, int, str, int, list[str]],
 )
 
 # Also used by the v0 import: counts only go up, so the larger one is kept.
 IMPORT_PING = sql(
-    "INSERT INTO word_pings (guild_id, user_id, word, count) VALUES ($1, $2, $3, $4) "
-    "ON CONFLICT (guild_id, user_id, word) "
-    "DO UPDATE SET count = GREATEST(word_pings.count, EXCLUDED.count)",
+    t"INSERT INTO word_pings (guild_id, user_id, word, count) VALUES ({1}, {2}, {3}, {4}) "
+    t"ON CONFLICT (guild_id, user_id, word) "
+    t"DO UPDATE SET count = GREATEST(word_pings.count, EXCLUDED.count)",
     args=tuple[int, int, str, int],
 )
 IMPORT_IGNORE = _IGNORE
@@ -88,7 +90,9 @@ def normalize(word: str) -> str:
 
 
 def word_pattern(word: str) -> re.Pattern[str]:
-    return re.compile(f"{_BOUNDARY}{re.escape(word)}{_BOUNDARY_END}", re.IGNORECASE)
+    """Only the word is escaped; the boundaries are regex on purpose."""
+    pattern = render(t"{Raw(_BOUNDARY)}{word}{Raw(_BOUNDARY_END)}", re.escape)
+    return re.compile(pattern, re.IGNORECASE)
 
 
 @dataclass(slots=True)

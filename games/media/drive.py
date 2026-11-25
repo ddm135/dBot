@@ -13,11 +13,14 @@ import logging
 from dataclasses import dataclass
 from io import BytesIO
 from pathlib import Path
+from string.templatelib import Template
 from typing import Any, Protocol, Self
 
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseUpload
+
+from templates import render
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +60,11 @@ class BorderFolder(Protocol):
 
 def _quote(text: str) -> str:
     return text.replace("\\", "\\\\").replace("'", "\\'")
+
+
+def query(template: Template) -> str:
+    """A Drive ``q`` string; every interpolated value is quoted."""
+    return render(template, _quote)
 
 
 class Drive:
@@ -116,7 +124,7 @@ class Drive:
 
     async def files(self, folder: str) -> dict[str, StoredFile]:
         """The files of a folder by name, with where each came from."""
-        found = await self._list(f"'{_quote(folder)}' in parents and trashed=false")
+        found = await self._list(query(t"'{folder}' in parents and trashed=false"))
         return {
             str(f["name"]): StoredFile(
                 str(f["id"]), (f.get("appProperties") or {}).get(SOURCE)

@@ -12,7 +12,7 @@ from games.index import Index
 from ui.images import Upload, files, prepare
 from ui.pages import Paginator, page_count, slice_page
 from ui.song import song_embed
-from ui.text import escape
+from ui.text import escape, md
 
 from .common import (
     NO_DATA,
@@ -49,8 +49,8 @@ def song_line(
     song: Song, stat: SongStat | None, deck: Deck | None, *, show_deck: bool
 ) -> str:
     duration = stat.duration if stat else "Unknown"
-    name = f"**{escape(song.label)}**"
-    prefix = f"{escape(deck.name)} - " if show_deck and deck else ""
+    name = md(t"**{song.label}**")
+    prefix = md(t"{deck.name} - ") if show_deck and deck else ""
     return f"({duration}) {prefix}{name}"
 
 

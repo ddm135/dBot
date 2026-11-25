@@ -15,7 +15,7 @@ from games.bonus.notices import NoticeLine, Section
 from games.charts.song_stats import SongStat
 from games.index import Index
 
-from .text import escape, month_day, timestamp
+from .text import escape, md, month_day, timestamp
 
 MAX_SONG_NAMES = 3
 EMBED_CHARS = 6000
@@ -86,7 +86,7 @@ def entry_name(
     members = members if members and members != deck.name else ""
     name = entry_prefix(entry, today)
     if show_deck:
-        name += f"**{escape(deck.name)}**" + (" " if members else "")
+        name += md(t"**{deck.name}**") + (" " if members else "")
     name += escape(members)
     name += ": " if show_deck or members else ""
     name += song_names(deck, entry) + " " + entry_icons(entry)
@@ -285,7 +285,7 @@ def pings_embed(
     index_game_name: str, color: int, decks: list[str], icon: str | None
 ) -> discord.Embed:
     """``/bonus ping list``: a game and the artists the user follows."""
-    description = "\n".join(f"- {escape(name)}" for name in decks) or "None"
+    description = "\n".join(md(t"- {name}") for name in decks) or "None"
     embed = discord.Embed(description=description, color=color)
     embed.set_author(name=index_game_name, icon_url=icon)
     return embed
@@ -319,8 +319,8 @@ def notice_text(
         return ""
     stat = (stats or {}).get(song.code)
     duration = f" ({stat.duration})" if stat else ""
-    album = escape(song.album or deck.name)
-    return f"> {album} - **{escape(song.label)}**{duration}\n{window}"
+    album = song.album or deck.name
+    return md(t"> {album} - **{song.label}**{duration}\n{window}")
 
 
 def notice_embed(

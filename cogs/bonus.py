@@ -25,7 +25,7 @@ from ui.bonus import (
 )
 from ui.images import Upload, files
 from ui.pages import Paginator, page_count
-from ui.text import escape
+from ui.text import md
 
 from .common import (
     NO_DATA,
@@ -395,9 +395,9 @@ class Bonus(commands.Cog):
             itr.user.id, game.value, deck.code
         )
         text = (
-            f"You will be pinged about **{escape(deck.name)}** bonuses in {game.name}."
+            md(t"You will be pinged about **{deck.name}** bonuses in {game.name}.")
             if added
-            else f"You are already pinged about **{escape(deck.name)}** bonuses."
+            else md(t"You are already pinged about **{deck.name}** bonuses.")
         )
         await itr.followup.send(text, ephemeral=True)
 

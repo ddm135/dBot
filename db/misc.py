@@ -11,21 +11,21 @@ type AliasKind = Literal["song", "deck"]
 # -- live themes -------------------------------------------------------------------
 
 _LIVE_THEME = sql(
-    "SELECT amount FROM live_themes WHERE user_id = $1 AND game = $2",
+    t"SELECT amount FROM live_themes WHERE user_id = {1} AND game = {2}",
     args=tuple[int, str],
     result=int,
 )
 
 _SET_LIVE_THEME = sql(
-    "INSERT INTO live_themes (user_id, game, amount) VALUES ($1, $2, $3) "
-    "ON CONFLICT (user_id, game) DO UPDATE SET amount = EXCLUDED.amount",
+    t"INSERT INTO live_themes (user_id, game, amount) VALUES ({1}, {2}, {3}) "
+    t"ON CONFLICT (user_id, game) DO UPDATE SET amount = EXCLUDED.amount",
     args=tuple[int, str, int],
 )
 
 # Also used by the v0 import: an existing amount is kept.
 INSERT_LIVE_THEME_IF_NEW = sql(
-    "INSERT INTO live_themes (user_id, game, amount) VALUES ($1, $2, $3) "
-    "ON CONFLICT (user_id, game) DO NOTHING",
+    t"INSERT INTO live_themes (user_id, game, amount) VALUES ({1}, {2}, {3}) "
+    t"ON CONFLICT (user_id, game) DO NOTHING",
     args=tuple[int, str, int],
 )
 
@@ -38,31 +38,31 @@ class _Credential(NamedTuple):
 
 
 _ALL_CREDENTIALS = sql(
-    "SELECT game, fields FROM game_credentials",
+    t"SELECT game, fields FROM game_credentials",
     resultset=_Credential,
 )
 
 _CREDENTIAL = sql(
-    "SELECT fields FROM game_credentials WHERE game = $1",
+    t"SELECT fields FROM game_credentials WHERE game = {1}",
     arg=str,
     resultset=tuple[RequiredJsonType],  # a union cannot be given as ``result=``
 )
 
 _SAVE_CREDENTIAL = sql(
-    "INSERT INTO game_credentials (game, fields) VALUES ($1, $2) "
-    "ON CONFLICT (game) DO UPDATE SET fields = EXCLUDED.fields",
+    t"INSERT INTO game_credentials (game, fields) VALUES ({1}, {2}) "
+    t"ON CONFLICT (game) DO UPDATE SET fields = EXCLUDED.fields",
     args=tuple[str, RequiredJsonType],
 )
 
 # Also used by the v0 import: existing credentials are kept.
 INSERT_CREDENTIAL_IF_NEW = sql(
-    "INSERT INTO game_credentials (game, fields) VALUES ($1, $2) "
-    "ON CONFLICT (game) DO NOTHING",
+    t"INSERT INTO game_credentials (game, fields) VALUES ({1}, {2}) "
+    t"ON CONFLICT (game) DO NOTHING",
     args=tuple[str, RequiredJsonType],
 )
 
 _DELETE_CREDENTIAL = sql(
-    "DELETE FROM game_credentials WHERE game = $1 RETURNING true",
+    t"DELETE FROM game_credentials WHERE game = {1} RETURNING true",
     arg=str,
     result=bool,
 )
@@ -77,21 +77,21 @@ class _Alias(NamedTuple):
 
 
 _ALL_ALIASES = sql(
-    "SELECT kind, code, alias FROM search_aliases WHERE game = $1 ORDER BY alias",
+    t"SELECT kind, code, alias FROM search_aliases WHERE game = {1} ORDER BY alias",
     arg=str,
     resultset=_Alias,
 )
 
 _ADD_ALIAS = sql(
-    "INSERT INTO search_aliases (game, kind, code, alias) VALUES ($1, $2, $3, $4) "
-    "ON CONFLICT DO NOTHING RETURNING true",
+    t"INSERT INTO search_aliases (game, kind, code, alias) VALUES ({1}, {2}, {3}, {4}) "
+    t"ON CONFLICT DO NOTHING RETURNING true",
     args=tuple[str, str, int, str],
     result=bool,
 )
 
 _REMOVE_ALIAS = sql(
-    "DELETE FROM search_aliases "
-    "WHERE game = $1 AND kind = $2 AND code = $3 AND alias = $4 RETURNING true",
+    t"DELETE FROM search_aliases "
+    t"WHERE game = {1} AND kind = {2} AND code = {3} AND alias = {4} RETURNING true",
     args=tuple[str, str, int, str],
     result=bool,
 )
@@ -107,20 +107,20 @@ class _DisplayName(NamedTuple):
 
 
 _ALL_NAMES = sql(
-    "SELECT kind, code, name FROM display_names WHERE game = $1",
+    t"SELECT kind, code, name FROM display_names WHERE game = {1}",
     arg=str,
     resultset=_DisplayName,
 )
 
 _SET_NAME = sql(
-    "INSERT INTO display_names (game, kind, code, name) VALUES ($1, $2, $3, $4) "
-    "ON CONFLICT (game, kind, code) DO UPDATE SET name = EXCLUDED.name",
+    t"INSERT INTO display_names (game, kind, code, name) VALUES ({1}, {2}, {3}, {4}) "
+    t"ON CONFLICT (game, kind, code) DO UPDATE SET name = EXCLUDED.name",
     args=tuple[str, str, int, str],
 )
 
 _CLEAR_NAME = sql(
-    "DELETE FROM display_names WHERE game = $1 AND kind = $2 AND code = $3 "
-    "RETURNING true",
+    t"DELETE FROM display_names WHERE game = {1} AND kind = {2} AND code = {3} "
+    t"RETURNING true",
     args=tuple[str, str, int],
     result=bool,
 )

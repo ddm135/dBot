@@ -5,8 +5,9 @@ One row per song (``data`` is v0's per-song document: ``{"duration": "3:21",
 save, so a reader can tell cheaply whether it has the latest.
 """
 
+import asyncio
 import json
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from typing import Any, NamedTuple
 
 import asyncpg
@@ -15,30 +16,30 @@ from asyncpg_typed import RequiredJsonType, sql
 
 class _Row(NamedTuple):
     song: int
-    data: RequiredJsonType
+    data: str  # the document as JSON text; decoded in a thread (see ``load``)
 
 
 _VERSION = sql(
-    "SELECT version FROM song_stats_versions WHERE game = $1",
+    t"SELECT version FROM song_stats_versions WHERE game = {1}",
     arg=str,
     result=int,
 )
 
 _LOAD = sql(
-    "SELECT song, data FROM song_stats WHERE game = $1",
+    t"SELECT song, data::text FROM song_stats WHERE game = {1}",
     arg=str,
     resultset=_Row,
 )
 
 _SAVE_SONG = sql(
-    "INSERT INTO song_stats (game, song, data) VALUES ($1, $2, $3) "
-    "ON CONFLICT (game, song) DO UPDATE SET data = EXCLUDED.data",
+    t"INSERT INTO song_stats (game, song, data) VALUES ({1}, {2}, {3}) "
+    t"ON CONFLICT (game, song) DO UPDATE SET data = EXCLUDED.data",
     args=tuple[str, int, RequiredJsonType],
 )
 
 _BUMP_VERSION = sql(
-    "INSERT INTO song_stats_versions (game, version) VALUES ($1, 1) "
-    "ON CONFLICT (game) DO UPDATE SET version = song_stats_versions.version + 1",
+    t"INSERT INTO song_stats_versions (game, version) VALUES ({1}, 1) "
+    t"ON CONFLICT (game) DO UPDATE SET version = song_stats_versions.version + 1",
     arg=str,
 )
 
@@ -59,8 +60,10 @@ class SongStatsDb:
         """The game's stored songs, as ``{song code: document}``."""
         async with self._pool.acquire() as conn:
             rows = await _LOAD.fetch(conn, game)
-        found = {str(row.song): row.data for row in rows if isinstance(row.data, dict)}
-        self._saved[game] = {int(k): _text(v) for k, v in found.items()}
+        # A game has thousands of songs: decoding them is more than a second of
+        # CPU, which must not hold the event loop.
+        found, saved = await asyncio.to_thread(_decode, rows)
+        self._saved[game] = saved
         return found
 
     async def save(self, game: str, songs: Mapping[str, Any]) -> int:
@@ -80,6 +83,18 @@ class SongStatsDb:
             await _SAVE_SONG.executemany(conn, changed)
             await _BUMP_VERSION.execute(conn, game)
         return len(changed)
+
+
+def _decode(rows: Iterable[_Row]) -> tuple[dict[str, Any], dict[int, str]]:
+    """``{song code: document}`` and what each document is as text."""
+    found: dict[str, Any] = {}
+    saved: dict[int, str] = {}
+    for row in rows:
+        document = json.loads(row.data)
+        if isinstance(document, dict):
+            found[str(row.song)] = document
+            saved[row.song] = _text(document)
+    return found, saved
 
 
 def _text(document: Any) -> str:

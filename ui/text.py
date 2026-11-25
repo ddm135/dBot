@@ -1,6 +1,9 @@
 """Small text helpers shared by embeds."""
 
 from datetime import date, datetime
+from string.templatelib import Template
+
+from templates import render
 
 MARKDOWN_CHARS = ("*", "_", "`")  # the same three v0 escaped
 
@@ -10,6 +13,12 @@ def escape(text: str) -> str:
     for char in MARKDOWN_CHARS:
         text = text.replace(char, f"\\{char}")
     return text
+
+
+def md(template: Template) -> str:
+    """Render ``t"**{name}**"`` with every interpolation escaped; wrap already
+    formatted markdown in ``Raw`` to insert it as it is."""
+    return render(template, escape)
 
 
 def month_day(value: date | datetime) -> str:

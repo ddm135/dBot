@@ -6,7 +6,7 @@ from games.bonus.decks import Deck, Song
 from games.charts.song_stats import SongStat
 from games.index import Index
 
-from .text import escape
+from .text import escape, md
 
 
 def song_embed(
@@ -22,7 +22,7 @@ def song_embed(
     colour = index.album_color(song.code)  # black is a colour too
     embed = discord.Embed(
         title=escape(deck.name),
-        description=f"**{escape(song.label)}**",
+        description=md(t"**{song.label}**"),
         color=index.game.color if colour is None else colour,
     )
     embed.set_author(name=f"{index.game.name} - {author}", icon_url=icon)
