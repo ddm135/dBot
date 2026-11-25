@@ -9,9 +9,10 @@ import asyncio
 import ctypes
 import gc
 import logging
+import os
 import sys
 import time
-from collections.abc import Collection, Iterator
+from collections.abc import Callable, Collection, Iterator
 from contextlib import contextmanager, suppress
 from hashlib import sha1
 from pathlib import Path, PurePosixPath
@@ -184,6 +185,14 @@ def _read_wanted(
     return found
 
 
+def _listing(folder: Path) -> set[str]:
+    try:
+        with os.scandir(folder) as entries:
+            return {entry.name for entry in entries if entry.is_file()}
+    except FileNotFoundError:
+        return set()
+
+
 class BundleStore:
     def __init__(
         self,
@@ -212,6 +221,23 @@ class BundleStore:
         return (
             self._root / "files" / game_key / "plain" / f"{digest}_{bundle_name(url)}"
         )
+
+    def on_disk(self, game_key: str) -> Callable[[str, bool], bool]:
+        """A check of which files of a game are on disk, from one look at its
+        folders. Asking the file system about each of thousands of files costs
+        seconds of CPU; this costs one listing for each folder. Blocking: call
+        it in a thread."""
+        folder = self._root / "files" / game_key
+        names = _listing(folder)
+        plain_names = _listing(folder / "plain")
+
+        def has(url: str, plain: bool) -> bool:
+            if not plain:
+                return bundle_name(url) in names
+            digest = sha1(url.encode()).hexdigest()[:12]
+            return f"{digest}_{bundle_name(url)}" in plain_names
+
+        return has
 
     async def fetch(self, game_key: str, url: str, *, plain: bool = False) -> Path:
         """The file's path, downloading it first if it is not on disk."""

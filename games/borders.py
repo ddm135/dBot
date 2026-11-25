@@ -84,11 +84,16 @@ def _from_catalog(
 
 def _from_tables(tables: Tables) -> dict[str, str]:
     locale = tables.get("LocaleData", {})
-    themes = list(tables.get("ThemeData", {}).values())
+    # The first theme of each border number (looked up once, not scanned for).
+    themes: dict[Any, Any] = {}
+    for each in tables.get("ThemeData", {}).values():
+        number = each.get("themeTypeCode")
+        if isinstance(number, str | int | float):
+            themes.setdefault(number, each)
     found: dict[str, str] = {}
     for border in tables.get("ThemeTypeData", {}).values():
         code = border.get("code")
-        theme = next((t for t in themes if t.get("themeTypeCode") == code), None)
+        theme = themes.get(code) if isinstance(code, str | int | float) else None
         if not code or theme is None or not theme.get("limitedType"):
             continue
         entry = locale.get(str(theme.get("localeName")))

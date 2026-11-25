@@ -68,7 +68,10 @@ class Borders(HourlyTask):
         if data.catalog is None:
             return 0
         catalog = data.catalog.catalog
-        wanted = border_files(game, data.tables, catalog, data.strings)
+        # Reads thousands of entries: not on the loop.
+        wanted = await asyncio.to_thread(
+            border_files, game, data.tables, catalog, data.strings
+        )
         if not wanted:
             return 0
         sources = {name: _source(catalog, key) for name, key in wanted.items()}

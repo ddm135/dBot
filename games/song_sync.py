@@ -246,15 +246,8 @@ def _absent(
     game_key: str, bundles: BundleStore, keep: set[tuple[str, bool]]
 ) -> list[tuple[str, bool]]:
     """The kept charts whose bundle is not on disk (sorted, so runs are alike)."""
-    return [
-        (url, plain)
-        for url, plain in sorted(keep)
-        if not (
-            bundles.plain_path(game_key, url)
-            if plain
-            else bundles.path(game_key, bundle_name(url))
-        ).exists()
-    ]
+    present = bundles.on_disk(game_key)
+    return [(url, plain) for url, plain in sorted(keep) if not present(url, plain)]
 
 
 async def sync_seq_stats(

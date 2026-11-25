@@ -269,3 +269,18 @@ def test_plain_files_with_different_versions_are_kept_apart(tmp_path):
     old = store.plain_path("KD", "http://cdn/a/x.seq?v=1")
     new = store.plain_path("KD", "http://cdn/a/x.seq?v=2")
     assert old != new and old.name.endswith("_x.seq") and old.parent.name == "plain"
+
+
+def test_one_listing_tells_which_files_are_on_disk(tmp_path):
+    store = BundleStore(tmp_path, None)  # type: ignore[arg-type]
+    here = "http://cdn/a/here.bundle?v=1"
+    plain = "http://cdn/a/x.seq?v=1"
+    store.path("KD", "here.bundle").parent.mkdir(parents=True)
+    store.path("KD", "here.bundle").write_bytes(b"1")
+    store.plain_path("KD", plain).parent.mkdir(parents=True)
+    store.plain_path("KD", plain).write_bytes(b"1")
+
+    has = store.on_disk("KD")
+    assert has(here, False) and not has("http://cdn/a/gone.bundle", False)
+    assert has(plain, True) and not has("http://cdn/a/x.seq?v=2", True)
+    assert not store.on_disk("none")(here, False)  # a game with no folder
