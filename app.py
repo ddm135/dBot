@@ -7,6 +7,7 @@ import sys
 from bot import dBot
 from config import Settings
 from lease import BaseLease, Leader, create_lease_backend, supervise
+from lease.watchdog import LoopWatchdog
 
 logger = logging.getLogger(__name__)
 
@@ -91,9 +92,11 @@ async def run(settings: Settings) -> None:
     logger.info(
         "Instance ID: %s%s",
         holder,
-        " (Preferred)" if settings.preferred else "",
+        " (preferred)" if settings.preferred else "",
     )
 
+    watchdog = LoopWatchdog(asyncio.get_running_loop())
+    watchdog.start()
     try:
         await supervise(
             leader,
@@ -104,5 +107,6 @@ async def run(settings: Settings) -> None:
             close_timeout=settings.close_timeout,
         )
     finally:
+        watchdog.stop()
         await leader.release()
         await backend.close()

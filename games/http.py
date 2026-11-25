@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_TIMEOUT = httpx.Timeout(30.0, connect=10.0)
 CHUNK_SIZE = 256 * 1024
+FLUSH_EVERY = 32 * 1024 * 1024  # bytes written between handing pages back to the OS
 
 
 @dataclass(frozen=True, slots=True)
@@ -124,6 +125,22 @@ async def fetch(
     return response
 
 
+def release_pages(file: Any) -> None:
+    """Write what a file holds to disk and drop it from the page cache.
+
+    A container's memory meter counts the cache, so downloading many bundles
+    would show as ever more RAM in use even though nothing is held. The files are
+    read back from disk when needed, so keeping their pages cached gains little.
+    """
+    try:
+        file.flush()
+        os.fsync(file.fileno())
+        if hasattr(os, "posix_fadvise"):  # Linux, not Windows
+            os.posix_fadvise(file.fileno(), 0, 0, os.POSIX_FADV_DONTNEED)
+    except OSError:
+        logger.debug("Could not release a file's pages.", exc_info=True)
+
+
 async def download(
     client: httpx.AsyncClient,
     url: str,
@@ -140,8 +157,14 @@ async def download(
             response.raise_for_status()
             file = await asyncio.to_thread(open, partial, "wb")
             try:
+                since = 0
                 async for chunk in response.aiter_bytes(chunk_size):
                     await asyncio.to_thread(file.write, chunk)
+                    since += len(chunk)
+                    if since >= FLUSH_EVERY:
+                        since = 0
+                        await asyncio.to_thread(release_pages, file)
+                await asyncio.to_thread(release_pages, file)
             finally:
                 await asyncio.to_thread(file.close)
 

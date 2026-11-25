@@ -51,7 +51,6 @@ async def test_every_extension_loads_and_unloads(bot):
 
     prefix = {c.name for c in bot.commands}
     assert {
-        "pull",
         "sync",
         "load",
         "reload",

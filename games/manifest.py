@@ -112,7 +112,9 @@ async def fetch_manifest(
                     f"{game.key}: there is no manifest for version {version} "
                     f"(HTTP {response.status_code})."
                 ) from None
-            logger.info("%s: No manifest for %s, trying %s...", game.key, version, floor)
+            logger.info(
+                "%s: No manifest for %s, trying %s...", game.key, version, floor
+            )
             version = floor
             continue
 

@@ -2,23 +2,22 @@
 
 Only the preferred instance does this (and downloads the border bundles)."""
 
-import asyncio
 import logging
-from datetime import time
 from pathlib import PurePosixPath
 from typing import TYPE_CHECKING, Any
 
 import discord
-from discord.ext import commands, tasks
 
 from channels import find_channel
 from discord_ids import BORDER_CHANNEL_ID
 from games.borders import border_files
 from games.borders import old_name as _old_name
 from games.bundles import BuiltInBundle, BundleError
-from games.drive import BorderFolder, Drive, StoredFile
+from games.drive import BorderFolder, Drive, StoredFile, fingerprint
 from games.service import State
 from ui.text import escape
+
+from .hourly import HourlyTask
 
 if TYPE_CHECKING:
     from bot import dBot
@@ -26,12 +25,13 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class Borders(commands.Cog):
+class Borders(HourlyTask):
+    # After the catalogs (:05), tables (:10) and song stats (:15).
+    minute = 40
+
     def __init__(self, bot: dBot, drive: BorderFolder | None = None) -> None:
-        self.bot = bot
+        super().__init__(bot)
         self._drive = drive
-        self._running = asyncio.Lock()
-        self._startup: asyncio.Task[None] | None = None
 
     def _folder(self) -> BorderFolder | None:
         if self._drive is None:
@@ -46,26 +46,6 @@ class Borders(commands.Cog):
                 google.border_folder_id, google.credentials_file
             )
         return self._drive
-
-    async def cog_load(self) -> None:
-        self.sync.start()
-        self._startup = asyncio.create_task(self._first_run())
-
-    async def cog_unload(self) -> None:
-        self.sync.cancel()
-        if self._startup is not None:
-            self._startup.cancel()
-            await asyncio.gather(self._startup, return_exceptions=True)
-
-    async def _first_run(self) -> None:
-        await self.bot.games.wait_until_ready()
-        await self.run_all()
-
-    # After the catalogs (:00), tables (:10) and song stats (:15).
-    @tasks.loop(time=[time(hour=hour, minute=30) for hour in range(24)])
-    async def sync(self) -> None:
-        await self.bot.games.wait_until_ready()
-        await self.run_all()
 
     async def run_all(self) -> bool:
         if not self.bot.settings.preferred or self._running.locked():
@@ -102,7 +82,10 @@ class Borders(commands.Cog):
             name: key
             for name, key in wanted.items()
             if name not in have
-            or (have[name].source is not None and have[name].source != sources[name])
+            or (
+                have[name].source is not None
+                and have[name].source not in (sources[name], fingerprint(sources[name]))
+            )
         }
         if not todo:
             return 0
@@ -121,7 +104,9 @@ class Borders(commands.Cog):
                 old = _old_name(name, have)
                 await folder.rename(have[name].id, old)
                 note = " (updated)"
-            link = await folder.upload(folder_id, name, image, sources[name])
+            link = await folder.upload(
+                folder_id, name, image, fingerprint(sources[name])
+            )
             await channel.send(f"{game.name}: {escape(name)}{note}\n<{link}>")
             announced += 1
         return announced

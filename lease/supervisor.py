@@ -1,9 +1,12 @@
 import asyncio
 import logging
+import os
 import time
 from collections.abc import Callable
 
 from discord.ext import commands
+
+from games.bundles import release_memory
 
 from .console import listen
 from .leader import Leader
@@ -29,6 +32,10 @@ async def supervise(
         crashed = await _serve_term(
             leader, make_bot(), token, stop=stop, close_timeout=close_timeout
         )
+        # The old bot's tables, indexes and caches are garbage now; give the
+        # memory back before the next one loads its own, or restarts add up.
+        release_memory()
+        logger.info("Memory in use after the term: %s.", _rss())
         if crashed:
             leader.mark_unhealthy()
 
@@ -39,6 +46,15 @@ async def supervise(
                 await asyncio.wait_for(stop.wait(), cooldown)
             except TimeoutError:
                 pass
+
+
+def _rss() -> str:
+    try:
+        with open("/proc/self/statm") as file:
+            pages = int(file.read().split()[1])
+        return f"{pages * os.sysconf('SC_PAGE_SIZE') / 1024 / 1024:.0f} MB"
+    except OSError, ValueError, IndexError:  # not Linux
+        return "unknown"
 
 
 async def _serve_term(

@@ -8,11 +8,12 @@ republishes under the same name is noticed: the old file is renamed
 """
 
 import asyncio
+import hashlib
 import logging
 from dataclasses import dataclass
 from io import BytesIO
 from pathlib import Path
-from typing import Any, Protocol
+from typing import Any, Protocol, Self
 
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
@@ -26,6 +27,12 @@ RETRIES = 3
 
 
 SOURCE = "source"  # the file property that says where a border came from
+
+
+def fingerprint(source: str) -> str:
+    """A short stand-in for a source: Drive limits a property (key and value
+    together) to 124 bytes, which a catalog key and an asset path can pass."""
+    return hashlib.sha256(source.encode()).hexdigest()[:32]
 
 
 @dataclass(frozen=True, slots=True)
@@ -59,7 +66,7 @@ class Drive:
         self._files = files
 
     @classmethod
-    def from_service_account(cls, root: str, credentials_file: Path) -> Drive:
+    def from_service_account(cls, root: str, credentials_file: Path) -> Self:
         credentials = Credentials.from_service_account_file(
             str(credentials_file), scopes=SCOPES
         )

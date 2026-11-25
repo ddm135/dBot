@@ -2,11 +2,10 @@
 
 import asyncio
 import logging
-from datetime import UTC, date, datetime, time, timedelta
+from datetime import UTC, date, datetime, timedelta
 from typing import TYPE_CHECKING
 
 import discord
-from discord.ext import commands, tasks
 
 from db.bonus_pings import PingKind, PingPreferences
 from games.index import Index
@@ -16,6 +15,8 @@ from games.song_stats import SongStat
 from ui.bonus import midnight, notice_embed, notice_text
 from ui.images import Upload, files, prepare
 from ui.text import timestamp
+
+from .hourly import HourlyTask
 
 if TYPE_CHECKING:
     from bot import dBot
@@ -53,31 +54,8 @@ def deck_texts(
     return texts
 
 
-class NotifyBonus(commands.Cog):
-    def __init__(self, bot: dBot) -> None:
-        self.bot = bot
-        self._running = asyncio.Lock()
-        self._startup: asyncio.Task[None] | None = None
-
-    async def cog_load(self) -> None:
-        self.notify.start()
-        self._startup = asyncio.create_task(self._first_run())
-
-    async def cog_unload(self) -> None:
-        self.notify.cancel()
-        if self._startup is not None:
-            self._startup.cancel()
-            await asyncio.gather(self._startup, return_exceptions=True)
-
-    async def _first_run(self) -> None:
-        """Send what came due while the bot was down, without waiting for the hour."""
-        await self.bot.games.wait_until_ready()
-        await self.run_all()
-
-    @tasks.loop(time=[time(hour=hour) for hour in range(24)])
-    async def notify(self) -> None:
-        await self.bot.games.wait_until_ready()
-        await self.run_all()
+class NotifyBonus(HourlyTask):
+    minute = 0
 
     async def run_all(self) -> None:
         async with self._running:  # the hourly run and the first one never overlap

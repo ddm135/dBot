@@ -3,7 +3,7 @@
 import asyncio
 import logging
 from collections.abc import Iterable
-from datetime import datetime, time, timedelta
+from datetime import date, datetime, time, timedelta
 from typing import TYPE_CHECKING
 
 import discord
@@ -37,12 +37,12 @@ def slot_name(game: Game, when: datetime) -> str:
     return f"SSL #{when.isoweekday()}"
 
 
-def reset_time(game: Game, last: object) -> datetime | None:
+def reset_time(game: Game, last: date | None) -> datetime | None:
     """The moment the SSL of a past day started, for the "last seen" fields."""
     day = last
     if day is None:
         return None
-    return datetime.combine(day, time(RESET_HOUR), tzinfo=game.timezone)  # type: ignore[arg-type]
+    return datetime.combine(day, time(RESET_HOUR), tzinfo=game.timezone)
 
 
 def last_text(moment: datetime | None) -> str:

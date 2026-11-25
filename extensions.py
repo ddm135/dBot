@@ -13,6 +13,7 @@ EXTENSIONS = (
     "tasks.basic_sync",
     "tasks.dalcom_sync",
     "tasks.song_stats",
+    "tasks.album_bundles",
     "tasks.pinata",
     "tasks.borders",
     "tasks.strings_sync",

@@ -12,7 +12,7 @@ google-auth==2.63.1
     # via dbot (pyproject.toml)
 gplaydl==4.4.0
     # via dbot (pyproject.toml)
-grpcio==1.85.3
+grpcio==1.85.4
     # via dbot (pyproject.toml)
 httpx==0.28.1
     # via dbot (pyproject.toml)

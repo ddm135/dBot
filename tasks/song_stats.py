@@ -4,16 +4,14 @@ Only the preferred instance does this; it saves the result in the database, whic
 every instance reads.
 """
 
-import asyncio
 import logging
-from datetime import time
 from typing import TYPE_CHECKING
-
-from discord.ext import commands, tasks
 
 from games.apks import needs_apk
 from games.service import State
 from games.song_sync import SyncResult, sync_seq_stats
+
+from .hourly import HourlyTask
 
 if TYPE_CHECKING:
     from bot import dBot
@@ -21,34 +19,12 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class SongStatsSync(commands.Cog):
+class SongStatsSync(HourlyTask):
+    minute = 15
+
     def __init__(self, bot: dBot) -> None:
-        self.bot = bot
+        super().__init__(bot)
         self._known_bad: set[str] = set()
-        self._running = asyncio.Lock()
-        self._startup: asyncio.Task[None] | None = None
-
-    async def cog_load(self) -> None:
-        self.sync.start()
-        # The hourly loop waits for its next slot; measure at start-up too,
-        # as soon as the first data sync has finished.
-        self._startup = asyncio.create_task(self._first_run())
-
-    async def cog_unload(self) -> None:
-        self.sync.cancel()
-        if self._startup is not None:
-            self._startup.cancel()
-            await asyncio.gather(self._startup, return_exceptions=True)
-
-    async def _first_run(self) -> None:
-        await self.bot.games.wait_until_ready()
-        await self.run_all()
-
-    # After the tables (:10) have been refreshed.
-    @tasks.loop(time=[time(hour=hour, minute=15) for hour in range(24)])
-    async def sync(self) -> None:
-        await self.bot.games.wait_until_ready()
-        await self.run_all()
 
     async def run_all(self) -> bool:
         """Measure every game. Skipped (False) if a run is already going, or if this

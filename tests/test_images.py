@@ -6,7 +6,7 @@ from PIL import Image as PILImage
 
 import games.images as images_module
 from games.bundles import BuiltInBundle, BundleError
-from games.images import ImageService, Picture, read_images
+from games.images import ImageService, Picture, PrefetchResult, read_images
 from games.index import Indexes
 from ui.images import files, prepare
 
@@ -42,10 +42,9 @@ def fake_unitypy(monkeypatch, objects):
 
 def test_an_id_picks_the_one_image_among_several_of_one_name(monkeypatch):
     # A border updated under a new dated path: two images, one name.
-    def pointing_at(path_id):
-        return SimpleNamespace(
-            asset=SimpleNamespace(m_PathID=path_id)
-        )
+    pointing_at = lambda path_id: SimpleNamespace(
+        asset=SimpleNamespace(m_PathID=path_id)
+    )
     fake_unitypy(
         monkeypatch,
         [
@@ -295,3 +294,76 @@ async def test_why_a_built_in_image_is_missing_is_logged_once(patched, caplog):
             now[0] += 1000
     messages = [r.getMessage() for r in caplog.records]
     assert len(messages) == 1 and "built in" in messages[0] and "APK" in messages[0]
+
+
+# --- keeping the album bundles ---------------------------------------------------
+
+
+class PrefetchBundles(FakeBundles):
+    def __init__(self, root):
+        super().__init__()
+        self.root = root
+
+    def path(self, game, name):
+        return self.root / name
+
+    async def fetch(self, game, url, *, plain=False):
+        result = await super().fetch(game, url)
+        (self.root / url.rsplit("/", 1)[-1]).write_bytes(b"x")
+        return result
+
+
+def prefetch_world():
+    t = Tables()
+    t.group(1, "TWICE")
+    t.song(10, "a", 1, album="albums/a.png")
+    t.song(11, "b", 1, album="albums/b.png")  # the same bundle as a
+    t.song(12, "c", 1, album="albums/c.png")
+    t.song(13, "d", 1, album="https://cdn/d.png")  # a URL: Discord loads it
+    t.song(14, "e", 1, album="built-in/e.png")  # in the APK
+    t.song(15, "f", 1, album=None)
+    service = FakeService(t.as_tables())
+    service.data.catalog = SimpleNamespace(
+        catalog=SimpleNamespace(
+            bundle_urls=lambda key: {
+                "albums/a.png": ["https://cdn/one.bundle"],
+                "albums/b.png": ["https://cdn/one.bundle"],
+                "albums/c.png": ["https://cdn/two.bundle"],
+                "built-in/e.png": ["{Runtime}/e.bundle"],
+            }[key],
+            internal_ids=lambda key: [],
+        )
+    )
+    return service, Indexes(service)
+
+
+async def test_every_album_bundle_is_downloaded_once(tmp_path):
+    service, indexes = prefetch_world()
+    bundles = PrefetchBundles(tmp_path)
+    images = ImageService(bundles, service, indexes)
+
+    first = await images.prefetch_albums("SM")
+    assert sorted(bundles.fetched) == [
+        "https://cdn/one.bundle",
+        "https://cdn/two.bundle",
+    ]
+    assert (first.downloaded, first.kept, first.failed, first.built_in) == (2, 0, 0, 1)
+    assert "{Runtime}/e.bundle" not in bundles.fetched  # built in: nothing to download
+
+    second = await images.prefetch_albums("SM")
+    assert (second.downloaded, second.kept) == (0, 2)
+
+
+async def test_a_failed_album_download_is_counted_not_raised(tmp_path):
+    service, indexes = prefetch_world()
+    bundles = PrefetchBundles(tmp_path)
+    bundles.error = BundleError("down")
+    result = await ImageService(bundles, service, indexes).prefetch_albums("SM")
+    assert (result.downloaded, result.failed) == (0, 2)
+
+
+async def test_a_game_without_a_catalog_has_nothing_to_keep(tmp_path):
+    service, indexes = prefetch_world()
+    service.data.catalog = None
+    images = ImageService(PrefetchBundles(tmp_path), service, indexes)
+    assert await images.prefetch_albums("SM") == PrefetchResult()

@@ -14,6 +14,7 @@ import logging
 import re
 import sys
 import threading
+from collections.abc import Mapping
 from pprint import pformat
 from typing import Any
 
@@ -27,8 +28,17 @@ _TOKEN = re.compile(
 )
 
 
+def _keys_hint(mapping: Mapping[Any, Any]) -> str:
+    return f" Keys: {', '.join(str(k) for k in list(mapping)[:30])}."
+
+
 def names(obj: object) -> list[str]:
-    """The public names under ``obj``, for suggestions and for ``?``."""
+    """The public names under ``obj``, for suggestions and for ``?``.
+
+    For a mapping (``cogs``, a dict) these are its keys, to use as ``['key']``.
+    """
+    if isinstance(obj, Mapping):
+        return sorted(str(k) for k in obj)
     try:
         return sorted(n for n in dir(obj) if not n.startswith("_"))
     except Exception:  # noqa: BLE001 - a broken __dir__
@@ -58,9 +68,10 @@ def lookup(root: object, path: str) -> object:
             if attr:
                 current = getattr(current, attr)
             elif key:
-                if not isinstance(current, dict) or key not in current:
+                if not isinstance(current, Mapping) or key not in current:
                     raise LookupFailed(
-                        f"Key '{key}' not found or object is not a dict along path '{path}'."
+                        f"Key '{key}' not found or object is not a mapping along path '{path}'."
+                        + (_keys_hint(current) if isinstance(current, Mapping) else "")
                     )
                 current = current[key]
             else:
@@ -94,17 +105,59 @@ def render(value: object) -> str:
     return text
 
 
-def _read_lines(
-    loop: asyncio.AbstractEventLoop, lines: asyncio.Queue[str | None]
-) -> None:
-    """Runs in a daemon thread; ``None`` marks the end of the input."""
-    try:
-        for line in sys.stdin:  # ends at EOF (Ctrl+Z, Ctrl+D) or a closed console
-            loop.call_soon_threadsafe(lines.put_nowait, line)
-    except BaseException:  # a Ctrl+C or a broken console ends the reader
-        logger.debug("Console input failed.", exc_info=True)
-    with contextlib.suppress(RuntimeError):  # the loop may already be closed
-        loop.call_soon_threadsafe(lines.put_nowait, None)
+class _Reader:
+    """One thread reads the console for the life of the process.
+
+    A thread blocked on stdin cannot be stopped, so a new one for every restart
+    would pile up (each holding memory, and taking input meant for the current
+    listener). Instead the single thread hands lines to whichever listener is
+    attached right now.
+    """
+
+    def __init__(self) -> None:
+        self._lock = threading.Lock()
+        self._sink: tuple[asyncio.AbstractEventLoop, asyncio.Queue[str | None]] | None
+        self._sink = None
+        self._thread: threading.Thread | None = None
+        self._ended = False
+
+    def attach(
+        self, loop: asyncio.AbstractEventLoop, lines: asyncio.Queue[str | None]
+    ) -> None:
+        with self._lock:
+            self._sink = (loop, lines)
+            if self._ended:
+                lines.put_nowait(None)
+            elif self._thread is None:
+                self._thread = threading.Thread(
+                    target=self._read, name="console", daemon=True
+                )
+                self._thread.start()
+
+    def detach(self, lines: asyncio.Queue[str | None]) -> None:
+        with self._lock:
+            if self._sink is not None and self._sink[1] is lines:
+                self._sink = None
+
+    def _send(self, line: str | None) -> None:
+        with self._lock:
+            sink = self._sink
+        if sink is not None:
+            with contextlib.suppress(RuntimeError):  # the loop may be closed
+                sink[0].call_soon_threadsafe(sink[1].put_nowait, line)
+
+    def _read(self) -> None:
+        try:
+            for line in sys.stdin:  # ends at EOF (Ctrl+Z, Ctrl+D) or a closed console
+                self._send(line)
+        except BaseException:  # a Ctrl+C or a broken console ends the reader
+            logger.debug("Console input failed.", exc_info=True)
+        with self._lock:
+            self._ended = True
+        self._send(None)
+
+
+_reader = _Reader()
 
 
 async def listen(bot: object) -> None:
@@ -114,13 +167,14 @@ async def listen(bot: object) -> None:
 
     logger.info("Console listener enabled.")
     lines: asyncio.Queue[str | None] = asyncio.Queue()
-    threading.Thread(
-        target=_read_lines,
-        args=(asyncio.get_running_loop(), lines),
-        name="console",
-        daemon=True,
-    ).start()
+    _reader.attach(asyncio.get_running_loop(), lines)
+    try:
+        await _serve(bot, lines)
+    finally:
+        _reader.detach(lines)
 
+
+async def _serve(bot: object, lines: asyncio.Queue[str | None]) -> None:
     while (line := await lines.get()) is not None:
         path = line.strip()
         if not path:

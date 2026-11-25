@@ -21,6 +21,7 @@ from .bundles import (
     BundleStore,
     Source,
     asset_name,
+    bundle_name,
     describe,
     open_environment,
     release_memory,
@@ -35,6 +36,17 @@ logger = logging.getLogger(__name__)
 IMAGE_TYPES = ("Texture2D", "Sprite")
 CACHE_SIZE = 256
 MISS_SECONDS = 600.0
+
+
+@dataclass(frozen=True, slots=True)
+class PrefetchResult:
+    kept: int = 0  # bundles already on disk
+    downloaded: int = 0
+    failed: int = 0
+    built_in: int = 0  # in the game's APK, not downloadable
+
+
+PREFETCH_CONCURRENCY = 3
 
 
 @dataclass(frozen=True, slots=True)
@@ -129,6 +141,52 @@ class ImageService:
         if index is None:
             return None
         return await self._picture(game_key, index, index.album_ref(song_code))
+
+    def album_bundle_urls(self, game_key: str) -> list[str]:
+        """The bundles that hold the game's album art, each once.
+
+        Only art named by a catalog key is in a bundle; a URL is Discord's to load.
+        """
+        index: Index | None = self._indexes.get(game_key)
+        catalog = self._games.get(game_key).catalog
+        if index is None or catalog is None:
+            return []
+        urls: dict[str, None] = {}
+        for code in index.decks.songs:
+            ref = index.album_ref(code)
+            if not isinstance(ref, str) or not ref or index.resolve_url(ref):
+                continue
+            try:
+                found = catalog.catalog.bundle_urls(ref)
+            except KeyError:
+                continue
+            urls.update(dict.fromkeys(u for u in found[:1] if u))
+        return list(urls)
+
+    async def prefetch_albums(self, game_key: str) -> PrefetchResult:
+        """Download every album bundle not yet kept (nothing is decoded or saved
+        as an image; pictures still come from the bundles when asked for)."""
+        urls = self.album_bundle_urls(game_key)
+        gate = asyncio.Semaphore(PREFETCH_CONCURRENCY)
+        counts = dict.fromkeys(("kept", "downloaded", "failed", "built_in"), 0)
+
+        async def one(url: str) -> None:
+            async with gate:
+                if not url.startswith(("http://", "https://")):
+                    counts["built_in"] += 1
+                    return
+                path = self._bundles.path(game_key, bundle_name(url))
+                had = await asyncio.to_thread(path.exists)
+                try:
+                    await self._bundles.fetch(game_key, url)
+                except BundleError as exc:
+                    counts["failed"] += 1
+                    logger.warning("%s: album bundle: %s", game_key, exc)
+                    return
+                counts["downloaded" if not had else "kept"] += 1
+
+        await asyncio.gather(*(one(url) for url in urls))
+        return PrefetchResult(**counts)
 
     async def emblem(self, game_key: str, deck_code: int) -> Picture | None:
         index: Index | None = self._indexes.get(game_key)

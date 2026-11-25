@@ -22,8 +22,6 @@ services:
     dns:
       - 1.1.1.1
       - 8.8.8.8
-    environment:
-    - DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
     env_file:
       - ./.env
     logging:

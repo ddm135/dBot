@@ -4,7 +4,7 @@ import discord
 
 from games.borders import border_files
 from games.bundles import BundleError
-from games.drive import FOLDER_MIME, Drive, StoredFile
+from games.drive import FOLDER_MIME, Drive, StoredFile, fingerprint
 from games.images import Picture
 from games.registry import GAMES
 from tasks import borders as borders_task
@@ -294,10 +294,13 @@ async def test_a_border_republished_under_the_same_name_keeps_the_old_one(
     assert await cog.announce(data_for(BL, catalog, limited(1, 2, 3))) == 1
     assert folder.renamed == [("1.png", "1 (old 2).png")]
     assert [u[1] for u in folder.uploads] == ["1.png"]
-    assert folder.have["1.png"] == now
+    assert folder.have["1.png"] == fingerprint(now)  # short: Drive limits properties
+    assert len(fingerprint(now)) + len("source") <= 124
     assert channel.sent[0].startswith(f"{BL.name}: 1.png (updated)")
     # Same source now: nothing more to do. A file with no recorded source is
     # never touched.
+    assert await cog.announce(data_for(BL, catalog, limited(1, 2, 3))) == 0
+    folder.have = {"1.png": now}  # recorded in full, before sources were shortened
     assert await cog.announce(data_for(BL, catalog, limited(1, 2, 3))) == 0
     folder.have = {"1.png": None}
     assert await cog.announce(data_for(BL, catalog, limited(1, 2, 3))) == 0

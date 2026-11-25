@@ -1,3 +1,4 @@
+from types import SimpleNamespace
 from typing import ClassVar
 
 import pytest
@@ -47,3 +48,15 @@ def test_a_missing_name_suggests_close_ones_and_bot_is_the_root():
     from lease.console import names
 
     assert "items" in names(thing) and not any(n.startswith("_") for n in names(thing))
+
+
+def test_any_mapping_works_with_keys_and_lists_its_keys():
+    from types import MappingProxyType
+
+    from lease.console import names
+
+    holder = SimpleNamespace(cogs=MappingProxyType({"Forward": Thing()}))
+    assert lookup(holder, "cogs['Forward'].name") == "n"
+    assert names(holder.cogs) == ["Forward"]
+    with pytest.raises(LookupFailed, match="Keys: Forward"):
+        lookup(holder, "cogs['Nope']")

@@ -5,9 +5,11 @@ from dotenv import load_dotenv
 
 from app import run
 from config import Settings
+from tuning import limit_arenas
 
 
 def main() -> None:
+    limit_arenas()  # before any thread exists
     load_dotenv()
     try:
         settings = Settings.from_env()
