@@ -12,6 +12,7 @@ EXTENSIONS = (
     "cogs.status",
     "tasks.basic_sync",
     "tasks.dalcom_sync",
+    "tasks.warm_indexes",
     "tasks.song_stats",
     "tasks.album_bundles",
     "tasks.pinata",

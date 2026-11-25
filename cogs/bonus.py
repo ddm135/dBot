@@ -195,6 +195,7 @@ class Bonus(commands.Cog):
     async def _context(
         self, itr: Itr, key: str
     ) -> tuple[Index, BonusCalendar, str | None] | None:
+        await self.bot.indexes.warm(key)  # off the event loop
         index = self.bot.indexes.get(key)
         calendar_ = self.bot.indexes.current_calendar(key)
         if index is None or calendar_ is None:

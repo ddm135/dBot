@@ -1,3 +1,4 @@
+import asyncio
 from datetime import date, datetime
 
 from games.index import Indexes, build_index, parse_color
@@ -395,3 +396,33 @@ def test_chosen_names_replace_the_games_own_for_decks_and_songs():
     from games.index import find_deck_by_name
 
     assert find_deck_by_name(index, "M&D").code == 2  # and so do old sheets
+
+
+async def test_warming_builds_off_the_loop_once_and_leaves_the_caches_full():
+    import threading
+
+    service = FakeService(sample().as_tables())
+    indexes = Indexes(
+        service, clock=lambda game: datetime(2025, 6, 1, tzinfo=game.timezone)
+    )
+    built_in = []
+    original = indexes._build_calendar
+
+    def build_calendar(index, years):
+        built_in.append(threading.current_thread())
+        return original(index, years)
+
+    indexes._build_calendar = build_calendar
+    await asyncio.gather(indexes.warm("SM"), indexes.warm("SM"))  # one build, not two
+    assert len(built_in) == 1 and built_in[0] is not threading.main_thread()
+    cal = indexes.current_calendar("SM")  # found ready: nothing is built here
+    assert cal is not None and len(built_in) == 1
+
+    await indexes.warm("SM", 2026)  # another year is another calendar
+    assert len(built_in) == 2
+
+    service.set(
+        dict(service.data.loaded_tables.tables, MusicData={})
+    )  # a changed table
+    await indexes.warm("SM")
+    assert indexes.current_calendar("SM") is not cal

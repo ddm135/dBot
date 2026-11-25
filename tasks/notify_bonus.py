@@ -83,6 +83,7 @@ class NotifyBonus(HourlyTask):
 
     async def _notify_day(self, game: Game, now: datetime, days_ahead: int) -> int:
         target = now.date() + timedelta(days=days_ahead)
+        await self.bot.indexes.warm(game.key, target.year)  # off the event loop
         index = self.bot.indexes.get(game.key)
         calendar = self.bot.indexes.calendar(game.key, target.year)
         if index is None or calendar is None:

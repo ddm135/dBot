@@ -92,7 +92,7 @@ async def run(settings: Settings) -> None:
     logger.info(
         "Instance ID: %s%s",
         holder,
-        " (preferred)" if settings.preferred else "",
+        " (Preferred)" if settings.preferred else "",
     )
 
     watchdog = LoopWatchdog(asyncio.get_running_loop())

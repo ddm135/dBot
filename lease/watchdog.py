@@ -21,7 +21,7 @@ class LoopWatchdog:
         self,
         loop: asyncio.AbstractEventLoop,
         *,
-        threshold: float = 1.5,
+        threshold: float = 2,
         interval: float = 0.5,
     ) -> None:
         self._loop = loop

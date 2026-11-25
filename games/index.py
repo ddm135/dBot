@@ -5,6 +5,7 @@ index, score ceilings, the bonus calendar) is built once and reused until a
 sync replaces the tables.
 """
 
+import asyncio
 import logging
 import re
 from collections.abc import Callable, Mapping
@@ -307,6 +308,7 @@ class Indexes:
         self._clock = clock
         self._names: dict[str, dict[tuple[NameKind, int], str]] = {}
         self._indexes: dict[str, tuple[tuple[object, ...] | None, Index | None]] = {}
+        self._warming: dict[str, asyncio.Lock] = {}
         self._calendars: dict[
             str, tuple[tuple[object, ...] | None, tuple[int, ...], BonusCalendar]
         ] = {}
@@ -339,32 +341,38 @@ class Indexes:
             return a is b
         return len(a) == len(b) and all(x is y for x, y in zip(a, b))
 
+    def _build(
+        self, key: str, data: State, source: tuple[object, ...] | None
+    ) -> Index | None:
+        if source is None:
+            return None
+        return build_index(data.game, data.tables, data.strings, self._names.get(key))
+
     def get(self, key: str) -> Index | None:
         data = self._service.get(key)
         source = self._source(key, data)
         cached = self._indexes.get(key)
         if cached and self._same(cached[0], source):
             return cached[1]
-        index = (
-            build_index(data.game, data.tables, data.strings, self._names.get(key))
-            if source is not None
-            else None
-        )
+        index = self._build(key, data, source)
         self._indexes[key] = (source, index)
         return index
 
-    def calendar(self, key: str, year: int) -> BonusCalendar | None:
-        """The bonus calendar covering ``year`` and the one after it."""
-        index = self.get(key)
-        if index is None or not index.game.has_bonuses:
-            return None
-        years = tuple(
+    @staticmethod
+    def _years(year: int) -> tuple[int, ...]:
+        return tuple(
             range(year - CALENDAR_YEARS_BEFORE, year + CALENDAR_YEARS_AFTER + 1)
         )
-        source = self._source(key, self._service.get(key))
+
+    def _cached_calendar(
+        self, key: str, source: tuple[object, ...] | None, years: tuple[int, ...]
+    ) -> BonusCalendar | None:
         cached = self._calendars.get(key)
         if cached and self._same(cached[0], source) and cached[1] == years:
             return cached[2]
+        return None
+
+    def _build_calendar(self, index: Index, years: tuple[int, ...]) -> BonusCalendar:
         songs = build_song_periods(
             index.decks,
             index.artists,
@@ -373,9 +381,51 @@ class Indexes:
             self._rules,
             index.languages,
         )
-        calendar = BonusCalendar.build(songs, years)
+        return BonusCalendar.build(songs, years)
+
+    def calendar(self, key: str, year: int) -> BonusCalendar | None:
+        """The bonus calendar covering ``year`` and the one after it.
+
+        Built here on the spot if it is not ready; that holds the event loop for
+        seconds, so code that can wait calls :meth:`warm` first.
+        """
+        index = self.get(key)
+        if index is None or not index.game.has_bonuses:
+            return None
+        years = self._years(year)
+        source = self._source(key, self._service.get(key))
+        if (calendar := self._cached_calendar(key, source, years)) is not None:
+            return calendar
+        calendar = self._build_calendar(index, years)
         self._calendars[key] = (source, years, calendar)
         return calendar
+
+    async def warm(self, key: str, year: int | None = None) -> None:
+        """Build a game's index and calendar in a thread, if they are out of date.
+
+        Both are big (a game's songs over several years) and are rebuilt after
+        every change to its tables. Done on the event loop they stalled it for
+        seconds, long enough to miss a lease renewal; done here, :meth:`get` and
+        :meth:`calendar` then find them ready.
+        """
+        async with self._warming.setdefault(key, asyncio.Lock()):
+            data = self._service.get(key)
+            source = self._source(key, data)
+            cached = self._indexes.get(key)
+            if cached and self._same(cached[0], source):
+                index = cached[1]
+            else:
+                index = await asyncio.to_thread(self._build, key, data, source)
+                self._indexes[key] = (source, index)
+            if index is None or not index.game.has_bonuses:
+                return
+            years = self._years(
+                year if year is not None else self.today(index.game).year
+            )
+            if self._cached_calendar(key, source, years) is not None:
+                return
+            calendar = await asyncio.to_thread(self._build_calendar, index, years)
+            self._calendars[key] = (source, years, calendar)
 
     def current_calendar(self, key: str) -> BonusCalendar | None:
         index = self.get(key)

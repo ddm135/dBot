@@ -88,11 +88,11 @@ class Settings:
     data_dir: Path = DEFAULT_DATA_DIR
 
     lease_key: str = "dBot:leader"
-    lease_ttl: float = 30.0  # lease lifetime without a renewal
-    lease_renew_interval: float = 10.0  # leader renews this often
+    lease_ttl: float = 60.0  # lease lifetime without a renewal
+    lease_renew_interval: float = 15.0  # leader renews this often
     lease_poll_interval: float = 5.0  # standby tries this often
-    lease_margin: float = 5.0  # leader steps down this long before the TTL ends
-    lease_request_timeout: float = 3.0
+    lease_margin: float = 15.0  # leader steps down this long before the TTL ends
+    lease_request_timeout: float = 5.0
     restart_cooldown: float = 60.0  # pause after a crash so the standby can win
     close_timeout: float = 15.0  # how long to wait for the bot to close before killing
 
