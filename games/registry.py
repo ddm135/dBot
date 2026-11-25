@@ -5,9 +5,8 @@ from types import MappingProxyType
 from zoneinfo import ZoneInfo
 
 from discord_ids import SSRG_GUILD, TEST_GUILD
-
-from .fields import ENGLISH_FIRST, JAPANESE_FIRST, KOREAN_FIRST
-from .models import (
+from games.data.schema import ENGLISH_FIRST, JAPANESE_FIRST, KOREAN_FIRST
+from games.models import (
     AppStoreLookup,
     CatalogPatterns,
     ForwardConfig,

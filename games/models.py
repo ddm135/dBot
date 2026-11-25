@@ -3,6 +3,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from types import MappingProxyType
+from typing import Any
 from zoneinfo import ZoneInfo
 
 
@@ -153,3 +154,7 @@ class Game:
 
     def parse_date(self, text: str) -> datetime:
         return datetime.strptime(text, self.date_format).replace(tzinfo=self.timezone)
+
+
+type Entry = Mapping[str, Any]  # one row of a game table
+type Tables = Mapping[str, Mapping[str, Entry]]  # the game tables, by name

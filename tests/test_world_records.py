@@ -7,16 +7,7 @@ import pytest
 from discord import app_commands
 
 from cogs.world_record import WorldRecord, season_autocomplete
-from games.registry import GAMES
-from games.seasons import (
-    SeasonError,
-    check_weekly,
-    current_monday,
-    latest_season,
-    quarterly_seasons,
-    season_code_of,
-)
-from games.world_records import (
+from games.api.world_records import (
     Leaderboard,
     Record,
     WorldRecordError,
@@ -24,6 +15,15 @@ from games.world_records import (
     parse_last_modified,
     parse_records,
 )
+from games.bonus.schedule import (
+    SeasonError,
+    check_weekly,
+    current_monday,
+    latest_season,
+    quarterly_seasons,
+    season_code_of,
+)
+from games.registry import GAMES
 from ui.world_record import (
     artist_embed,
     last_updated_text,

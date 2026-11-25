@@ -6,11 +6,9 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from games.decks import Deck
-from games.index import Index
-from games.models import Game
-from games.registry import GAMES
-from games.seasons import (
+from games.api.world_records import Leaderboard, Record, WorldRecordError
+from games.bonus.decks import Deck
+from games.bonus.schedule import (
     SeasonError,
     check_weekly,
     current_monday,
@@ -18,7 +16,9 @@ from games.seasons import (
     quarterly_seasons,
     season_code_of,
 )
-from games.world_records import Leaderboard, Record, WorldRecordError
+from games.index import Index
+from games.models import Game
+from games.registry import GAMES
 from ui.images import Upload, files, prepare
 from ui.pages import Paginator
 from ui.world_record import PER_PAGE, artist_embed, leaderboard_embed, page_total

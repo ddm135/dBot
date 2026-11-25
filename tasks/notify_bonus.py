@@ -2,16 +2,23 @@
 
 import asyncio
 import logging
+from collections.abc import Iterable
 from datetime import UTC, date, datetime, timedelta
 from typing import TYPE_CHECKING
 
 import discord
 
 from db.bonus_pings import PingKind, PingPreferences
+from games.bonus.notices import (
+    Category,
+    NoticeLine,
+    Section,
+    hours_due,
+    notices_for_day,
+)
+from games.charts.song_stats import SongStat
 from games.index import Index
 from games.models import Game
-from games.notices import Category, NoticeLine, Section, hours_due, notices_for_day
-from games.song_stats import SongStat
 from ui.bonus import midnight, notice_embed, notice_text
 from ui.images import Upload, files, prepare
 from ui.text import timestamp
@@ -20,6 +27,7 @@ from .hourly import HourlyTask
 
 if TYPE_CHECKING:
     from bot import dBot
+    from games.service import State
 
 logger = logging.getLogger(__name__)
 
@@ -56,18 +64,17 @@ def deck_texts(
 
 class NotifyBonus(HourlyTask):
     minute = 0
+    skip_when_running = False  # the hourly run and the first one follow each other
+    failure = "Bonus pings failed."
 
-    async def run_all(self) -> None:
-        async with self._running:  # the hourly run and the first one never overlap
-            for data in self.bot.games:
-                game = data.game
-                if not game.has_bonuses:
-                    continue
-                try:
-                    await self.notify_game(game, game.now())
-                except Exception:
-                    logger.exception("%s: Bonus pings failed.", game.key)
-            await self.bot.db.bonus_pings.prune(datetime.now(UTC).date())
+    def games(self) -> Iterable[State]:
+        return (data for data in self.bot.games if data.game.has_bonuses)
+
+    async def run_game(self, data: State) -> None:
+        await self.notify_game(data.game, data.game.now())
+
+    async def finish(self) -> None:
+        await self.bot.db.bonus_pings.prune(datetime.now(UTC).date())
 
     async def notify_game(self, game: Game, now: datetime) -> int:
         """Send the pings that are due at ``now``. Returns how many were sent.

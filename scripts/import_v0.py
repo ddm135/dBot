@@ -20,9 +20,9 @@ from dotenv import load_dotenv
 from config import DEFAULT_DATA_DIR, PostgresSettings
 from db import create_pool, migrate
 from db.legacy import DateParser, DeckLookup, SongLookup, import_all
+from games.data.storage import DataStore
 from games.index import Index, build_index, find_deck_by_name
 from games.registry import GAMES
-from games.storage import DataStore
 
 logger = logging.getLogger(__name__)
 
@@ -51,11 +51,7 @@ def read_v0(directory: Path) -> dict[str, dict[str, Any]]:
 async def load_indexes(store: DataStore) -> dict[str, Index]:
     indexes: dict[str, Index] = {}
     for game in GAMES.values():
-        tables = {}
-        for name in TABLES:
-            table = await store.read_table(game.key, name)
-            if table is not None:
-                tables[name] = table
+        tables = await store.read_all(game.key, TABLES, pruned=False)
         if index := build_index(game, tables):
             indexes[game.key] = index
     return indexes

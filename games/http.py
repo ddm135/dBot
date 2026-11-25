@@ -18,7 +18,7 @@ from tenacity import (
     stop_after_attempt,
 )
 
-from .errors import ServerError
+from games.errors import ServerError
 
 logger = logging.getLogger(__name__)
 

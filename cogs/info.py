@@ -6,9 +6,9 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from games.decks import Deck, Song
+from games.bonus.decks import Deck, Song
+from games.charts.song_stats import SongStat
 from games.index import Index
-from games.song_stats import SongStat
 from ui.images import Upload, files, prepare
 from ui.pages import Paginator, page_count, slice_page
 from ui.song import song_embed

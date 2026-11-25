@@ -67,7 +67,3 @@ class SslHistory:
     async def pinned_on(self, game: str, day: date) -> bool:
         async with self._pool.acquire() as conn:
             return await _PINNED_ON.fetchrow(conn, game, day) is not None
-
-    async def import_many(self, rows: list[tuple[str, date, int, int]]) -> None:
-        async with self._pool.acquire() as conn:
-            await INSERT_MISSING.executemany(conn, rows)

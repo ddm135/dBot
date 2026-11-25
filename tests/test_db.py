@@ -162,11 +162,6 @@ async def test_ssl_last_appearances(database):
 
     assert await ssl.pinned_on("SM", date(2025, 1, 3))
     assert not await ssl.pinned_on("SM", date(2025, 1, 9))
-    await ssl.import_many(
-        [("SM", date(2025, 1, 3), 99, 9), ("SM", date(2024, 5, 5), 4, 4)]
-    )
-    assert (await ssl.last("SM", 4, 4)).song == date(2024, 5, 5)
-    assert (await ssl.last("SM", 99, 9)).song is None  # existing day kept
 
 
 # --- bonus pings --------------------------------------------------------------

@@ -27,9 +27,5 @@ def timestamp(value: datetime, style: str = "R") -> str:
     return f"<t:{int(value.timestamp())}:{style}>"
 
 
-def plural(count: int, word: str) -> str:
-    return f"{count} {word}" if count == 1 else f"{count} {word}s"
-
-
 def truncate(text: str, limit: int) -> str:
     return text if len(text) <= limit else text[: limit - 1] + "…"

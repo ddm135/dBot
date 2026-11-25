@@ -5,7 +5,7 @@ from io import BytesIO
 
 import discord
 
-from games.images import Picture
+from games.media.images import Picture
 
 
 @dataclass(frozen=True, slots=True)

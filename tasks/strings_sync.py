@@ -3,8 +3,8 @@
 import logging
 from typing import TYPE_CHECKING
 
+from games.data.strings import load_strings
 from games.service import State
-from games.strings import load_strings
 
 from .hourly import HourlyTask
 
@@ -16,19 +16,9 @@ logger = logging.getLogger(__name__)
 
 class StringsSync(HourlyTask):
     minute = 15
+    failure = "Reading strings failed."
 
-    async def run_all(self) -> bool:
-        if self._running.locked():
-            return False
-        async with self._running:
-            for data in self.bot.games:
-                try:
-                    await self.sync_game(data)
-                except Exception:
-                    logger.exception("%s: Reading strings failed.", data.game.key)
-        return True
-
-    async def sync_game(self, data: State) -> bool:
+    async def run_game(self, data: State) -> bool:
         """Read the game's strings. True if they changed."""
         config = data.game.strings
         if config is None or data.catalog is None:

@@ -9,11 +9,11 @@ from datetime import date, datetime, time, timedelta
 
 import discord
 
-from games.bonuses import BonusEntry, max_score
-from games.decks import Deck
+from games.bonus.bonuses import BonusEntry, max_score
+from games.bonus.decks import Deck
+from games.bonus.notices import NoticeLine, Section
+from games.charts.song_stats import SongStat
 from games.index import Index
-from games.notices import NoticeLine, Section
-from games.song_stats import SongStat
 
 from .text import escape, month_day, timestamp
 

@@ -9,10 +9,10 @@ import httpx
 from Cryptodome.Cipher import AES
 from Cryptodome.Util.Padding import pad
 
-from games.crypto import Cipher
-from games.decks import build_deck_index
+from games.api.crypto import Cipher
+from games.api.manifest import Manifest
+from games.bonus.decks import build_deck_index
 from games.index import build_index
-from games.manifest import Manifest
 from games.registry import GAMES
 from games.service import DataService
 

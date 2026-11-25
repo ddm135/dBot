@@ -1,8 +1,7 @@
 import pytest
 
-from games.accounts import Accounts
+from games.api.accounts import Accounts, fetch_todays_song, todays_song
 from games.errors import ServerError
-from games.ssleague import fetch_todays_song, todays_song
 
 
 class Store:
@@ -37,8 +36,6 @@ async def test_accounts_load_cache_and_save_changes():
             },
         )
     ]
-    accounts.forget("SM")
-    assert await accounts.get("SM") is not account
 
 
 async def test_accounts_refuse_unknown_games_and_unusable_credentials():

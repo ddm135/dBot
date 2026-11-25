@@ -5,10 +5,10 @@ from discord import app_commands
 
 from cogs.bonus import Bonus
 from cogs.info import Info
-from games.images import ImageService
+from games.charts.song_stats import SongStatsStore
 from games.index import Indexes
+from games.media.images import ImageService
 from games.registry import GAMES
-from games.song_stats import SongStatsStore
 from search import Searcher
 
 from .data import MemoryStats, Tables
@@ -227,7 +227,7 @@ async def test_highest_only_lists_every_deck_with_only_its_best_entries(
 
 
 async def test_info_attaches_decoded_images(tmp_path, database):
-    from games.images import Picture
+    from games.media.images import Picture
 
     class Images:
         async def emblem(self, game, deck):

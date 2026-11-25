@@ -5,11 +5,11 @@ from pathlib import Path
 import httpx
 import pytest
 
-from games.apks import ApkStore, member_name, read_member
-from games.bundles import BuiltInBundle, BundleStore
+from games.api.stores import PlayDetails
+from games.charts.song_sync import sync_seq_stats
 from games.errors import PlayStoreError
-from games.song_sync import sync_seq_stats
-from games.stores import PlayDetails
+from games.media.apks import ApkStore, member_name, read_member
+from games.media.bundles import BuiltInBundle, BundleStore
 
 from .data import NO_RETRY
 from .test_seq_bundles import BUNDLE, EASY, HARD, NORMAL
@@ -238,7 +238,7 @@ async def test_the_newest_kept_apk_is_searched_first(tmp_path):
 
 
 def test_needs_apk_looks_for_built_in_files_the_tables_refer_to():
-    from games.apks import needs_apk
+    from games.media.apks import needs_apk
 
     class Catalog:
         def bundle_urls(self, key):

@@ -2,10 +2,10 @@ from types import SimpleNamespace
 
 import discord
 
-from games.borders import border_files
-from games.bundles import BundleError
-from games.drive import FOLDER_MIME, Drive, StoredFile, fingerprint
-from games.images import Picture
+from games.media.borders import border_files
+from games.media.bundles import BundleError
+from games.media.drive import FOLDER_MIME, Drive, StoredFile, fingerprint
+from games.media.images import Picture
 from games.registry import GAMES
 from tasks import borders as borders_task
 from tasks.borders import Borders
@@ -243,7 +243,7 @@ async def test_only_borders_missing_from_the_folder_are_uploaded_and_announced(
     )
     cog = make(monkeypatch, folder, images, channel)
     assert (
-        await cog.announce(data_for(BL, catalog, limited(1, 2, 3))) == 1
+        await cog.run_game(data_for(BL, catalog, limited(1, 2, 3))) == 1
     )  # 1 is there, 3 unreadable
     assert folder.uploads == [
         ("folder-" + BL.name, "2.png", b"PNG:Image_ThemeType_2_R_Large")
@@ -252,20 +252,20 @@ async def test_only_borders_missing_from_the_folder_are_uploaded_and_announced(
     # The upload is the record: another run finds 2.png there and does nothing
     # more for it (3 is still unreadable and is tried again).
     images.asked.clear()
-    assert await cog.announce(data_for(BL, catalog, limited(1, 2, 3))) == 0
+    assert await cog.run_game(data_for(BL, catalog, limited(1, 2, 3))) == 0
     assert images.asked == ["Image_ThemeType_3_R_Large"]
 
 
 async def test_nothing_is_done_without_a_catalog_borders_or_a_channel(monkeypatch):
     folder, images = FakeFolder(), FakeImages()
     cog = make(monkeypatch, folder, images, None)
-    assert await cog.announce(data_for(BL, None)) == 0  # no catalog yet
+    assert await cog.run_game(data_for(BL, None)) == 0  # no catalog yet
     assert (
-        await cog.announce(data_for(BL, FakeCatalog({}), limited(1))) == 0
+        await cog.run_game(data_for(BL, FakeCatalog({}), limited(1))) == 0
     )  # no borders
     catalog = FakeCatalog({"Image_ThemeType_1_R_Large": "a/b.png"})
     assert (
-        await cog.announce(data_for(BL, catalog, limited(1, 2, 3))) == 0
+        await cog.run_game(data_for(BL, catalog, limited(1, 2, 3))) == 0
     )  # channel unreachable
     assert folder.uploads == [] and images.asked == []
 
@@ -279,7 +279,7 @@ async def test_without_google_credentials_nothing_is_announced(tmp_path):
     bot = SimpleNamespace(settings=settings, images=FakeImages(), bundles=FakeBundles())
     cog = Borders(bot)  # type: ignore[arg-type]
     catalog = FakeCatalog({"Image_ThemeType_1_R_Large": "a/b.png"})
-    assert await cog.announce(data_for(BL, catalog, limited(1, 2, 3))) == 0  # type: ignore[arg-type]
+    assert await cog.run_game(data_for(BL, catalog, limited(1, 2, 3))) == 0  # type: ignore[arg-type]
 
 
 async def test_a_border_republished_under_the_same_name_keeps_the_old_one(
@@ -291,7 +291,7 @@ async def test_a_border_republished_under_the_same_name_keeps_the_old_one(
     folder = FakeFolder(have={"1.png": old, "1 (old).png": old, "2.png": None})
     images, channel = FakeImages(), Channel()
     cog = make(monkeypatch, folder, images, channel)
-    assert await cog.announce(data_for(BL, catalog, limited(1, 2, 3))) == 1
+    assert await cog.run_game(data_for(BL, catalog, limited(1, 2, 3))) == 1
     assert folder.renamed == [("1.png", "1 (old 2).png")]
     assert [u[1] for u in folder.uploads] == ["1.png"]
     assert folder.have["1.png"] == fingerprint(now)  # short: Drive limits properties
@@ -299,11 +299,11 @@ async def test_a_border_republished_under_the_same_name_keeps_the_old_one(
     assert channel.sent[0].startswith(f"{BL.name}: 1.png (updated)")
     # Same source now: nothing more to do. A file with no recorded source is
     # never touched.
-    assert await cog.announce(data_for(BL, catalog, limited(1, 2, 3))) == 0
+    assert await cog.run_game(data_for(BL, catalog, limited(1, 2, 3))) == 0
     folder.have = {"1.png": now}  # recorded in full, before sources were shortened
-    assert await cog.announce(data_for(BL, catalog, limited(1, 2, 3))) == 0
+    assert await cog.run_game(data_for(BL, catalog, limited(1, 2, 3))) == 0
     folder.have = {"1.png": None}
-    assert await cog.announce(data_for(BL, catalog, limited(1, 2, 3))) == 0
+    assert await cog.run_game(data_for(BL, catalog, limited(1, 2, 3))) == 0
 
 
 def test_the_old_name_keeps_the_number_in_front():
@@ -357,7 +357,7 @@ async def test_borders_kept_by_number_are_renamed_not_uploaded_again(monkeypatch
     catalog = FakeCatalog({"Image_ThemeType_1003_R_Large": "a/1003.png"})
     folder = FakeFolder(have={"1003.png": None})
     cog = make(monkeypatch, folder, FakeImages(), Channel())
-    assert await cog.announce(data_for(BL, catalog, BL_THEMES)) == 0
+    assert await cog.run_game(data_for(BL, catalog, BL_THEMES)) == 0
     assert folder.renamed == [("1003.png", "1003 - Seed.png")]
     assert folder.uploads == []
     assert set(folder.have) == {"1003 - Seed.png"}
@@ -383,7 +383,7 @@ async def test_the_bundles_of_all_borders_are_downloaded_whatever_drive_has(
     )
     bundles = FakeBundles()
     cog = make(monkeypatch, folder, FakeImages(), Channel(), bundles)
-    assert await cog.announce(data_for(BL, catalog, limited(1, 2, 3, 4))) == 0
+    assert await cog.run_game(data_for(BL, catalog, limited(1, 2, 3, 4))) == 0
     # Each once; a failed one does not stop the rest; built-in ones are not fetched.
     assert bundles.fetched == [
         (BL.key, "https://cdn/a.bundle"),
@@ -406,7 +406,7 @@ async def test_only_the_preferred_instance_downloads_and_uploads_borders(monkeyp
 
 
 def test_the_migration_plan_sorts_every_file_in_the_folder():
-    from games.drive import StoredFile, fingerprint
+    from games.media.drive import StoredFile, fingerprint
     from scripts.migrate_borders import plan
 
     wanted = {

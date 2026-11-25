@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, NamedTuple
 import discord
 from discord import app_commands
 
-from games.decks import Deck
+from games.bonus.decks import Deck
 from games.index import Index
 from games.models import Game
 from games.registry import GAMES

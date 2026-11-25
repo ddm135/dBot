@@ -4,10 +4,10 @@ from types import SimpleNamespace
 import pytest
 from PIL import Image as PILImage
 
-import games.images as images_module
-from games.bundles import BuiltInBundle, BundleError
-from games.images import ImageService, Picture, PrefetchResult, read_images
+import games.media.images as images_module
 from games.index import Indexes
+from games.media.bundles import BuiltInBundle, BundleError
+from games.media.images import ImageService, Picture, PrefetchResult, read_images
 from ui.images import files, prepare
 
 from .data import Tables
@@ -288,7 +288,7 @@ async def test_why_a_built_in_image_is_missing_is_logged_once(patched, caplog):
     bundles = FakeBundles()
     now = [0.0]
     images = ImageService(bundles, service, indexes, clock=lambda: now[0])
-    with caplog.at_level(logging.WARNING, logger="games.images"):
+    with caplog.at_level(logging.WARNING, logger="games.media.images"):
         for _ in range(3):
             await images.emblem("SM", 4)  # built in, and there is no APK
             now[0] += 1000

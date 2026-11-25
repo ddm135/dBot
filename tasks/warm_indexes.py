@@ -9,12 +9,13 @@ import asyncio
 import logging
 from typing import TYPE_CHECKING
 
-from games.bundles import freeze_heap
+from tuning import freeze_heap
 
 from .hourly import HourlyTask
 
 if TYPE_CHECKING:
     from bot import dBot
+    from games.service import State
 
 logger = logging.getLogger(__name__)
 
@@ -22,17 +23,15 @@ logger = logging.getLogger(__name__)
 class WarmIndexes(HourlyTask):
     # After the catalogs (:05), tables (:10) and strings (:15).
     minute = 20
+    failure = "Preparing the index failed."
 
-    async def run_all(self) -> bool:
-        for data in self.bot.games:
-            try:
-                await self.bot.indexes.warm(data.game.key)
-            except Exception:
-                logger.exception("%s: Preparing the index failed.", data.game.key)
+    async def run_game(self, data: State) -> None:
+        await self.bot.indexes.warm(data.game.key)
+
+    async def finish(self) -> None:
         # Everything is built and settled: keep the collector from walking it
         # again for every bundle read from now on.
         await asyncio.to_thread(freeze_heap)
-        return True
 
 
 async def setup(bot: dBot) -> None:

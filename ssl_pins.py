@@ -9,10 +9,10 @@ from typing import TYPE_CHECKING
 import discord
 
 from db.ssl import LastAppearance
-from games.decks import Deck, Song
+from games.bonus.decks import Deck, Song
+from games.charts.song_stats import SongStat
 from games.index import Index
 from games.models import Game
-from games.song_stats import SongStat
 from ui.images import Upload, files, prepare
 from ui.song import song_embed
 from ui.text import long_date, timestamp

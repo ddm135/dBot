@@ -1,7 +1,7 @@
 import json
 
-from games.assets import AssetContext
-from games.storage import DataStore
+from games.data.schema import AssetContext
+from games.data.storage import DataStore
 
 ANSWER = {
     "code": 1000,
@@ -49,7 +49,7 @@ async def test_big_tables_are_trimmed_in_memory_but_not_on_disk(tmp_path):
 
 
 def test_only_locale_entries_that_something_refers_to_are_kept():
-    from games.storage import prune_referenced
+    from games.data.storage import prune_referenced
 
     tables = {
         "LocaleData": {"1": {"enUS": "a"}, "2": {"enUS": "b"}, "3": {"enUS": "c"}},
@@ -66,9 +66,9 @@ def test_only_locale_entries_that_something_refers_to_are_kept():
 async def test_the_whole_locale_table_is_read_again_when_what_refers_to_it_changes(
     tmp_path,
 ):
+    from games.data.tables import _prune_tables
     from games.models import Game
     from games.registry import GAMES
-    from games.tables import _prune_tables
 
     store = DataStore(tmp_path)
     game: Game = GAMES["SM"]
@@ -89,8 +89,8 @@ async def test_the_whole_locale_table_is_read_again_when_what_refers_to_it_chang
 
 
 def test_urls_are_kept_only_for_games_that_name_files_by_code():
-    from games.song_sync import DIFFICULTY_FIELDS
-    from games.storage import REFERENCE_FIELDS, prune_referenced
+    from games.charts.song_sync import DIFFICULTY_FIELDS
+    from games.data.storage import REFERENCE_FIELDS, prune_referenced
 
     assert set(DIFFICULTY_FIELDS.values()) <= set(REFERENCE_FIELDS["URLs"])
     urls = {"5": {"url": "a"}, "6": {"url": "b"}, "7": {"url": "c"}}
@@ -123,8 +123,8 @@ async def test_a_kept_table_is_good_until_a_table_file_changes(tmp_path):
 
 
 async def test_pruning_saves_what_it_kept_for_the_next_start(tmp_path):
+    from games.data.tables import _prune_tables
     from games.registry import GAMES
-    from games.tables import _prune_tables
 
     store = DataStore(tmp_path)
     game = GAMES["SM"]
@@ -151,7 +151,7 @@ def test_the_signature_is_the_same_in_every_run(tmp_path):
     (tmp_path / "dalcom" / "SM").mkdir(parents=True)
     (tmp_path / "dalcom" / "SM" / "MusicData.json").write_text("{}")
     code = (
-        "import sys;from pathlib import Path;from games.storage import _signature;"
+        "import sys;from pathlib import Path;from games.data.storage import _signature;"
         "print(_signature(Path(sys.argv[1])))"
     )
     seen = {

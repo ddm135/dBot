@@ -1,15 +1,14 @@
 import httpx
 
-from games.bundles import BundleStore, asset_name
-from games.song_stats import SongStatsStore
-from games.song_sync import (
+from games.charts.song_stats import SongStatsStore
+from games.charts.song_sync import (
     catalog_refs,
     collect_refs,
     refresh_duration,
     resolve,
-    songs_without_charts,
     sync_seq_stats,
 )
+from games.media.bundles import BundleStore, asset_name
 
 from .data import NO_RETRY, MemoryStats
 from .test_seq_bundles import BUNDLE, EASY, HARD, NORMAL
@@ -235,7 +234,7 @@ async def test_built_in_missing_and_unreadable_charts_are_counted(tmp_path):
 
 
 async def test_plain_chart_files_are_measured_too(tmp_path):
-    from games.bundles import read_text_assets
+    from games.media.bundles import read_text_assets
 
     raw = read_text_assets(BUNDLE, [HARD])[HARD]
 
@@ -287,18 +286,13 @@ def test_duration_is_the_shortest_chart_rounded():
     assert "duration" not in empty
 
 
-def test_songs_without_charts_are_reported():
-    t = {"MusicData": {"1": {}, "2": {"isHidden": True}, "3": {}}}
-    assert list(songs_without_charts(t, {"1": {"seq": {"Easy": {}}}})) == ["3"]
-
-
 async def test_the_task_saves_what_info_reads(tmp_path):
     from types import SimpleNamespace
 
+    from games.data.storage import DataStore
+    from games.data.tables import LoadedTables
     from games.registry import GAMES
     from games.service import State
-    from games.storage import DataStore
-    from games.tables import LoadedTables
     from tasks.song_stats import SongStatsSync
 
     rec = Recorder()
@@ -315,14 +309,14 @@ async def test_the_task_saves_what_info_reads(tmp_path):
             bundles=BundleStore(tmp_path, client, retry=NO_RETRY),
         )
         cog = SongStatsSync(bot)
-        assert (await cog.sync_game(data)).updated == 3
-        assert (await cog.sync_game(data)).unchanged == 3
+        assert (await cog.run_game(data)).updated == 3
+        assert (await cog.run_game(data)).unchanged == 3
         stat = (await bot.stats.get("SM"))[770]
         assert (stat.duration, dict(stat.notes)) == ("1:27", EXPECTED)
 
         data.loaded_tables = None  # nothing to measure without tables
-        assert await cog.sync_game(data) is None
-        assert await cog.sync_game(State(GAMES["BL"])) is None  # catalog-only
+        assert await cog.run_game(data) is None
+        assert await cog.run_game(State(GAMES["BL"])) is None  # catalog-only
 
 
 async def test_a_chart_with_a_new_key_is_measured_again(tmp_path):
@@ -362,10 +356,10 @@ async def test_songs_are_measured_when_the_bot_starts_not_only_at_the_next_hour(
     import asyncio
     from types import SimpleNamespace
 
+    from games.data.storage import DataStore
+    from games.data.tables import LoadedTables
     from games.registry import GAMES
     from games.service import State
-    from games.storage import DataStore
-    from games.tables import LoadedTables
     from tasks.song_stats import SongStatsSync
 
     rec = Recorder()
@@ -477,10 +471,10 @@ async def test_charts_of_a_catalog_only_game_are_found_by_key(tmp_path):
 async def test_only_the_preferred_instance_measures(tmp_path):
     from types import SimpleNamespace
 
+    from games.data.storage import DataStore
+    from games.data.tables import LoadedTables
     from games.registry import GAMES
     from games.service import State
-    from games.storage import DataStore
-    from games.tables import LoadedTables
     from tasks.song_stats import SongStatsSync
 
     data = State(GAMES["SM"])
@@ -503,14 +497,14 @@ async def test_only_the_preferred_instance_measures(tmp_path):
         assert rec.calls == [] and database.songs == {}
 
         bot.settings.preferred = True
-        await cog.sync_game(data)
+        await cog.run_game(data)
         assert set(database.songs["SM"]) == {"770"}
 
 
 async def test_sorting_the_charts_does_not_hold_the_event_loop(tmp_path, monkeypatch):
     import threading
 
-    from games import song_sync
+    from games.charts import song_sync
 
     seen = set()
     original = song_sync.resolve

@@ -4,9 +4,10 @@ from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 
 from db.misc import Aliases, AliasKind
-from games.decks import Deck, Entry, Song, clean, name_key
-from games.fields import LOCALE_COLUMNS
+from games.bonus.decks import Deck, Song, clean, name_key
+from games.data.schema import LOCALE_COLUMNS
 from games.index import HIDDEN_SUFFIX, Index, Indexes
+from games.models import Entry
 
 MAX_RESULTS = 25  # Discord's autocomplete limit
 MAX_CHOICE_LENGTH = 100

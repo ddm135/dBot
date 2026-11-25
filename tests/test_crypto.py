@@ -6,7 +6,7 @@ import pytest
 from Cryptodome.Cipher import AES
 from Cryptodome.Util.Padding import pad
 
-from games.crypto import Cipher, CryptoError, random_iv
+from games.api.crypto import Cipher, CryptoError, random_iv
 
 KEY = b"0123456789abcdef0123456789abcdef"
 cipher = Cipher(KEY)

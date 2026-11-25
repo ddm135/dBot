@@ -4,9 +4,9 @@ import asyncio
 import logging
 from typing import TYPE_CHECKING
 
+from games.api.accounts import fetch_todays_song
 from games.errors import ServiceError
 from games.models import Game
-from games.ssleague import fetch_todays_song
 from ssl_pins import ssl_day
 
 from .hourly import HourlyTask

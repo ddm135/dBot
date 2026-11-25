@@ -1,11 +1,7 @@
 from pathlib import Path
 from types import SimpleNamespace
 
-from games.bundles import BuiltInBundle
-from games.index import album_titles, group_names, song_names
-from games.models import StringsConfig
-from games.registry import GAMES
-from games.strings import (
+from games.data.strings import (
     load_strings,
     pick,
     read_key_names,
@@ -13,6 +9,10 @@ from games.strings import (
     shared_data_key,
     table_key,
 )
+from games.index import album_titles, group_names, song_names
+from games.media.bundles import BuiltInBundle
+from games.models import StringsConfig
+from games.registry import GAMES
 from tasks.strings_sync import StringsSync
 
 FIXTURES = Path(__file__).parent / "fixtures" / "bl"
@@ -117,16 +117,16 @@ async def test_the_sync_keeps_old_strings_when_nothing_is_read(tmp_path):
     data = SimpleNamespace(
         game=BL, catalog=SimpleNamespace(catalog=FakeCatalog()), strings={}
     )
-    assert await sync.sync_game(data) is True  # type: ignore[arg-type]
+    assert await sync.run_game(data) is True  # type: ignore[arg-type]
     assert data.strings["Album_1002"]["en"] == "QUINTESSENCE"
     first = data.strings
-    assert await sync.sync_game(data) is False  # unchanged: same object kept
+    assert await sync.run_game(data) is False  # unchanged: same object kept
     assert data.strings is first
     data.catalog = SimpleNamespace(catalog=FakeCatalog({}))
-    assert await sync.sync_game(data) is False  # nothing found: nothing lost
+    assert await sync.run_game(data) is False  # nothing found: nothing lost
     assert data.strings is first
     data.catalog = None
-    assert await sync.sync_game(data) is False
+    assert await sync.run_game(data) is False
 
 
 async def test_group_names_come_from_the_string_table_over_the_locale():

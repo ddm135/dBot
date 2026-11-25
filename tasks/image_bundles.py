@@ -8,39 +8,35 @@ pictures are still read from the kept bundles on demand.
 import logging
 from typing import TYPE_CHECKING
 
-from games.images import PrefetchResult
+from games.media.images import PrefetchResult
 
 from .hourly import HourlyTask
 
 if TYPE_CHECKING:
     from bot import dBot
+    from games.service import State
 
 logger = logging.getLogger(__name__)
 
 
 class ImageBundles(HourlyTask):
     minute = 30
+    only_preferred = True
+    failure = "Keeping picture bundles failed."
 
-    async def run_all(self) -> bool:
-        """Skipped (False) if a run is already going, or this is not the
-        preferred instance."""
-        if not self.bot.settings.preferred or self._running.locked():
-            return False
-        async with self._running:
-            images = self.bot.images
-            for data in self.bot.games:
-                key = data.game.key
-                for what, prefetch in (
-                    ("Album", images.prefetch_albums),
-                    ("Emblem", images.prefetch_emblems),
-                ):
-                    try:
-                        result = await prefetch(key)
-                    except Exception:
-                        logger.exception("%s: Keeping %s bundles failed.", key, what)
-                        continue
-                    self._report(key, what, result)
-        return True
+    async def run_game(self, data: State) -> None:
+        key = data.game.key
+        images = self.bot.images
+        for what, prefetch in (
+            ("Album", images.prefetch_albums),
+            ("Emblem", images.prefetch_emblems),
+        ):
+            try:
+                result = await prefetch(key)
+            except Exception:
+                logger.exception("%s: Keeping %s bundles failed.", key, what)
+                continue
+            self._report(key, what, result)
 
     @staticmethod
     def _report(key: str, what: str, result: PrefetchResult) -> None:

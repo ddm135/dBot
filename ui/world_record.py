@@ -5,8 +5,8 @@ from datetime import datetime
 
 import discord
 
+from games.api.world_records import Record
 from games.models import Game
-from games.world_records import Record
 
 from .pages import slice_page
 from .text import escape

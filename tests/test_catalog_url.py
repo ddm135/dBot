@@ -5,14 +5,14 @@ from types import SimpleNamespace
 import httpx
 import pytest
 
-from games import catalogs
-from games.apks import SETTINGS_MEMBER, ApkStore
-from games.catalog import CatalogError
-from games.catalogs import addressables_version, sync_catalog
+from games.data import catalogs
+from games.data.catalog import CatalogError
+from games.data.catalogs import addressables_version, sync_catalog
+from games.data.storage import DataStore
 from games.errors import DataSyncError
+from games.media.apks import SETTINGS_MEMBER, ApkStore
 from games.registry import GAMES
 from games.service import DataService, State
-from games.storage import DataStore
 
 from .data import NO_RETRY
 from .test_apks import FakePlay, Server, make_apk

@@ -19,7 +19,6 @@ logger = logging.getLogger(__name__)
 type Ctx = commands.Context[dBot]
 
 CLOCK = "tasks.clock"
-GIT_TIMEOUT = 60.0
 
 
 def _in_status_channel(ctx: Ctx) -> bool:

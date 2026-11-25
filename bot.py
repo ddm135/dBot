@@ -12,18 +12,18 @@ from cogs.status import STATUS_TZ, announce, stop_message
 from config import Settings
 from db import Database
 from extensions import EXTENSIONS
-from games.accounts import Accounts
-from games.apks import ApkStore
-from games.bundles import BundleStore
-from games.crypto import Cipher
+from games.api.accounts import Accounts
+from games.api.crypto import Cipher
+from games.api.stores import PlayStore
+from games.api.world_records import WorldRecords
+from games.charts.song_stats import SongStatsStore
 from games.http import create_client
-from games.images import ImageService
 from games.index import Indexes
+from games.media.apks import ApkStore
+from games.media.bundles import BundleStore
+from games.media.images import ImageService
 from games.registry import GAMES
 from games.service import DataService
-from games.song_stats import SongStatsStore
-from games.stores import PlayStore
-from games.world_records import WorldRecords
 from search import Searcher
 from ssl_pins import SslPinner
 

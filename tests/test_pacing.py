@@ -2,7 +2,7 @@ import time
 
 import pytest
 
-from games.pacing import Pacer
+from tuning import Pacer
 
 
 def _spin(seconds: float) -> None:

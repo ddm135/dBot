@@ -15,11 +15,10 @@ import tracemalloc
 from pathlib import Path
 
 from config import DEFAULT_DATA_DIR
-from games.assets import TABLE_NAMES
-from games.catalog import CatalogError, load_catalog
+from games.data.catalog import CatalogError, load_catalog
+from games.data.storage import DataStore
 from games.index import build_index
 from games.registry import GAMES
-from games.storage import REFERENCE_FIELDS, DataStore, prune_referenced
 
 MB = 1024 * 1024
 
@@ -62,14 +61,7 @@ async def report(data_dir: Path) -> None:
     start = traced()
 
     for game in GAMES.values():
-        tables = {}
-        for name in TABLE_NAMES:
-            table = await store.read_table(game.key, name)
-            if table is not None:
-                tables[name] = table
-        for name in REFERENCE_FIELDS:
-            if (pruned := prune_referenced(name, tables)) is not None:
-                tables[name] = pruned  # the full one is let go, as in the bot
+        tables = await store.read_all(game.key)  # as in the bot: the big ones pruned
         keep.append(tables)
         gc.collect()
         for name, table in tables.items():

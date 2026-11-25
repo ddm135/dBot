@@ -1,16 +1,16 @@
 import dataclasses
 from datetime import date, datetime, timedelta
 
-from games.bonuses import (
+from games.bonus.bonuses import (
     BonusCalendar,
     build_song_periods,
     deck_entries,
     top_scores,
 )
+from games.bonus.notices import deck_notices
+from games.charts.song_stats import SongStat
 from games.index import build_index
-from games.notices import deck_notices
 from games.registry import GAMES
-from games.song_stats import SongStat
 from ui.bonus import (
     BLANK,
     DeckEntries,
@@ -28,7 +28,7 @@ from ui.bonus import (
     week_range,
     year_range,
 )
-from ui.text import escape, month_day, plural, truncate
+from ui.text import escape, month_day, truncate
 
 from .data import Tables, d
 
@@ -74,7 +74,6 @@ def test_text_helpers():
         escape("a*b_c`d~e|f>g\\h") == "a\\*b\\_c\\`d~e|f>g\\h"
     )  # the three v0 escaped
     assert month_day(date(2025, 6, 7)) == "June 7"
-    assert plural(1, "day") == "1 day" and plural(2, "day") == "2 days"
     assert truncate("abcdef", 4) == "abc…" and truncate("ab", 4) == "ab"
 
 

@@ -5,9 +5,9 @@ import discord
 import pytest
 
 from db.bonus_pings import PingPreferences
+from games.charts.song_stats import SongStatsStore
 from games.index import Indexes
 from games.registry import GAMES
-from games.song_stats import SongStatsStore
 from tasks import notify_bonus
 from tasks.notify_bonus import NotifyBonus, deck_texts, due_kinds
 
@@ -153,7 +153,7 @@ async def test_end_pings_describe_what_ends(database, tmp_path):
 
 
 def test_deck_texts_only_has_the_requested_kinds():
-    from games.notices import notices_for_day
+    from games.bonus.notices import notices_for_day
 
     index = Indexes(FakeService(sample().as_tables())).get("SM")
     cal = Indexes(FakeService(sample().as_tables())).calendar("SM", 2025)

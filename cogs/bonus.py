@@ -8,8 +8,8 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from games.bonuses import BonusCalendar, deck_entries, max_score, top_scores
-from games.decks import Deck
+from games.bonus.bonuses import BonusCalendar, deck_entries, max_score, top_scores
+from games.bonus.decks import Deck
 from games.index import Index
 from games.registry import GAMES
 from ui.bonus import (

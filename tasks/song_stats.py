@@ -7,9 +7,9 @@ every instance reads.
 import logging
 from typing import TYPE_CHECKING
 
-from games.apks import needs_apk
+from games.charts.song_sync import SyncResult, sync_seq_stats
+from games.media.apks import needs_apk
 from games.service import State
-from games.song_sync import SyncResult, sync_seq_stats
 
 from .hourly import HourlyTask
 
@@ -21,25 +21,14 @@ logger = logging.getLogger(__name__)
 
 class SongStatsSync(HourlyTask):
     minute = 15
+    only_preferred = True
+    failure = "Measuring songs failed."
 
     def __init__(self, bot: dBot) -> None:
         super().__init__(bot)
         self._known_bad: set[str] = set()
 
-    async def run_all(self) -> bool:
-        """Measure every game. Skipped (False) if a run is already going, or if this
-        is not the preferred instance."""
-        if not self.bot.settings.preferred or self._running.locked():
-            return False
-        async with self._running:
-            for data in self.bot.games:
-                try:
-                    await self.sync_game(data)
-                except Exception:
-                    logger.exception("%s: Measuring songs failed.", data.game.key)
-        return True
-
-    async def sync_game(self, data: State) -> SyncResult | None:
+    async def run_game(self, data: State) -> SyncResult | None:
         game = data.game
         if "MusicData" not in data.tables:
             return None

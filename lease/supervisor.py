@@ -6,7 +6,7 @@ from collections.abc import Callable
 import psutil
 from discord.ext import commands
 
-from games.bundles import release_memory
+from tuning import release_memory
 
 from .console import listen
 from .leader import Leader

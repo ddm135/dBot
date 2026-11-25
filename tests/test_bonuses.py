@@ -3,7 +3,7 @@ from datetime import date
 
 import pytest
 
-from games.bonuses import (
+from games.bonus.bonuses import (
     BonusCalendar,
     BonusRules,
     EventKind,
@@ -15,9 +15,8 @@ from games.bonuses import (
     max_score,
     periods_for,
     song_people,
-    window_of,
 )
-from games.decks import build_deck_index
+from games.bonus.decks import build_deck_index
 
 from .data import KST, Tables, d
 from .reference import bonus_periods as reference
@@ -211,7 +210,7 @@ def test_the_two_timelines_have_their_own_events():
 
     change = next(e for e in cal.events_on(d(2023, 6, 9)) if e.kind is EventKind.CHANGE)
     assert [type(b) for b in change.added] == [MemberBonus]
-    assert change.removed == () and change.is_gain
+    assert change.removed == ()
 
 
 def test_events_on_new_year_have_no_artificial_boundary():
@@ -226,12 +225,10 @@ def test_events_on_new_year_have_no_artificial_boundary():
     assert [e.kind for e in cal.events_on(d(2023, 1, 4))] == [EventKind.END]
 
 
-def test_calendar_active_on_and_coverage():
+def test_calendar_coverage():
     _t, tables, index = make()
     cal = _calendar(tables, index, [2025])
     assert cal.covers(d(2025, 6, 1)) and not cal.covers(d(2027, 1, 1))
-    assert 100 in cal.active_on(d(2025, 3, 26))
-    assert cal.active_on(d(2025, 8, 1)) == {}
     assert cal.days() == sorted(cal.days())
 
 
@@ -386,21 +383,8 @@ def test_matches_the_reference_script_inside_a_year(seed, year):
         assert got == want, song["code"]
 
 
-def test_window_of_gives_the_whole_bonus_window_not_the_period():
-    member = MemberBonus("M", d(1999, 6, 12), 2, (1,))
-    release = ReleaseBonus(3, 3, d(2020, 6, 10))
-    assert window_of(member, d(2023, 6, 14)) == (d(2023, 6, 9), d(2023, 6, 15))
-    assert window_of(release, d(2023, 6, 14)) is None
-    assert window_of(release, d(2023, 6, 8)) == (d(2023, 6, 7), d(2023, 6, 13))
-    assert window_of(member, d(2023, 8, 1)) is None
-    # Across New Year the window belongs to the neighbouring year.
-    jan = MemberBonus("J", d(2000, 1, 1), 2, (1,))
-    assert window_of(jan, d(2022, 12, 30)) == (d(2022, 12, 29), d(2023, 1, 4))
-    assert window_of(jan, d(2023, 1, 3)) == (d(2022, 12, 29), d(2023, 1, 4))
-
-
-def test_a_swap_with_the_same_total_is_not_a_gain():
-    from games.bonuses import BonusEvent, Period
+def test_a_swap_keeps_what_was_added_and_removed():
+    from games.bonus.bonuses import BonusEvent, Period
 
     release = ReleaseBonus(3, 1, d(2020, 1, 1))
     member = MemberBonus("M", d(2000, 1, 1), 3, (1,))
@@ -408,7 +392,6 @@ def test_a_swap_with_the_same_total_is_not_a_gain():
     after = Period(d(2023, 1, 4), d(2023, 1, 6), (member,))
     swap = BonusEvent(d(2023, 1, 4), EventKind.CHANGE, 1, 1, after, before)
     assert (swap.from_percent, swap.to_percent) == (3, 3)
-    assert not swap.is_gain
     assert swap.added == (member,) and swap.removed == (release,)
 
 
@@ -482,7 +465,7 @@ def _quadratic_periods(song, members, years, rules, include_release=True):
     from datetime import timedelta
     from itertools import pairwise
 
-    from games.bonuses import ONE_DAY, Period
+    from games.bonus.bonuses import ONE_DAY, Period
 
     wanted = sorted(set(years))
     delta = timedelta(days=rules.window_days)

@@ -75,7 +75,7 @@ async def test_the_report_names_the_thread_that_used_the_cpu(caplog):
     import threading
 
     def spin() -> None:
-        end = time.thread_time() + 0.3
+        end = time.thread_time() + 0.8
         while time.thread_time() < end:
             pass
 

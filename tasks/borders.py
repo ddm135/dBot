@@ -11,10 +11,10 @@ import discord
 
 from channels import find_channel
 from discord_ids import BORDER_CHANNEL_ID
-from games.borders import border_files
-from games.borders import old_name as _old_name
-from games.bundles import BuiltInBundle, BundleError
-from games.drive import BorderFolder, Drive, StoredFile, fingerprint
+from games.media.borders import border_files
+from games.media.borders import old_name as _old_name
+from games.media.bundles import BuiltInBundle, BundleError
+from games.media.drive import BorderFolder, Drive, StoredFile, fingerprint
 from games.service import State
 from ui.text import escape
 
@@ -29,6 +29,8 @@ logger = logging.getLogger(__name__)
 class Borders(HourlyTask):
     # After the catalogs (:05), tables (:10) and song stats (:15).
     minute = 40
+    only_preferred = True  # only the preferred instance downloads and uploads
+    failure = "Announcing borders failed."
 
     def __init__(self, bot: dBot, drive: BorderFolder | None = None) -> None:
         super().__init__(bot)
@@ -51,18 +53,7 @@ class Borders(HourlyTask):
             )
         return self._drive
 
-    async def run_all(self) -> bool:
-        if not self.bot.settings.preferred or self._running.locked():
-            return False  # only the preferred instance downloads and uploads
-        async with self._running:
-            for data in self.bot.games:
-                try:
-                    await self.announce(data)
-                except Exception:
-                    logger.exception("%s: Announcing borders failed.", data.game.key)
-        return True
-
-    async def announce(self, data: State) -> int:
+    async def run_game(self, data: State) -> int:
         """Upload and announce the borders the game's folder does not have yet."""
         game = data.game
         if data.catalog is None:

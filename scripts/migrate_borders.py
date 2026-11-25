@@ -29,15 +29,14 @@ import httpx
 from dotenv import load_dotenv
 
 from config import Settings
-from games.assets import TABLE_NAMES
-from games.borders import border_files
-from games.bundles import BundleStore
-from games.catalog import CatalogError, load_catalog
-from games.drive import Drive, StoredFile, fingerprint
+from games.data.catalog import CatalogError, load_catalog
+from games.data.storage import DataStore
+from games.data.strings import load_strings
+from games.media.borders import border_files
+from games.media.bundles import BundleStore
+from games.media.drive import Drive, StoredFile, fingerprint
 from games.models import Game
 from games.registry import GAMES
-from games.storage import REFERENCE_FIELDS, DataStore, prune_referenced
-from games.strings import load_strings
 from tasks.borders import _source
 
 logger = logging.getLogger("migrate_borders")
@@ -93,14 +92,7 @@ def plan(
 
 async def _load(game: Game, data_dir: Path, bundles: BundleStore):
     store = DataStore(data_dir)
-    tables = {}
-    for name in TABLE_NAMES:
-        table = await store.read_table(game.key, name)
-        if table is not None:
-            tables[name] = table
-    for name in REFERENCE_FIELDS:
-        if (pruned := prune_referenced(name, tables)) is not None:
-            tables[name] = pruned
+    tables = await store.read_all(game.key)
     catalog = None
     for path in sorted(store.catalog_dir(game.key).glob("*.bin")):
         try:

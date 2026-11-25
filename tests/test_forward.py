@@ -8,8 +8,8 @@ import discord
 import httpx
 import pytest
 
-from games.forward import next_update
-from games.manifest import Manifest
+from games.api.manifest import Manifest
+from games.bonus.schedule import next_update
 from games.models import ForwardConfig
 from games.registry import GAMES
 from games.service import DataService

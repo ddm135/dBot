@@ -13,29 +13,32 @@ from dataclasses import dataclass, field
 from datetime import date, datetime
 from typing import TYPE_CHECKING, Literal
 
-from .bonuses import (
+from games.bonus.bonuses import (
     DEFAULT_RULES,
     BonusCalendar,
     BonusRules,
     build_song_periods,
 )
-from .decks import (
+from games.bonus.decks import (
     Deck,
     DeckIndex,
+    DeckScore,
     Entry,
     build_deck_index,
     clean,
+    deck_scores,
     entry_name,
+    live_theme_maximum,
+    member_counts,
     name_key,
 )
-from .fields import LOCALE_COLUMNS
-from .models import Game, StringsConfig
-from .pacing import Pacer
-from .scoring import DeckScore, deck_scores, live_theme_maximum, member_counts
-from .strings import pick
+from games.data.schema import LOCALE_COLUMNS
+from games.data.strings import pick
+from games.models import Game, StringsConfig
+from tuning import Pacer
 
 if TYPE_CHECKING:
-    from .service import DataService, State
+    from games.service import DataService, State
 
 logger = logging.getLogger(__name__)
 
@@ -103,10 +106,6 @@ class Index:
             return url if isinstance(url, str) else None
         return None
 
-    def emblem_url(self, deck_code: int) -> str | None:
-        deck = self.decks.decks.get(deck_code)
-        return self.resolve_url(deck.raw.get("emblemImage")) if deck else None
-
     def album_ref(self, song_code: int) -> object:
         """What names a song's album art: a table value, or a catalog key built
         from the album code for games that keep the art in the catalog."""
@@ -120,9 +119,6 @@ class Index:
         if template and code and str(code) in self.albums:
             return template.format(code=code)
         return None
-
-    def album_url(self, song_code: int) -> str | None:
-        return self.resolve_url(self.album_ref(song_code))
 
     def album_color(self, song_code: int) -> int | None:
         """The album's colour. The table stores ``0xRRGGBBAA``; the alpha is dropped."""
@@ -378,7 +374,7 @@ class Indexes:
         self, index: Index, years: tuple[int, ...], *, paced: bool = False
     ) -> BonusCalendar:
         # In a worker thread it rests between songs, so that the host's CPU quota
-        # is not spent in one go (see games.pacing); on the loop it must not.
+        # is not spent in one go (see tuning); on the loop it must not.
         pace = Pacer(CALENDAR_SHARE) if paced else None
         songs = build_song_periods(
             index.decks,

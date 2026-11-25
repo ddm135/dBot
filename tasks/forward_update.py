@@ -2,19 +2,21 @@
 
 import asyncio
 import logging
-from datetime import datetime, time
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 import discord
-from discord.ext import commands, tasks
 
 from channels import find_channel
 from discord_ids import NEXT_UPDATE_CHANNEL_ID
-from games.forward import WINDOW, next_update
+from games.bonus.schedule import WINDOW, next_update
 from games.models import Game
+
+from .hourly import HourlyTask
 
 if TYPE_CHECKING:
     from bot import dBot
+    from games.service import State
 
 logger = logging.getLogger(__name__)
 
@@ -27,29 +29,23 @@ def announcement(game: Game, source_id: int, start: datetime) -> str:
     )
 
 
-class ForwardUpdate(commands.Cog):
+class ForwardUpdate(HourlyTask):
+    minute = 5
+    failure = "Could not plan the forwarding."
+
     def __init__(self, bot: dBot) -> None:
-        self.bot = bot
+        super().__init__(bot)
         self.queue: dict[str, asyncio.Task[None]] = {}
 
-    async def cog_load(self) -> None:
-        self.plan_all.start()
-
     async def cog_unload(self) -> None:
-        self.plan_all.cancel()
+        await super().cog_unload()
         for task in self.queue.values():
             task.cancel()
         await asyncio.gather(*self.queue.values(), return_exceptions=True)
         self.queue.clear()
 
-    @tasks.loop(time=[time(hour=hour, minute=5) for hour in range(24)])
-    async def plan_all(self) -> None:
-        await self.bot.games.wait_until_ready()
-        for data in self.bot.games:
-            try:
-                self.plan(data.game)
-            except Exception:
-                logger.exception("%s: Could not plan the forwarding.", data.game.key)
+    async def run_game(self, data: State) -> None:
+        self.plan(data.game)
 
     def plan(self, game: Game) -> bool:
         """Start waiting for a game's update; True if a wait was started."""

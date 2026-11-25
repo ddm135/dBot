@@ -3,7 +3,7 @@ import pytest
 from bot import dBot
 from config import Settings
 from extensions import EXTENSIONS
-from games.accounts import Accounts
+from games.api.accounts import Accounts
 from search import Searcher
 
 

@@ -1,8 +1,8 @@
 from dataclasses import replace
 
-from games.bonuses import BonusCalendar, build_song_periods
-from games.decks import build_deck_index
-from games.notices import deck_notices, hours_due, notices_for_day
+from games.bonus.bonuses import BonusCalendar, build_song_periods
+from games.bonus.decks import build_deck_index
+from games.bonus.notices import deck_notices, hours_due, notices_for_day
 
 from .data import KST, Tables, d
 
@@ -127,8 +127,8 @@ def test_hours_due_reaches_two_days_ahead():
 def test_a_following_bonus_that_gives_less_counts_as_the_other_ending():
     from types import SimpleNamespace
 
-    from games.bonuses import MemberBonus, Period, song_events
-    from games.notices import category_of
+    from games.bonus.bonuses import MemberBonus, Period, song_events
+    from games.bonus.notices import category_of
 
     def bonus(percent):
         return (MemberBonus("M", d(1999, 6, 12), percent, (1,)),)

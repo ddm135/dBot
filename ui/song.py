@@ -2,9 +2,9 @@
 
 import discord
 
-from games.decks import Deck, Song
+from games.bonus.decks import Deck, Song
+from games.charts.song_stats import SongStat
 from games.index import Index
-from games.song_stats import SongStat
 
 from .text import escape
 

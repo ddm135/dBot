@@ -6,9 +6,8 @@ import httpx
 import msgpack
 import pytest
 
-from games.crypto import Cipher, CryptoError
-from games.errors import DataSyncError, ServerError
-from games.magic_onion import (
+from games.api.crypto import Cipher, CryptoError
+from games.api.magic_onion import (
     BundleCheck,
     BundleContext,
     MagicOnionClient,
@@ -17,6 +16,7 @@ from games.magic_onion import (
     pack,
     unpack,
 )
+from games.errors import DataSyncError, ServerError
 from games.models import GrpcConfig
 from games.registry import GAMES
 

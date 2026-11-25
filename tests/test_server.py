@@ -1,7 +1,7 @@
 import json
 from types import SimpleNamespace
 
-from games.server import Server
+from games.api.server import Server
 
 JYPNATION_LOGIN = (
     '{{"class":"Account","method":"loginSNS",'
@@ -14,7 +14,7 @@ JYP_LOGIN = (
 
 
 async def _check(fields):
-    from games.auth import LoginCredentials
+    from games.api.auth import LoginCredentials
 
     sent = []
 
@@ -45,7 +45,7 @@ class _Recorder(Server):
 
 
 async def _login(fields):
-    from games.auth import LoginCredentials
+    from games.api.auth import LoginCredentials
 
     server = _Recorder()
     manifest = SimpleNamespace(server_url="http://x")

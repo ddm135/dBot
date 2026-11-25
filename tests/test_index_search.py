@@ -1,17 +1,17 @@
 import asyncio
 from datetime import date, datetime
 
-from games.index import Indexes, build_index, parse_color
-from games.registry import GAMES
-from games.scoring import deck_scores, live_theme_maximum, member_counts
-from games.service import State
-from games.song_stats import (
+from games.bonus.decks import deck_scores, live_theme_maximum, member_counts
+from games.charts.song_stats import (
     SongStatsStore,
     format_duration,
     parse_duration,
     parse_stats,
 )
-from games.tables import LoadedTables
+from games.data.tables import LoadedTables
+from games.index import Indexes, build_index, parse_color
+from games.registry import GAMES
+from games.service import State
 from search import Search, Searcher, rank
 
 from .data import MemoryStats, Tables, d
@@ -75,10 +75,6 @@ def test_live_theme_maximum_needs_the_reward_field_and_known_decks():
 def test_build_index_resolves_urls_and_colours():
     t = sample()
     index = build_index(SM, t.as_tables())
-    assert index.emblem_url(1) == "http://x/emblem.png"
-    assert index.emblem_url(2) is None
-    assert index.album_url(100) == "http://x/a.png"
-    assert index.album_url(101) is None
     assert index.album_color(100) == 0xFF8800
     assert index.album_color(101) is None
     assert parse_color("0x0f0f11FF") == 0x0F0F11  # the format in the game tables

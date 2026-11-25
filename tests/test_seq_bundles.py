@@ -6,7 +6,8 @@ from pathlib import Path
 import httpx
 import pytest
 
-from games.bundles import (
+from games.charts.seq import SeqError, parse_seq
+from games.media.bundles import (
     BuiltInBundle,
     BundleError,
     BundleStore,
@@ -14,7 +15,6 @@ from games.bundles import (
     bundle_name,
     read_text_assets,
 )
-from games.seq import SeqError, parse_seq
 
 from .data import NO_RETRY
 from .reference.seq_v0 import Seq

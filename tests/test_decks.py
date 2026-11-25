@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from games.decks import build_deck_index, clean, locale_text, name_key
-from games.times import ms_to_date, ms_to_datetime
+from games.bonus.decks import build_deck_index, clean, locale_text, name_key
+from games.bonus.schedule import ms_to_date, ms_to_datetime
 
 from .data import KST, Tables, d, ms
 
@@ -58,7 +58,6 @@ def test_duplicate_deck_names_label_only_hidden_only_decks_with_code():
     assert index.decks[20700].label == "SUPER JUNIOR [20700]"
     assert not index.decks[20700].is_main
     assert index.decks[5].same_name_codes == (20700,)
-    assert index.find_deck("super junior [20700]").code == 20700
 
 
 def test_two_main_decks_with_one_name_both_keep_codes():
