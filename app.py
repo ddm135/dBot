@@ -94,7 +94,7 @@ async def run(settings: Settings) -> None:
     logger.info(
         "Instance ID: %s%s",
         holder,
-        " (preferred)" if settings.preferred else "",
+        " (Preferred)" if settings.preferred else "",
     )
 
     # The default thread pool is sized for the host's CPUs, not for the share of

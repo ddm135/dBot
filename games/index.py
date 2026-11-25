@@ -49,7 +49,7 @@ SOURCE_TABLES = (
     "URLs",
 )
 
-CALENDAR_SHARE = 0.5  # of the time a thread building a calendar may work
+CALENDAR_SHARE = 0.3  # of the time a thread building a calendar may work
 CALENDAR_YEARS_BEFORE = 0
 CALENDAR_YEARS_AFTER = 1  # so a window across New Year is always complete
 
