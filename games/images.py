@@ -10,7 +10,7 @@ import asyncio
 import logging
 import time
 from collections import OrderedDict
-from collections.abc import Callable, Collection
+from collections.abc import Callable, Collection, Iterable
 from dataclasses import dataclass
 from io import BytesIO
 from typing import TYPE_CHECKING, Any
@@ -46,7 +46,7 @@ class PrefetchResult:
     built_in: int = 0  # in the game's APK, not downloadable
 
 
-PREFETCH_CONCURRENCY = 2
+PREFETCH_CONCURRENCY = 3
 
 
 @dataclass(frozen=True, slots=True)
@@ -143,17 +143,35 @@ class ImageService:
         return await self._picture(game_key, index, index.album_ref(song_code))
 
     def album_bundle_urls(self, game_key: str) -> list[str]:
-        """The bundles that hold the game's album art, each once.
+        """The bundles that hold the game's album art, each once."""
+        return self._bundle_urls(
+            game_key,
+            lambda index: (index.album_ref(code) for code in index.decks.songs),
+        )
 
-        Only art named by a catalog key is in a bundle; a URL is Discord's to load.
+    def emblem_bundle_urls(self, game_key: str) -> list[str]:
+        """The bundles that hold the groups' emblems (their icons), each once."""
+        return self._bundle_urls(
+            game_key,
+            lambda index: (
+                deck.raw.get("emblemImage") for deck in index.decks.decks.values()
+            ),
+        )
+
+    def _bundle_urls(
+        self, game_key: str, refs: Callable[[Index], Iterable[object]]
+    ) -> list[str]:
+        """The bundles holding the pictures ``refs`` names, each once.
+
+        Only a picture named by a catalog key is in a bundle; a URL is Discord's
+        to load.
         """
         index: Index | None = self._indexes.get(game_key)
         catalog = self._games.get(game_key).catalog
         if index is None or catalog is None:
             return []
         urls: dict[str, None] = {}
-        for code in index.decks.songs:
-            ref = index.album_ref(code)
+        for ref in refs(index):
             if not isinstance(ref, str) or not ref or index.resolve_url(ref):
                 continue
             try:
@@ -166,7 +184,13 @@ class ImageService:
     async def prefetch_albums(self, game_key: str) -> PrefetchResult:
         """Download every album bundle not yet kept (nothing is decoded or saved
         as an image; pictures still come from the bundles when asked for)."""
-        urls = self.album_bundle_urls(game_key)
+        return await self._prefetch(game_key, self.album_bundle_urls(game_key))
+
+    async def prefetch_emblems(self, game_key: str) -> PrefetchResult:
+        """:meth:`prefetch_albums` for the groups' emblems."""
+        return await self._prefetch(game_key, self.emblem_bundle_urls(game_key))
+
+    async def _prefetch(self, game_key: str, urls: list[str]) -> PrefetchResult:
         gate = asyncio.Semaphore(PREFETCH_CONCURRENCY)
         counts = dict.fromkeys(("kept", "downloaded", "failed", "built_in"), 0)
 

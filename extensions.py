@@ -14,7 +14,7 @@ EXTENSIONS = (
     "tasks.dalcom_sync",
     "tasks.warm_indexes",
     "tasks.song_stats",
-    "tasks.album_bundles",
+    "tasks.image_bundles",
     "tasks.pinata",
     "tasks.borders",
     "tasks.strings_sync",

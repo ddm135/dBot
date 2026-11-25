@@ -367,3 +367,33 @@ async def test_a_game_without_a_catalog_has_nothing_to_keep(tmp_path):
     service.data.catalog = None
     images = ImageService(PrefetchBundles(tmp_path), service, indexes)
     assert await images.prefetch_albums("SM") == PrefetchResult()
+
+
+async def test_every_emblem_bundle_is_downloaded_once(tmp_path):
+    t = Tables()
+    t.group(1, "TWICE", emblemImage="emblems/a.png")
+    t.group(2, "ITZY", emblemImage="emblems/b.png")  # the same bundle as a
+    t.group(3, "NMIXX", emblemImage="emblems/c.png")
+    t.group(4, "XG", emblemImage="https://cdn/xg.png")  # a URL: Discord loads it
+    t.group(5, "LE SSERAFIM")  # no emblem
+    for group in range(1, 6):
+        t.song(10 + group, "s", group)
+    service = FakeService(t.as_tables())
+    service.data.catalog = SimpleNamespace(
+        catalog=SimpleNamespace(
+            bundle_urls=lambda key: {
+                "emblems/a.png": ["https://cdn/e1.bundle"],
+                "emblems/b.png": ["https://cdn/e1.bundle"],
+                "emblems/c.png": ["https://cdn/e2.bundle"],
+            }[key],
+            internal_ids=lambda key: [],
+        )
+    )
+    bundles = PrefetchBundles(tmp_path)
+    images = ImageService(bundles, service, Indexes(service))
+
+    first = await images.prefetch_emblems("SM")
+    assert sorted(bundles.fetched) == ["https://cdn/e1.bundle", "https://cdn/e2.bundle"]
+    assert (first.downloaded, first.kept, first.failed) == (2, 0, 0)
+    second = await images.prefetch_emblems("SM")
+    assert (second.downloaded, second.kept) == (0, 2)
