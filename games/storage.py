@@ -118,7 +118,9 @@ def _signature(directory: Path) -> str:
     A kept table (see ``DataStore.read_kept``) is only good while none of the
     files it was made from has changed, nor the fields it keeps.
     """
-    parts: list[object] = [sorted(KEPT_FIELDS.items(), key=str), REFERENCE_FIELDS]
+    # Sorted: the order of a set of strings changes from one run to the next.
+    kept = sorted((name, sorted(fields)) for name, fields in KEPT_FIELDS.items())
+    parts: list[object] = [kept, sorted(REFERENCE_FIELDS.items())]
     for name in sorted(TABLE_NAMES):
         try:
             status = (directory / f"{name}.json").stat()

@@ -141,3 +141,27 @@ async def test_pruning_saves_what_it_kept_for_the_next_start(tmp_path):
     tables = {"LocaleData": {"1": {"enUS": "a"}}, "MusicData": music}
     await _prune_tables(store, game, tables, [], None, saved={"LocaleData"})
     assert tables["LocaleData"] == {"1": {"enUS": "a"}}
+
+
+def test_the_signature_is_the_same_in_every_run(tmp_path):
+    """A set of strings is ordered differently by each process (hash seeds)."""
+    import subprocess
+    import sys
+
+    (tmp_path / "dalcom" / "SM").mkdir(parents=True)
+    (tmp_path / "dalcom" / "SM" / "MusicData.json").write_text("{}")
+    code = (
+        "import sys;from pathlib import Path;from games.storage import _signature;"
+        "print(_signature(Path(sys.argv[1])))"
+    )
+    seen = {
+        subprocess.run(
+            [sys.executable, "-c", code, str(tmp_path / "dalcom" / "SM")],
+            env={"PYTHONHASHSEED": str(seed), "PATH": ""},
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout
+        for seed in (1, 2, 3)
+    }
+    assert len(seen) == 1
