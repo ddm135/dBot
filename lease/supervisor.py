@@ -1,9 +1,9 @@
 import asyncio
 import logging
-import os
 import time
 from collections.abc import Callable
 
+import psutil
 from discord.ext import commands
 
 from games.bundles import release_memory
@@ -32,14 +32,17 @@ async def supervise(
         crashed = await _serve_term(
             leader, make_bot(), token, stop=stop, close_timeout=close_timeout
         )
-        # The old bot's tables, indexes and caches are garbage now; give the
-        # memory back before the next one loads its own, or restarts add up.
-        release_memory()
-        logger.info("Memory in use after the term: %s.", _rss())
         if crashed:
             leader.mark_unhealthy()
 
-        await leader.release()
+        await leader.release()  # first: the other instance need not wait for the rest
+        if not stop.is_set():
+            # The old bot's tables, indexes and caches are garbage now; give the
+            # memory back before the next one loads its own, or restarts add up.
+            # (A collection holds the interpreter for seconds, so the lease is
+            # let go before it, and a process that is exiting skips it.)
+            release_memory(everything=True)
+            logger.info("Memory in use after the term: %s.", _rss())
         if crashed and not stop.is_set():
             logger.info("Waiting %.0fs before contending again...", cooldown)
             try:
@@ -49,11 +52,10 @@ async def supervise(
 
 
 def _rss() -> str:
+    """The process's resident memory, for the log."""
     try:
-        with open("/proc/self/statm") as file:
-            pages = int(file.read().split()[1])
-        return f"{pages * os.sysconf('SC_PAGE_SIZE') / 1024 / 1024:.0f} MB"
-    except OSError, ValueError, IndexError:  # not Linux
+        return f"{psutil.Process().memory_info().rss / 1024 / 1024:.0f} MB"
+    except psutil.Error:
         return "unknown"
 
 

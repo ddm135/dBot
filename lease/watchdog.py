@@ -22,7 +22,17 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 CGROUP_CPU_STAT = Path("/sys/fs/cgroup/cpu.stat")
+CGROUP_CPU_MAX = Path("/sys/fs/cgroup/cpu.max")
 IDLE_FUNCTIONS = {"select", "poll", "_run_once"}  # where a waiting loop sits
+
+
+def cgroup_cpu_limit() -> float | None:
+    """How many cores' worth of CPU the container may use (None: no limit, or unknown)."""
+    try:
+        quota, period = CGROUP_CPU_MAX.read_text().split()
+        return None if quota == "max" else int(quota) / int(period)
+    except OSError, ValueError:
+        return None
 
 
 def cgroup_throttling() -> tuple[int, int] | None:
@@ -42,7 +52,7 @@ class LoopWatchdog:
         self,
         loop: asyncio.AbstractEventLoop,
         *,
-        threshold: float = 2,
+        threshold: float = 1.5,
         interval: float = 0.5,
     ) -> None:
         self._loop = loop
@@ -91,6 +101,8 @@ class LoopWatchdog:
     def _host(self, late: float) -> str:
         used = time.process_time() - self._cpu_at_beat
         text = f"The process used {used:.1f}s of CPU in those {late:.1f}s"
+        if (limit := cgroup_cpu_limit()) is not None:
+            text += f" (the host allows {limit * 100:.0f}% of one core)"
         now = cgroup_throttling()
         if now is not None and self._throttle_seen is not None:
             times, ms = now[0] - self._throttle_seen[0], now[1] - self._throttle_seen[1]

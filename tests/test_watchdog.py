@@ -55,3 +55,16 @@ def test_the_host_throttling_is_read_from_the_cgroup(tmp_path, monkeypatch):
     assert module.cgroup_throttling() == (7, 3500)
     monkeypatch.setattr(module, "CGROUP_CPU_STAT", tmp_path / "missing")
     assert module.cgroup_throttling() is None
+
+
+def test_the_cpu_quota_is_read_from_the_cgroup(tmp_path, monkeypatch):
+    import lease.watchdog as module
+
+    limit = tmp_path / "cpu.max"
+    monkeypatch.setattr(module, "CGROUP_CPU_MAX", limit)
+    limit.write_text("50000 100000\n")
+    assert module.cgroup_cpu_limit() == 0.5
+    limit.write_text("max 100000\n")
+    assert module.cgroup_cpu_limit() is None
+    monkeypatch.setattr(module, "CGROUP_CPU_MAX", tmp_path / "missing")
+    assert module.cgroup_cpu_limit() is None

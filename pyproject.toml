@@ -24,6 +24,7 @@ dependencies = [
     "unitypy>=1.25.4",
     "valkey[libvalkey]>=6.2.0 ; sys_platform == 'win32'",
     "valkey-glide>=2.6.0 ; sys_platform != 'win32'",
+    "psutil>=7.2.2",
 ]
 
 [dependency-groups]
@@ -36,6 +37,7 @@ dev = [
     "pytest-asyncio>=1.5.0",
     "ruff>=0.17.6",
     "types-grpcio>=1.85.0.20261122",
+    "types-psutil>=7.2.2.20261122",
 ]
 
 [tool.ruff]

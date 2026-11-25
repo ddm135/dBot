@@ -5,8 +5,11 @@ its own copy. The builds run in threads, so the event loop (and with it the
 lease and Discord's three-second window) is never held by them.
 """
 
+import asyncio
 import logging
 from typing import TYPE_CHECKING
+
+from games.bundles import freeze_heap
 
 from .hourly import HourlyTask
 
@@ -26,6 +29,9 @@ class WarmIndexes(HourlyTask):
                 await self.bot.indexes.warm(data.game.key)
             except Exception:
                 logger.exception("%s: Preparing the index failed.", data.game.key)
+        # Everything is built and settled: keep the collector from walking it
+        # again for every bundle read from now on.
+        await asyncio.to_thread(freeze_heap)
         return True
 
 

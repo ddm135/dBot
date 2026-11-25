@@ -45,3 +45,10 @@ async def test_a_bot_that_cannot_finish_closing_still_leaves_discord_cleanly(cap
     assert not crashed
     assert bot.ws.codes == [1000]  # the gateway got a proper close
     assert "did not stop" in caplog.text
+
+
+def test_the_memory_reading_is_a_number_of_megabytes():
+    from lease.supervisor import _rss
+
+    value, unit = _rss().split()
+    assert unit == "MB" and int(value) > 0

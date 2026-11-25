@@ -10,6 +10,7 @@ import ctypes
 import gc
 import logging
 import sys
+import time
 from collections.abc import Collection, Iterator
 from contextlib import contextmanager, suppress
 from hashlib import sha1
@@ -64,15 +65,45 @@ def load_environment(source: Source) -> Any:
     return UnityPy.load(source)
 
 
-def release_memory() -> None:
+TRIM_EVERY = 5.0  # seconds between returning freed memory to the OS
+_last_trim = 0.0
+
+
+def freeze_heap() -> None:
+    """Take everything alive now (the game tables, the indexes) out of the
+    cycle collector's sight.
+
+    A collection walks every object the interpreter tracks, and the tables are
+    millions of them: seconds of work, with the interpreter held, once for every
+    bundle that is opened. Frozen, they are skipped, so a collection only looks
+    at what a bundle just made. Call it when the tables have settled; it first
+    collects, and lets earlier frozen objects go through that collection, so
+    what was replaced is freed.
+    """
+    gc.unfreeze()
+    gc.collect()
+    gc.freeze()
+
+
+def release_memory(*, everything: bool = False) -> None:
     """Hand the memory of a finished bundle back, not at some later collection.
 
     UnityPy's objects refer to each other in cycles, so a bundle (the file, its
     decompressed blocks) lives until the cycle collector runs, and glibc keeps
     what was freed. Several bundles in a row, in threads, then pile up.
+
+    ``everything`` also unfreezes the heap first (see :func:`freeze_heap`), for
+    when a whole bot's worth of data has just been dropped.
     """
+    global _last_trim
+    if everything:
+        gc.unfreeze()
     gc.collect()
-    if sys.platform.startswith("linux"):
+    now = time.monotonic()
+    if sys.platform.startswith("linux") and (
+        everything or now - _last_trim >= TRIM_EVERY
+    ):
+        _last_trim = now
         with suppress(OSError, AttributeError):
             ctypes.CDLL("libc.so.6").malloc_trim(0)
 

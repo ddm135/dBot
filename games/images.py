@@ -46,7 +46,7 @@ class PrefetchResult:
     built_in: int = 0  # in the game's APK, not downloadable
 
 
-PREFETCH_CONCURRENCY = 3
+PREFETCH_CONCURRENCY = 2
 
 
 @dataclass(frozen=True, slots=True)
