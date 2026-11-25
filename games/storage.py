@@ -189,9 +189,16 @@ class DataStore:
         files that are there now. Parsing it costs next to nothing, where the
         full file is seconds of CPU on a slow host."""
         signature = await self.signature(game_key)
-        return await asyncio.to_thread(
-            _read_kept, self.kept_path(game_key, name), signature
-        )
+        path = self.kept_path(game_key, name)
+        table = await asyncio.to_thread(_read_kept, path, signature)
+        if table is None:
+            logger.info(
+                "%s: no usable kept copy of %s (%s); reading the whole table.",
+                game_key,
+                name,
+                "changed" if path.is_file() else "none saved yet",
+            )
+        return table
 
     async def write_kept(self, game_key: str, name: str, table: Table) -> None:
         signature = await self.signature(game_key)

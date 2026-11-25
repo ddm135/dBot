@@ -76,12 +76,14 @@ def freeze_heap() -> None:
     A collection walks every object the interpreter tracks, and the tables are
     millions of them: seconds of work, with the interpreter held, once for every
     bundle that is opened. Frozen, they are skipped, so a collection only looks
-    at what a bundle just made. Call it when the tables have settled; it first
-    collects, and lets earlier frozen objects go through that collection, so
-    what was replaced is freed.
+    at what a bundle just made. Call it when the tables have settled.
+
+    It does not collect first: that walks the whole heap, seconds with the
+    interpreter held, every time it runs. Tables are made of dicts and lists
+    that nothing refers to in a cycle, so what is replaced is freed by its
+    reference count even while frozen; only cyclic garbage is left until
+    :func:`release_memory` is called with ``everything``.
     """
-    gc.unfreeze()
-    gc.collect()
     gc.freeze()
 
 
