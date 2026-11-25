@@ -3,6 +3,7 @@ import logging
 import secrets
 import signal
 import sys
+from concurrent.futures import ThreadPoolExecutor
 
 from bot import dBot
 from config import Settings
@@ -12,6 +13,7 @@ from lease.watchdog import LoopWatchdog
 logger = logging.getLogger(__name__)
 
 CONNECT_BACKOFF_MAX = 30.0
+WORKER_THREADS = 4  # for file, parsing and bundle work (see run)
 
 
 def _install_signal_handlers(stop: asyncio.Event) -> None:
@@ -92,9 +94,16 @@ async def run(settings: Settings) -> None:
     logger.info(
         "Instance ID: %s%s",
         holder,
-        " (Preferred)" if settings.preferred else "",
+        " (preferred)" if settings.preferred else "",
     )
 
+    # The default thread pool is sized for the host's CPUs, not for the share of
+    # them this container is given: eight busy threads spend a CPU quota in a
+    # fraction of its period, and the host then freezes all of them, the event
+    # loop too, until the next period.
+    asyncio.get_running_loop().set_default_executor(
+        ThreadPoolExecutor(max_workers=WORKER_THREADS, thread_name_prefix="work")
+    )
     watchdog = LoopWatchdog(asyncio.get_running_loop())
     watchdog.start()
     try:

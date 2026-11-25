@@ -35,6 +35,18 @@ def cgroup_cpu_limit() -> float | None:
         return None
 
 
+def cgroup_cpu_period_ms() -> float | None:
+    """How long the host's CPU accounting period is, in ms (None if unknown).
+
+    A container that spends its quota in a period is frozen, every thread of it,
+    until the next period starts, so this is the longest a single freeze can be.
+    """
+    try:
+        return int(CGROUP_CPU_MAX.read_text().split()[1]) / 1000
+    except OSError, ValueError, IndexError:
+        return None
+
+
 def cgroup_throttling() -> tuple[int, int] | None:
     """How often and for how long (ms) the host has held this container's CPU back.
 
@@ -102,7 +114,9 @@ class LoopWatchdog:
         used = time.process_time() - self._cpu_at_beat
         text = f"The process used {used:.1f}s of CPU in those {late:.1f}s"
         if (limit := cgroup_cpu_limit()) is not None:
-            text += f" (the host allows {limit * 100:.0f}% of one core)"
+            period = cgroup_cpu_period_ms()
+            text += f" (the host allows {limit * 100:.0f}% of one core"
+            text += f", counted per {period:.0f} ms)" if period else ")"
         now = cgroup_throttling()
         if now is not None and self._throttle_seen is not None:
             times, ms = now[0] - self._throttle_seen[0], now[1] - self._throttle_seen[1]

@@ -64,6 +64,7 @@ def test_the_cpu_quota_is_read_from_the_cgroup(tmp_path, monkeypatch):
     monkeypatch.setattr(module, "CGROUP_CPU_MAX", limit)
     limit.write_text("50000 100000\n")
     assert module.cgroup_cpu_limit() == 0.5
+    assert module.cgroup_cpu_period_ms() == 100
     limit.write_text("max 100000\n")
     assert module.cgroup_cpu_limit() is None
     monkeypatch.setattr(module, "CGROUP_CPU_MAX", tmp_path / "missing")
