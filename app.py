@@ -13,7 +13,7 @@ from lease.watchdog import LoopWatchdog
 logger = logging.getLogger(__name__)
 
 CONNECT_BACKOFF_MAX = 30.0
-WORKER_THREADS = 4  # for file, parsing and bundle work (see run)
+WORKER_THREADS = 3  # for file, parsing and bundle work (see run)
 
 
 def _install_signal_handlers(stop: asyncio.Event) -> None:
