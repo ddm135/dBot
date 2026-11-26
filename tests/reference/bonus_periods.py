@@ -9,7 +9,7 @@ Rules
   bonusBirthdayUse == false or artistType == 4. A null bonusBirthday is
   treated as timestamp 0 (Jan 1).
 * Release anniversary   : +3%, same -3/+3 day window around the release date,
-  only for years after the release year.
+  from the release year on.
 * Several artist codes of the same person (e.g. IRENE Vocal / Dance / Rhythm)
   are merged into one entry, with their percentages added together.
 * Overlaps (anniversary + birthdays, or several birthdays) are split into
@@ -132,7 +132,7 @@ def build_song_periods(song, artists, groups, locale, year):
             c = anniversary_in_year(p["birth"], y)
             if c:
                 intervals.append((*window(c), ("member", key)))
-        if y > release.year:
+        if y >= release.year:
             c = anniversary_in_year(release, y)
             if c:
                 intervals.append((*window(c), ("release", y - release.year)))

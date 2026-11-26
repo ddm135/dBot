@@ -268,6 +268,8 @@ _GAMES: tuple[Game, ...] = (
         key="EB",
         name="SUPERSTAR EBiDAN",
         languages=JAPANESE_FIRST,
+        # Position 3 is Guitar, which the game words in the slot Dance has elsewhere.
+        position_locale=MappingProxyType({0: 51003001, 3: 51003002}),
         color=0xC71D1B,
         timezone=JST,
         date_format="%Y-%m-%d",

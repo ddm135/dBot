@@ -379,6 +379,7 @@ class Indexes:
             self._rules,
             index.languages,
             pace,
+            index.game.position_locale,
         )
         return BonusCalendar.build(songs, years, pace)
 

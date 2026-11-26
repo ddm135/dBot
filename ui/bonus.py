@@ -4,6 +4,7 @@ Pure formatting: it takes the bonus data and builds strings and embeds, so
 it can be tested without Discord.
 """
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta
 
@@ -11,6 +12,7 @@ import discord
 
 from games.bonus.entries import BonusEntry, max_score
 from games.bonus.notices import NoticeLine, Section
+from games.bonus.periods import MemberBonus
 from games.charts.song_stats import SongStat
 from games.data.decks import Deck
 from games.index import Index
@@ -81,16 +83,32 @@ def entry_prefix(entry: BonusEntry, today: date) -> str:
             return ":white_check_mark: "
 
 
+def member_names(members: Iterable[MemberBonus], index: Index) -> str:
+    """Members joined with `` + ``; one from another deck is followed by that deck
+    (``Jin (from TWICE)``).
+    """
+    names = []
+    for member in members:
+        group = index.group_name(member.group_code) if member.group_code else None
+        names.append(f"{member.name} (from {group})" if group else member.name)
+    return " + ".join(names)
+
+
 def entry_name(
-    entry: BonusEntry, deck: Deck, today: date, *, show_deck: bool = False
+    entry: BonusEntry,
+    deck: Deck,
+    index: Index,
+    today: date,
+    *,
+    show_deck: bool = False,
 ) -> str:
     """The first line of an entry.
 
     ``<prefix>[**deck**] [members: ]<songs> <icons>``. The members are named
     only for a birthday on its own, and not when they are the deck itself.
     """
-    members = "" if entry.has_release else " + ".join(m.name for m in entry.members)
-    members = members if members and members != deck.name else ""
+    own = "" if entry.has_release else " + ".join(m.name for m in entry.members)
+    members = member_names(entry.members, index) if own and own != deck.name else ""
     name = entry_prefix(entry, today)
     if show_deck:
         name += md(t"**{deck.name}**") + (" " if members else "")
@@ -163,7 +181,7 @@ def list_embed(
     embed.set_footer(text=f"Page {page}/{pages}")
     for entry_deck, entry in shown:
         embed.add_field(
-            name=entry_name(entry, entry_deck, today, show_deck=deck is None),
+            name=entry_name(entry, entry_deck, index, today, show_deck=deck is None),
             value=entry_value(
                 entry,
                 entry_deck,
@@ -190,7 +208,7 @@ def top_entry_text(
     live_theme: int,
 ) -> str:
     """One entry of the weekly top as text: its name, percentage, dates and score."""
-    name = entry_name(entry, deck, today)
+    name = entry_name(entry, deck, index, today)
     # The name line is bold; the prefix and the strike-through sit inside it.
     value = entry_value(
         entry, deck, index, today=today, last_day=last_day, live_theme=live_theme
@@ -306,7 +324,10 @@ def pings_embed(
 
 
 def notice_text(
-    line: NoticeLine, deck: Deck, stats: dict[int, SongStat] | None = None
+    line: NoticeLine,
+    deck: Deck,
+    index: Index,
+    stats: dict[int, SongStat] | None = None,
 ) -> str:
     """One entry of a ping, as a block quote:
 
@@ -315,7 +336,7 @@ def notice_text(
     """
     window = f"> {percent_text(line.total, line.before)} | {month_day(line.start)} - {month_day(line.end)}\n"
     if not line.has_release:
-        who = escape(" + ".join(m.name for m in line.members))
+        who = escape(member_names(line.members, index))
         by_code = {s.code: s for s in deck.songs}
         songs = (
             "All Songs"

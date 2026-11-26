@@ -95,22 +95,25 @@ def test_entry_names_follow_the_games_own_list():
     live = d(2023, 6, 10)
     # A birthday on its own names its members and the songs.
     assert (
-        entry_name(member, deck, live) == ":white_check_mark: Mem: All Songs :birthday:"
+        entry_name(member, deck, index, live)
+        == ":white_check_mark: Mem: All Songs :birthday:"
     )
-    assert entry_name(member, deck, live, show_deck=True) == (
+    assert entry_name(member, deck, index, live, show_deck=True) == (
         ":white_check_mark: **TW\\_ICE** Mem: All Songs :birthday:"
     )
     # An entry of a song names only the song, with the icons of what it earns.
     both = next(e for e in entries_of(index, cal, 1) if e.has_release and e.members)
     assert (
-        entry_name(both, deck, live)
+        entry_name(both, deck, index, live)
         == ":white_check_mark: Cheer \\*Up\\* :birthday: :dvd:"
     )
     only = next(e for e in entries_of(index, cal, 1) if e.has_release and not e.members)
     assert (
-        entry_name(only, deck, d(2023, 6, 1)) == "Cheer \\*Up\\* :cd:"
+        entry_name(only, deck, index, d(2023, 6, 1)) == "Cheer \\*Up\\* :cd:"
     )  # upcoming: no mark
-    assert entry_name(only, deck, d(2023, 7, 1)) == "~~Cheer \\*Up\\* :cd:~~"  # expired
+    assert (
+        entry_name(only, deck, index, d(2023, 7, 1)) == "~~Cheer \\*Up\\* :cd:~~"
+    )  # expired
 
 
 def test_members_who_are_the_deck_are_not_repeated():
@@ -118,10 +121,10 @@ def test_members_who_are_the_deck_are_not_repeated():
     solo = index.decks.decks[2]
     (member,) = entries_of(index, cal, 2)
     assert (
-        entry_name(member, solo, d(2023, 6, 10))
+        entry_name(member, solo, index, d(2023, 6, 10))
         == ":white_check_mark: All Songs :birthday:"
     )
-    assert entry_name(member, solo, d(2023, 6, 10), show_deck=True) == (
+    assert entry_name(member, solo, index, d(2023, 6, 10), show_deck=True) == (
         ":white_check_mark: **SOLO**: All Songs :birthday:"
     )
 
@@ -134,11 +137,11 @@ def test_a_birthday_that_misses_some_songs_names_them():
 
     some = replace(member, song_codes=(2,), all_songs=False)
     assert (
-        entry_name(some, deck, d(2023, 6, 10))
+        entry_name(some, deck, index, d(2023, 6, 10))
         == ":white_check_mark: Mem: Fancy :birthday:"
     )
     many = replace(member, song_codes=(1, 2, 2, 2, 2), all_songs=False)
-    assert "+2 more" in entry_name(many, deck, d(2023, 6, 10))
+    assert "+2 more" in entry_name(many, deck, index, d(2023, 6, 10))
 
 
 def test_icons():
@@ -336,7 +339,7 @@ def test_a_birthday_ping_line_names_the_members_and_all_songs():
         l for l in lines_on(index, cal, d(2023, 6, 9))["start"] if not l.has_release
     )
     assert (
-        notice_text(birthday, deck)
+        notice_text(birthday, deck, index)
         == "> Mem - **All Songs**\n> 2% | June 9 - June 15\n"
     )
 
@@ -348,11 +351,13 @@ def test_a_song_ping_line_has_the_album_the_song_and_its_length():
         l for l in lines_on(index, cal, d(2023, 6, 9))["start"] if l.has_release
     )
     stats = {1: SongStat(201)}
-    assert notice_text(song, deck, stats) == (
+    assert notice_text(song, deck, index, stats) == (
         "> The Album - **Cheer \\*Up\\*** (3:21)\n> 3% -> 5% | June 9 - June 13\n"
     )
     # Without stats the length is left out; without an album the deck stands in.
-    assert notice_text(song, deck).startswith("> The Album - **Cheer \\*Up\\***\n")
+    assert notice_text(song, deck, index).startswith(
+        "> The Album - **Cheer \\*Up\\***\n"
+    )
 
 
 def test_the_ping_embed_has_available_and_ending_fields():
@@ -387,7 +392,10 @@ def test_a_following_bonus_shows_the_change_and_a_lower_one_ends_the_higher():
     lower = dataclasses.replace(song, category="end", before=7)
     assert lower.drop and lower.section == "drop"
     assert not song.drop and song.section == "start"
-    assert notice_text(lower, deck).splitlines()[1] == "> 7% -> 5% | June 9 - June 13"
+    assert (
+        notice_text(lower, deck, index).splitlines()[1]
+        == "> 7% -> 5% | June 9 - June 13"
+    )
 
     day = d(2023, 6, 9)
     start = int(datetime(2023, 6, 9, tzinfo=SM.timezone).timestamp())
@@ -411,3 +419,31 @@ def test_a_list_entry_shows_the_change_but_keeps_its_own_status_text():
     assert active.startswith("4% -> 2% | ") and "Ends <t:" in active
     up = entry_value(dataclasses.replace(member, before=1), deck, index, today=today)
     assert up.startswith("1% -> 2% | ") and "Available <t:" in up
+
+
+def test_a_member_from_another_deck_is_followed_by_their_deck():
+    t = Tables()
+    t.group(1, "TW_ICE")
+    t.group(2, "Other")
+    t.artist(1, "Guest", 2, birthday=(1999, 6, 12))
+    t.artist(2, "Own", 1, birthday=(1999, 6, 12))
+    t.song(1, "On Both", 1, release=(2030, 1, 1), artists=[1, 2])
+    t.song(2, "Own Only", 1, release=(2030, 1, 1), artists=[2])
+    t.song(3, "Other Song", 2, release=(2030, 1, 1), artists=[1])
+    tables = t.as_tables()
+    index = build_index(SM, tables)
+    songs = build_song_periods(index.decks, index.artists, index.locale, [2023])
+    cal = BonusCalendar.build(songs, [2023])
+    deck = index.decks.decks[1]
+    today = d(2023, 6, 12)
+    names = {
+        entry_name(e, deck, index, today)
+        for e in entries_of(index, cal, 1)
+        if not e.has_release
+    }
+    assert ":white_check_mark: Guest (from Other) + Own: On Both :birthday:" in names
+    # In the guest's own deck they are not a guest.
+    (other,) = entries_of(index, cal, 2)
+    assert entry_name(other, index.decks.decks[2], index, today).startswith(
+        ":white_check_mark: Guest: "
+    )

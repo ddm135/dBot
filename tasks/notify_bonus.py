@@ -56,7 +56,7 @@ def deck_texts(
     texts: dict[Section, list[str]] = {}
     for kind in kinds:
         for line in lines[kind]:
-            if text := notice_text(line, deck, stats):
+            if text := notice_text(line, deck, index, stats):
                 texts.setdefault(line.section, []).append(text)
     return texts
 

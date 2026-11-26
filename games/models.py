@@ -88,6 +88,12 @@ class GrpcConfig:
     secure: bool = True  # TLS; only tests use plain HTTP/2
 
 
+# The locale text of each artist position (Vocal, Dance, Rhythm) in most games.
+POSITION_LOCALE: Mapping[int, int] = MappingProxyType(
+    {0: 51003001, 1: 51003002, 2: 51003003}
+)
+
+
 @dataclass(frozen=True, slots=True, eq=False)
 class Game:
     """One game: its identity, how to reach it and what the bot does with it.
@@ -125,6 +131,8 @@ class Game:
     strings: StringsConfig | None = None
     # Locale columns names are shown in, first one that has the text wins.
     languages: tuple[str, ...] = ("enUS", "koKR")
+    # The locale text that names each artist position (``ArtistData.position``).
+    position_locale: Mapping[int, int] = POSITION_LOCALE
 
     dalcom_authorization: str | None = None  # Basic auth for Dalcom ID login
     google_audience: str | None = None  # OAuth client id prefix for Google login

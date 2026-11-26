@@ -102,7 +102,7 @@ def test_member_from_another_deck_is_flagged():
     assert people["Own"].group_code is None
 
 
-def test_window_is_seven_days_inclusive_and_release_needs_a_later_year():
+def test_window_is_seven_days_inclusive_and_the_release_year_counts():
     t = Tables()
     t.group(1, "D")
     t.song(1, "s", 1, release=(2020, 6, 10))
@@ -111,9 +111,12 @@ def test_window_is_seven_days_inclusive_and_release_needs_a_later_year():
     song = index.songs[1]
     (p,) = [x for x in periods_for(song, [], [2022]) if x.start.year == 2022]
     assert (p.start, p.end, p.days, p.total) == (d(2022, 6, 7), d(2022, 6, 13), 7, 3)
-    assert p.bonuses == (ReleaseBonus(3, 2, d(2020, 6, 10)),)
-    # No anniversary in the release year itself.
-    assert not [x for x in periods_for(song, [], [2020]) if x.start.year == 2020]
+    assert p.bonuses == (ReleaseBonus(3),)
+    # The release year counts too, and its window includes the days before the release.
+    (first,) = [x for x in periods_for(song, [], [2020]) if x.start.year == 2020]
+    assert (first.start, first.end, first.total) == (d(2020, 6, 7), d(2020, 6, 13), 3)
+    # Nothing before the release year.
+    assert not [x for x in periods_for(song, [], [2019]) if x.start.year == 2019]
 
 
 def test_overlap_splits_into_separate_periods_with_the_right_totals():
@@ -384,7 +387,7 @@ def test_a_swap_keeps_what_was_added_and_removed():
     from games.bonus.events import BonusEvent
     from games.bonus.periods import Period
 
-    release = ReleaseBonus(3, 1, d(2020, 1, 1))
+    release = ReleaseBonus(3)
     member = MemberBonus("M", d(2000, 1, 1), 3, (1,))
     before = Period(d(2023, 1, 1), d(2023, 1, 3), (release,))
     after = Period(d(2023, 1, 4), d(2023, 1, 6), (member,))
@@ -473,12 +476,10 @@ def _quadratic_periods(song, members, years, rules, include_release=True):
             centre = anniversary_in_year(member.birthday, year)
             if centre:
                 intervals.append((centre - delta, centre + delta, member))
-        if include_release and song.release and year > song.release.year:
+        if include_release and song.release and year >= song.release.year:
             centre = anniversary_in_year(song.release, year)
             if centre:
-                bonus = ReleaseBonus(
-                    rules.anniversary_percent, year - song.release.year, song.release
-                )
+                bonus = ReleaseBonus(rules.anniversary_percent)
                 intervals.append((centre - delta, centre + delta, bonus))
     cuts = sorted({s for s, _, _ in intervals} | {e + ONE_DAY for _, e, _ in intervals})
     out = []
@@ -535,3 +536,91 @@ def test_a_paced_build_gives_the_same_calendar_and_rests_between_songs():
     built = BonusCalendar.build(paced, [2025], pace)
     assert len(calls) == len(index.songs) + len(paced)
     assert built.songs == plain
+
+
+def _names(song_code, tables, index):
+    return sorted(
+        p.name
+        for p in song_people(
+            index.songs[song_code], tables["ArtistData"], tables["LocaleData"], KST
+        )
+    )
+
+
+def test_a_person_is_named_by_their_codes_when_the_song_has_only_some():
+    t = Tables()
+    t.group(1, "D")
+    for position, part in enumerate(("Vocal", "Dance", "Rhythm")):
+        t.locale[str(51003001 + position)] = {"koKR": part, "enUS": part}
+    for code, position in ((10, 0), (11, 1), (12, 2)):
+        t.artist(code, "Irene", 1, position=position)
+    t.artist(20, "Solo", 1)
+    t.song(1, "a", 1, artists=[10, 20])
+    t.song(2, "b", 1, artists=[11])
+    t.song(3, "c", 1, artists=[10, 11])
+    t.song(4, "d", 1, artists=[10, 11, 12])
+    tables = t.as_tables()
+    index = build_deck_index(tables, KST)
+    assert _names(1, tables, index) == ["Irene Vocal", "Solo"]
+    assert _names(2, tables, index) == ["Irene Dance"]
+    assert _names(3, tables, index) == ["Irene Vocal + Irene Dance"]  # in code order
+    assert _names(4, tables, index) == ["Irene"]  # all of them: the person
+
+
+def test_songs_with_different_codes_of_a_person_are_separate_entries():
+    t = Tables()
+    t.group(1, "D")
+    for position, part in enumerate(("Vocal", "Dance")):
+        t.locale[str(51003001 + position)] = {"koKR": part, "enUS": part}
+    for code, position in ((10, 0), (11, 1)):
+        t.artist(code, "Irene", 1, birthday=(1991, 3, 29), position=position)
+    t.song(1, "S1", 1, release=(2030, 1, 1), artists=[10])
+    t.song(2, "S2", 1, release=(2030, 1, 1), artists=[11])
+    t.song(3, "S3", 1, release=(2030, 1, 1), artists=[10])
+    tables = t.as_tables()
+    index = build_deck_index(tables, KST)
+    cal = _calendar(tables, index, [2026])
+    entries = deck_entries(index.decks[1], cal, d(2026, 1, 1), d(2026, 12, 31))
+    got = sorted((e.members[0].name, e.song_codes) for e in entries)
+    assert got == [("Irene Dance", (2,)), ("Irene Vocal", (1, 3))]
+
+
+def test_a_code_without_position_text_is_named_by_its_analytics_name():
+    t = Tables()
+    t.group(1, "D")
+    t.artist(10, "Gu", 1, position=3, analyticsData="Gu Guitar")  # no text for 3
+    t.artist(11, "Gu", 1, position=0, analyticsData="Gu Vocal")
+    t.artist(12, "Plain", 1)
+    t.artist(13, "Plain", 1, position=None)
+    t.song(1, "a", 1, artists=[10])
+    t.song(2, "b", 1, artists=[12])
+    tables = t.as_tables()
+    index = build_deck_index(tables, KST)
+    assert _names(1, tables, index) == ["Gu Guitar"]
+    assert _names(2, tables, index) == ["Plain"]  # a name only, whatever is missing
+
+
+def test_a_game_can_say_which_text_names_a_position():
+    t = Tables()
+    t.group(1, "D")
+    t.locale["51003002"] = {"enUS": "GUITAR", "koKR": "GUITAR"}
+    t.artist(10, "Gu", 1, position=3)
+    t.artist(11, "Gu", 1, position=0, analyticsData="Gu Vocal")
+    t.song(1, "a", 1, artists=[10])
+    tables = t.as_tables()
+    index = build_deck_index(tables, KST)
+    (person,) = song_people(
+        index.songs[1],
+        tables["ArtistData"],
+        tables["LocaleData"],
+        KST,
+        positions={3: 51003002},
+    )
+    assert person.name == "Gu GUITAR"
+
+
+def test_ebidan_names_position_3_with_the_guitar_text():
+    from games.registry import GAMES
+
+    assert GAMES["EB"].position_locale[3] == 51003002
+    assert GAMES["SM"].position_locale == {0: 51003001, 1: 51003002, 2: 51003003}

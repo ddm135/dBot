@@ -75,9 +75,6 @@ class TimeRange(Enum):
 TIME_CHOICES = [app_commands.Choice(name=t.value, value=t.name) for t in TimeRange]
 
 
-TIME_CHOICES = [app_commands.Choice(name=t.value, value=t.name) for t in TimeRange]
-
-
 def collect(
     index: Index,
     calendar_: BonusCalendar,
