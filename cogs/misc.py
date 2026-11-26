@@ -2,16 +2,16 @@
 
 from datetime import datetime
 from typing import TYPE_CHECKING
-from zoneinfo import ZoneInfo
 
 from discord.ext import commands
+
+from games.registry import KST
 
 if TYPE_CHECKING:
     from bot import dBot
 
 type Ctx = commands.Context[dBot]
 
-KST = ZoneInfo("Asia/Seoul")
 
 MOTS7_RELEASE = datetime(2020, 2, 21, tzinfo=KST)
 LP_RELEASE = datetime(2020, 11, 30, tzinfo=KST)

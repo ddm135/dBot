@@ -187,8 +187,6 @@ async def test_bonus_subscriptions_and_preferences(database):
     assert await bp.set_preferences(U, start_hours=3) == PingPreferences(3, 1)
     assert await bp.set_preferences(U, end_hours=0) == PingPreferences(3, 0)
     assert await bp.set_preferences(777, end_hours=5) == PingPreferences(1, 5)
-    assert PingPreferences(3, 0).hours("start") == 3
-    assert PingPreferences(3, 0).hours("end") == 0
 
 
 async def test_ping_log_claims_once_and_prunes(database):

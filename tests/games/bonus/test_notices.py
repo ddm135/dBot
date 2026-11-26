@@ -24,7 +24,7 @@ def fixture():
     songs = build_song_periods(
         index, tables["ArtistData"], tables["LocaleData"], [2023]
     )
-    return index, BonusCalendar.build(songs, [2023])
+    return index, BonusCalendar.build(songs)
 
 
 def lines(index, cal, day, deck=1):
@@ -106,8 +106,7 @@ def test_songs_with_the_same_anniversary_get_a_line_each():
     tables = t.as_tables()
     index = build_deck_index(tables, KST)
     cal = BonusCalendar.build(
-        build_song_periods(index, tables["ArtistData"], tables["LocaleData"], [2023]),
-        [2023],
+        build_song_periods(index, tables["ArtistData"], tables["LocaleData"], [2023])
     )
     start = deck_notices(index.decks[1], cal.events_on(d(2023, 6, 7)))["start"]
     assert [line.song_codes for line in start] == [
@@ -132,7 +131,7 @@ def test_a_following_bonus_that_gives_less_counts_as_the_other_ending():
     from games.bonus.periods import MemberBonus, Period
 
     def bonus(percent):
-        return (MemberBonus("M", d(1999, 6, 12), percent, (1,)),)
+        return (MemberBonus("M", d(1999, 6, 12), percent),)
 
     song = SimpleNamespace(code=1, deck_code=1)
     first = Period(d(2023, 6, 1), d(2023, 6, 3), bonus(7))

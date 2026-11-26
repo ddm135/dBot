@@ -14,15 +14,11 @@ LOG_KEEP_DAYS = 14
 
 
 class PingPreferences(NamedTuple):
-    # The names are the column names of ``_SET_PREFERENCES``.
     """How many hours before a day a user wants the start and the end pings."""
 
+    # The names are the column names of ``_SET_PREFERENCES``.
     start_hours: int = DEFAULT_OFFSET
     end_hours: int = DEFAULT_OFFSET
-
-    def hours(self, kind: PingKind) -> int:
-        """The hours for a kind of ping."""
-        return self.start_hours if kind == "start" else self.end_hours
 
 
 class _Subscriber(NamedTuple):

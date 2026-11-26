@@ -82,16 +82,9 @@ class Song:
     is_hidden: bool
     release: date | None
     album: str | None
-    track_number: int | None
-    display_group: str | None
     analytics_name: str | None
-    same_name_codes: tuple[int, ...] = ()
     artist_codes: tuple[int, ...] = ()
     raw: Entry = field(default_factory=dict, repr=False, compare=False)
-
-    @property
-    def has_duplicate_name(self) -> bool:
-        return bool(self.same_name_codes)
 
     @property
     def display_label(self) -> str:
@@ -109,17 +102,9 @@ class Deck:
     name: str
     label: str  # unique among decks
     is_main: bool  # holds at least one visible song
-    in_group_data: bool
-    same_name_codes: tuple[int, ...]
     songs: tuple[Song, ...]
-    group_type: int | None = None
-    integrate_code: int | None = None
     analytics_name: str | None = None
     raw: Entry = field(default_factory=dict, repr=False, compare=False)
-
-    @property
-    def has_duplicate_name(self) -> bool:
-        return bool(self.same_name_codes)
 
     @property
     def display_name(self) -> str:
@@ -160,10 +145,6 @@ class DeckIndex:
 
     def __iter__(self) -> Iterator[Deck]:
         return (self.decks[c] for c in self._deck_order)
-
-    def deck_of(self, song_code: int) -> Deck | None:
-        song = self.songs.get(song_code)
-        return self.decks.get(song.deck_code) if song else None
 
 
 class _Builder:
@@ -285,7 +266,7 @@ class _Builder:
             mains = [c for c in by_name[name_key(name)] if is_main[c]]
             # Same-named decks get "[code]" added, except the one real deck.
             plain = not same or (is_main[code] and len(mains) == 1)
-            deck_songs = self.songs_of(code, name)
+            deck_songs = self.songs_of(code)
             group = self.groups.get(code, {})
             album_entry = self.albums.get(code)
             decks[int(code)] = Deck(
@@ -293,11 +274,7 @@ class _Builder:
                 name=name,
                 label=name if plain else f"{name} [{code}]",
                 is_main=is_main[code],
-                in_group_data=code in self.groups,
-                same_name_codes=tuple(int(c) for c in same),
                 songs=tuple(deck_songs),
-                group_type=group.get("groupType"),
-                integrate_code=group.get("integrateCode"),
                 analytics_name=group.get("analyticsData"),
                 raw=album_entry or group,
             )
@@ -310,7 +287,7 @@ class _Builder:
             tuple(order),
         )
 
-    def songs_of(self, code: str, deck_name: str) -> list[Song]:
+    def songs_of(self, code: str) -> list[Song]:
         """A deck's songs in order. Songs with the same name inside one deck get
         ``[code]`` added to their label."""
         entries = sorted(
@@ -335,9 +312,6 @@ class _Builder:
             song_code = _code(m)
             name = names[song_code]
             same = tuple(c for c in with_name[name_key(name)] if c != song_code)
-            display = locale_text(
-                self.locale, m.get("localeDisplayGroupName"), None, self.languages
-            )
             result.append(
                 Song(
                     code=song_code,
@@ -353,10 +327,7 @@ class _Builder:
                     or locale_text(
                         self.locale, m.get("albumName"), None, self.languages
                     ),
-                    track_number=m.get("trackNumber"),
-                    display_group=display if display != deck_name else None,
                     analytics_name=m.get("analyticsData"),
-                    same_name_codes=same,
                     artist_codes=_parse_codes(m.get("artistCode")),
                     raw=m,
                 )
@@ -403,14 +374,6 @@ BASE_MEMBERS = 3
 EXCLUDED_ARTIST_TYPE = 4
 
 
-@dataclass(frozen=True, slots=True)
-class DeckScore:
-    """What a deck's best score depends on: its member count and the game's base score."""
-
-    member_count: int
-    base: int  # 0 when the game has no known base score
-
-
 def member_counts(artists: Mapping[str, Entry]) -> dict[int, int]:
     """Members per deck: artists of the deck that are not of type 4."""
     counts: dict[int, int] = {}
@@ -427,15 +390,17 @@ def member_counts(artists: Mapping[str, Entry]) -> dict[int, int]:
 
 def deck_scores(
     tables: Tables, base_score: int | None, deck_codes: list[int]
-) -> dict[int, DeckScore]:
-    """The :class:`DeckScore` of every deck."""
+) -> dict[int, int]:
+    """The base score of every deck: the game's, plus a bonus for each member over
+    :data:`BASE_MEMBERS`; 0 when the game has no known base score.
+    """
     counts = member_counts(tables.get("ArtistData", {}))
-    scores: dict[int, DeckScore] = {}
-    for code in deck_codes:
-        members = counts.get(code, 0)
-        base = base_score + PER_MEMBER * (members - BASE_MEMBERS) if base_score else 0
-        scores[code] = DeckScore(members, base)
-    return scores
+    return {
+        code: base_score + PER_MEMBER * (counts.get(code, 0) - BASE_MEMBERS)
+        if base_score
+        else 0
+        for code in deck_codes
+    }
 
 
 def live_theme_maximum(

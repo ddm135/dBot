@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 import discord
 
-from db.bonus_pings import PingKind, PingPreferences
+from db.bonus_pings import PingPreferences
 from games.bonus.notices import (
     Category,
     NoticeLine,
@@ -117,7 +117,7 @@ class NotifyBonus(HourlyTask):
             for kind in due_kinds(prefs[user_id], now.hour, days_ahead):
                 has_lines = any(lines[kind] for lines in plan.values())
                 if has_lines and await self.bot.db.bonus_pings.claim(
-                    user_id, game.key, target, _ping_kind(kind)
+                    user_id, game.key, target, kind
                 ):
                     kinds.append(kind)
             if not kinds:
@@ -127,7 +127,7 @@ class NotifyBonus(HourlyTask):
             else:  # let the next hour try again
                 for kind in kinds:
                     await self.bot.db.bonus_pings.release(
-                        user_id, game.key, target, _ping_kind(kind)
+                        user_id, game.key, target, kind
                     )
             await asyncio.sleep(SEND_DELAY)
         return sent
@@ -170,10 +170,6 @@ class NotifyBonus(HourlyTask):
             logger.warning("Could not send a bonus ping to %d.", user_id, exc_info=True)
             return False
         return True
-
-
-def _ping_kind(category: Category) -> PingKind:
-    return category
 
 
 async def setup(bot: dBot) -> None:

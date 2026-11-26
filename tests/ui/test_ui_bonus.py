@@ -47,7 +47,7 @@ def setup():
     tables = t.as_tables()
     index = build_index(SM, tables)
     songs = build_song_periods(index.decks, index.artists, index.locale, [2023])
-    cal = BonusCalendar.build(songs, [2023])
+    cal = BonusCalendar.build(songs)
     return index, cal
 
 
@@ -433,7 +433,7 @@ def test_a_member_from_another_deck_is_followed_by_their_deck():
     tables = t.as_tables()
     index = build_index(SM, tables)
     songs = build_song_periods(index.decks, index.artists, index.locale, [2023])
-    cal = BonusCalendar.build(songs, [2023])
+    cal = BonusCalendar.build(songs)
     deck = index.decks.decks[1]
     today = d(2023, 6, 12)
     names = {

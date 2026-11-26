@@ -116,8 +116,6 @@ class StoreInfo:
 
     version: str  # the newest of the store versions and the game's floor
     icon_url: str | None
-    android_version: str | None = None
-    ios_version: str | None = None
 
 
 def _parsed(text: str | None) -> Version | None:
@@ -164,4 +162,4 @@ async def fetch_store_info(
         if text and _parsed(text) is not None
     ]
     version = max(candidates, key=Version)
-    return StoreInfo(version, icon, android, ios)
+    return StoreInfo(version, icon)

@@ -19,7 +19,6 @@ from games.data.decks import (
     HIDDEN_SUFFIX,
     Deck,
     DeckIndex,
-    DeckScore,
     build_deck_index,
     clean,
     deck_scores,
@@ -59,7 +58,7 @@ class Index:
 
     game: Game
     decks: DeckIndex
-    scores: Mapping[int, DeckScore]
+    scores: Mapping[int, int]  # each deck's base score
     live_theme_max: int
     artists: Mapping[str, Entry] = field(repr=False)
     locale: Mapping[str, Entry] = field(repr=False)
@@ -123,8 +122,7 @@ class Index:
         return parse_color(raw)
 
     def deck_max_score(self, deck_code: int) -> int:
-        score = self.scores.get(deck_code)
-        return score.base if score else 0
+        return self.scores.get(deck_code, 0)
 
 
 def parse_color(raw: object) -> int | None:
@@ -381,7 +379,7 @@ class Indexes:
             pace,
             index.game.position_locale,
         )
-        return BonusCalendar.build(songs, years, pace)
+        return BonusCalendar.build(songs, pace)
 
     def calendar(self, key: str, year: int) -> BonusCalendar | None:
         """The bonus calendar covering ``year`` and the one after it.

@@ -26,9 +26,9 @@ def test_member_counts_skip_type_4():
 def test_deck_scores_use_the_base_score_and_member_count():
     t = sample()
     scores = deck_scores(t.as_tables(), 6_000_000, [1, 2, 3])
-    assert scores[1].base == 6_000_000 + 15_000 * (2 - 3)
-    assert scores[3].member_count == 0
-    assert deck_scores(t.as_tables(), None, [1])[1].base == 0
+    assert scores[1] == 6_000_000 + 15_000 * (2 - 3)
+    assert scores[3] == 6_000_000 + 15_000 * (0 - 3)  # no members
+    assert deck_scores(t.as_tables(), None, [1]) == {1: 0}
 
 
 def test_live_theme_maximum_needs_the_reward_field_and_known_decks():
@@ -97,7 +97,6 @@ def test_calendar_is_built_per_year_and_cached():
     )
     assert indexes.today(SM) == date(2025, 6, 1)
     cal = indexes.current_calendar("SM")
-    assert cal.years == (2025, 2026)
     assert indexes.calendar("SM", 2025) is cal
     assert indexes.calendar("SM", 2026) is not cal
     assert 200 not in cal.songs  # hidden

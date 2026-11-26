@@ -1,21 +1,13 @@
 """What changes on which day: the events of a song's periods, and the calendar of them."""
 
 from collections import defaultdict
-from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
+from collections.abc import Callable, Iterator, Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import date
 from enum import StrEnum
 
-from games.bonus.periods import (
-    ONE_DAY,
-    Bonus,
-    Period,
-    ReleaseBonus,
-    SongPeriods,
-)
-from games.data.decks import (
-    Song,
-)
+from games.bonus.periods import ONE_DAY, Period, SongPeriods, has_release
+from games.data.decks import Song
 
 
 class EventKind(StrEnum):
@@ -30,7 +22,7 @@ class EventKind(StrEnum):
 class BonusEvent:
     """Something that changes on a day for a song: a bonus starts, changes (the
     period before is ``before``) or ends. The properties give the percentages
-    before and after and the bonuses added and removed.
+    before and after, and whether it is a drop.
     """
 
     day: date
@@ -55,29 +47,6 @@ class BonusEvent:
         return 0 if self.kind is EventKind.END else self.period.total
 
     @property
-    def added(self) -> tuple[Bonus, ...]:
-        match self.kind:
-            case EventKind.START:
-                return self.period.bonuses
-            case EventKind.CHANGE:
-                old = set(self.before.bonuses) if self.before else set()
-                return tuple(b for b in self.period.bonuses if b not in old)
-            case EventKind.END:
-                return ()
-
-    @property
-    def removed(self) -> tuple[Bonus, ...]:
-        match self.kind:
-            case EventKind.START:
-                return ()
-            case EventKind.CHANGE:
-                new = set(self.period.bonuses)
-                old = self.before.bonuses if self.before else ()
-                return tuple(b for b in old if b not in new)
-            case EventKind.END:
-                return self.period.bonuses
-
-    @property
     def change_from(self) -> int | None:
         """The percentage this replaces, when a following period differs."""
         if self.kind is EventKind.CHANGE and self.before:
@@ -88,11 +57,6 @@ class BonusEvent:
     def is_drop(self) -> bool:
         """Whether a following period gives less than the one it replaces."""
         return self.kind is EventKind.CHANGE and self.to_percent < self.from_percent
-
-
-def has_release(period: Period) -> bool:
-    """Whether any bonus of the period is a release anniversary."""
-    return any(isinstance(b, ReleaseBonus) for b in period.bonuses)
 
 
 def song_events(song: Song, periods: Sequence[Period]) -> Iterator[BonusEvent]:
@@ -134,7 +98,7 @@ def timelines(
     They are announced separately, as the game's own list shows them: the
     birthday bonus for the deck, and each song's anniversary entry.
     """
-    anniversary = tuple(p for p in song_periods.periods if has_release(p))
+    anniversary = tuple(p for p in song_periods.periods if has_release(p.bonuses))
     return song_periods.member_timeline, anniversary
 
 
@@ -143,17 +107,15 @@ class BonusCalendar:
     """Every song's periods and the events derived from them."""
 
     songs: Mapping[int, SongPeriods]
-    years: tuple[int, ...]
     _events: Mapping[date, tuple[BonusEvent, ...]] = field(default_factory=dict)
 
     @classmethod
     def build(
         cls,
         songs: Mapping[int, SongPeriods],
-        years: Iterable[int],
         pace: Callable[[], None] | None = None,
     ) -> BonusCalendar:
-        """The calendar for ``songs`` over ``years``.
+        """The calendar of the periods of ``songs``.
 
         ``pace`` is called between songs so a worker thread can rest (see ``Pacer``).
         """
@@ -171,13 +133,7 @@ class BonusCalendar:
             )
             for day, evs in by_day.items()
         }
-        return cls(songs, tuple(sorted(set(years))), events)
+        return cls(songs, events)
 
     def events_on(self, day: date) -> tuple[BonusEvent, ...]:
         return self._events.get(day, ())
-
-    def days(self) -> list[date]:
-        return sorted(self._events)
-
-    def covers(self, day: date) -> bool:
-        return bool(self.years) and self.years[0] <= day.year <= self.years[-1]

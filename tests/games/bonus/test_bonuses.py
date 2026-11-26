@@ -48,7 +48,6 @@ def test_same_person_codes_merge_and_add_percent():
     )
     irene = next(p for p in people if p.name == "Irene")
     assert irene.percent == 4
-    assert irene.artist_codes == (10, 11)
     assert len(people) == 2
 
 
@@ -110,7 +109,8 @@ def test_window_is_seven_days_inclusive_and_the_release_year_counts():
     index = build_deck_index(tables, KST)
     song = index.songs[1]
     (p,) = [x for x in periods_for(song, [], [2022]) if x.start.year == 2022]
-    assert (p.start, p.end, p.days, p.total) == (d(2022, 6, 7), d(2022, 6, 13), 7, 3)
+    assert (p.start, p.end, p.total) == (d(2022, 6, 7), d(2022, 6, 13), 3)
+    assert (p.end - p.start).days + 1 == 7
     assert p.bonuses == (ReleaseBonus(3),)
     # The release year counts too, and its window includes the days before the release.
     (first,) = [x for x in periods_for(song, [], [2020]) if x.start.year == 2020]
@@ -184,7 +184,7 @@ def test_no_years_or_no_sources_gives_no_periods():
 
 
 def _calendar(tables, index, years):
-    return BonusCalendar.build(periods(tables, index, years), years)
+    return BonusCalendar.build(periods(tables, index, years))
 
 
 def test_the_two_timelines_have_their_own_events():
@@ -209,8 +209,7 @@ def test_the_two_timelines_have_their_own_events():
     assert kinds(d(2023, 6, 16)) == []
 
     change = next(e for e in cal.events_on(d(2023, 6, 9)) if e.kind is EventKind.CHANGE)
-    assert [type(b) for b in change.added] == [MemberBonus]
-    assert change.removed == ()
+    assert (change.change_from, change.to_percent, change.is_drop) == (3, 5, False)
 
 
 def test_events_on_new_year_have_no_artificial_boundary():
@@ -223,13 +222,6 @@ def test_events_on_new_year_have_no_artificial_boundary():
     assert cal.events_on(d(2023, 1, 1)) == ()
     assert [e.kind for e in cal.events_on(d(2022, 12, 29))] == [EventKind.START]
     assert [e.kind for e in cal.events_on(d(2023, 1, 4))] == [EventKind.END]
-
-
-def test_calendar_coverage():
-    _t, tables, index = make()
-    cal = _calendar(tables, index, [2025])
-    assert cal.covers(d(2025, 6, 1)) and not cal.covers(d(2027, 1, 1))
-    assert cal.days() == sorted(cal.days())
 
 
 # --- deck entries -----------------------------------------------------------
@@ -383,17 +375,17 @@ def test_matches_the_reference_script_inside_a_year(seed, year):
         assert got == want, song["code"]
 
 
-def test_a_swap_keeps_what_was_added_and_removed():
+def test_a_swap_between_equal_totals_is_not_a_change_in_percent():
     from games.bonus.events import BonusEvent
     from games.bonus.periods import Period
 
     release = ReleaseBonus(3)
-    member = MemberBonus("M", d(2000, 1, 1), 3, (1,))
+    member = MemberBonus("M", d(2000, 1, 1), 3)
     before = Period(d(2023, 1, 1), d(2023, 1, 3), (release,))
     after = Period(d(2023, 1, 4), d(2023, 1, 6), (member,))
     swap = BonusEvent(d(2023, 1, 4), EventKind.CHANGE, 1, 1, after, before)
     assert (swap.from_percent, swap.to_percent) == (3, 3)
-    assert swap.added == (member,) and swap.removed == (release,)
+    assert swap.change_from is None and not swap.is_drop
 
 
 def test_entries_include_periods_touching_the_range_edges():
@@ -502,7 +494,6 @@ def test_the_sweep_gives_exactly_the_periods_the_quadratic_scan_gave():
                 f"M{i}",
                 date(rng.randint(1985, 2005), rng.randint(1, 12), rng.randint(1, 28)),
                 rng.choice([5, 10]),
-                (i,),
             )
             for i in range(rng.randint(0, 12))
         ]
@@ -533,7 +524,7 @@ def test_a_paced_build_gives_the_same_calendar_and_rests_between_songs():
     paced = build_song_periods(*args, pace=pace)
     assert paced == plain
     assert len(calls) == len(index.songs)
-    built = BonusCalendar.build(paced, [2025], pace)
+    built = BonusCalendar.build(paced, pace)
     assert len(calls) == len(index.songs) + len(paced)
     assert built.songs == plain
 

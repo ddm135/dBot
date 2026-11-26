@@ -18,7 +18,7 @@ from datetime import date
 from typing import Literal, NamedTuple
 
 from games.bonus.events import BonusEvent, EventKind
-from games.bonus.periods import Bonus, MemberBonus, ReleaseBonus
+from games.bonus.periods import Bonus, MemberBonus, has_release, members_of
 from games.data.decks import Deck
 
 type Category = Literal["start", "end"]
@@ -53,11 +53,11 @@ class NoticeLine:
 
     @property
     def has_release(self) -> bool:
-        return any(isinstance(b, ReleaseBonus) for b in self.bonuses)
+        return has_release(self.bonuses)
 
     @property
     def members(self) -> tuple[MemberBonus, ...]:
-        return tuple(b for b in self.bonuses if isinstance(b, MemberBonus))
+        return members_of(self.bonuses)
 
 
 class _Key(NamedTuple):
@@ -94,7 +94,7 @@ def deck_notices(
         if event.deck_code != deck.code or event.song_code not in visible:
             continue
         period = event.period
-        anniversary = any(isinstance(b, ReleaseBonus) for b in period.bonuses)
+        anniversary = has_release(period.bonuses)
         key = _Key(
             category_of(event),
             period.bonuses,

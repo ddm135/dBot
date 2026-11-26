@@ -10,7 +10,7 @@ from datetime import date, datetime, time, timedelta
 
 import discord
 
-from games.bonus.entries import BonusEntry, max_score
+from games.bonus.entries import TOP_POSITIONS, BonusEntry, max_score
 from games.bonus.notices import NoticeLine, Section
 from games.bonus.periods import MemberBonus
 from games.charts.song_stats import SongStat
@@ -23,7 +23,6 @@ EMBED_CHARS = 6000
 EMBED_FIELDS = 25
 FIELD_CHARS = 1024
 BLANK = "\u200b"  # an empty-looking name for the continuation of a field
-MAX_POSITIONS = 5
 
 
 @dataclass(frozen=True, slots=True)
@@ -296,7 +295,7 @@ def max_embed(
     embed.set_author(name=f"{index.game.name} - Top Bonuses", icon_url=icon)
     position = 1
     for score, codes in ranked.items():
-        last = min(position + len(codes) - 1, MAX_POSITIONS)
+        last = min(position + len(codes) - 1, TOP_POSITIONS)
         label = (
             f"**Top {position}"
             + (f"-{last}" if last != position else "")
@@ -304,7 +303,7 @@ def max_embed(
         )
         names = ", ".join(escape(index.group_name(c) or str(c)) for c in codes)
         embed.add_field(name=label, value=names, inline=False)
-        if last >= MAX_POSITIONS:
+        if last >= TOP_POSITIONS:
             break
         position = last + 1
     return embed

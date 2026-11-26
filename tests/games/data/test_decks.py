@@ -38,10 +38,8 @@ def test_index_maps_songs_to_decks_and_hidden_flags():
     index = build_deck_index(t.as_tables(), KST)
 
     assert [deck.name for deck in index] == ["BTS", "TWICE"]  # by orderIndex
-    assert index.deck_of(10).name == "TWICE"
     assert index.songs[11].is_hidden
     assert [s.code for s in index.decks[1].visible_songs] == [10]
-    assert index.deck_of(999) is None
 
 
 def test_duplicate_deck_names_label_only_hidden_only_decks_with_code():
@@ -56,7 +54,6 @@ def test_duplicate_deck_names_label_only_hidden_only_decks_with_code():
     assert index.decks[5].is_main
     assert index.decks[20700].label == "SUPER JUNIOR [20700]"
     assert not index.decks[20700].is_main
-    assert index.decks[5].same_name_codes == (20700,)
 
 
 def test_two_main_decks_with_one_name_both_keep_codes():
@@ -82,7 +79,6 @@ def test_duplicate_song_names_in_a_deck_get_codes():
         10049: "underwater [10049]",
         5: "Other",
     }
-    assert index.songs[1303].same_name_codes == (10049,)
 
 
 def test_songs_pointing_at_a_missing_deck_still_get_one():
@@ -90,7 +86,6 @@ def test_songs_pointing_at_a_missing_deck_still_get_one():
     t.song(1, "Lost", 77)
     index = build_deck_index(t.as_tables(), KST)
     deck = index.decks[77]
-    assert not deck.in_group_data
     assert deck.name == "Deck 77"
     assert index.songs[1].deck_code == 77
 
@@ -121,16 +116,6 @@ def test_artist_codes_parse_from_json_or_list_and_dedupe():
     assert index.songs[2].artist_codes == (7, 8)
     assert index.songs[3].artist_codes == ()
     assert index.songs[4].artist_codes == ()
-
-
-def test_display_group_only_when_it_differs_from_the_deck_name():
-    t = Tables()
-    t.group(1, "Deck")
-    t.song(1, "a", 1, localeDisplayGroupName=t.text("Deck"))
-    t.song(2, "b", 1, localeDisplayGroupName=t.text("Unit"))
-    index = build_deck_index(t.as_tables(), KST)
-    assert index.songs[1].display_group is None
-    assert index.songs[2].display_group == "Unit"
 
 
 def test_dates_are_read_in_the_games_own_timezone():

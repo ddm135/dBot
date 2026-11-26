@@ -67,14 +67,13 @@ class LoadedTables:
 
 @dataclass(frozen=True, slots=True)
 class TableSyncResult:
-    """What a sync did: the tables now loaded, which were downloaded, which failed
-    (and why), and whether the server was reached.
+    """What a sync did: the tables now loaded, which were downloaded, and which failed
+    (and why).
     """
 
     loaded: LoadedTables
     downloaded: tuple[str, ...]
     failed: Mapping[str, str]
-    online: bool
 
 
 async def _bundle_context(
@@ -108,16 +107,16 @@ async def _current_index(
     bundles: MagicOnionClient | None = None,
     client: httpx.AsyncClient | None = None,
     retry: RetryPolicy = DEFAULT_RETRY,
-) -> tuple[AssetContext, bool]:
+) -> AssetContext:
     if game.is_unlisted:
         if stored is None:
             raise DataSyncError(f"{game.key}: an unlisted game needs a stored a.json.")
-        return stored, False
+        return stored
 
     if game.grpc is not None and bundles is not None and client is not None:
         fresh = await _bundle_context(game, bundles, client, retry)
         if fresh is not None:
-            return fresh, True
+            return fresh
     else:
         answer = None
         try:
@@ -126,7 +125,7 @@ async def _current_index(
             logger.info("%s: no asset context from the server (%s).", game.key, exc)
         if answer is not None and answer.get("code") == 1000:
             try:
-                return AssetContext.from_json(answer.get("result")), True
+                return AssetContext.from_json(answer.get("result"))
             except AssetContextError:
                 logger.warning("%s: the server's asset context is malformed.", game.key)
 
@@ -135,7 +134,7 @@ async def _current_index(
             f"{game.key}: the server gave no asset context and none is stored.",
             retryable=True,
         )
-    return stored, False
+    return stored
 
 
 async def _download_table(
@@ -167,7 +166,7 @@ async def sync_tables(
     # `stored` is the listing from the last successful sync (what the files on disk
     # are); `current` is what the server lists now. The difference is the work.
     stored = loaded.assets if loaded is not None else await store.read_assets(game.key)
-    current, online = await _current_index(
+    current = await _current_index(
         game, manifest, server, stored, bundles, client, retry
     )
     on_disk = await store.present_tables(game.key)
@@ -225,6 +224,4 @@ async def sync_tables(
     if stored is None or effective != stored:
         await store.write_assets(game.key, effective)
 
-    return TableSyncResult(
-        LoadedTables(effective, tables), tuple(downloaded), failed, online
-    )
+    return TableSyncResult(LoadedTables(effective, tables), tuple(downloaded), failed)

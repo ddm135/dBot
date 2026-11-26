@@ -143,7 +143,6 @@ class BundleContext:
     """The files of one asset bundle directory (``#AssetContext.json``)."""
 
     asset_hash: str
-    base_url: str
     files: Mapping[str, BundleFile]  # by table name
 
     @classmethod
@@ -162,7 +161,7 @@ class BundleContext:
                 files[str(name)] = BundleFile(
                     f"{base}/{entry['file'].lstrip('/')}", str(entry.get("version", ""))
                 )
-        return cls(check.asset_hash, base, files)
+        return cls(check.asset_hash, files)
 
     def to_asset_context(self) -> AssetContext:
         """The same shape as the other games' ``a.json``, with full file URLs."""

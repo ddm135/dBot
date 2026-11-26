@@ -5,11 +5,16 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import date
 
-from games.bonus.events import BonusCalendar, has_release
-from games.bonus.periods import ONE_DAY, Bonus, MemberBonus, Period, ReleaseBonus
-from games.data.decks import (
-    Deck,
+from games.bonus.events import BonusCalendar
+from games.bonus.periods import (
+    ONE_DAY,
+    Bonus,
+    MemberBonus,
+    Period,
+    has_release,
+    members_of,
 )
+from games.data.decks import Deck
 
 
 @dataclass(frozen=True, slots=True)
@@ -32,11 +37,11 @@ class BonusEntry:
 
     @property
     def has_release(self) -> bool:
-        return any(isinstance(b, ReleaseBonus) for b in self.bonuses)
+        return has_release(self.bonuses)
 
     @property
     def members(self) -> tuple[MemberBonus, ...]:
-        return tuple(b for b in self.bonuses if isinstance(b, MemberBonus))
+        return members_of(self.bonuses)
 
     def status(self, today: date) -> str:
         if self.end < today:
@@ -80,7 +85,7 @@ def deck_entries(
             if period.end >= first and period.start <= last:
                 before = previous_total(sp.member_timeline, period)
                 members[(period.start, period.end, period.bonuses, before)].append(code)
-        anniversaries = [p for p in sp.periods if has_release(p)]
+        anniversaries = [p for p in sp.periods if has_release(p.bonuses)]
         for period in anniversaries:
             if period.end < first or period.start > last:
                 continue

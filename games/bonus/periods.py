@@ -59,15 +59,14 @@ ONE_DAY = timedelta(days=1)
 
 @dataclass(frozen=True, slots=True)
 class MemberBonus:
-    """A member's birthday bonus: who, the birthday, the percentage and the artist codes it
-    applies to. ``name`` is the person, or the codes of theirs the song has (``IRENE
-    Vocal``) when it has only some of them.
+    """A member's birthday bonus: who, the birthday and the percentage. ``name`` is the
+    person, or the codes of theirs the song has (``IRENE Vocal``) when it has only
+    some of them.
     """
 
     name: str
     birthday: date  # the birth date; only month and day matter
     percent: int
-    artist_codes: tuple[int, ...]
     group_code: int | None = None  # set when the member is from another deck
 
 
@@ -81,6 +80,16 @@ class ReleaseBonus:
 type Bonus = MemberBonus | ReleaseBonus
 
 
+def has_release(bonuses: Iterable[Bonus]) -> bool:
+    """Whether any of the bonuses is a release anniversary."""
+    return any(isinstance(b, ReleaseBonus) for b in bonuses)
+
+
+def members_of(bonuses: Iterable[Bonus]) -> tuple[MemberBonus, ...]:
+    """The member birthdays among the bonuses."""
+    return tuple(b for b in bonuses if isinstance(b, MemberBonus))
+
+
 @dataclass(frozen=True, slots=True)
 class Period:
     """A stretch of days (inclusive) with a constant set of active bonuses."""
@@ -92,13 +101,6 @@ class Period:
     @property
     def total(self) -> int:
         return sum(b.percent for b in self.bonuses)
-
-    @property
-    def days(self) -> int:
-        return (self.end - self.start).days + 1
-
-    def covers(self, day: date) -> bool:
-        return self.start <= day <= self.end
 
 
 @dataclass(frozen=True, slots=True)
@@ -208,7 +210,6 @@ def song_people(
             name=_label(p, key, artists, roster, locale, languages, positions),
             birthday=p.birth,
             percent=p.percent,
-            artist_codes=tuple(p.codes),
             group_code=p.group_code if p.group_code != song.deck_code else None,
         )
         for key, p in people.items()
