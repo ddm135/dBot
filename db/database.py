@@ -7,8 +7,7 @@ import asyncpg
 from asyncpg_typed import sql
 
 from config import PostgresSettings
-
-from .migrations import MIGRATIONS
+from db.migrations import MIGRATIONS
 
 logger = logging.getLogger(__name__)
 

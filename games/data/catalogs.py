@@ -8,10 +8,10 @@ from pathlib import Path
 
 import httpx
 
+from games.api.http import DEFAULT_RETRY, RetryPolicy, download, is_retryable_status
 from games.data.catalog import BinaryCatalog, CatalogError, load_catalog
 from games.data.storage import DataStore
 from games.errors import DataSyncError
-from games.http import DEFAULT_RETRY, RetryPolicy, download, is_retryable_status
 from games.models import Game
 
 logger = logging.getLogger(__name__)

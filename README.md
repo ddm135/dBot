@@ -8,17 +8,18 @@ Run `python dBot.py`. Tests: `uv run pytest` (needs Postgres, see `DBOT_TEST_PG`
 
 | Where | What |
 |---|---|
-| `dBot.py`, `app.py`, `bot.py`, `config.py`, `tuning.py` | Start-up, the bot object, settings; `tuning.py` has the memory settings (malloc arenas, GC freeze, trimming) and `Pacer`. |
-| `lease/` | Leader election in Valkey, the supervisor that restarts the bot's term, the event-loop watchdog, the console. |
+| `dBot.py`, `app.py`, `bot.py`, `config.py` | Start-up, the bot object, settings. |
+| `lease/` | Leader election in Valkey and the supervisor that restarts the bot's term. |
+| `ops/` | The event-loop watchdog, the console, and `tuning` (memory settings: malloc arenas, GC freeze, trimming; and `Pacer`). |
 | `games/` | Everything about the games, with no Discord in it. |
-| `games/api/` | Talking to the game servers: login, accounts, requests, manifests, encryption, MagicOnion, store listings, world records. |
-| `games/data/` | The game tables and catalogs: schema, files on disk, downloading, strings. |
+| `games/api/` | Talking to the game servers and CDNs: HTTP with retries, login, accounts, requests, manifests, encryption, MagicOnion, store listings, world records. |
+| `games/data/` | What the game tables say: schema, files on disk, downloading, strings, decks and songs, dates and seasons. |
 | `games/media/` | Bundles and APKs, pictures, borders and their Google Drive folder. |
 | `games/charts/` | Song charts: reading `.seq` files, measuring them, keeping the stats. |
-| `games/bonus/` | Decks, dates (schedule, seasons), bonus periods and the calendar, notices. |
+| `games/bonus/` | The bonus rules and periods (`periods`), the calendar of events (`events`), the deck-level entries (`entries`) and the notices built from them. |
 | `games/service.py`, `games/index.py` | The data service (what is current) and the indexes built from it. |
-| `games/models.py`, `registry.py`, `errors.py`, `http.py` | Shared definitions: the games, their settings, errors, HTTP with retries. |
-| `cogs/`, `ui/`, `search.py`, `ssl_pins.py` | The Discord layer: commands, embeds and views. |
+| `games/models.py`, `registry.py`, `errors.py` | Shared definitions: the games, their settings, errors. |
+| `cogs/`, `ui/` | The Discord layer: commands, and in `ui/` the embeds, views, name search for autocomplete and the SSL pinning. |
 | `tasks/` | Hourly and periodic jobs. `hourly.py` is the shape most share. |
 | `db/` | Postgres access and migrations. |
 | `pinata/`, `scripts/` | The pinata game; one-off and maintenance scripts. |

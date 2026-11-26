@@ -9,13 +9,12 @@ from datetime import date, datetime, time, timedelta
 
 import discord
 
-from games.bonus.bonuses import BonusEntry, max_score
-from games.bonus.decks import Deck
+from games.bonus.entries import BonusEntry, max_score
 from games.bonus.notices import NoticeLine, Section
 from games.charts.song_stats import SongStat
+from games.data.decks import Deck
 from games.index import Index
-
-from .text import escape, md, month_day, timestamp
+from ui.text import escape, md, month_day, timestamp
 
 MAX_SONG_NAMES = 3
 EMBED_CHARS = 6000

@@ -6,15 +6,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from games.bonus.decks import Deck, Song
-from games.charts.song_stats import SongStat
-from games.index import Index
-from ui.images import Upload, files, prepare
-from ui.pages import Paginator, page_count, slice_page
-from ui.song import song_embed
-from ui.text import escape, md
-
-from .common import (
+from cogs.common import (
     NO_DATA,
     Itr,
     choose_artist,
@@ -24,6 +16,13 @@ from .common import (
     parse_code,
     song_autocomplete,
 )
+from games.charts.song_stats import SongStat
+from games.data.decks import Deck, Song
+from games.index import Index
+from ui.images import Upload, files, prepare
+from ui.pages import Paginator, page_count, slice_page
+from ui.song import song_embed
+from ui.text import escape, md
 
 if TYPE_CHECKING:
     from bot import dBot
@@ -51,8 +50,8 @@ def song_line(
 ) -> str:
     """One song of the length list: ``(3:21) Artist - **Song**``."""
     duration = stat.duration if stat else "Unknown"
-    name = md(t"**{song.label}**")
-    prefix = md(t"{deck.name} - ") if show_deck and deck else ""
+    name = md(t"**{song.display_label}**")
+    prefix = md(t"{deck.display_name} - ") if show_deck and deck else ""
     return f"({duration}) {prefix}{name}"
 
 
@@ -192,7 +191,7 @@ class Info(commands.Cog):
         if not songs:
             await itr.followup.send("No songs found.")
             return
-        title = escape(deck.name) if deck else "All Songs"
+        title = escape(deck.display_name) if deck else "All Songs"
         pages = page_count(len(songs), PER_PAGE)
 
         def render(page: int, total: int) -> discord.Embed:

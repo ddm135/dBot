@@ -12,8 +12,8 @@ from zoneinfo import ZoneInfo
 
 import httpx
 
+from games.api.http import DEFAULT_RETRY, RetryPolicy, fetch
 from games.errors import ServerError
-from games.http import DEFAULT_RETRY, RetryPolicy, fetch
 
 logger = logging.getLogger(__name__)
 

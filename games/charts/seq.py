@@ -44,7 +44,7 @@ class _Reader:
         end = self.pos + size
         if end > len(self.data):
             raise SeqError("The chart ends early.")
-        (value,) = struct.unpack_from(fmt, self.data, self.pos)
+        value: int | float = struct.unpack_from(fmt, self.data, self.pos)[0]
         self.pos = end
         return value
 

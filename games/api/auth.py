@@ -20,8 +20,8 @@ from google.auth.exceptions import TransportError
 from google.auth.transport import Request, Response
 from google.oauth2.service_account import IDTokenCredentials
 
+from games.api.http import DEFAULT_RETRY, RetryPolicy, is_retryable_status, send
 from games.errors import LoginError
-from games.http import DEFAULT_RETRY, RetryPolicy, is_retryable_status, send
 from games.models import Game
 
 DALCOM_API_URL = "https://oauth.dalcomsoft.net/v1"

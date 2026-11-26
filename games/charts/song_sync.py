@@ -14,12 +14,13 @@ import asyncio
 import logging
 import re
 from collections import defaultdict
-from collections.abc import Awaitable, Callable, Iterable
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 
 from games.charts.seq import SeqError, parse_seq
 from games.charts.song_stats import format_duration
+from games.data.catalog import HasBundleUrls, HasInternalIds, HasKeys
 from games.data.schema import DIFFICULTY_FIELDS
 from games.media.bundles import (
     BuiltInBundle,
@@ -38,13 +39,8 @@ FLUSH_EVERY = 50  # bundles between saves, so a long first run is not lost
 type Stored = dict[str, Any]
 
 
-class Catalog(Protocol):
+class SyncCatalog(HasBundleUrls, HasInternalIds, HasKeys, Protocol):
     """What the sync needs of a catalog: keys, ids and bundle URLs."""
-
-    def bundle_urls(self, key: object) -> list[str | None]: ...
-    def internal_ids(self, key: object) -> list[str | None]: ...
-
-    def keys(self) -> Iterable[object]: ...
 
 
 @dataclass(frozen=True, slots=True)
@@ -108,7 +104,7 @@ def collect_refs(tables: Tables) -> list[SeqRef]:
 
 
 def catalog_refs(
-    tables: Tables, catalog: Catalog, pattern: re.Pattern[str]
+    tables: Tables, catalog: SyncCatalog, pattern: re.Pattern[str]
 ) -> list[SeqRef]:
     """The charts of a game whose tables do not name them, found by catalog key.
 
@@ -126,7 +122,7 @@ def catalog_refs(
     return refs
 
 
-def resolve(ref: SeqRef, tables: Tables, catalog: Catalog | None) -> Source | None:
+def resolve(ref: SeqRef, tables: Tables, catalog: SyncCatalog | None) -> Source | None:
     """Where a chart lives, or None if it cannot be located."""
     if isinstance(ref.ref, int):
         url = (tables.get("URLs", {}).get(str(ref.ref)) or {}).get("url")
@@ -230,7 +226,7 @@ def _parse(data: bytes) -> tuple[int, float] | SeqError:
 def _classify(
     game_key: str,
     tables: Tables,
-    catalog: Catalog | None,
+    catalog: SyncCatalog | None,
     stored: Stored,
     known_bad: set[str],
     seq_pattern: re.Pattern[str] | None,
@@ -270,7 +266,7 @@ def _absent(
 async def sync_seq_stats(
     game_key: str,
     tables: Tables,
-    catalog: Catalog | None,
+    catalog: SyncCatalog | None,
     bundles: BundleStore,
     stored: Stored,
     save: Callable[[], Awaitable[None]],

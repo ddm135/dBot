@@ -18,8 +18,8 @@ from urllib.parse import urlsplit
 import httpx
 import UnityPy
 
-from games.http import DEFAULT_RETRY, RetryPolicy, download
-from tuning import release_memory
+from games.api.http import DEFAULT_RETRY, RetryPolicy, download
+from ops.tuning import release_memory
 
 if TYPE_CHECKING:
     from games.media.apks import ApkStore

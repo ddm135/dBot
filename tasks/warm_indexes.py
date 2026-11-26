@@ -9,9 +9,8 @@ import asyncio
 import logging
 from typing import TYPE_CHECKING
 
-from tuning import freeze_heap
-
-from .hourly import HourlyTask
+from ops.tuning import freeze_heap
+from tasks.hourly import HourlyTask
 
 if TYPE_CHECKING:
     from bot import dBot

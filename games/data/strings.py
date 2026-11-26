@@ -11,8 +11,9 @@ like any other bundle, and read in place.
 import asyncio
 import logging
 from collections.abc import Mapping
-from typing import Any, Protocol
+from typing import Any
 
+from games.data.catalog import HasBundleUrls
 from games.media.bundles import (
     BuiltInBundle,
     BundleError,
@@ -25,12 +26,6 @@ from games.models import StringsConfig
 logger = logging.getLogger(__name__)
 
 type Strings = Mapping[str, Mapping[str, str]]  # key -> {language: text}
-
-
-class Catalog(Protocol):
-    """What the strings need of a catalog: where a key's bundles are."""
-
-    def bundle_urls(self, key: object) -> list[str | None]: ...
 
 
 def shared_data_key(collection: str) -> str:
@@ -74,7 +69,7 @@ def read_texts(source: Source, name: str) -> dict[int, str]:
 
 
 async def _open(
-    bundles: BundleStore, game_key: str, catalog: Catalog, key: str
+    bundles: BundleStore, game_key: str, catalog: HasBundleUrls, key: str
 ) -> Source | None:
     try:
         urls = [u for u in catalog.bundle_urls(key) if u]
@@ -90,7 +85,7 @@ async def _open(
 
 
 async def load_strings(
-    game_key: str, catalog: Catalog, bundles: BundleStore, config: StringsConfig
+    game_key: str, catalog: HasBundleUrls, bundles: BundleStore, config: StringsConfig
 ) -> dict[str, dict[str, str]]:
     """Every string of the collection by key name, in each configured language.
 

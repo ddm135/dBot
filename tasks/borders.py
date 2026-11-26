@@ -16,9 +16,8 @@ from games.media.borders import old_name as _old_name
 from games.media.bundles import BuiltInBundle, BundleError
 from games.media.drive import BorderFolder, Drive, StoredFile, fingerprint
 from games.service import State
+from tasks.hourly import HourlyTask
 from ui.text import md
-
-from .hourly import HourlyTask
 
 if TYPE_CHECKING:
     from bot import dBot
@@ -125,8 +124,8 @@ class Borders(HourlyTask):
         for url in sorted(urls):
             try:
                 await self.bot.bundles.fetch(game_key, url)
-            except (BundleError, BuiltInBundle) as error:
-                logger.warning("%s: Border bundle %s: %s", game_key, url, error)
+            except (BundleError, BuiltInBundle) as exc:
+                logger.warning("%s: Border bundle %s: %s", game_key, url, exc)
 
 
 async def _adopt_numbered(

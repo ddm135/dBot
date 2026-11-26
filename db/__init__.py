@@ -5,14 +5,15 @@ from typing import Self
 import asyncpg
 
 from config import PostgresSettings
-
-from .bonus_pings import BonusPings
-from .database import create_pool, migrate
-from .misc import Aliases, Credentials, DisplayNames, LiveThemes
-from .roles import StoredRoles
-from .song_stats import SongStatsDb
-from .ssl import SslHistory
-from .word_pings import WordPings
+from db.bonus_pings import BonusPings
+from db.credentials import Credentials
+from db.database import create_pool, migrate
+from db.live_themes import LiveThemes
+from db.names import Aliases, DisplayNames
+from db.roles import StoredRoles
+from db.song_stats import SongStatsDb
+from db.ssl import SslHistory
+from db.word_pings import WordPings
 
 
 class Database:

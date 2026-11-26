@@ -10,8 +10,7 @@ from typing import TYPE_CHECKING
 from games.charts.song_sync import SyncResult, sync_seq_stats
 from games.media.apks import needs_apk
 from games.service import State
-
-from .hourly import HourlyTask
+from tasks.hourly import HourlyTask
 
 if TYPE_CHECKING:
     from bot import dBot

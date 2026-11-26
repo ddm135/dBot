@@ -4,7 +4,7 @@ from bot import dBot
 from config import Settings
 from extensions import EXTENSIONS
 from games.api.accounts import Accounts
-from search import Searcher
+from ui.search import Searcher
 
 
 @pytest.fixture

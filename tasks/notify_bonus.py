@@ -19,11 +19,10 @@ from games.bonus.notices import (
 from games.charts.song_stats import SongStat
 from games.index import Index
 from games.models import Game
+from tasks.hourly import HourlyTask
 from ui.bonus import midnight, notice_embed, notice_text
 from ui.images import Upload, files, prepare
 from ui.text import timestamp
-
-from .hourly import HourlyTask
 
 if TYPE_CHECKING:
     from bot import dBot

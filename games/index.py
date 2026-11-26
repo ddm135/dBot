@@ -13,17 +13,13 @@ from dataclasses import dataclass, field
 from datetime import date, datetime
 from typing import TYPE_CHECKING, Literal
 
-from games.bonus.bonuses import (
-    DEFAULT_RULES,
-    BonusCalendar,
-    BonusRules,
-    build_song_periods,
-)
-from games.bonus.decks import (
+from games.bonus.events import BonusCalendar
+from games.bonus.periods import DEFAULT_RULES, BonusRules, build_song_periods
+from games.data.decks import (
+    HIDDEN_SUFFIX,
     Deck,
     DeckIndex,
     DeckScore,
-    Entry,
     build_deck_index,
     clean,
     deck_scores,
@@ -34,8 +30,8 @@ from games.bonus.decks import (
 )
 from games.data.schema import LOCALE_COLUMNS
 from games.data.strings import pick
-from games.models import Game, StringsConfig
-from tuning import Pacer
+from games.models import Entry, Game, StringsConfig
+from ops.tuning import Pacer
 
 if TYPE_CHECKING:
     from games.service import DataService, State
@@ -233,7 +229,6 @@ def build_index(
 
 
 type NameKind = Literal["song", "deck"]
-HIDDEN_SUFFIX = " (Hidden)"
 
 
 def deck_names(index: Index, deck: Deck) -> set[str]:
@@ -374,7 +369,7 @@ class Indexes:
         self, index: Index, years: tuple[int, ...], *, paced: bool = False
     ) -> BonusCalendar:
         # In a worker thread it rests between songs, so that the host's CPU quota
-        # is not spent in one go (see tuning); on the loop it must not.
+        # is not spent in one go (see ops.tuning); on the loop it must not.
         pace = Pacer(CALENDAR_SHARE) if paced else None
         songs = build_song_periods(
             index.decks,

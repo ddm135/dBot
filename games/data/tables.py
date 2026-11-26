@@ -6,13 +6,14 @@ import asyncio
 import logging
 from collections.abc import Collection, Mapping
 from dataclasses import dataclass, field
+from typing import Any, Protocol
 
 import httpx
 
 from games.api.crypto import Cipher, CryptoError
+from games.api.http import DEFAULT_RETRY, RetryPolicy, fetch
 from games.api.magic_onion import MagicOnionClient, fetch_bundle_context
 from games.api.manifest import Manifest
-from games.api.server import Server
 from games.data.schema import AssetContext, AssetContextError, tables_to_download
 from games.data.storage import (
     REFERENCE_FIELDS,
@@ -22,7 +23,6 @@ from games.data.storage import (
     slim,
 )
 from games.errors import DataSyncError, ServerError
-from games.http import DEFAULT_RETRY, RetryPolicy, fetch
 from games.models import Game
 
 logger = logging.getLogger(__name__)
@@ -94,10 +94,16 @@ async def _bundle_context(
         return None
 
 
+class AssetServer(Protocol):
+    """What the table sync asks of the game server (the real one is ``Server``)."""
+
+    async def check_asset_bundle(self, manifest: Manifest) -> dict[str, Any]: ...
+
+
 async def _current_index(
     game: Game,
     manifest: Manifest,
-    server: Server,
+    server: AssetServer,
     stored: AssetContext | None,
     bundles: MagicOnionClient | None = None,
     client: httpx.AsyncClient | None = None,
@@ -143,7 +149,7 @@ async def sync_tables(
     game: Game,
     manifest: Manifest,
     *,
-    server: Server,
+    server: AssetServer,
     client: httpx.AsyncClient,
     cipher: Cipher,
     store: DataStore,
@@ -158,6 +164,8 @@ async def sync_tables(
     the kept copies where they are still valid. A table that fails keeps its older
     copy and is listed in ``failed``.
     """
+    # `stored` is the listing from the last successful sync (what the files on disk
+    # are); `current` is what the server lists now. The difference is the work.
     stored = loaded.assets if loaded is not None else await store.read_assets(game.key)
     current, online = await _current_index(
         game, manifest, server, stored, bundles, client, retry
@@ -171,6 +179,8 @@ async def sync_tables(
     failed: dict[str, str] = {}
 
     for name, file in current.table_files().items():
+        # Sources for an unchanged table, cheapest first: the copy in memory, the cut-
+        # down copy on disk, then the full file. Only if none exists is it downloaded.
         if name not in wanted:
             kept = loaded.tables.get(name) if loaded is not None else None
             if kept is None and name in REFERENCE_FIELDS:
@@ -188,22 +198,30 @@ async def sync_tables(
         except (ServerError, CryptoError, httpx.HTTPError) as exc:
             logger.warning("%s: could not update %s: %s", game.key, name, exc)
             failed[name] = str(exc)
+            # One bad table must not take the game down: keep serving its old copy.
             previous = loaded.tables.get(name) if loaded is not None else None
             if previous is None:
                 previous = await store.read_table(game.key, name)
             if previous is not None:
                 tables[name] = previous
             continue
+        # The full file goes to disk; memory keeps only the slim version, because the
+        # full tables are large and the bot reads few of their columns. slim is CPU
+        # heavy, so it runs in a thread rather than blocking the event loop.
         await store.write_table(game.key, name, table)
         tables[name] = await asyncio.to_thread(slim, name, table)
         downloaded.append(name)
 
     await _prune_tables(store, game, tables, downloaded, loaded, saved)
 
+    # Record the new listing, except that a failed table keeps its old entry: the
+    # next sync then sees it as out of date and tries again, instead of treating the
+    # stale copy as current.
     effective = current
     if failed:
         old = stored.context if stored is not None else {}
         effective = current.with_tables({name: old.get(name) for name in failed})
+    # Skip the write when nothing changed, so an idle sync does not touch the disk.
     if stored is None or effective != stored:
         await store.write_assets(game.key, effective)
 

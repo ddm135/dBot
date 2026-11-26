@@ -17,8 +17,9 @@ from dataclasses import dataclass
 from datetime import date
 from typing import Literal, NamedTuple
 
-from games.bonus.bonuses import Bonus, BonusEvent, EventKind, MemberBonus, ReleaseBonus
-from games.bonus.decks import Deck
+from games.bonus.events import BonusEvent, EventKind
+from games.bonus.periods import Bonus, MemberBonus, ReleaseBonus
+from games.data.decks import Deck
 
 type Category = Literal["start", "end"]
 # What a ping says an entry does: "drop" is a following bonus that gives less,

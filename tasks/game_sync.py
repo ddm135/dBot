@@ -8,7 +8,7 @@ import logging
 from collections.abc import Awaitable
 from typing import TYPE_CHECKING, ClassVar
 
-from .hourly import HourlyTask
+from tasks.hourly import HourlyTask
 
 if TYPE_CHECKING:
     from bot import dBot

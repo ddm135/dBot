@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from app import run
 from config import Settings
 from extensions import EXTENSIONS
-from tuning import limit_arenas
+from ops.tuning import limit_arenas
 
 
 def main() -> None:

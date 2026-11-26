@@ -5,12 +5,11 @@ acquires and renews it, and :func:`supervise` runs a bot for as long as it holds
 """
 
 from config import ValkeySettings
-
-from .base import BaseLease
-from .glide import GlideLease
-from .leader import Leader
-from .supervisor import supervise
-from .valkey import ValkeyLease
+from lease.base import BaseLease
+from lease.glide import GlideLease
+from lease.leader import Leader
+from lease.supervisor import supervise
+from lease.valkey import ValkeyLease
 
 
 def create_lease_backend(

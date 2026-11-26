@@ -6,9 +6,19 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+from cogs.common import (
+    NO_DATA,
+    Itr,
+    deck_autocomplete,
+    deck_of,
+    game_choices,
+    parse_code,
+    selected_game,
+    song_autocomplete,
+)
 from games.api.world_records import Leaderboard, Record, WorldRecordError
-from games.bonus.decks import Deck
-from games.bonus.schedule import (
+from games.data.decks import Deck
+from games.data.schedule import (
     SeasonError,
     check_weekly,
     current_monday,
@@ -22,17 +32,6 @@ from games.registry import GAMES
 from ui.images import Upload, files, prepare
 from ui.pages import Paginator
 from ui.world_record import PER_PAGE, artist_embed, leaderboard_embed, page_total
-
-from .common import (
-    NO_DATA,
-    Itr,
-    deck_autocomplete,
-    deck_of,
-    game_choices,
-    parse_code,
-    selected_game,
-    song_autocomplete,
-)
 
 if TYPE_CHECKING:
     from bot import dBot
@@ -167,7 +166,15 @@ class WorldRecord(
         album = await self.bot.images.album(game.key, song.code)
         thumbnail, more = prepare(album, None, "album")
         await self._show_board(
-            itr, game, deck, song.label, season, board, thumbnail, icon, uploads + more
+            itr,
+            game,
+            deck,
+            song.display_label,
+            season,
+            board,
+            thumbnail,
+            icon,
+            uploads + more,
         )
 
     async def _artist(
@@ -198,7 +205,9 @@ class WorldRecord(
                 updated = max(updated, result.updated) if updated else result.updated
 
         def render(page: int, _: int) -> discord.Embed:
-            return artist_embed(game, deck.name, season, rows, updated, icon, page)
+            return artist_embed(
+                game, deck.display_name, season, rows, updated, icon, page
+            )
 
         await Paginator(itr.user, render, page_total(len(rows))).start(
             itr, files=files(uploads)
@@ -272,7 +281,7 @@ class WorldRecord(
         def render(page: int, _: int) -> discord.Embed:
             return leaderboard_embed(
                 game,
-                deck.name,
+                deck.display_name,
                 song,
                 season,
                 board.records,

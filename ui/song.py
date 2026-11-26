@@ -2,11 +2,10 @@
 
 import discord
 
-from games.bonus.decks import Deck, Song
 from games.charts.song_stats import SongStat
+from games.data.decks import Deck, Song
 from games.index import Index
-
-from .text import escape, md
+from ui.text import escape, md
 
 
 def song_embed(
@@ -21,8 +20,8 @@ def song_embed(
     """The artist and song, the game as author, and the song's duration."""
     colour = index.album_color(song.code)  # black is a colour too
     embed = discord.Embed(
-        title=escape(deck.name),
-        description=md(t"**{song.label}**"),
+        title=escape(deck.display_name),
+        description=md(t"**{song.display_label}**"),
         color=index.game.color if colour is None else colour,
     )
     embed.set_author(name=f"{index.game.name} - {author}", icon_url=icon)

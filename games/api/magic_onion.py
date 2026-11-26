@@ -18,9 +18,9 @@ import httpx
 import msgpack
 
 from games.api.crypto import Cipher
+from games.api.http import DEFAULT_RETRY, RetryPolicy, fetch
 from games.data.schema import AssetContext
 from games.errors import DataSyncError, ServerError
-from games.http import DEFAULT_RETRY, RetryPolicy, fetch
 from games.models import GrpcConfig
 
 logger = logging.getLogger(__name__)

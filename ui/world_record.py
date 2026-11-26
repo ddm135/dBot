@@ -8,9 +8,8 @@ import discord
 from games.api.world_records import Record
 from games.models import Game
 from templates import Raw
-
-from .pages import slice_page
-from .text import escape, md
+from ui.pages import slice_page
+from ui.text import escape, md
 
 PER_PAGE = 10
 

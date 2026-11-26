@@ -7,14 +7,32 @@ each key the internal ids and bundle URLs of its locations.
 
 import asyncio
 import struct
-from collections.abc import Iterator, Sequence
-from typing import NamedTuple
+from collections.abc import Iterable, Iterator, Sequence
+from typing import NamedTuple, Protocol
 
 NONE = 0xFFFFFFFF  # uint.MaxValue, used as "null" offset
 UNICODE_FLAG = 0x80000000  # kUnicodeStringFlag
 DYNAMIC_FLAG = 0x40000000  # kDynamicStringFlag
 CLEAR_MASK = 0x3FFFFFFF  # kClearFlagsMask
 CATALOG_VERSION = 2  # ContentCatalogData.kVersion
+
+
+class HasKeys(Protocol):
+    """A catalog that can list its keys."""
+
+    def keys(self) -> Iterable[object]: ...
+
+
+class HasBundleUrls(Protocol):
+    """A catalog that can say which bundle files a key lives in."""
+
+    def bundle_urls(self, key: object) -> list[str | None]: ...
+
+
+class HasInternalIds(Protocol):
+    """A catalog that can give the internal ids (asset paths) of a key."""
+
+    def internal_ids(self, key: object) -> list[str | None]: ...
 
 
 class CatalogError(ValueError):

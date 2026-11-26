@@ -23,9 +23,9 @@ from games.api.auth import (
     fetch_google_id_token,
 )
 from games.api.crypto import Cipher, CryptoError, random_iv
+from games.api.http import DEFAULT_RETRY, RetryPolicy, is_retryable_status, send
 from games.api.manifest import Manifest
 from games.errors import LoginError, ServerError
-from games.http import DEFAULT_RETRY, RetryPolicy, is_retryable_status, send
 from games.models import Game
 
 logger = logging.getLogger(__name__)

@@ -7,10 +7,9 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+from cogs.common import Itr
 from db.word_pings import IgnoreKind, Subscription, WordPings, normalize
 from ui.text import truncate
-
-from .common import Itr
 
 if TYPE_CHECKING:
     from bot import dBot

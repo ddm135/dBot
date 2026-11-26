@@ -9,6 +9,7 @@ from pathlib import Path
 import httpx
 
 from games.api.crypto import Cipher
+from games.api.http import DEFAULT_RETRY, RetryPolicy
 from games.api.magic_onion import MagicOnionClient
 from games.api.manifest import Manifest, fetch_manifest
 from games.api.server import Server
@@ -18,7 +19,6 @@ from games.data.catalogs import LoadedCatalog, addressables_version, sync_catalo
 from games.data.storage import DataStore, Table
 from games.data.tables import LoadedTables, sync_tables
 from games.errors import ManifestError, ServiceError
-from games.http import DEFAULT_RETRY, RetryPolicy
 from games.media.apks import SETTINGS_MEMBER, ApkStore
 from games.models import Game
 from games.registry import GAMES

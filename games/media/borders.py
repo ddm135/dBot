@@ -13,20 +13,17 @@ from itertools import count
 from pathlib import PurePosixPath
 from typing import Any, Protocol
 
+from games.data.catalog import HasInternalIds, HasKeys
 from games.data.strings import Strings, pick
 from games.models import Game, Tables
 
 
-class Catalog(Protocol):
+class BorderCatalog(HasKeys, HasInternalIds, Protocol):
     """What the borders need of a catalog: its keys and their internal ids."""
-
-    def keys(self) -> Any: ...
-
-    def internal_ids(self, key: object) -> list[str | None]: ...
 
 
 def border_files(
-    game: Game, tables: Tables, catalog: Catalog, strings: Strings | None = None
+    game: Game, tables: Tables, catalog: BorderCatalog, strings: Strings | None = None
 ) -> dict[str, str]:
     """``{announced name: catalog key}`` for every border of the game."""
     if game.catalog_patterns is not None:
@@ -62,7 +59,7 @@ def _theme_names(game: Game, tables: Tables, strings: Strings) -> dict[str, str 
 
 
 def _from_catalog(
-    game: Game, tables: Tables, strings: Strings, catalog: Catalog
+    game: Game, tables: Tables, strings: Strings, catalog: BorderCatalog
 ) -> dict[str, str]:
     assert game.catalog_patterns is not None
     pattern = game.catalog_patterns.border

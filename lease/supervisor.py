@@ -4,20 +4,35 @@ import asyncio
 import logging
 import time
 from collections.abc import Callable
+from typing import Protocol
 
 import psutil
 from discord.ext import commands
 
-from tuning import release_memory
-
-from .console import listen
-from .leader import Leader
+from ops.console import listen
+from ops.tuning import release_memory
 
 logger = logging.getLogger(__name__)
 
 
+class Holder(Protocol):
+    """A lease that is held until it is lost (what a term waits on)."""
+
+    async def hold(self) -> object: ...
+
+
+class Lease(Holder, Protocol):
+    """What the supervisor asks of a :class:`lease.leader.Leader`."""
+
+    async def acquire(self, stop: asyncio.Event | None = None) -> bool: ...
+
+    async def release(self) -> None: ...
+
+    def mark_unhealthy(self) -> None: ...
+
+
 async def supervise(
-    leader: Leader,
+    leader: Lease,
     /,
     make_bot: Callable[[], commands.Bot],
     token: str,
@@ -68,7 +83,7 @@ def _rss() -> str:
 
 
 async def _serve_term(
-    leader: Leader,
+    leader: Holder,
     /,
     bot: commands.Bot,
     token: str,
@@ -76,6 +91,12 @@ async def _serve_term(
     stop: asyncio.Event,
     close_timeout: float,
 ) -> bool:
+    """Run ``bot`` until it ends, the lease is lost or ``stop`` is set, then close it.
+
+    Return whether the bot crashed (the caller cools down only after a crash).
+    """
+    # The four tasks race: whichever of the bot, the lease and the stop request
+    # finishes first ends the term. The console only listens for commands.
     bot_task = asyncio.create_task(bot.start(token), name="bot")
     hold_task = asyncio.create_task(leader.hold(), name="lease")
     stop_task = asyncio.create_task(stop.wait(), name="stop")
@@ -101,6 +122,10 @@ async def _serve_term(
                 reason = "Lease error."
                 logger.warning("Stepping down: %s", reason, exc_info=True)
     finally:
+        # Whatever ended the term, the bot must be closed before the lease is given up,
+        # or two instances could be connected to Discord at once. A hung close is bounded
+        # by close_timeout and then the connection is cut, so a stuck bot cannot hold
+        # the lease forever.
         console_task.cancel()
         hold_task.cancel()
         stop_task.cancel()
@@ -117,6 +142,7 @@ async def _serve_term(
             logger.exception("Error while stopping the bot.")
             await _drop_connection(bot)
         bot_task.cancel()
+        # Reap every task so none is left running or warns "never retrieved".
         await asyncio.gather(
             bot_task, hold_task, stop_task, console_task, return_exceptions=True
         )

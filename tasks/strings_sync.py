@@ -5,8 +5,7 @@ from typing import TYPE_CHECKING
 
 from games.data.strings import load_strings
 from games.service import State
-
-from .hourly import HourlyTask
+from tasks.hourly import HourlyTask
 
 if TYPE_CHECKING:
     from bot import dBot

@@ -7,7 +7,7 @@ from typing import Any, Protocol
 
 from games.api.auth import LoginCredentials, Session
 from games.api.manifest import Manifest
-from games.api.server import Server
+from games.api.server import LoginResult
 from games.errors import LoginError, ServerError
 from games.models import Game
 from games.registry import GAMES
@@ -30,7 +30,7 @@ class Account:
     def __init__(
         self,
         game: Game,
-        server: Server,
+        server: GameServer,
         credentials: LoginCredentials,
         *,
         on_change: ChangeCallback | None = None,
@@ -112,6 +112,27 @@ class Account:
             await self._on_change(self._credentials)
 
 
+class GameServer(Protocol):
+    """What an account asks of the game server (the real one is ``Server``)."""
+
+    async def login(
+        self, game: Game, manifest: Manifest, credentials: LoginCredentials
+    ) -> LoginResult: ...
+
+    async def session_call(
+        self,
+        manifest: Manifest,
+        session: Session,
+        class_: str,
+        method: str,
+        *params: Any,
+    ) -> dict[str, Any]: ...
+
+    async def apply_access_token(
+        self, manifest: Manifest, session: Session
+    ) -> None: ...
+
+
 class CredentialStore(Protocol):
     """Where credentials are kept (the database)."""
 
@@ -123,7 +144,7 @@ class CredentialStore(Protocol):
 class Accounts:
     """One :class:`Account` per game that has stored credentials."""
 
-    def __init__(self, server: Server, store: CredentialStore) -> None:
+    def __init__(self, server: GameServer, store: CredentialStore) -> None:
         self._server = server
         self._store = store
         self._accounts: dict[str, Account] = {}

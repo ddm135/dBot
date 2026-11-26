@@ -16,18 +16,18 @@ from db import Database
 from extensions import EXTENSIONS
 from games.api.accounts import Accounts
 from games.api.crypto import Cipher
+from games.api.http import create_client
 from games.api.stores import PlayStore
 from games.api.world_records import WorldRecords
 from games.charts.song_stats import SongStatsStore
-from games.http import create_client
 from games.index import Indexes
 from games.media.apks import ApkStore
 from games.media.bundles import BundleStore
 from games.media.images import ImageService
 from games.registry import GAMES
 from games.service import DataService
-from search import Searcher
-from ssl_pins import SslPinner
+from ui.search import Searcher
+from ui.ssl_pins import SslPinner
 
 logger = logging.getLogger(__name__)
 

@@ -9,10 +9,9 @@ import discord
 
 from channels import find_channel
 from discord_ids import NEXT_UPDATE_CHANNEL_ID
-from games.bonus.schedule import WINDOW, next_update
+from games.data.schedule import WINDOW, next_update
 from games.models import Game
-
-from .hourly import HourlyTask
+from tasks.hourly import HourlyTask
 
 if TYPE_CHECKING:
     from bot import dBot

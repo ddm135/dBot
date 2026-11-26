@@ -8,8 +8,20 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from games.bonus.bonuses import BonusCalendar, deck_entries, max_score, top_scores
-from games.bonus.decks import Deck
+from cogs.common import (
+    NO_DATA,
+    Itr,
+    choose_artist,
+    deck_autocomplete,
+    deck_of,
+    game_choices,
+    has_bonuses,
+    parse_code,
+    selected_game,
+)
+from games.bonus.entries import deck_entries, max_score, top_scores
+from games.bonus.events import BonusCalendar
+from games.data.decks import Deck
 from games.index import Index
 from games.registry import GAMES
 from ui.bonus import (
@@ -26,18 +38,6 @@ from ui.bonus import (
 from ui.images import Upload, files
 from ui.pages import Paginator, page_count
 from ui.text import md
-
-from .common import (
-    NO_DATA,
-    Itr,
-    choose_artist,
-    deck_autocomplete,
-    deck_of,
-    game_choices,
-    has_bonuses,
-    parse_code,
-    selected_game,
-)
 
 if TYPE_CHECKING:
     from bot import dBot

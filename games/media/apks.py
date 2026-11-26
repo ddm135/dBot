@@ -18,10 +18,11 @@ from typing import Protocol
 
 import httpx
 
+from games.api.http import DEFAULT_RETRY, RetryPolicy, download
 from games.api.stores import PlayDetails
+from games.data.catalog import HasBundleUrls
 from games.data.schema import FILE_FIELDS
 from games.errors import PlayStoreError
-from games.http import DEFAULT_RETRY, RetryPolicy, download
 from games.registry import GAMES
 
 logger = logging.getLogger(__name__)
@@ -61,12 +62,6 @@ def read_member(apk: Path, member: str) -> bytes | None:
     except zipfile.BadZipFile, OSError:
         logger.warning("Could not read %s.", apk, exc_info=True)
         return None
-
-
-class HasBundleUrls(Protocol):
-    """What :func:`needs_apk` asks of a catalog."""
-
-    def bundle_urls(self, key: object) -> list[str | None]: ...
 
 
 def needs_apk(

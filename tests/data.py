@@ -3,15 +3,18 @@
 import copy
 import json
 from datetime import date, datetime
+from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
 
-from games.http import RetryPolicy
+from games.api.http import RetryPolicy
 
 KST = ZoneInfo("Asia/Seoul")
 NO_RETRY = RetryPolicy(
     attempts=1, initial=0, maximum=0, jitter=0
 )  # no waiting in tests
+
+FIXTURES = Path(__file__).parent / "fixtures"
 
 
 def ms(year: int, month: int, day: int) -> int:
@@ -127,3 +130,36 @@ class MemoryStats:
         self.songs[game] = new
         self.versions[game] = self.versions.get(game, 0) + 1
         return len(new)
+
+
+def sample() -> Tables:
+    t = Tables()
+    t.group(1, "TWICE", emblemImage=900)
+    t.group(2, "BTS")
+    t.artist(10, "Nayeon", 1, birthday=(1995, 9, 22))
+    t.artist(11, "Jihyo", 1, birthday=(1997, 2, 1))
+    t.artist(12, "Staff", 1, artistType=4)
+    t.artist(20, "Jungkook", 2, birthday=(1997, 9, 1))
+    t.song(100, "Cheer Up", 1, artists=[10, 11], album=901, albumBgColor="0xFF8800FF")
+    t.song(101, "Fancy", 1, artists=[10])
+    t.song(200, "Dynamite", 2, artists=[20])
+    t.locale["5000"] = {"koKR": "치어 업", "enUS": "Cheer Up", "jaJP": "チアアップ"}
+    t.music["100"]["localeName"] = 5000
+    t.music["200"]["isHidden"] = True
+    t.urls = {"900": {"url": "http://x/emblem.png"}, "901": {"url": "http://x/a.png"}}
+    return t
+
+
+BUNDLE = (
+    FIXTURES
+    / "sounds_assets_sounds_nct_dream_770_9d5f0cc79824258362a8bfa981f4ed7a.bundle"
+)
+
+
+EASY = "easy_pattern_nct_dream_never_goodbye_220427"
+
+
+NORMAL = "normal_pattern_nct_dream_never_goodbye_220427"
+
+
+HARD = "hard_pattern_nct_dream_never_goodbye_220427"

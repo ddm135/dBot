@@ -15,7 +15,7 @@ from concurrent.futures import ThreadPoolExecutor
 from bot import dBot
 from config import Settings
 from lease import BaseLease, Leader, create_lease_backend, supervise
-from lease.watchdog import LoopWatchdog
+from ops.watchdog import LoopWatchdog
 
 logger = logging.getLogger(__name__)
 

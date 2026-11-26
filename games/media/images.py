@@ -25,7 +25,7 @@ from games.media.bundles import (
     describe,
     open_environment,
 )
-from tuning import release_memory
+from ops.tuning import release_memory
 
 if TYPE_CHECKING:
     from games.index import Index

@@ -13,8 +13,8 @@ from typing import Any, Self
 import httpx
 from packaging.version import InvalidVersion, Version
 
+from games.api.http import DEFAULT_RETRY, RetryPolicy, is_retryable_status, send
 from games.errors import ManifestError
-from games.http import DEFAULT_RETRY, RetryPolicy, is_retryable_status, send
 from games.models import Game
 
 logger = logging.getLogger(__name__)
@@ -100,6 +100,9 @@ async def fetch_manifest(
     version that has no manifest falls back to the floor.
     """
     floor = game.version_floor
+    # Start from the newest version we already know of: manifests only ever point
+    # forward, so starting higher saves hops, and never below the floor, which is the
+    # oldest version the server still has a manifest for.
     if version is None:
         candidates = [floor]
         if known is not None:
@@ -123,6 +126,8 @@ async def fetch_manifest(
                 retryable=True,
             )
 
+        # A version the server does not know answers with a non-JSON error page rather
+        # than a clean 404, so a parse failure is how "no such manifest" shows up.
         try:
             manifest = Manifest.from_json(json.loads(response.text))
         except json.JSONDecodeError:
@@ -134,9 +139,12 @@ async def fetch_manifest(
             logger.info(
                 "%s: No manifest for %s, trying %s...", game.key, version, floor
             )
-            version = floor
+            version = floor  # a guessed-too-new version; fall back to a known one
             continue
 
+        # Settled: this manifest names the version we asked for (or an older one).
+        # Otherwise a newer version has its own manifest, so follow it. MAX_HOPS stops
+        # a loop if two manifests point at each other.
         if _version(manifest.active_version_android) <= _version(version):
             return manifest
         version = manifest.active_version_android

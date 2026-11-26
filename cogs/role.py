@@ -8,9 +8,8 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+from cogs.common import Itr
 from discord_ids import SUPERSTAR_ROLES
-
-from .common import Itr
 
 if TYPE_CHECKING:
     from bot import dBot
@@ -199,6 +198,10 @@ class Role(
         ----------
         role: Role
         """
+        # Roles are ranked by position, and a member wears one rank per group: the
+        # chosen role plus every lower one are applied, and the higher ones are stored
+        # (removed from the member but remembered) so they can be restored later.
+        # `plan_set` decides which; this method only validates, applies and reports.
         await itr.response.defer()
         assert itr.guild and isinstance(itr.user, discord.Member)
         target = self._find(itr.guild, role)
@@ -207,6 +210,7 @@ class Role(
             return
         stored = await self.bot.db.roles.get(itr.user.id)
         worn = {r.id for r in itr.user.roles}
+        # Owned means stored or currently worn; anything else cannot be claimed.
         if target.id not in stored and target.id not in worn:
             await itr.followup.send("You do not own this role.")
             return
@@ -216,12 +220,15 @@ class Role(
             guild_order, group_roles_of(itr.guild.id), target.id, worn, stored
         )
         by_id = {r.id: r for r in itr.guild.roles}
+        # `apply` and `store` are ids from the guild's own role list, so they resolve.
         add = [by_id[i] for i in change.apply]
         remove = [by_id[i] for i in change.store]
         if add:
             await itr.user.add_roles(*add)
         if remove:
             await itr.user.remove_roles(*remove)
+        # Discord first, then the database: if a Discord call fails the stored set
+        # still matches what the member wears. Stored roles are the ones taken off.
         await self.bot.db.roles.change(
             itr.user.id, add=change.store, remove=change.apply
         )

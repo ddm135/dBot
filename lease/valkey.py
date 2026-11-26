@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from .base import SCRIPTS, BaseLease
+from lease.base import SCRIPTS, BaseLease
 
 
 class ValkeyLease(BaseLease):

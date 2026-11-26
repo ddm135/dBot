@@ -5,9 +5,7 @@ from typing import TYPE_CHECKING
 from discord import app_commands
 from discord.ext import commands
 
-from games.registry import GAMES
-
-from .common import (
+from cogs.common import (
     Itr,
     deck_autocomplete,
     game_choices,
@@ -15,6 +13,7 @@ from .common import (
     parse_code,
     song_autocomplete,
 )
+from games.registry import GAMES
 
 if TYPE_CHECKING:
     from bot import dBot
@@ -24,7 +23,7 @@ async def song_id_autocomplete(
     itr: Itr, current: str
 ) -> list[app_commands.Choice[str]]:
     """A song code is only offered once it is typed in full and exists."""
-    from .common import selected_game
+    from cogs.common import selected_game
 
     key = selected_game(itr)
     code = parse_code(current)

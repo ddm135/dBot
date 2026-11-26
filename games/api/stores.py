@@ -18,8 +18,8 @@ from gplaydl.api import (
 from gplaydl.auth import DispenserError, ensure_auth
 from packaging.version import InvalidVersion, Version
 
+from games.api.http import DEFAULT_RETRY, RetryPolicy, send
 from games.errors import PlayStoreError
-from games.http import DEFAULT_RETRY, RetryPolicy, send
 from games.models import AppStoreLookup, Game
 
 logger = logging.getLogger(__name__)

@@ -7,9 +7,8 @@ from typing import TYPE_CHECKING
 from games.api.accounts import fetch_todays_song
 from games.errors import ServiceError
 from games.models import Game
-from ssl_pins import ssl_day
-
-from .hourly import HourlyTask
+from tasks.hourly import HourlyTask
+from ui.ssl_pins import ssl_day
 
 if TYPE_CHECKING:
     from bot import dBot

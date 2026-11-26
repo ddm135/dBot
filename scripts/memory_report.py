@@ -82,8 +82,8 @@ async def report(data_dir: Path) -> None:
         before = traced()
         try:
             index = build_index(game, tables)
-        except Exception as error:  # noqa: BLE001 - report what can be measured
-            print(f"{game.key}: no index ({error!r})")
+        except Exception as exc:  # noqa: BLE001 - report what can be measured
+            print(f"{game.key}: no index ({exc!r})")
             continue
         keep.append(index)
         rows.append(((traced() - before) / MB, f"{game.key} index (beyond tables)"))

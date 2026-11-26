@@ -13,11 +13,12 @@ from typing import Any
 
 import asyncpg
 
-from .bonus_pings import IMPORT_PREFERENCES, IMPORT_SUBSCRIPTION
-from .misc import INSERT_CREDENTIAL_IF_NEW, INSERT_LIVE_THEME_IF_NEW
-from .roles import INSERT_IGNORING
-from .ssl import INSERT_MISSING
-from .word_pings import IMPORT_IGNORE, IMPORT_PING, normalize
+from db.bonus_pings import IMPORT_PREFERENCES, IMPORT_SUBSCRIPTION
+from db.credentials import INSERT_CREDENTIAL_IF_NEW
+from db.live_themes import INSERT_LIVE_THEME_IF_NEW
+from db.roles import INSERT_IGNORING
+from db.ssl import INSERT_MISSING
+from db.word_pings import IMPORT_IGNORE, IMPORT_PING, normalize
 
 logger = logging.getLogger(__name__)
 

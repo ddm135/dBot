@@ -9,8 +9,7 @@ import logging
 from typing import TYPE_CHECKING
 
 from games.media.images import PrefetchResult
-
-from .hourly import HourlyTask
+from tasks.hourly import HourlyTask
 
 if TYPE_CHECKING:
     from bot import dBot

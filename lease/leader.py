@@ -12,9 +12,7 @@ import logging
 import math
 import time
 from collections.abc import Awaitable, Callable
-from typing import Any
-
-from .base import BaseLease
+from typing import Any, Protocol
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +25,18 @@ class StepDownReason(enum.StrEnum):
     HANDOVER = "The preferred instance is online."
 
 
+class LeaseBackend(Protocol):
+    """What a leader needs of the store that holds the lease (``BaseLease``)."""
+
+    async def acquire_or_renew(self) -> bool: ...
+
+    async def release(self) -> None: ...
+
+    async def advertise_preferred(self) -> None: ...
+
+    async def preferred_waiting(self) -> bool: ...
+
+
 class Leader:
     """One instance's claim on the lease.
 
@@ -35,7 +45,7 @@ class Leader:
 
     def __init__(
         self,
-        backend: BaseLease,
+        backend: LeaseBackend,
         *,
         ttl: float,
         renew_interval: float,

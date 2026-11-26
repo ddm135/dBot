@@ -29,13 +29,13 @@ import httpx
 from dotenv import load_dotenv
 
 from config import Settings
-from games.data.catalog import CatalogError, load_catalog
+from games.data.catalog import BinaryCatalog, CatalogError, load_catalog
 from games.data.storage import DataStore
-from games.data.strings import load_strings
+from games.data.strings import Strings, load_strings
 from games.media.borders import border_files
 from games.media.bundles import BundleStore
 from games.media.drive import Drive, StoredFile, fingerprint
-from games.models import Game
+from games.models import Game, Tables
 from games.registry import GAMES
 from tasks.borders import _source
 
@@ -94,7 +94,9 @@ def plan(
     return result
 
 
-async def _load(game: Game, data_dir: Path, bundles: BundleStore):
+async def _load(
+    game: Game, data_dir: Path, bundles: BundleStore
+) -> tuple[Tables, BinaryCatalog, Strings] | None:
     store = DataStore(data_dir)
     tables = await store.read_all(game.key)
     catalog = None
