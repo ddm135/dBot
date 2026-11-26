@@ -70,6 +70,8 @@ def _code(entry: Entry) -> int:
 
 @dataclass(frozen=True, slots=True)
 class Song:
+    """A song of a deck, with the fields of the game table it comes from (``raw``)."""
+
     code: int
     name: str
     label: str  # unique inside its deck
@@ -91,6 +93,10 @@ class Song:
 
 @dataclass(frozen=True, slots=True)
 class Deck:
+    """A deck: an artist or an album with songs. ``label`` tells apart decks with
+    the same name; ``is_main`` is false for a deck with no visible song.
+    """
+
     code: int
     name: str
     label: str  # unique among decks
@@ -132,6 +138,8 @@ def _parse_codes(value: object) -> tuple[int, ...]:
 
 @dataclass(frozen=True, slots=True, eq=False)
 class DeckIndex:
+    """Every deck and song of a game by code, with the game's timezone."""
+
     decks: Mapping[int, Deck]
     songs: Mapping[int, Song]
     timezone: ZoneInfo
@@ -318,6 +326,8 @@ EXCLUDED_ARTIST_TYPE = 4
 
 @dataclass(frozen=True, slots=True)
 class DeckScore:
+    """What a deck's best score depends on: its member count and the game's base score."""
+
     member_count: int
     base: int  # 0 when the game has no known base score
 
@@ -339,6 +349,7 @@ def member_counts(artists: Mapping[str, Entry]) -> dict[int, int]:
 def deck_scores(
     tables: Tables, base_score: int | None, deck_codes: list[int]
 ) -> dict[int, DeckScore]:
+    """The :class:`DeckScore` of every deck."""
     counts = member_counts(tables.get("ArtistData", {}))
     scores: dict[int, DeckScore] = {}
     for code in deck_codes:

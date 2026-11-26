@@ -16,6 +16,12 @@ from .word_pings import WordPings
 
 
 class Database:
+    """Every store of the bot, over one connection pool.
+
+    Made with :meth:`connect`, which also applies the missing migrations and loads
+    the word pings into memory.
+    """
+
     def __init__(self, pool: asyncpg.Pool) -> None:
         self.pool = pool
         self.word_pings = WordPings(pool)
@@ -30,6 +36,7 @@ class Database:
 
     @classmethod
     async def connect(cls, settings: PostgresSettings) -> Self:
+        """Open the pool, bring the schema up to date, and load the word pings."""
         pool = await create_pool(settings)
         try:
             await migrate(pool)
@@ -41,6 +48,7 @@ class Database:
         return database
 
     async def close(self) -> None:
+        """Close the pool."""
         await self.pool.close()
 
 

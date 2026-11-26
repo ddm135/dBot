@@ -1,3 +1,10 @@
+"""The settings, read from environment variables.
+
+``Settings.from_env`` is the one place the environment is read; everything
+else is passed what it needs. It also checks that the lease timings are
+consistent with each other.
+"""
+
 import logging
 import os
 import socket
@@ -12,6 +19,8 @@ DEFAULT_DATA_DIR = Path(__file__).resolve().parent / "data"
 
 @dataclass(frozen=True, slots=True)
 class PostgresSettings:
+    """How to reach Postgres: ``POSTGRES_*`` variables."""
+
     host: str
     port: int
     username: str
@@ -23,6 +32,7 @@ class PostgresSettings:
 
     @classmethod
     def from_env(cls, env: Mapping[str, str] | None = None) -> Self:
+        """Read ``POSTGRES_*`` from ``env`` (default: the process environment)."""
         env = os.environ if env is None else env
         return cls(
             host=env.get("POSTGRES_HOST", "localhost"),
@@ -38,6 +48,10 @@ class PostgresSettings:
 
 @dataclass(frozen=True, slots=True)
 class ValkeySettings:
+    """How to reach the Valkey (or Redis) server that holds the lease: ``VALKEY_*``
+    variables, or ``REDIS_*``.
+    """
+
     host: str
     port: int
     username: str
@@ -46,6 +60,7 @@ class ValkeySettings:
 
     @classmethod
     def from_env(cls, env: Mapping[str, str] | None = None) -> Self:
+        """Read ``VALKEY_*`` (else ``REDIS_*``) from ``env``."""
         env = os.environ if env is None else env
         return cls(
             host=env.get("VALKEY_HOST") or env.get("REDIS_HOST") or "localhost",
@@ -77,6 +92,13 @@ class GoogleSettings:
 
 @dataclass(frozen=True, slots=True)
 class Settings:
+    """Everything the bot is configured with.
+
+    The lease timings must fit together: a leader renews every
+    ``lease_renew_interval`` and steps down ``lease_margin`` before its lease ends,
+    so that a slow or failed request can never leave two instances connected.
+    """
+
     discord_token: str
     postgres: PostgresSettings
     valkey: ValkeySettings
@@ -134,6 +156,9 @@ class Settings:
 
     @classmethod
     def from_env(cls, env: Mapping[str, str] | None = None) -> Self:
+        """Build the settings from ``DISCORD_TOKEN``, ``AES_KEY`` and the rest; raise
+        ``RuntimeError`` naming what is missing or inconsistent.
+        """
         env = os.environ if env is None else env
 
         token = env.get("DISCORD_TOKEN")

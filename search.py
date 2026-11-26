@@ -15,6 +15,8 @@ MAX_CHOICE_LENGTH = 100
 
 @dataclass(frozen=True, slots=True)
 class Hit:
+    """One search result: a deck or song, its label, and whether it is hidden."""
+
     code: int
     label: str
     deck_code: int | None = None  # for songs
@@ -22,6 +24,7 @@ class Hit:
 
     @property
     def choice_name(self) -> str:
+        """The label as an autocomplete choice: marked if hidden, cut to Discord's length."""
         name = f"{self.label}{HIDDEN_SUFFIX}" if self.hidden else self.label
         return (
             name
@@ -69,6 +72,8 @@ def _terms(
 
 
 class Search:
+    """Searching one game's decks and songs by name, any language, and by alias."""
+
     def __init__(
         self, index: Index, aliases: Mapping[tuple[AliasKind, int], list[str]]
     ) -> None:
@@ -80,6 +85,7 @@ class Search:
                 self._songs.append(_song_entry(index, song, aliases))
 
     def decks(self, query: str, limit: int = MAX_RESULTS) -> list[Hit]:
+        """The decks matching ``query``, best first."""
         return _search(self._decks, query, limit)
 
     def songs(

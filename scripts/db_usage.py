@@ -63,6 +63,7 @@ def _size(count: int) -> str:
 
 
 async def report() -> None:
+    """Print the database size, the tables and their dead rows, and the connections."""
     pool = await create_pool(PostgresSettings.from_env(), max_size=1)
     try:
         async with pool.acquire() as conn:

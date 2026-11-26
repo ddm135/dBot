@@ -1,3 +1,5 @@
+"""The app stores' listings of a game: the newest version, and its icon."""
+
 import asyncio
 import json
 import logging
@@ -27,6 +29,8 @@ ITUNES_LOOKUP_URL = "https://itunes.apple.com/lookup"
 
 @dataclass(frozen=True, slots=True)
 class AppStoreListing:
+    """A game's App Store version and icon."""
+
     version: str
     icon_url: str
 
@@ -37,6 +41,7 @@ async def lookup_app_store(
     *,
     retry: RetryPolicy = DEFAULT_RETRY,
 ) -> AppStoreListing | None:
+    """The game's App Store listing, or None if the store does not know it."""
     response = await send(
         client, "GET", ITUNES_LOOKUP_URL, params=lookup.params, retry=retry
     )
@@ -53,11 +58,15 @@ async def lookup_app_store(
 
 @dataclass(frozen=True, slots=True)
 class PlayDetails:
+    """A game's Google Play version name and code."""
+
     version_string: str
     version_code: int
 
 
 class PlayStore:
+    """Google Play through ``gplaydl``; its calls block, so they run in threads."""
+
     def __init__(self) -> None:
         self._auth_lock = asyncio.Lock()
 
@@ -103,6 +112,8 @@ class PlayStore:
 
 @dataclass(frozen=True, slots=True)
 class StoreInfo:
+    """What the stores say about a game."""
+
     version: str  # the newest of the store versions and the game's floor
     icon_url: str | None
     android_version: str | None = None
@@ -124,6 +135,10 @@ async def fetch_store_info(
     *,
     retry: RetryPolicy = DEFAULT_RETRY,
 ) -> StoreInfo:
+    """The newest version of a game from Google Play, the App Store and its floor.
+
+    A store that cannot be reached is skipped; unlisted games only have the floor.
+    """
     if game.is_unlisted:
         return StoreInfo(game.version_floor, game.icon_url)
 

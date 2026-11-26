@@ -48,6 +48,7 @@ async def create_pool(
 ) -> asyncpg.Pool:
     # JSON columns are left as text on purpose: asyncpg-typed encodes and
     # decodes them itself, so no jsonb codec is registered here.
+    """A pool to Postgres over TLS (if enabled), with the pool size from the settings."""
     tls = tls_context(settings)
     pool = await asyncpg.create_pool(
         host=settings.host,

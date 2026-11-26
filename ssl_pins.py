@@ -46,6 +46,7 @@ def reset_time(game: Game, last: date | None) -> datetime | None:
 
 
 def last_text(moment: datetime | None) -> str:
+    """How long ago a song or deck was last pinned, for the embed."""
     if moment is None:
         return "N/A"
     return f"{long_date(moment)} ({timestamp(moment)})"
@@ -62,6 +63,9 @@ def build_embed(
     last: LastAppearance,
     thumbnail: str | None = None,
 ) -> discord.Embed:
+    """The SSL song's embed: its album, length, when the song and its deck were last
+    pinned, and its notes.
+    """
     game = index.game
     embed = song_embed(index, deck, song, stat, slot_name(game, when), icon, thumbnail)
     counts = (
@@ -95,6 +99,10 @@ class PinError(Exception):
 
 
 class SslPinner:
+    """Posts and pins the SSL song of the day in the guilds' pin channels, and
+    keeps the channel topic and the history in step.
+    """
+
     def __init__(self, bot: dBot) -> None:
         self.bot = bot
 

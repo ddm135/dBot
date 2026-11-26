@@ -20,6 +20,13 @@ type ChangeCallback = Callable[[LoginCredentials], Awaitable[None]]
 
 
 class Account:
+    """A logged-in account of the bot in one game.
+
+    It logs in when it has no session, logs in again when the server rejects the
+    session, and keeps the new key the server offers; every change to the
+    credentials goes to ``on_change`` to be stored.
+    """
+
     def __init__(
         self,
         game: Game,
@@ -41,6 +48,7 @@ class Account:
     async def call(
         self, manifest: Manifest, class_: str, method: str, *params: Any
     ) -> dict[str, Any]:
+        """Call ``class_.method`` as this account, logging in first if needed."""
         async with self._lock:
             for _ in range(2):
                 session = await self._session(manifest)
@@ -104,10 +112,9 @@ class Account:
             await self._on_change(self._credentials)
 
 
-logger = logging.getLogger(__name__)
-
-
 class CredentialStore(Protocol):
+    """Where credentials are kept (the database)."""
+
     async def get(self, game: str) -> dict[str, Any] | None: ...
 
     async def save(self, game: str, fields: Mapping[str, Any]) -> None: ...
@@ -169,6 +176,9 @@ def todays_song(answer: Mapping[str, Any]) -> int | None:
 
 
 async def fetch_todays_song(account: Account, manifest: Manifest) -> int:
+    """The song code of the day from the game's server; ``ServerError`` if the answer has
+    none.
+    """
     answer = await account.call(manifest, "StarLeague", "getWeekPlayMusic")
     song = todays_song(answer)
     if song is None:

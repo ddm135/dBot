@@ -1,3 +1,7 @@
+"""Keeping a game's data tables current: what the server says is new, downloaded,
+decrypted, stored, and cut down to what the bot reads.
+"""
+
 import asyncio
 import logging
 from collections.abc import Collection, Mapping
@@ -55,12 +59,18 @@ async def _prune_tables(
 
 @dataclass(frozen=True, slots=True)
 class LoadedTables:
+    """A game's asset listing and the tables read for it."""
+
     assets: AssetContext
     tables: Mapping[str, Table] = field(repr=False)
 
 
 @dataclass(frozen=True, slots=True)
 class TableSyncResult:
+    """What a sync did: the tables now loaded, which were downloaded, which failed
+    (and why), and whether the server was reached.
+    """
+
     loaded: LoadedTables
     downloaded: tuple[str, ...]
     failed: Mapping[str, str]
@@ -141,6 +151,13 @@ async def sync_tables(
     retry: RetryPolicy = DEFAULT_RETRY,
     bundles: MagicOnionClient | None = None,
 ) -> TableSyncResult:
+    """Bring a game's tables up to date.
+
+    Asks the server (or the MagicOnion server, or the stored listing for unlisted
+    games) which files are new, downloads those, and reads the rest from disk, from
+    the kept copies where they are still valid. A table that fails keeps its older
+    copy and is listed in ``failed``.
+    """
     stored = loaded.assets if loaded is not None else await store.read_assets(game.key)
     current, online = await _current_index(
         game, manifest, server, stored, bundles, client, retry

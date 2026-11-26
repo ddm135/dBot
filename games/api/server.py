@@ -1,3 +1,10 @@
+"""The game's HTTP server: encrypted JSON calls, and logging in.
+
+Every call is a JSON object ``{class, method, params}`` sent encrypted with a
+fresh IV; the answer comes back encrypted or plain. Sessions are made by
+:meth:`Server.login`.
+"""
+
 import asyncio
 import json
 import logging
@@ -34,6 +41,8 @@ __all__ = ["LoginResult", "Server", "Session"]
 
 @dataclass(frozen=True, slots=True)
 class LoginResult:
+    """A session, and the credential fields the login changed."""
+
     session: Session
     updates: Mapping[str, Any]
 
@@ -87,6 +96,8 @@ def _payload(class_: str, method: str, *params: Any, **extra: Any) -> str:
 
 
 class Server:
+    """Calls to a game's server, and the logins that open sessions for them."""
+
     def __init__(
         self,
         client: httpx.AsyncClient,
@@ -99,6 +110,7 @@ class Server:
         self._retry = retry
 
     async def call(self, server_url: str, payload: str) -> dict[str, Any]:
+        """Send an encrypted request to ``server_url`` and return the decoded answer."""
         iv = random_iv()
         try:
             response = await send(
@@ -204,6 +216,7 @@ class Server:
         method: str,
         *params: Any,
     ) -> dict[str, Any]:
+        """A call made as a logged-in session."""
         return await self.call(
             manifest.server_url,
             _payload(class_, method, session.oid, session.key, *params),
@@ -213,6 +226,7 @@ class Server:
         await self.session_call(manifest, session, "Account", "applyAccessToken")
 
     async def create_authentication(self, manifest: Manifest) -> tuple[str, str]:
+        """Ask the server for a new user id and local password, for registering an account."""
         answer = await self.call(
             manifest.server_url, _payload("Account", "createAuthentication")
         )
@@ -233,6 +247,7 @@ class Server:
         token: str,
         nickname: str,
     ) -> None:
+        """Register a new account behind a provider's token under ``nickname``."""
         answer = await self.call(
             manifest.server_url,
             _payload(
@@ -271,6 +286,11 @@ class Server:
         manifest: Manifest,
         credentials: LoginCredentials,
     ) -> LoginResult:
+        """Log in to a game with its stored credentials.
+
+        Registers the account first if the provider has none. Raises ``LoginError``;
+        whatever was refreshed on the way is in its ``updates``.
+        """
         method = credentials.method_for(game)
         if method is None:
             raise LoginError(

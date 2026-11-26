@@ -35,6 +35,8 @@ CACHE_BYTES = 64 * 1024 * 1024
 
 
 class Play(Protocol):
+    """What the APK store needs of Google Play."""
+
     async def details(self, package: str) -> PlayDetails: ...
 
     async def split_url(
@@ -62,6 +64,8 @@ def read_member(apk: Path, member: str) -> bytes | None:
 
 
 class HasBundleUrls(Protocol):
+    """What :func:`needs_apk` asks of a catalog."""
+
     def bundle_urls(self, key: object) -> list[str | None]: ...
 
 
@@ -85,6 +89,12 @@ def needs_apk(
 
 
 class ApkStore:
+    """The games' APKs, kept on disk.
+
+    Games ship some bundles inside the APK. They are read from there, and the APK
+    is downloaded from Google Play when none is kept.
+    """
+
     def __init__(
         self,
         root: Path,

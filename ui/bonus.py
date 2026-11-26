@@ -27,15 +27,19 @@ MAX_POSITIONS = 5
 
 @dataclass(frozen=True, slots=True)
 class DeckEntries:
+    """A deck with its bonus entries in a window."""
+
     deck: Deck
     entries: list[BonusEntry]
 
     def best(self, index: Index, live: int) -> int:
+        """The best score the deck can reach with one of its entries."""
         base = index.deck_max_score(self.deck.code)
         return max((max_score(base, e.total, live) for e in self.entries), default=0)
 
 
 def midnight(index: Index, day: date) -> datetime:
+    """The start of ``day`` in the game's timezone."""
     return datetime.combine(day, time(), tzinfo=index.game.timezone)
 
 
@@ -54,6 +58,7 @@ def song_names(deck: Deck, entry: BonusEntry) -> str:
 
 
 def entry_icons(entry: BonusEntry) -> str:
+    """The emoji that say what an entry is for: a birthday, a release, or both."""
     if entry.has_release:
         return ":birthday: :dvd:" if entry.members else ":cd:"
     return ":birthday:"
@@ -65,6 +70,9 @@ def percent_text(total: int, before: int | None = None) -> str:
 
 
 def entry_prefix(entry: BonusEntry, today: date) -> str:
+    """What goes before an entry's name: struck through when over, a check mark when
+    active.
+    """
     match entry.status(today):
         case "expired":
             return "~~"
@@ -142,6 +150,9 @@ def list_embed(
     pages: int,
     per_page: int,
 ) -> discord.Embed:
+    """A page of ``/bonus list``: the entries of one artist or all, with their dates and
+    scores.
+    """
     shown = rows[(page - 1) * per_page : page * per_page]
     title = escape(deck.name) if deck else "All Bonuses"
     embed = discord.Embed(
@@ -179,6 +190,7 @@ def top_entry_text(
     last_day: date,
     live_theme: int,
 ) -> str:
+    """One entry of the weekly top as text: its name, percentage, dates and score."""
     name = entry_name(entry, deck, today)
     # The name line is bold; the prefix and the strike-through sit inside it.
     value = entry_value(
@@ -368,6 +380,8 @@ def chunks(parts: list[str], limit: int = FIELD_CHARS) -> list[str]:
 
 @dataclass(frozen=True, slots=True)
 class WeekRange:
+    """A range of days, first to last, inclusive."""
+
     first: date
     last: date  # inclusive
 
@@ -379,6 +393,7 @@ def week_range(today: date, *, weeks_ahead: int = 0) -> WeekRange:
 
 
 def month_range(today: date, *, months_ahead: int = 0) -> WeekRange:
+    """The month of ``today``, or one ``months_ahead``."""
     month = today.month - 1 + months_ahead
     first = date(today.year + month // 12, month % 12 + 1, 1)
     nxt = date(first.year + (first.month // 12), first.month % 12 + 1, 1)
@@ -386,4 +401,5 @@ def month_range(today: date, *, months_ahead: int = 0) -> WeekRange:
 
 
 def year_range(today: date) -> WeekRange:
+    """The year of ``today``."""
     return WeekRange(date(today.year, 1, 1), date(today.year, 12, 31))

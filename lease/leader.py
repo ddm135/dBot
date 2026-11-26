@@ -1,3 +1,11 @@
+"""Winning, holding and giving up the lease.
+
+A standby polls; a leader renews and steps down a margin before its lease would
+run out, so it has stopped before another instance can take over. The
+preferred instance (the main one) takes the lease back from a standby once it
+has been healthy for a while.
+"""
+
 import asyncio
 import enum
 import logging
@@ -12,12 +20,19 @@ logger = logging.getLogger(__name__)
 
 
 class StepDownReason(enum.StrEnum):
+    """Why a leader stopped holding the lease."""
+
     LOST = "The lease is held by another instance."
     EXPIRED = "The lease could not be renewed in time."
     HANDOVER = "The preferred instance is online."
 
 
 class Leader:
+    """One instance's claim on the lease.
+
+    ``clock`` and ``sleep`` are injectable so the timing can be tested.
+    """
+
     def __init__(
         self,
         backend: BaseLease,
@@ -99,6 +114,11 @@ class Leader:
             await asyncio.gather(sleeper, waiter, return_exceptions=True)
 
     async def acquire(self, stop: asyncio.Event | None = None) -> bool:
+        """Wait until this instance holds the lease; False if ``stop`` is set first.
+
+        The preferred instance asks for it, and advertises once it has been healthy
+        long enough; the others defer while it is advertising.
+        """
         while stop is None or not stop.is_set():
             if self._preferred:
                 result = await self._acquire()
@@ -116,6 +136,7 @@ class Leader:
         return False
 
     async def hold(self) -> StepDownReason:
+        """Keep renewing the lease; return why it could not be held any longer."""
         while True:
             delay = min(
                 self._renew_interval, self._valid_until - self._margin - self._clock()
@@ -131,6 +152,7 @@ class Leader:
                 return StepDownReason.HANDOVER
 
     async def release(self) -> None:
+        """Give the lease up at once, so another instance need not wait for it to expire."""
         try:
             await asyncio.wait_for(self._backend.release(), self._request_timeout)
         except Exception:

@@ -38,4 +38,5 @@ def prepare(
 
 
 def files(uploads: list[Upload]) -> list[discord.File]:
+    """The Discord files for some uploads."""
     return [upload.file() for upload in uploads]

@@ -27,6 +27,8 @@ class WorldRecordError(ServerError):
 
 @dataclass(frozen=True, slots=True)
 class Record:
+    """One leaderboard entry."""
+
     rank: int
     nickname: str
     highscore: int
@@ -34,6 +36,8 @@ class Record:
 
 @dataclass(frozen=True, slots=True)
 class Leaderboard:
+    """The records of an item and when the server last changed them."""
+
     records: tuple[Record, ...] = ()
     updated: datetime | None = None  # when the server last changed it
 
@@ -58,6 +62,7 @@ def parse_records(data: object) -> tuple[Record, ...]:
 
 
 def parse_last_modified(value: str | None, timezone: ZoneInfo) -> datetime | None:
+    """The server's ``Last-Modified`` header as a time, or None."""
     if not value:
         return None
     try:
@@ -67,6 +72,10 @@ def parse_last_modified(value: str | None, timezone: ZoneInfo) -> datetime | Non
 
 
 class WorldRecords:
+    """The rank server's boards, kept for a few minutes so repeated commands do not ask
+    again.
+    """
+
     def __init__(
         self,
         client: httpx.AsyncClient,

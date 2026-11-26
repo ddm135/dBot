@@ -28,6 +28,10 @@ type Section = Literal["start", "drop", "end"]
 
 @dataclass(frozen=True, slots=True)
 class NoticeLine:
+    """One entry of a ping: a bonus that begins or is on its last day, the songs and
+    the total percentage. ``drop`` is true when it replaces a higher one.
+    """
+
     category: Category  # "start": an entry begins; "end": it is on its last day
     song_codes: tuple[int, ...]
     all_songs: bool

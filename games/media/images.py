@@ -40,6 +40,8 @@ MISS_SECONDS = 600.0
 
 @dataclass(frozen=True, slots=True)
 class PrefetchResult:
+    """How a prefetch went: bundles kept, downloaded, failed, or built in."""
+
     kept: int = 0  # bundles already on disk
     downloaded: int = 0
     failed: int = 0
@@ -118,6 +120,11 @@ def read_images(
 
 
 class ImageService:
+    """Album art and group emblems, from the game's bundles.
+
+    Pictures are decoded only when asked for; what is prefetched is the bundles.
+    """
+
     def __init__(
         self,
         bundles: BundleStore,
@@ -137,6 +144,7 @@ class ImageService:
         self._clock = clock
 
     async def album(self, game_key: str, song_code: int) -> Picture | None:
+        """The art of a song's album, or None if the game has none."""
         index: Index | None = self._indexes.get(game_key)
         if index is None:
             return None
@@ -213,6 +221,7 @@ class ImageService:
         return PrefetchResult(**counts)
 
     async def emblem(self, game_key: str, deck_code: int) -> Picture | None:
+        """The emblem of a deck, or None if it has none."""
         index: Index | None = self._indexes.get(game_key)
         deck = index.decks.decks.get(deck_code) if index else None
         if index is None or deck is None:

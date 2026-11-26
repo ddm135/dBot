@@ -37,4 +37,5 @@ def timestamp(value: datetime, style: str = "R") -> str:
 
 
 def truncate(text: str, limit: int) -> str:
+    """``text`` cut to ``limit`` characters, with an ellipsis if it was cut."""
     return text if len(text) <= limit else text[: limit - 1] + "…"

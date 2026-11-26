@@ -1,3 +1,8 @@
+"""The errors the game clients raise on purpose, so callers can tell them from bugs.
+
+``ServerError`` and its subclasses say whether trying again later may help.
+"""
+
 from collections.abc import Mapping
 from typing import Any
 

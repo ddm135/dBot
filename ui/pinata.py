@@ -14,6 +14,8 @@ FILLED, EMPTY = "◼", "◻"
 
 
 class Person(Hashable, Protocol):
+    """Someone who can be lined up for a prize: anything with a mention."""
+
     @property
     def mention(self) -> str: ...
 

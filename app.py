@@ -1,3 +1,10 @@
+"""Running the bot: the lease, the worker threads, and the watchdog.
+
+Only one instance of the bot may be connected to Discord at a time. This module
+connects to the lease backend, then keeps handing a fresh bot to
+:func:`lease.supervise` for as long as this instance holds the lease.
+"""
+
 import asyncio
 import logging
 import secrets
@@ -66,6 +73,12 @@ async def _connect_lease_backend(
 
 
 async def run(settings: Settings) -> None:
+    """Run until a signal asks to stop.
+
+    Connects to the lease backend, sizes the worker thread pool, starts the loop
+    watchdog, and supervises the bot; whatever happens, the lease is released and
+    the backend closed on the way out.
+    """
     stop = asyncio.Event()
     _install_signal_handlers(stop)
 

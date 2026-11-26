@@ -1,3 +1,5 @@
+"""Running a bot for as long as this instance leads."""
+
 import asyncio
 import logging
 import time
@@ -24,6 +26,12 @@ async def supervise(
     stop: asyncio.Event,
     close_timeout: float = 15.0,
 ) -> None:
+    """Win the lease, run a bot, and do it again until ``stop`` is set.
+
+    Each pass is one term: a new bot is made, runs until it crashes, the lease is
+    lost or a stop is asked, and is then closed. After a crash the instance waits
+    ``cooldown`` so that the standby can win the lease.
+    """
     while not stop.is_set():
         logger.info("Acquiring lease...")
         if not await leader.acquire(stop):

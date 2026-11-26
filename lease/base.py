@@ -1,3 +1,9 @@
+"""The lease operations, as Lua scripts, behind an interface a client implements.
+
+Each script runs atomically on the server, so acquiring, renewing and
+releasing cannot interleave with another instance's.
+"""
+
 from typing import Any
 
 from config import ValkeySettings
@@ -34,6 +40,13 @@ SCRIPTS = {
 
 
 class BaseLease:
+    """A lease on one key: held by one ``holder`` at a time and kept for ``ttl``.
+
+    Also the preferred instance's return signal, a second key that exists for a
+    short while, which the others see and defer to. Subclasses supply the client
+    (:meth:`connect`, :meth:`close`) and :meth:`_run`.
+    """
+
     def __init__(
         self,
         settings: ValkeySettings,

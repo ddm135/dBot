@@ -32,6 +32,8 @@ JUNK_KEYS = frozenset({"start", "end", "restart", "reend"})
 
 @dataclass(slots=True)
 class WordPing:
+    """A word ping as v0 stored it."""
+
     count: int = 0
     users: set[int] = field(default_factory=set)
     channels: set[int] = field(default_factory=set)
@@ -39,6 +41,8 @@ class WordPing:
 
 @dataclass(slots=True)
 class Report:
+    """What an import wrote, by table, and what it skipped."""
+
     imported: dict[str, int] = field(default_factory=dict)
     skipped: list[str] = field(default_factory=list)
 
@@ -83,6 +87,7 @@ def parse_word_pings(data: Mapping[str, Any]) -> dict[tuple[int, int, str], Word
 
 
 def parse_roles(data: Mapping[str, Any]) -> set[tuple[int, int]]:
+    """v0's stored roles as ``(user, role)`` pairs."""
     pairs: set[tuple[int, int]] = set()
     for user, roles in data.items():
         user_id = _int(user)
@@ -110,6 +115,8 @@ def parse_live_themes(
 
 @dataclass(slots=True)
 class BonusPingData:
+    """v0's bonus ping subscriptions as ``(user, game, deck)`` and preferences by user."""
+
     subscriptions: set[tuple[int, str, int]] = field(default_factory=set)
     preferences: dict[int, tuple[int, int]] = field(default_factory=dict)
 

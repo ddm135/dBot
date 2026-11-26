@@ -45,6 +45,12 @@ _BUMP_VERSION = sql(
 
 
 class SongStatsDb:
+    """Song stats as one JSON document per song.
+
+    Keeps what it last loaded or saved, so a save writes only the songs that
+    changed, and bumps a per-game version so other instances know to reload.
+    """
+
     def __init__(self, pool: asyncpg.Pool) -> None:
         self._pool = pool
         # What each game's rows hold, as text, so only changed songs are written.

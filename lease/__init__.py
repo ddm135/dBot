@@ -1,3 +1,9 @@
+"""Leadership of the bot: one instance at a time is connected to Discord.
+
+A lease (a key in Valkey that expires) says who the leader is. :class:`Leader`
+acquires and renews it, and :func:`supervise` runs a bot for as long as it holds.
+"""
+
 from config import ValkeySettings
 
 from .base import BaseLease
@@ -17,6 +23,9 @@ def create_lease_backend(
     preferred_key: str | None = None,
     preferred_ttl: float = 15.0,
 ) -> BaseLease:
+    """The lease backend for this platform: Valkey GLIDE where it is available, the
+    plain ``valkey`` client on Windows.
+    """
     import sys
 
     backend = GlideLease if sys.platform != "win32" else ValkeyLease

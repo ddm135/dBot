@@ -12,6 +12,7 @@ MIN_ROLL_OTHER = 99.99
 
 
 def min_roll(is_superstar: bool) -> float:
+    """The lowest roll that wins: 99.5 for a SuperStar role, 99.99 for any other prize."""
     return MIN_ROLL_SUPERSTAR if is_superstar else MIN_ROLL_OTHER
 
 
@@ -53,6 +54,10 @@ class Entries[T: Hashable]:
 
 @dataclass(frozen=True, slots=True)
 class Draw[T]:
+    """The result of a draw: every roll in line order, the winner, and the minimum it
+    needed.
+    """
+
     rolls: tuple[tuple[T, float], ...]  # in line order
     winner: T | None  # the first to reach the minimum
     minimum: float
@@ -60,6 +65,10 @@ class Draw[T]:
 
 
 def draw[T](entrants: Sequence[T], minimum: float, rng: random.Random) -> Draw[T]:
+    """Roll for each entrant in order until one reaches ``minimum``.
+
+    When nobody does, ``rolls_needed`` says how many more rolls it would have taken.
+    """
     rolls = tuple((who, roll(rng)) for who in entrants)
     winner = next((who for who, value in rolls if value >= minimum), None)
     needed = 0

@@ -20,6 +20,10 @@ logger = logging.getLogger(__name__)
 
 
 class SongStatsSync(HourlyTask):
+    """Measures every game's charts on the preferred instance and saves the note
+    counts and lengths (:func:`games.charts.song_sync.sync_seq_stats`).
+    """
+
     minute = 15
     only_preferred = True
     failure = "Measuring songs failed."
@@ -29,6 +33,7 @@ class SongStatsSync(HourlyTask):
         self._known_bad: set[str] = set()
 
     async def run_game(self, data: State) -> SyncResult | None:
+        """Measure the charts of one game that are new or changed, and store the result."""
         game = data.game
         if "MusicData" not in data.tables:
             return None

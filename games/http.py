@@ -1,3 +1,5 @@
+"""HTTP for the game servers and CDNs: a shared client, retries, and downloads."""
+
 import asyncio
 import logging
 import os
@@ -29,6 +31,10 @@ FLUSH_EVERY = 32 * 1024 * 1024  # bytes written between handing pages back to th
 
 @dataclass(frozen=True, slots=True)
 class RetryPolicy:
+    """How often to try a request and how long to wait between tries (doubling, with
+    jitter, up to ``maximum`` seconds).
+    """
+
     attempts: int = 3
     initial: float = 1.0
     maximum: float = 15.0
@@ -39,6 +45,7 @@ DEFAULT_RETRY = RetryPolicy()
 
 
 def create_client(**kwargs: Any) -> httpx.AsyncClient:
+    """An ``httpx`` client with the bot's timeouts, redirects and connection limits."""
     kwargs.setdefault("timeout", DEFAULT_TIMEOUT)
     kwargs.setdefault("follow_redirects", True)
     kwargs.setdefault(
@@ -48,6 +55,7 @@ def create_client(**kwargs: Any) -> httpx.AsyncClient:
 
 
 def is_retryable_status(status_code: int) -> bool:
+    """Whether an HTTP status is worth trying again: too many requests, or a server error."""
     return status_code == 429 or status_code >= 500
 
 
@@ -89,6 +97,11 @@ async def send(
     retry: RetryPolicy = DEFAULT_RETRY,
     **kwargs: Any,
 ) -> httpx.Response:
+    """Send a request, trying again on network errors and retryable statuses.
+
+    Returns the last response even when it is still a failure; the caller decides
+    what a status means.
+    """
     retrying = _retrying(
         retry,
         retry=(
@@ -149,6 +162,10 @@ async def download(
     retry: RetryPolicy = DEFAULT_RETRY,
     chunk_size: int = CHUNK_SIZE,
 ) -> Path:
+    """Stream a URL to ``path`` through a ``.part`` file, so a failed download never
+    leaves a half file under the real name. Retries on network errors and
+    retryable statuses, and hands the written pages back to the OS as it goes.
+    """
     partial = path.with_name(path.name + ".part")
     await asyncio.to_thread(path.parent.mkdir, parents=True, exist_ok=True)
 

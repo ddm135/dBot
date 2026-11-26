@@ -1,9 +1,13 @@
+"""The lease on the pure-Python ``valkey`` client, for platforms without GLIDE."""
+
 from typing import Any
 
 from .base import SCRIPTS, BaseLease
 
 
 class ValkeyLease(BaseLease):
+    """Runs the lease scripts through ``valkey.asyncio``."""
+
     async def connect(self, request_timeout: float) -> None:
         from valkey.asyncio import Valkey
 

@@ -34,6 +34,7 @@ STANDARD_LEVELS = "Easy / Hard / Normal"
 
 
 def length_key(stat: SongStat | None) -> int:
+    """A sort key for a song's length; unknown lengths sort last."""
     return stat.seconds if stat and stat.seconds is not None else UNKNOWN_SORT
 
 
@@ -48,6 +49,7 @@ def sort_by_length(songs: list[Song], stats: dict[int, SongStat]) -> list[Song]:
 def song_line(
     song: Song, stat: SongStat | None, deck: Deck | None, *, show_deck: bool
 ) -> str:
+    """One song of the length list: ``(3:21) Artist - **Song**``."""
     duration = stat.duration if stat else "Unknown"
     name = md(t"**{song.label}**")
     prefix = md(t"{deck.name} - ") if show_deck and deck else ""
@@ -65,6 +67,7 @@ def list_embed(
     *,
     show_deck: bool,
 ) -> discord.Embed:
+    """A page of the songs sorted by length, with the song count and the game as author."""
     shown = slice_page(songs, page, PER_PAGE)
     embed = discord.Embed(
         title=title,
@@ -92,6 +95,9 @@ def detail_embed(
     icon: str | None,
     thumbnail: str | None = None,
 ) -> discord.Embed:
+    """One song's details: length, note counts, difficulties, album, release date and
+    record challenge score.
+    """
     game = index.game
     embed = song_embed(index, deck, song, stat, "Song Info", icon, thumbnail)
     if stat and stat.notes:
@@ -114,6 +120,8 @@ def detail_embed(
 
 
 class Info(commands.Cog):
+    """``/info``: the length of songs, and a song's details."""
+
     def __init__(self, bot: dBot) -> None:
         self.bot = bot
 

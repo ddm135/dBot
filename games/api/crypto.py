@@ -1,3 +1,5 @@
+"""The games' encryption: AES, and the table and server formats built on it."""
+
 import base64
 import gzip
 import json
@@ -19,6 +21,7 @@ class CryptoError(ValueError):
 
 
 def random_iv() -> str:
+    """A random IV in the form the HTTP server expects: 16 capital letters."""
     return "".join(secrets.choice(_IV_ALPHABET) for _ in range(IV_LENGTH))
 
 
@@ -64,12 +67,15 @@ class Cipher:
     # Text bodies (base64), as the HTTP server and the data tables use them.
 
     def decrypt_ecb(self, data: str | bytes) -> bytes:
+        """Decrypt a base64 body without an IV (the data tables)."""
         return self._decrypt(self._base64(data))
 
     def decrypt_cbc(self, data: str | bytes, iv: str | bytes) -> bytes:
+        """Decrypt a base64 body that was encrypted with ``iv``."""
         return self._decrypt(self._base64(data), _iv_bytes(iv))
 
     def encrypt_cbc(self, data: str | bytes, iv: str | bytes) -> str:
+        """Encrypt ``data`` with ``iv``; the result is base64 text."""
         if isinstance(data, str):
             data = data.encode()
         encrypted = self._encrypt_cbc(data, _iv_bytes(iv))
@@ -78,15 +84,18 @@ class Cipher:
     # Binary bodies, as the MagicOnion servers use them: ``IV || ciphertext``.
 
     def seal(self, data: bytes) -> bytes:
+        """Encrypt for a MagicOnion server: a random IV followed by the ciphertext."""
         iv = os.urandom(IV_LENGTH)
         return iv + self._encrypt_cbc(data, iv)
 
     def unseal(self, payload: bytes) -> bytes:
+        """The inverse of :meth:`seal`."""
         if len(payload) < 2 * IV_LENGTH:
             raise CryptoError(f"The encrypted body is too short: {len(payload)}.")
         return self._decrypt(payload[IV_LENGTH:], payload[:IV_LENGTH])
 
     def decode_table(self, content: bytes) -> dict[str, dict[str, Any]]:
+        """A game data table (gzip of encrypted JSON) as ``{code: row}``."""
         try:
             plain = self.decrypt_ecb(gzip.decompress(content))
             return {str(item["code"]): item for item in json.loads(plain)}

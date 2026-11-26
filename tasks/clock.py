@@ -1,3 +1,5 @@
+"""The clock: the bot's status shows the date and time, a different timezone each minute."""
+
 import logging
 from datetime import UTC, datetime, time
 from typing import TYPE_CHECKING
@@ -25,6 +27,11 @@ ZONES = tuple(TIMEZONES.items())
 
 
 class Clock(commands.Cog):
+    """Updates the custom status once a minute, cycling through ``TIMEZONES``.
+
+    On a stop that is not a shutdown it leaves a "Clock is disabled." status instead.
+    """
+
     def __init__(self, bot: dBot) -> None:
         self.bot = bot
 

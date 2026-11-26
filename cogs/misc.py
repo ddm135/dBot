@@ -20,11 +20,16 @@ BONUSBOT_DEATH = datetime(2025, 3, 24, 6, 35, tzinfo=KST)
 
 
 def days_since(moment: datetime, now: datetime | None = None) -> int:
+    """Whole days from ``moment`` to ``now`` (default: now)."""
     now = now or datetime.now(tz=moment.tzinfo)
     return (now - moment).days
 
 
 class Miscellaneous(commands.Cog):
+    """Counters for how long since some dates: ``db!mots7``, ``db!got7``, ``db!baemon``,
+    ``db!bonusbot``.
+    """
+
     def __init__(self, bot: dBot) -> None:
         self.bot = bot
 

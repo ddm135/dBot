@@ -1,7 +1,6 @@
 """The birthday and release-anniversary bonus calendar.
 
-This is the pure core of ``bonus_periods.py``. It works on data tables and
-dates only, so it needs no clock and no files and is easy to test.
+It works on data tables and dates only, so it needs no clock and no files.
 
 Rules (see :class:`BonusRules`):
 
@@ -16,9 +15,8 @@ Rules (see :class:`BonusRules`):
 * Overlaps are split into separate periods, each listing what is active.
 * February 29 events only exist in leap years. Hidden songs are ignored.
 
-Unlike the script, periods are not clipped to a calendar year. A window that
-crosses New Year simply is one period, so there are no artificial "ongoing"
-events on January 1.
+Periods are not clipped to a calendar year: a window that crosses New Year is
+one period, so there are no artificial "ongoing" events on January 1.
 """
 
 import calendar
@@ -43,6 +41,10 @@ from games.bonus.schedule import ms_to_date
 
 @dataclass(frozen=True, slots=True)
 class BonusRules:
+    """The numbers of the bonus rules: window length, percentages, and the artist type that
+    gets none.
+    """
+
     window_days: int = 3
     birthday_percent: int = 2
     anniversary_percent: int = 3
@@ -55,6 +57,10 @@ ONE_DAY = timedelta(days=1)
 
 @dataclass(frozen=True, slots=True)
 class MemberBonus:
+    """A member's birthday bonus: who, the birthday, the percentage and the artist codes it
+    applies to.
+    """
+
     name: str
     birthday: date  # the birth date; only month and day matter
     percent: int
@@ -64,6 +70,10 @@ class MemberBonus:
 
 @dataclass(frozen=True, slots=True)
 class ReleaseBonus:
+    """A release anniversary bonus: its percentage, which anniversary, and the release
+    date.
+    """
+
     percent: int
     anniversary: int  # the nth anniversary
     release: date
@@ -94,6 +104,10 @@ class Period:
 
 @dataclass(frozen=True, slots=True)
 class SongPeriods:
+    """A song's periods, and the same periods without the anniversary (what birthdays give
+    on their own).
+    """
+
     song: Song
     periods: tuple[Period, ...]
     # The same periods with the release anniversary left out: what a member
@@ -239,7 +253,7 @@ def build_song_periods(
 ) -> dict[int, SongPeriods]:
     """Periods for every visible song that has any (keyed by song code).
 
-    ``pace`` is called between songs (see ``tuning``).
+    ``pace`` is called between songs (see ``tuning.Pacer``).
     """
     years = tuple(years)
     result: dict[int, SongPeriods] = {}
@@ -270,6 +284,8 @@ def build_song_periods(
 
 
 class EventKind(StrEnum):
+    """What happens on a day: a bonus starts, the active set changes, or the last day ends."""
+
     START = "start"  # a bonus begins on a song that had none
     CHANGE = "change"  # the active set or the total changes
     END = "end"  # the last active day; the bonus ends after it
@@ -277,6 +293,11 @@ class EventKind(StrEnum):
 
 @dataclass(frozen=True, slots=True)
 class BonusEvent:
+    """Something that changes on a day for a song: a bonus starts, changes (the
+    period before is ``before``) or ends. The properties give the percentages
+    before and after and the bonuses added and removed.
+    """
+
     day: date
     kind: EventKind
     song_code: int
@@ -335,6 +356,7 @@ class BonusEvent:
 
 
 def has_release(period: Period) -> bool:
+    """Whether any bonus of the period is a release anniversary."""
     return any(isinstance(b, ReleaseBonus) for b in period.bonuses)
 
 
@@ -396,6 +418,10 @@ class BonusCalendar:
         years: Iterable[int],
         pace: Callable[[], None] | None = None,
     ) -> BonusCalendar:
+        """The calendar for ``songs`` over ``years``.
+
+        ``pace`` is called between songs so a worker thread can rest (see ``Pacer``).
+        """
         by_day: dict[date, list[BonusEvent]] = defaultdict(list)
         for sp in songs.values():
             if pace is not None:
@@ -429,6 +455,10 @@ class BonusCalendar:
 
 @dataclass(frozen=True, slots=True)
 class BonusEntry:
+    """A deck's bonus as listed to users: the songs it covers, its dates and what
+    makes it up. ``before`` is the percentage it follows, if that differs.
+    """
+
     deck_code: int
     start: date
     end: date

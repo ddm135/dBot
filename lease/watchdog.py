@@ -72,6 +72,13 @@ def thread_cpu() -> dict[int, float]:
 
 
 class LoopWatchdog:
+    """Watches the event loop from its own thread.
+
+    The loop is asked to beat every ``interval`` seconds. A beat later than
+    ``threshold`` is a stall, and is logged with where the loop was and what the
+    process, the other threads and the host were doing meanwhile.
+    """
+
     def __init__(
         self,
         loop: asyncio.AbstractEventLoop,

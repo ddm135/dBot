@@ -1,3 +1,10 @@
+"""Reading Unity Addressables binary catalogs (``catalog_*.bin``).
+
+A catalog says which bundle holds each asset. The format is Unity's
+``BinaryStorageBuffer``; only what the bot needs is decoded: the keys, and for
+each key the internal ids and bundle URLs of its locations.
+"""
+
 import asyncio
 import struct
 from collections.abc import Iterator, Sequence
@@ -19,6 +26,8 @@ class UnsupportedKeyError(CatalogError):
 
 
 class Location(NamedTuple):
+    """One resource location: its key, internal id, provider and dependencies."""
+
     primary_key: str | None
     internal_id: str | None
     provider_id: str | None
@@ -170,6 +179,12 @@ class BinaryStorageBuffer:
 
 
 class BinaryCatalog:
+    """A parsed catalog: the keys and where each is found.
+
+    ``internal_ids`` gives the asset's own id and ``bundle_urls`` the bundles that
+    contain it.
+    """
+
     def __init__(self, data: bytes) -> None:
         if len(data) < 32:
             raise CatalogError("File is too small to be a binary catalog.")
@@ -199,6 +214,7 @@ class BinaryCatalog:
         return (type(key), key) in self._key_to_set
 
     def keys(self) -> Iterator[object]:
+        """Every key of the catalog."""
         return (key for _type, key in self._key_to_set)
 
     def internal_ids(self, key: object) -> list[str | None]:
@@ -234,4 +250,5 @@ class BinaryCatalog:
 
 
 async def load_catalog(data: bytes) -> BinaryCatalog:
+    """Parse a catalog in a thread; it is big enough to hold up the event loop."""
     return await asyncio.to_thread(BinaryCatalog, data)

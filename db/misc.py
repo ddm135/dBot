@@ -152,6 +152,8 @@ class DisplayNames:
 
 
 class LiveThemes:
+    """The most live-theme bonus a user has, per game."""
+
     def __init__(self, pool: asyncpg.Pool) -> None:
         self._pool = pool
 

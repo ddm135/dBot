@@ -28,14 +28,18 @@ type Strings = Mapping[str, Mapping[str, str]]  # key -> {language: text}
 
 
 class Catalog(Protocol):
+    """What the strings need of a catalog: where a key's bundles are."""
+
     def bundle_urls(self, key: object) -> list[str | None]: ...
 
 
 def shared_data_key(collection: str) -> str:
+    """The catalog key of a string table collection's shared data (its key names)."""
     return f"Assets/Localization/Tables/{collection} Shared Data.asset"
 
 
 def table_key(collection: str, language: str) -> str:
+    """The name of one language's string table in a collection."""
     return f"{collection}_{language}"
 
 

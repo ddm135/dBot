@@ -39,6 +39,8 @@ class _GameSync(HourlyTask):
 
 
 class BasicSync(_GameSync):
+    """The hourly sync of every game's version, manifest and catalog (minute 5)."""
+
     minute = 5
     incomplete = "Basic sync failed for: %s."
     crashed = "The basic sync crashed."
@@ -48,6 +50,8 @@ class BasicSync(_GameSync):
 
 
 class DalcomSync(_GameSync):
+    """The hourly sync of every game's data tables (minute 10)."""
+
     minute = 10
     incomplete = "Table sync is incomplete for: %s."
     crashed = "The table sync crashed."

@@ -37,10 +37,12 @@ _RETRYABLE = {
 
 
 def pack(value: Any, cipher: Cipher) -> bytes:
+    """Encode ``value`` as MessagePack."""
     return cipher.seal(msgpack.packb(value, use_bin_type=True))
 
 
 def unpack(data: bytes, cipher: Cipher) -> Any:
+    """Decode a MessagePack body."""
     if not data:
         return None
     return msgpack.unpackb(cipher.unseal(data), raw=False, strict_map_key=False)
@@ -56,6 +58,7 @@ class BundleCheck:
 
     @classmethod
     def from_answer(cls, answer: object) -> Self:
+        """The check from the server's decoded ``CheckAssetBundle`` answer."""
         if not isinstance(answer, Mapping):
             raise ServerError("CheckAssetBundle did not answer with a map.")
         asset_hash, context = answer.get("AssetHash"), answer.get("Context")
@@ -69,6 +72,12 @@ class BundleCheck:
 
 
 class MagicOnionClient:
+    """A gRPC channel to a MagicOnion server.
+
+    Bodies are MessagePack, encrypted with the game's cipher; the channel opens on
+    the first call and is reused.
+    """
+
     def __init__(
         self,
         config: GrpcConfig,
@@ -99,6 +108,7 @@ class MagicOnionClient:
             self._channel = None
 
     async def call(self, method: str, request: Any = None) -> Any:
+        """Call the service's ``method`` with ``request`` and return the decoded answer."""
         cipher = self.cipher
         rpc: grpc.aio.UnaryUnaryMultiCallable[Any, Any] = self._open().unary_unary(
             f"/{SERVICE}/{method}",
@@ -116,11 +126,14 @@ class MagicOnionClient:
             raise ServerError(f"{method}: the answer was unreadable.") from exc
 
     async def check_asset_bundle(self, client_hash: str = "") -> BundleCheck:
+        """Ask whether the game's asset bundles changed since ``client_hash``."""
         return BundleCheck.from_answer(await self.call("CheckAssetBundle", client_hash))
 
 
 @dataclass(frozen=True, slots=True)
 class BundleFile:
+    """One file of an asset bundle directory."""
+
     url: str
     version: str
 
@@ -135,6 +148,7 @@ class BundleContext:
 
     @classmethod
     def parse(cls, check: BundleCheck, cdn_url: str, data: object) -> Self:
+        """The context from the parsed ``#AssetContext.json``."""
         if not isinstance(data, Mapping):
             raise DataSyncError("The bundle's asset context is not a JSON object.")
         base = f"{cdn_url.rstrip('/')}/{check.context}"
@@ -164,6 +178,7 @@ class BundleContext:
 
 
 def context_url(cdn_url: str, check: BundleCheck) -> str:
+    """Where the asset context of a bundle check is on the CDN."""
     return f"{cdn_url.rstrip('/')}/{check.context}/%23AssetContext.json"
 
 
@@ -174,6 +189,7 @@ async def fetch_bundle_context(
     *,
     retry: RetryPolicy = DEFAULT_RETRY,
 ) -> BundleContext:
+    """Download and parse the asset context a bundle check points to."""
     url = context_url(config.cdn_url, check)
     response = await fetch(client, url, retry=retry, error=DataSyncError)
     try:

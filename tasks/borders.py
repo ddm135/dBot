@@ -28,6 +28,11 @@ logger = logging.getLogger(__name__)
 
 class Borders(HourlyTask):
     # After the catalogs (:05), tables (:10) and song stats (:15).
+    """Announces the new borders of every game: uploads each to the Drive folder and
+    posts it in the borders channel. A border the game republished under the same
+    name replaces the old file, which is renamed.
+    """
+
     minute = 40
     only_preferred = True  # only the preferred instance downloads and uploads
     failure = "Announcing borders failed."

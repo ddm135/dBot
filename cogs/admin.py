@@ -26,6 +26,11 @@ def _in_status_channel(ctx: Ctx) -> bool:
 
 
 class Administrative(commands.Cog):
+    """Owner-only prefix commands, usable in the status channel: loading and
+    reloading extensions, syncing app commands and game data, deleting or posting
+    messages, and editing search aliases and display names.
+    """
+
     def __init__(self, bot: dBot) -> None:
         self.bot = bot
 

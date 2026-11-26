@@ -96,6 +96,7 @@ def lookup(root: object, path: str) -> object:
 
 
 def render(value: object) -> str:
+    """A value as the console prints it, cut at ``MAX_OUTPUT`` characters."""
     try:
         text = pformat(value)
     except Exception as error:  # noqa: BLE001 - a repr that raises
@@ -161,6 +162,7 @@ _reader = _Reader()
 
 
 async def listen(bot: object) -> None:
+    """Run the console for ``bot`` until it is closed (does nothing without a terminal)."""
     if not sys.stdin or not sys.stdin.isatty():
         logger.info("No interactive TTY found. Console listener disabled.")
         return

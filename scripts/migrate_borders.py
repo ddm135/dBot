@@ -44,6 +44,10 @@ logger = logging.getLogger("migrate_borders")
 
 @dataclass(slots=True)
 class Plan:
+    """What would bring the Drive folder in line with the borders: renames, fingerprints to
+    add, and counts of the rest.
+    """
+
     renames: list[tuple[str, str, str]] = field(default_factory=list)  # id, old, new
     to_fingerprint: list[tuple[str, str, str]] = field(
         default_factory=list
@@ -118,6 +122,9 @@ async def _apply(folder: Drive, plan_: Plan, *, stamp_unknown: bool) -> None:
 
 
 async def run(args: argparse.Namespace) -> int:
+    """Check every game's Drive folder against its borders; with ``--apply``,
+    rename and stamp the files.
+    """
     settings = Settings.from_env()
     google = settings.google
     if not google.credentials_file.is_file():
@@ -173,6 +180,7 @@ def _report(game: Game, plan_: Plan, *, applied: bool, stamped: bool) -> None:
 
 
 def main() -> None:
+    """Parse the arguments and run."""
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--apply", action="store_true", help="make the changes")
     parser.add_argument(

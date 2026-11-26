@@ -43,6 +43,8 @@ async def song_id_autocomplete(
 @app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)
 @app_commands.allowed_installs(guilds=True, users=False)
 class SSLeague(commands.GroupCog, name="ssl", description="Pin SSL song of the day"):
+    """``/ssl``: pin the SSL song of the day by hand, by artist and song or by song id."""
+
     def __init__(self, bot: dBot) -> None:
         self.bot = bot
 

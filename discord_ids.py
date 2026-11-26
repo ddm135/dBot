@@ -1,3 +1,5 @@
+"""The Discord servers, channels and roles the bot is wired to."""
+
 from collections.abc import Mapping
 
 TEST_GUILD = 540849436868214784

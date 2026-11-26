@@ -58,6 +58,8 @@ def next_update(
 
 @dataclass(frozen=True, slots=True)
 class Season:
+    """A quarterly world-record season: its code and when it starts and ends."""
+
     code: int
     start: datetime
     end: datetime
@@ -89,6 +91,7 @@ def quarterly_seasons(
 
 
 def latest_season(seasons: Mapping[int, Season]) -> int | None:
+    """The newest season's code, or None."""
     return max(seasons) if seasons else None
 
 
@@ -98,6 +101,7 @@ def season_code_of(day: date) -> int:
 
 
 def current_monday(today: date) -> date:
+    """The Monday of the week ``today`` is in."""
     return today - timedelta(days=today.weekday())
 
 

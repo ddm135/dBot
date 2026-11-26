@@ -15,6 +15,10 @@ logger = logging.getLogger(__name__)
 
 
 class StringsSync(HourlyTask):
+    """Reads the game's string tables (album titles and the like) from its bundles after
+    each sync.
+    """
+
     minute = 15
     failure = "Reading strings failed."
 

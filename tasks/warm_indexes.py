@@ -21,11 +21,16 @@ logger = logging.getLogger(__name__)
 
 
 class WarmIndexes(HourlyTask):
+    """Builds the index and the bonus calendar of each game when its data has changed, so
+    the first command does not wait.
+    """
+
     # After the catalogs (:05), tables (:10) and strings (:15).
     minute = 20
     failure = "Preparing the index failed."
 
     async def run_game(self, data: State) -> None:
+        """Build what is stale for this game."""
         await self.bot.indexes.warm(data.game.key)
 
     async def finish(self) -> None:

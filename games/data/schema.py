@@ -27,12 +27,16 @@ class AssetContextError(ValueError):
 
 @dataclass(frozen=True, slots=True)
 class AssetFile:
+    """A file of the asset listing: its version and URL."""
+
     version: str
     url: str
 
 
 @dataclass(frozen=True, slots=True)
 class AssetContext:
+    """The server's asset listing (``a.json``): a version and the files of each table."""
+
     raw: Mapping[str, Any]
 
     @classmethod
@@ -56,6 +60,7 @@ class AssetContext:
         return context
 
     def table_files(self) -> dict[str, AssetFile]:
+        """The table files of the listing by table name."""
         files = {}
         for name in TABLE_NAMES:
             entry = self.context.get(name)
@@ -81,6 +86,7 @@ class AssetContext:
 def tables_to_download(
     stored: AssetContext | None, current: AssetContext, on_disk: Collection[str]
 ) -> list[str]:
+    """The tables new or changed since the stored listing, or missing on disk."""
     refresh = stored is None or stored.version != current.version
     old = stored.table_files() if stored is not None else {}
     return [

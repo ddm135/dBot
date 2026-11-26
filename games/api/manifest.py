@@ -1,3 +1,9 @@
+"""The game's manifest: where its server is and which version is live.
+
+It is a JSON file the game downloads at start-up, one per client version.
+:func:`fetch_manifest` follows it to the newest version it points at.
+"""
+
 import json
 import logging
 from collections.abc import Mapping
@@ -18,10 +24,15 @@ MAX_HOPS = 8
 
 @dataclass(frozen=True, slots=True)
 class Manifest:
+    """The manifest of one version, with the fields the bot reads."""
+
     raw: Mapping[str, Any]
 
     @classmethod
     def from_json(cls, data: object) -> Self:
+        """Check that ``data`` is a manifest (an object with an Android version) and wrap
+        it.
+        """
         if not isinstance(data, Mapping):
             raise ManifestError("The manifest is not a JSON object.")
         active = data.get("ActiveVersion_Android")
@@ -42,6 +53,7 @@ class Manifest:
         return self._text("ActiveVersion_IOS")
 
     def latest_version(self, *others: str) -> str:
+        """The newest of the manifest's versions and ``others``."""
         candidates = [self.active_version_android, self.active_version_ios, *others]
         return max((v for v in candidates if v), key=_version)
 
@@ -59,6 +71,7 @@ class Manifest:
 
     @property
     def server_url(self) -> str:
+        """The game server's address; ``ManifestError`` if the manifest has none."""
         url = self._text("ServerUrl")
         if url is None:
             raise ManifestError("The manifest has no ServerUrl.")
@@ -80,6 +93,12 @@ async def fetch_manifest(
     known: Manifest | None = None,
     retry: RetryPolicy = DEFAULT_RETRY,
 ) -> Manifest:
+    """The current manifest of ``game``.
+
+    Starts from the newest version known (the game's floor, or ``known``'s) and
+    follows each manifest to the version it says is active until that settles. A
+    version that has no manifest falls back to the floor.
+    """
     floor = game.version_floor
     if version is None:
         candidates = [floor]

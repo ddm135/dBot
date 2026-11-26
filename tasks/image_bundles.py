@@ -20,11 +20,18 @@ logger = logging.getLogger(__name__)
 
 
 class ImageBundles(HourlyTask):
+    """Downloads each game's album-art and emblem bundles on the preferred instance, so
+    they are on disk before anyone asks.
+    """
+
     minute = 30
     only_preferred = True
     failure = "Keeping picture bundles failed."
 
     async def run_game(self, data: State) -> None:
+        """Fetch the game's album bundles and its emblem bundles; one kind failing does not
+        stop the other.
+        """
         key = data.game.key
         images = self.bot.images
         for what, prefetch in (

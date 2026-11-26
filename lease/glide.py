@@ -1,9 +1,13 @@
+"""The lease on Valkey GLIDE, the native client."""
+
 from typing import Any
 
 from .base import SCRIPTS, BaseLease
 
 
 class GlideLease(BaseLease):
+    """Runs the lease scripts through ``glide``'s ``invoke_script``."""
+
     async def connect(self, request_timeout: float) -> None:
         from glide import (
             GlideClient,

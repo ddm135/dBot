@@ -38,6 +38,7 @@ TABLES = ("MusicData", "ArtistData", "GroupData", "AlbumData", "LocaleData", "UR
 
 
 def read_v0(directory: Path) -> dict[str, dict[str, Any]]:
+    """The JSON files of v0 in ``directory`` by name; missing ones are skipped."""
     found: dict[str, dict[str, Any]] = {}
     for stem in V0_FILES:
         path = directory / f"{stem}.json"
@@ -49,6 +50,7 @@ def read_v0(directory: Path) -> dict[str, dict[str, Any]]:
 
 
 async def load_indexes(store: DataStore) -> dict[str, Index]:
+    """The index of every game, for matching v0's names to decks."""
     indexes: dict[str, Index] = {}
     for game in GAMES.values():
         tables = await store.read_all(game.key, TABLES, pruned=False)
@@ -70,6 +72,8 @@ RENAMED: dict[str, dict[str, str]] = {
 def make_lookups(
     indexes: dict[str, Index],
 ) -> tuple[DeckLookup, SongLookup, DateParser]:
+    """The functions that turn v0's artist names, song ids and dates into codes and dates."""
+
     def deck_of(game: str, artist: str) -> int | None:
         index = indexes.get(game)
         deck = find_deck_by_name(index, artist, RENAMED.get(game)) if index else None
@@ -90,6 +94,9 @@ def make_lookups(
 
 
 async def main(argv: list[str]) -> int:
+    """Import v0's JSON files from the data directory (``--data-dir``); returns the exit
+    status.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-dir", type=Path, default=None)
     args = parser.parse_args(argv)

@@ -25,6 +25,10 @@ NO_MENTIONS = discord.AllowedMentions.none()
 
 @dataclass(frozen=True, slots=True)
 class RoleChange:
+    """What setting a role changes: roles to give from the inventory, and roles to take off
+    into it.
+    """
+
     apply: tuple[int, ...]  # role ids to give the member (from their inventory)
     store: tuple[int, ...]  # role ids to take off the member into the inventory
 
@@ -55,6 +59,7 @@ def plan_set(
 
 
 def group_roles_of(guild_id: int) -> tuple[int, ...]:
+    """The group roles of a guild (none if the guild has none)."""
     return SUPERSTAR_ROLES.get(guild_id, ())
 
 
@@ -65,6 +70,10 @@ class Role(
     name="role",
     description="Manage SuperStar Roles",
 ):
+    """``/role``: SuperStar roles kept in an inventory. A user can store the roles
+    they hold, take them back, and wear one: the roles above it are stored.
+    """
+
     def __init__(self, bot: dBot) -> None:
         self.bot = bot
 

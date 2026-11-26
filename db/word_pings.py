@@ -97,11 +97,16 @@ def word_pattern(word: str) -> re.Pattern[str]:
 
 @dataclass(slots=True)
 class Subscription:
+    """A user's ping for one word: how often it fired, and the users and channels they
+    ignore.
+    """
+
     count: int = 0
     users: set[int] = field(default_factory=set)  # ignored users
     channels: set[int] = field(default_factory=set)  # ignored channels
 
     def ignores(self, author_id: int, channel_id: int) -> bool:
+        """Whether a message by ``author_id`` in ``channel_id`` is ignored."""
         return author_id in self.users or channel_id in self.channels
 
 
@@ -119,6 +124,7 @@ class WordPings:
         self._patterns: dict[str, re.Pattern[str]] = {}
 
     async def load(self) -> None:
+        """Read every ping from the database into memory."""
         data: dict[int, dict[str, dict[int, Subscription]]] = defaultdict(dict)
         async with self._pool.acquire() as conn:
             pings = await _LOAD_PINGS.fetch(conn)
@@ -175,6 +181,7 @@ class WordPings:
         return True
 
     async def remove(self, guild_id: int, user_id: int, word: str) -> bool:
+        """Remove a user's ping; False if there was none."""
         word = normalize(word)
         if not self.get(guild_id, user_id, word):
             return False
@@ -219,6 +226,9 @@ class WordPings:
         target_id: int,
         word: str | None = None,
     ) -> int:
+        """Stop ignoring a user or channel for one word, or all of the user's words;
+        returns how many words changed.
+        """
         return await self._change_ignore(
             guild_id, user_id, kind, target_id, word, add=False
         )

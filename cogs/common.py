@@ -24,6 +24,7 @@ NO_DATA = "There is no data for this game yet."
 def game_choices(
     predicate: Callable[[Game], bool] = lambda game: True,
 ) -> list[app_commands.Choice[str]]:
+    """The slash-command choices of the games that pass ``predicate``."""
     return [
         app_commands.Choice(name=game.name, value=game.key)
         for game in GAMES.values()
@@ -36,11 +37,13 @@ has_bonuses = attrgetter("has_bonuses")
 
 
 def selected_game(itr: Itr) -> str | None:
+    """The game key chosen so far in an interaction's ``game`` option, or None."""
     value = getattr(itr.namespace, "game", None)
     return value if isinstance(value, str) and value in GAMES else None
 
 
 async def deck_autocomplete(itr: Itr, current: str) -> list[app_commands.Choice[str]]:
+    """Autocomplete for an ``artist`` option: decks matching what was typed."""
     key = selected_game(itr)
     search = itr.client.search.game(key) if key else None
     if search is None:
@@ -52,6 +55,9 @@ async def deck_autocomplete(itr: Itr, current: str) -> list[app_commands.Choice[
 
 
 async def song_autocomplete(itr: Itr, current: str) -> list[app_commands.Choice[str]]:
+    """Autocomplete for a ``song`` option: songs of the chosen artist matching what was
+    typed.
+    """
     key = selected_game(itr)
     search = itr.client.search.game(key) if key else None
     if search is None:
@@ -71,6 +77,7 @@ def _int(value: Any) -> int | None:
 
 
 def parse_code(value: str | None) -> int | None:
+    """An autocomplete value as a code, or None if it is not a number."""
     return _int(value)
 
 
@@ -80,6 +87,8 @@ def deck_of(index: Index, artist: str | None) -> Deck | None:
 
 
 class Chosen(NamedTuple):
+    """A command's artist: the deck, its icon URL, and the images to attach."""
+
     deck: Deck
     icon: str | None
     uploads: list[Upload]
@@ -102,4 +111,5 @@ async def choose_artist(
 
 
 def icon_for(bot: dBot, key: str) -> str | None:
+    """The game's own icon, shown when a deck has no emblem."""
     return bot.games.get(key).icon_url

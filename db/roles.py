@@ -24,6 +24,8 @@ INSERT_IGNORING = sql(
 
 
 class StoredRoles:
+    """The roles a user has put into their inventory."""
+
     def __init__(self, pool: asyncpg.Pool) -> None:
         self._pool = pool
 

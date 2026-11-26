@@ -40,6 +40,8 @@ def fingerprint(source: str) -> str:
 
 @dataclass(frozen=True, slots=True)
 class StoredFile:
+    """A file in the Drive folder: its id and where it came from."""
+
     id: str
     source: str | None  # None for a file uploaded before sources were recorded
 
@@ -68,6 +70,11 @@ def query(template: Template) -> str:
 
 
 class Drive:
+    """A Google Drive folder, one subfolder per game.
+
+    The API's calls block, so they run in threads.
+    """
+
     def __init__(self, root: str, files: Any) -> None:
         """``files`` is the Drive API's ``files()`` resource."""
         self._root = root
@@ -75,6 +82,7 @@ class Drive:
 
     @classmethod
     def from_service_account(cls, root: str, credentials_file: Path) -> Self:
+        """A client for ``root`` using a service account's key file."""
         credentials = Credentials.from_service_account_file(
             str(credentials_file), scopes=SCOPES
         )

@@ -21,6 +21,7 @@ RESTART_HOURS = (3, 4)  # the weekly restart happens Monday at 03:00-04:59
 
 
 def is_weekly_restart(now: datetime) -> bool:
+    """Whether ``now`` falls in the weekly restart window."""
     return now.hour in RESTART_HOURS and now.weekday() == 0
 
 
@@ -32,6 +33,7 @@ def stop_message(now: datetime) -> tuple[str, str]:
 
 
 async def announce(bot: dBot, text: str) -> None:
+    """Post ``text`` in the status channel; a failure is logged, not raised."""
     channel = await find_channel(bot, STATUS_CHANNEL_ID, discord.abc.Messageable)
     if channel is None:
         return
@@ -42,6 +44,8 @@ async def announce(bot: dBot, text: str) -> None:
 
 
 class Status(commands.Cog):
+    """Announces a successful start in the status channel (once, not on reconnects)."""
+
     def __init__(self, bot: dBot) -> None:
         self.bot = bot
         self._started = False

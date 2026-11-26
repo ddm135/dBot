@@ -45,6 +45,7 @@ def recipients(
 
 
 def ping_embed(word: str, message: discord.Message) -> discord.Embed:
+    """The message that matched a word as an embed, linking back to it."""
     assert message.guild
     description = (
         f"`{message.author.name}` mentioned `{word}` in <#{message.channel.id}> on "
@@ -66,6 +67,10 @@ def ping_embed(word: str, message: discord.Message) -> discord.Embed:
 @app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)
 @app_commands.allowed_installs(guilds=True, users=False)
 class Ping(commands.GroupCog, name="ping", description="Manage word pings"):
+    """``/ping``: word pings. Users add words (per server) and get a DM when someone
+    says them; users and channels can be ignored for all of a user's words or one.
+    """
+
     def __init__(self, bot: dBot) -> None:
         self.bot = bot
 
@@ -76,6 +81,7 @@ class Ping(commands.GroupCog, name="ping", description="Manage word pings"):
     async def word_autocomplete(
         self, itr: Itr, current: str
     ) -> list[app_commands.Choice[str]]:
+        """Autocomplete for a word: the user's own words in this server that match."""
         if itr.guild_id is None:
             return []
         wanted = normalize(current)

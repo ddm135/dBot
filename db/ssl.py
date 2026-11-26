@@ -45,6 +45,8 @@ INSERT_MISSING = sql(
 
 
 class SslHistory:
+    """The days each SSL song and deck was pinned."""
+
     def __init__(self, pool: asyncpg.Pool) -> None:
         self._pool = pool
 

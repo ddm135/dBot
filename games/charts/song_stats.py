@@ -18,6 +18,8 @@ logger = logging.getLogger(__name__)
 
 @dataclass(frozen=True, slots=True)
 class SongStat:
+    """A song's length in seconds (None if unknown) and its note count per difficulty."""
+
     seconds: int | None
     notes: Mapping[str, int] = field(default_factory=dict)  # difficulty -> count
 
@@ -27,6 +29,7 @@ class SongStat:
 
 
 def format_duration(seconds: float) -> str:
+    """``201`` seconds as ``3:21``, rounded to the second."""
     whole = math.floor(seconds + 0.5)
     return f"{whole // 60}:{whole % 60:02d}"
 
@@ -43,6 +46,10 @@ def parse_duration(text: object) -> int | None:
 
 
 def parse_stats(raw: Mapping[str, Any]) -> dict[int, SongStat]:
+    """Song stats from the stored JSON (a map of song codes).
+
+    The length is the entry's own, else the shortest chart's, else the sound's.
+    """
     stats: dict[int, SongStat] = {}
     for key, entry in raw.items():
         try:

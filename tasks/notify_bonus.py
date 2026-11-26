@@ -63,6 +63,10 @@ def deck_texts(
 
 
 class NotifyBonus(HourlyTask):
+    """Sends the bonus pings: for each user and game, a DM when a followed deck's
+    bonus starts or is on its last day, ``hours`` before the day as the user set.
+    """
+
     minute = 0
     skip_when_running = False  # the hourly run and the first one follow each other
     failure = "Bonus pings failed."

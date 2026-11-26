@@ -46,6 +46,8 @@ PER_PAGE = 5
 
 
 class TimeRange(Enum):
+    """The periods ``/bonus list`` can show, as a user picks them."""
+
     CURRENT_WEEK = "Current Week"
     NEXT_WEEK = "Next Week"
     CURRENT_MONTH = "Current Month"
@@ -54,6 +56,7 @@ class TimeRange(Enum):
     RIGHT_NOW = "Right Now"
 
     def resolve(self, today: date) -> WeekRange:
+        """The first and last day of this range as seen from ``today``."""
         match self:
             case TimeRange.CURRENT_WEEK:
                 return week_range(today)
@@ -81,6 +84,9 @@ def collect(
     window: WeekRange,
     only: Deck | None,
 ) -> list[DeckEntries]:
+    """The bonus entries of the main decks (or just ``only``) in a window; decks with none
+    are left out.
+    """
     decks = [only] if only else [d for d in index.decks if d.is_main]
     found = []
     for deck in decks:
@@ -180,6 +186,10 @@ class TopView(Paginator):
 
 
 class Bonus(commands.Cog):
+    """``/bonus`` and ``/bonus ping``: lists, the weekly top, the live theme bonus,
+    and the subscriptions and delivery times of bonus pings.
+    """
+
     bonus = app_commands.Group(
         name="bonus", description="Birthday and anniversary bonuses."
     )

@@ -39,6 +39,8 @@ type Stored = dict[str, Any]
 
 
 class Catalog(Protocol):
+    """What the sync needs of a catalog: keys, ids and bundle URLs."""
+
     def bundle_urls(self, key: object) -> list[str | None]: ...
     def internal_ids(self, key: object) -> list[str | None]: ...
 
@@ -47,6 +49,8 @@ class Catalog(Protocol):
 
 @dataclass(frozen=True, slots=True)
 class SeqRef:
+    """A song's chart of one difficulty: a catalog key, or a code in the URLs table."""
+
     song: str
     level: str
     ref: int | str  # a catalog key, or a code in the URLs table
@@ -54,6 +58,10 @@ class SeqRef:
 
 @dataclass(frozen=True, slots=True)
 class Source:
+    """Where a chart is: its URL, the bundle and asset inside it, and the key that tells
+    whether it changed.
+    """
+
     ref: SeqRef
     url: str
     key: str  # what is stored to recognise an unchanged chart
@@ -64,6 +72,8 @@ class Source:
 
 @dataclass(slots=True)
 class SyncResult:
+    """What a sync of charts did, counted by outcome, and the songs it touched."""
+
     updated: int = 0  # charts measured
     unchanged: int = 0
     built_in: int = 0  # in the game's APK, so not downloadable
@@ -145,6 +155,7 @@ def resolve(ref: SeqRef, tables: Tables, catalog: Catalog | None) -> Source | No
 
 
 def is_current(stored: Stored, source: Source) -> bool:
+    """Whether a stored chart was made from this source (its key is unchanged)."""
     entry = stored.get(source.ref.song, {}).get("seq", {}).get(source.ref.level)
     return (
         isinstance(entry, dict)
@@ -155,6 +166,7 @@ def is_current(stored: Stored, source: Source) -> bool:
 
 
 def apply(stored: Stored, source: Source, count: int, seconds: float) -> None:
+    """Store a chart's measurement in the stats of its song."""
     song = stored.setdefault(source.ref.song, {})
     song.setdefault("seq", {})[source.ref.level] = {
         "count": count,

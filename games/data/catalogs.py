@@ -23,6 +23,8 @@ STATE_FILE = "state.json"
 
 @dataclass(frozen=True, slots=True)
 class LoadedCatalog:
+    """A parsed catalog, the version asked for and the one it was found under."""
+
     requested: str
     effective: str
     catalog: BinaryCatalog = field(repr=False)

@@ -18,6 +18,8 @@ logger = logging.getLogger(__name__)
 
 
 class PinSSL(HourlyTask):
+    """Pins the SSL song of the day; tried every hour until the day's song is pinned."""
+
     minute = 0
 
     async def run_all(self) -> None:
@@ -34,6 +36,9 @@ class PinSSL(HourlyTask):
         return [data.game for data in self.bot.games if data.game.has_pins]
 
     async def pin_game(self, game: Game) -> None:
+        """Ask the game's server for today's SSL song and pin it, unless it was already
+        pinned today.
+        """
         if await self.bot.db.ssl.pinned_on(game.key, ssl_day(game).date()):
             return
         data = self.bot.games.get(game.key)

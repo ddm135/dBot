@@ -2,9 +2,10 @@
 
 Two kinds of game. One lists its borders in the catalog by key
 (``Image_ThemeType_<n>_R_Large``); only the borders of limited themes are
-announced, as ``<n> - <name>`` with the name from the game's string table. The other lists them in its tables
-(``ThemeTypeData`` and ``ThemeData``) and only those of limited themes are
-announced; each is a normal ``_Large`` and, if the theme has one, a ``_Zoom``.
+announced, as ``<n> - <name>`` with the name from the game's string table. The
+other lists them in its tables (``ThemeTypeData`` and ``ThemeData``) and only
+those of limited themes are announced; each is a normal ``_Large`` and, if the
+theme has one, a ``_Zoom``.
 """
 
 from collections.abc import Container
@@ -17,6 +18,8 @@ from games.models import Game, Tables
 
 
 class Catalog(Protocol):
+    """What the borders need of a catalog: its keys and their internal ids."""
+
     def keys(self) -> Any: ...
 
     def internal_ids(self, key: object) -> list[str | None]: ...

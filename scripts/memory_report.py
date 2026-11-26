@@ -35,6 +35,7 @@ def peak_size() -> float | None:
 
 
 def traced() -> int:
+    """The bytes ``tracemalloc`` holds right now, after a garbage collection."""
     gc.collect()
     return tracemalloc.get_traced_memory()[0]
 
@@ -54,6 +55,7 @@ def deep_size(value: object, seen: set[int] | None = None) -> int:
 
 
 async def report(data_dir: Path) -> None:
+    """Print what each game's data costs in memory once it is loaded."""
     store = DataStore(data_dir)
     rows: list[tuple[float, str]] = []
     tracemalloc.start()

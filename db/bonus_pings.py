@@ -15,10 +15,13 @@ LOG_KEEP_DAYS = 14
 
 class PingPreferences(NamedTuple):
     # The names are the column names of ``_SET_PREFERENCES``.
+    """How many hours before a day a user wants the start and the end pings."""
+
     start_hours: int = DEFAULT_OFFSET
     end_hours: int = DEFAULT_OFFSET
 
     def hours(self, kind: PingKind) -> int:
+        """The hours for a kind of ping."""
         return self.start_hours if kind == "start" else self.end_hours
 
 
@@ -128,29 +131,36 @@ _PRUNE = sql(
 
 
 class BonusPings:
+    """Who follows which decks, when they want to hear about it, and which pings
+    were already sent. The log of sent pings keeps a few days.
+    """
+
     def __init__(self, pool: asyncpg.Pool) -> None:
         self._pool = pool
 
     # -- subscriptions -------------------------------------------------------
 
     async def subscribe(self, user_id: int, game: str, deck_code: int) -> bool:
+        """Follow a deck; False if the user already did."""
         async with self._pool.acquire() as conn, conn.transaction():
             added = await _SUBSCRIBE.fetchrow(conn, user_id, game, deck_code)
             await _ENSURE_PREFERENCES.execute(conn, user_id)
         return added is not None
 
     async def unsubscribe(self, user_id: int, game: str, deck_code: int) -> bool:
+        """Stop following a deck; False if the user did not."""
         async with self._pool.acquire() as conn:
             return (
                 await _UNSUBSCRIBE.fetchrow(conn, user_id, game, deck_code) is not None
             )
 
     async def decks_of(self, user_id: int, game: str) -> list[int]:
+        """The decks a user follows in a game."""
         async with self._pool.acquire() as conn:
             return await _DECKS_OF.fetchcol(conn, user_id, game)
 
     async def subscribers(self, game: str) -> dict[int, set[int]]:
-        """``{user_id: {deck_code}}`` for a game."""
+        """Every follower of a game, as ``{user: {deck codes}}``."""
         async with self._pool.acquire() as conn:
             rows = await _SUBSCRIBERS.fetch(conn, game)
         result: dict[int, set[int]] = {}
@@ -163,6 +173,7 @@ class BonusPings:
     async def preferences(
         self, user_ids: Collection[int]
     ) -> dict[int, PingPreferences]:
+        """The ping hours of the given users (defaults for those with none)."""
         if not user_ids:
             return {}
         async with self._pool.acquire() as conn:
@@ -177,6 +188,9 @@ class BonusPings:
         start_hours: int | None = None,
         end_hours: int | None = None,
     ) -> PingPreferences:
+        """Save the hours before a day a user is pinged (``None`` leaves one as it is);
+        returns the result.
+        """
         async with self._pool.acquire() as conn:
             row = await _SET_PREFERENCES.fetchrow(
                 conn, user_id, start_hours, end_hours, DEFAULT_OFFSET
@@ -192,9 +206,11 @@ class BonusPings:
             return await _CLAIM.fetchrow(conn, user_id, game, day, kind) is not None
 
     async def release(self, user_id: int, game: str, day: date, kind: PingKind) -> None:
+        """Give a claim back after a failed send, so it is tried again."""
         async with self._pool.acquire() as conn:
             await _RELEASE.execute(conn, user_id, game, day, kind)
 
     async def prune(self, today: date) -> int:
+        """Forget sent pings older than the log keeps; returns how many."""
         async with self._pool.acquire() as conn:
             return await _PRUNE.fetchval(conn, today - timedelta(days=LOG_KEEP_DAYS))

@@ -1,3 +1,5 @@
+"""What the registry says about a game, as plain data (:class:`Game` and its parts)."""
+
 import re
 from collections.abc import Mapping
 from dataclasses import dataclass, field
@@ -9,6 +11,10 @@ from zoneinfo import ZoneInfo
 
 @dataclass(frozen=True, slots=True)
 class PinTarget:
+    """Where a game's song of the day is pinned in a guild: a channel and the role to
+    mention.
+    """
+
     channel_id: int
     role_id: int | None = None
 
@@ -18,6 +24,10 @@ class PinTarget:
 # hashes its fields, which fails for dicts).
 @dataclass(frozen=True, slots=True, eq=False)
 class ForwardConfig:
+    """Where a game's maintenance and update notices are read, and the channels of
+    each guild they are forwarded to.
+    """
+
     maintenance_channel_id: int
     scheduled_channel_id: int | None = None
     targets: Mapping[int, int] = field(default_factory=dict)
@@ -26,6 +36,9 @@ class ForwardConfig:
         object.__setattr__(self, "targets", MappingProxyType(dict(self.targets)))
 
     def source_channel_id(self, *, scheduled: bool) -> int:
+        """The channel the notices are read from: the scheduled-update one or the
+        maintenance one.
+        """
         if scheduled and self.scheduled_channel_id is not None:
             return self.scheduled_channel_id
         return self.maintenance_channel_id
@@ -33,6 +46,8 @@ class ForwardConfig:
 
 @dataclass(frozen=True, slots=True)
 class AppStoreLookup:
+    """How to find a game in the App Store."""
+
     app_id: int
     country: str
 
@@ -43,6 +58,10 @@ class AppStoreLookup:
 
 @dataclass(frozen=True, slots=True)
 class CatalogPatterns:
+    """How the files of a catalog-only game are recognised in its catalog: sounds, charts
+    and borders.
+    """
+
     sound: re.Pattern[str]
     seq: re.Pattern[str]
     border: re.Pattern[str]
@@ -71,6 +90,13 @@ class GrpcConfig:
 
 @dataclass(frozen=True, slots=True, eq=False)
 class Game:
+    """One game: its identity, how to reach it and what the bot does with it.
+
+    Games are singletons from ``games.registry``, so they compare by identity.
+    The optional parts say what a game has: a catalog, pins, forwarding, weekly
+    seasons, a MagicOnion server, a string table, bonuses.
+    """
+
     key: str
     name: str
     color: int
@@ -144,15 +170,19 @@ class Game:
         return self.first_season is None and self.catalog_patterns is None
 
     def manifest_url_for(self, version: str) -> str:
+        """The manifest address for a client version."""
         return self.manifest_url.format(version=version)
 
     def now(self) -> datetime:
+        """The current time in the game's timezone."""
         return datetime.now(self.timezone)
 
     def format_date(self, value: datetime | date) -> str:
+        """A date in the way the game's own sheets write it."""
         return value.strftime(self.date_format)
 
     def parse_date(self, text: str) -> datetime:
+        """A date as the game writes it, in the game's timezone."""
         return datetime.strptime(text, self.date_format).replace(tzinfo=self.timezone)
 
 

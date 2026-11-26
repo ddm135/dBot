@@ -1,3 +1,5 @@
+"""The games the bot knows, one :class:`Game` each, keyed by its short name."""
+
 import re
 from collections.abc import Mapping
 from datetime import date

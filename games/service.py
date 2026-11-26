@@ -28,6 +28,10 @@ logger = logging.getLogger(__name__)
 
 @dataclass(slots=True)
 class State:
+    """What the bot has learned of one game: the store listing, the manifest, the
+    catalog and the tables.
+    """
+
     game: Game
     store: StoreInfo | None = None
     icon_url: str | None = None
@@ -39,10 +43,18 @@ class State:
 
     @property
     def tables(self) -> Mapping[str, Table]:
+        """The game's tables, or an empty mapping before the first sync."""
         return self.loaded_tables.tables if self.loaded_tables else {}
 
 
 class DataService:
+    """Every game's data, and the syncing that keeps it current.
+
+    A sync of one game runs under that game's lock. The "basic" sync is the
+    version, manifest and catalog; the table sync follows, and is skipped until a
+    manifest exists. ``ready`` is set when the first sync of every game has run.
+    """
+
     def __init__(
         self,
         data_dir: Path,
@@ -74,9 +86,11 @@ class DataService:
 
     @property
     def server(self) -> Server:
+        """The server client, for calls other than data syncs."""
         return self._server
 
     def get(self, key: str) -> State:
+        """The state of the game ``key``."""
         try:
             return self._data[key]
         except KeyError:
@@ -86,13 +100,18 @@ class DataService:
         return iter(self._data.values())
 
     async def close(self) -> None:
+        """Close the gRPC channels."""
         for client in self._bundles.values():
             await client.close()
 
     async def wait_until_ready(self) -> None:
+        """Wait for the first sync of all games to finish (or fail)."""
         await self.ready.wait()
 
     async def sync_basic_game(self, game: Game) -> bool:
+        """Update a game's store listing, manifest and catalog; False if it failed
+        (logged, never raised).
+        """
         async with self._locks[game.key]:
             data = self._data[game.key]
             try:
@@ -154,6 +173,7 @@ class DataService:
         return version
 
     async def sync_tables_game(self, game: Game) -> bool:
+        """Update a game's tables; False if it failed or only partly updated."""
         if game.is_catalog_only and game.grpc is None:
             return True
         async with self._locks[game.key]:
@@ -209,6 +229,7 @@ class DataService:
         return answer.get("code") == 1000
 
     async def sync_basic(self) -> list[str]:
+        """Run the basic sync of every game; the keys of those that failed."""
         return [
             key
             for key, data in self._data.items()
@@ -216,6 +237,7 @@ class DataService:
         ]
 
     async def sync_tables(self) -> list[str]:
+        """Run the table sync of every game; the keys of those that failed."""
         return [
             key
             for key, data in self._data.items()
@@ -223,6 +245,7 @@ class DataService:
         ]
 
     async def sync_all(self) -> None:
+        """The first sync: the basic one, then the tables. Sets ``ready`` however it ends."""
         try:
             for key in await self.sync_basic():
                 logger.warning("%s: No basic data yet.", key)

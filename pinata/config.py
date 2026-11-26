@@ -12,6 +12,8 @@ from discord_ids import SSRG_GUILD, TEST_GUILD
 
 @dataclass(frozen=True, slots=True)
 class Prize:
+    """A prize: a role of the guild or a text, and the word shown before it."""
+
     role: int | str  # a role id of the guild, or text
     source: str = ""
 

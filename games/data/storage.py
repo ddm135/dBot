@@ -1,3 +1,12 @@
+"""The game tables on disk, and the copy of them the bot keeps in memory.
+
+``dalcom/<game>/<Table>.json`` holds every table as downloaded. Two of them
+are huge and read only partly, so the bot holds ``slim`` copies of them
+(``KEPT_FIELDS``) and, for the lookup tables, only the entries the others refer
+to (``REFERENCE_FIELDS``). The pruned result is saved under a signature of the
+files it came from, so a restart reads it instead of the whole table.
+"""
+
 import asyncio
 import hashlib
 import json
@@ -148,6 +157,11 @@ def _present_tables(directory: Path) -> set[str]:
 
 
 class DataStore:
+    """The files of every game under one root: the asset listing (``a.json``), the
+    tables, the kept copies and the catalogs. All reads and writes run in threads
+    and writes replace the file at once, so a reader never sees half a file.
+    """
+
     def __init__(self, root: Path) -> None:
         self.root = root
 
@@ -155,21 +169,27 @@ class DataStore:
         return self.root / "dalcom" / game_key
 
     def assets_path(self, game_key: str) -> Path:
+        """Where a game's asset listing is stored."""
         return self._game_dir(game_key) / "a.json"
 
     def table_path(self, game_key: str, name: str) -> Path:
+        """Where table ``name`` is stored."""
         return self._game_dir(game_key) / f"{name}.json"
 
     def catalog_dir(self, game_key: str) -> Path:
+        """The folder a game's catalogs are kept in."""
         return self.root / "catalogs" / game_key
 
     async def read_json(self, path: Path) -> Any | None:
+        """A JSON file's content, or None if it is missing or unreadable."""
         return await asyncio.to_thread(_read_json, path)
 
     async def write_json(self, path: Path, data: Any) -> None:
+        """Write a JSON file atomically."""
         await asyncio.to_thread(_write_json, path, data)
 
     async def read_assets(self, game_key: str) -> AssetContext | None:
+        """The stored asset listing, or None if there is none or it is not one."""
         data = await self.read_json(self.assets_path(game_key))
         if data is None:
             return None
@@ -180,15 +200,19 @@ class DataStore:
             return None
 
     async def write_assets(self, game_key: str, index: AssetContext) -> None:
+        """Store the asset listing."""
         await self.write_json(self.assets_path(game_key), index.raw)
 
     async def present_tables(self, game_key: str) -> set[str]:
+        """The names of the tables that have a file."""
         return await asyncio.to_thread(_present_tables, self._game_dir(game_key))
 
     def kept_path(self, game_key: str, name: str) -> Path:
+        """Where the kept copy of table ``name`` is saved."""
         return self._game_dir(game_key) / "slim" / f"{name}.json"
 
     async def signature(self, game_key: str) -> str:
+        """The signature of the game's table files as they are now (see ``_signature``)."""
         return await asyncio.to_thread(_signature, self._game_dir(game_key))
 
     async def read_kept(self, game_key: str, name: str) -> Table | None:
@@ -208,11 +232,17 @@ class DataStore:
         return table
 
     async def write_kept(self, game_key: str, name: str, table: Table) -> None:
+        """Save the table as the bot keeps it, with the signature of the files it was made
+        from.
+        """
         signature = await self.signature(game_key)
         data = {"signature": signature, "table": table}
         await asyncio.to_thread(_write_json, self.kept_path(game_key, name), data, None)
 
     async def read_table(self, game_key: str, name: str) -> Table | None:
+        """One table as the bot holds it (cut down), or None if its file is missing or
+        unusable.
+        """
         data = await self.read_json(self.table_path(game_key, name))
         # Keyed and trimmed in a thread: a big table is seconds of work.
         return await asyncio.to_thread(_trimmed, name, data)
@@ -239,4 +269,5 @@ class DataStore:
         return tables
 
     async def write_table(self, game_key: str, name: str, table: Table) -> None:
+        """Store a downloaded table, whole."""
         await self.write_json(self.table_path(game_key, name), table)

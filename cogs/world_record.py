@@ -42,6 +42,7 @@ FIRST_WEEKLY_SEASON = 20241202
 
 
 async def season_autocomplete(itr: Itr, current: str) -> list[app_commands.Choice[int]]:
+    """Autocomplete for a quarterly season: the newest first, with its dates."""
     key = selected_game(itr)
     if key is None:
         return []
@@ -67,6 +68,10 @@ async def season_autocomplete(itr: Itr, current: str) -> list[app_commands.Choic
 class WorldRecord(
     commands.GroupCog, name="world_record", description="View world records"
 ):
+    """``/world_record``: the best scores of a quarterly or weekly season, for a
+    song or for an artist.
+    """
+
     def __init__(self, bot: dBot) -> None:
         self.bot = bot
 

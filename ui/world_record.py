@@ -16,6 +16,7 @@ PER_PAGE = 10
 
 
 def page_total(count: int) -> int:
+    """How many pages the records make."""
     return math.ceil(count / PER_PAGE) or 1
 
 

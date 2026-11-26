@@ -1,3 +1,11 @@
+"""Logging in to a game: which method a stored account uses, and the tokens for it.
+
+The games sign in with a Google ID token (from a service account), a Dalcom ID
+access token, or a plain game account. The credentials of an account are a
+mapping kept in the database; refreshed tokens are returned as ``updates`` for
+the caller to store.
+"""
+
 import enum
 import json
 import time
@@ -30,6 +38,8 @@ DEFAULT_NICKNAME = "dBot"
 
 
 class LoginMethod(enum.Enum):
+    """How an account signs in."""
+
     CLASSIC = enum.auto()
     GOOGLE = enum.auto()
     DALCOM = enum.auto()
@@ -37,17 +47,24 @@ class LoginMethod(enum.Enum):
 
 @dataclass(frozen=True, slots=True)
 class Session:
+    """A logged-in session: the user's object id and the key that signs its calls."""
+
     oid: int
     key: str = field(repr=False)
 
 
 @dataclass(frozen=True, slots=True)
 class LoginCredentials:
+    """What the database stores for an account: the provider and its fields (ids,
+    tokens, the login request template, the session once there is one).
+    """
+
     provider: int
     fields: Mapping[str, Any] = field(repr=False)
 
     @classmethod
     def from_mapping(cls, data: Mapping[str, Any]) -> Self:
+        """The credentials from a stored mapping; ``LoginError`` if it has no provider."""
         try:
             return cls(provider=int(data["provider"]), fields=dict(data))
         except (KeyError, TypeError, ValueError) as exc:
@@ -57,13 +74,18 @@ class LoginCredentials:
 
     @property
     def is_sns(self) -> bool:
+        """Whether the account signs in through a provider (Google or Dalcom ID) rather
+        than a game account.
+        """
         return bool(self.fields.get("isSNS", True))
 
     @property
     def nickname(self) -> str:
+        """The nickname to register a new account under."""
         return str(self.fields.get("nickname") or DEFAULT_NICKNAME)
 
     def method_for(self, game: Game) -> LoginMethod | None:
+        """How to log in to ``game`` with these credentials, or None if they do not fit it."""
         match self.provider:
             case 0 | 1 if not self.is_sns:
                 return LoginMethod.CLASSIC
@@ -75,6 +97,7 @@ class LoginCredentials:
 
     @property
     def session(self) -> Session | None:
+        """The stored session, if there is one."""
         oid, key = self.fields.get("oid"), self.fields.get("key")
         if not oid or not key:
             return None
@@ -84,10 +107,12 @@ class LoginCredentials:
             return None
 
     def updated(self, updates: Mapping[str, Any]) -> Self:
+        """A copy with ``updates`` applied (a None value empties a field)."""
         return type(self)(self.provider, {**self.fields, **updates})
 
 
 def jwt_expiry(token: str) -> float | None:
+    """When a JWT expires (a Unix time), or None if it cannot be read."""
     try:
         return float(jwt.decode(token, verify=False)["exp"])
     except ValueError, KeyError, TypeError:
@@ -97,6 +122,7 @@ def jwt_expiry(token: str) -> float | None:
 def cached_id_token(
     fields: Mapping[str, Any], *, now: float | None = None
 ) -> str | None:
+    """The stored Google ID token if it is still good for a while, else None."""
     token = fields.get("id_token")
     if not isinstance(token, str) or not token:
         return None
@@ -152,6 +178,10 @@ def fetch_google_id_token(
     *,
     transport: httpx.BaseTransport | None = None,
 ) -> str:
+    """A Google ID token for ``audience``, from a service account (a key file or its contents).
+
+    Blocking; call it in a thread.
+    """
     target = f"{audience}.apps.googleusercontent.com"
     if isinstance(service_account, Mapping):
         credentials = IDTokenCredentials.from_service_account_info(
@@ -219,6 +249,12 @@ async def dalcom_access_token(
     *,
     retry: RetryPolicy = DEFAULT_RETRY,
 ) -> tuple[str, dict[str, Any]]:
+    """A Dalcom ID access token, and the changes to store with the credentials.
+
+    Uses the stored tokens when they still work, refreshes them when they have
+    expired, and falls back to the id and password when the refresh token is
+    rejected too. ``LoginError.updates`` carries what changed even on failure.
+    """
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Basic {authorization}",

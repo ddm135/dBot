@@ -146,6 +146,12 @@ def _listing(folder: Path) -> set[str]:
 
 
 class BundleStore:
+    """Downloads and keeps the bundles of every game.
+
+    Downloads are made once and under a lock per file. A built-in bundle (one the
+    APK holds) is read from the APK instead.
+    """
+
     def __init__(
         self,
         root: Path,
@@ -161,6 +167,7 @@ class BundleStore:
         self._locks: dict[Path, asyncio.Lock] = {}
 
     def path(self, game_key: str, name: str) -> Path:
+        """Where a bundle is kept on disk."""
         return self._root / "files" / game_key / name
 
     def plain_path(self, game_key: str, url: str) -> Path:

@@ -1,8 +1,7 @@
 """Reading ``.seq`` rhythm charts: how many notes, and how long.
 
-The format is the one v0's ``Seq`` class read. Only what the bot needs is
-kept (the note count and the length in seconds); the rest is parsed only far
-enough to reach the events.
+Only what the bot shows is read: the note count, the length in seconds and the
+number of events that are not notes. The layouts differ by game version.
 """
 
 import base64
@@ -28,6 +27,8 @@ class SeqError(ValueError):
 
 @dataclass(frozen=True, slots=True)
 class SeqStats:
+    """The note count, length in seconds and invalid events of one chart."""
+
     count: int  # notes (a slider that holds counts twice)
     seconds: float
     invalid: int  # events that are not notes
@@ -68,6 +69,11 @@ def unwrap(data: bytes) -> bytes:
 
 
 def parse_seq(data: bytes) -> SeqStats:
+    """Measure a chart; raise :class:`SeqError` if it cannot be read.
+
+    Walks the header, tempo, object and channel blocks to the events and counts
+    the ones that are notes.
+    """
     r = _Reader(unwrap(data))
     layout = r.u32()
     if layout not in PADDING:

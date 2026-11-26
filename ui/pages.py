@@ -13,6 +13,7 @@ NOT_REQUESTER = "You are not the original requester."
 
 
 def page_count(total: int, per_page: int) -> int:
+    """How many pages ``total`` items make; at least one."""
     return max(1, math.ceil(total / per_page))
 
 

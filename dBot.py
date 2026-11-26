@@ -1,3 +1,7 @@
+"""The entry point: ``python dBot.py``. Reads the settings, imports every
+extension up front, and hands over to :func:`app.run`.
+"""
+
 import asyncio
 import importlib
 
@@ -11,6 +15,7 @@ from tuning import limit_arenas
 
 
 def main() -> None:
+    """Configure the process and run the bot until it is told to stop."""
     limit_arenas()  # before any thread exists
     load_dotenv()
     try:

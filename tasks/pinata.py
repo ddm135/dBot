@@ -31,7 +31,7 @@ NO_ROLE_MENTIONS = discord.AllowedMentions(
 
 
 def day_key(moment: datetime) -> str:
-    """``MMDD`` of a moment in KST."""
+    """The ``MMDD`` key of a moment in KST, which names a day's prizes."""
     return f"{moment.astimezone(KST):%m%d}"
 
 
@@ -56,6 +56,10 @@ class Box:
 
 
 class Pinata(commands.Cog):
+    """Opens a box of prizes every ten minutes on the days that have one: posts the
+    box, waits for people to join, then draws each prize.
+    """
+
     def __init__(
         self,
         bot: dBot,
@@ -97,6 +101,7 @@ class Pinata(commands.Cog):
     async def open_in(
         self, guild_id: int, channel_id: int, prizes: tuple[Prize, ...]
     ) -> None:
+        """Open the day's boxes in one guild's channel and draw them."""
         channel = await find_channel(self.bot, channel_id, discord.TextChannel)
         if channel is None or channel.guild.id != guild_id:
             return

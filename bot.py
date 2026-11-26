@@ -1,3 +1,5 @@
+"""The bot itself: its services, and starting and stopping them in order."""
+
 import asyncio
 import logging
 import time
@@ -44,6 +46,13 @@ IGNORED_COMMAND_ERRORS = (
 
 
 class dBot(commands.Bot):
+    """The Discord bot.
+
+    The services that need no database are made in ``__init__``; the ones that do
+    (``db``, ``stats``, ``accounts``, ``search``) are made in :meth:`setup_hook`,
+    once Postgres is connected, and closed again in :meth:`close`.
+    """
+
     web: httpx.AsyncClient
     games: DataService
     db: Database
@@ -89,6 +98,9 @@ class dBot(commands.Bot):
         self._first_sync: asyncio.Task[None] | None = None
 
     async def setup_hook(self) -> None:
+        """Connect the database, load the search index and the display names, start the
+        first game data sync in the background, and load the extensions.
+        """
         self.db = await Database.connect(self.settings.postgres)
         self.stats = SongStatsStore(self.db.song_stats)
         self.accounts = Accounts(self.games.server, self.db.credentials)
@@ -114,6 +126,9 @@ class dBot(commands.Bot):
         raise exception
 
     async def close(self) -> None:
+        """Tell the status channel the bot is going away, then close the connection and
+        the services. The announcement is time-limited so nothing delays the exit.
+        """
         self.shutting_down = True
         started = time.monotonic()
         try:

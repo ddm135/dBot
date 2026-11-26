@@ -24,12 +24,18 @@ POLL_SECONDS = 60
 
 
 def announcement(game: Game, source_id: int, start: datetime) -> str:
+    """The text forwarded for an update or a maintenance notice."""
     return (
         f"{game.name}: Forwarding from <#{source_id}> on <t:{int(start.timestamp())}:f>"
     )
 
 
 class ForwardUpdate(HourlyTask):
+    """Forwards a game's maintenance and update notices to the servers that follow
+    it once the game is back online, and announces a scheduled update in the
+    next-update channel.
+    """
+
     minute = 5
     failure = "Could not plan the forwarding."
 
